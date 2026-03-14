@@ -1,0 +1,1 @@
+export { singleLineJsdocRule } from "./rule";

@@ -1,0 +1,1 @@
+export { singleActStatementRule } from "./rule";

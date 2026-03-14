@@ -1,0 +1,1 @@
+export { enforceAaaStructureRule } from "./rule";

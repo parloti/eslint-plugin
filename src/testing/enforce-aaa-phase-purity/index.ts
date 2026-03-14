@@ -1,0 +1,1 @@
+export { enforceAaaPhasePurityRule } from "./rule";

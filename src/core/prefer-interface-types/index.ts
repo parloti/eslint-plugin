@@ -1,0 +1,1 @@
+export { preferInterfaceTypesRule } from "./rule";

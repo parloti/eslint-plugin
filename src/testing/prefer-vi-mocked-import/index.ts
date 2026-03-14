@@ -1,0 +1,1 @@
+export { preferViMockedImportRule } from "./rule";

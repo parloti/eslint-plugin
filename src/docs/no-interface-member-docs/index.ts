@@ -1,0 +1,1 @@
+export { noInterfaceMemberDocumentationRule } from "./rule";

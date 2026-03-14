@@ -1,0 +1,28 @@
+# Source files
+*.ts
+!dist/**/*.ts
+
+# Config files
+tsconfig.json
+.eslintrc*
+eslint.config.*
+.prettierrc*
+.editorconfig
+
+# Development
+.git
+.github
+.vscode
+.idea
+
+# Tests
+*.spec.ts
+*.test.ts
+__tests__
+coverage
+
+# Misc
+*.md
+!README.md
+.gitignore
+.npmignore
