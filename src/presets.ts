@@ -72,3 +72,4 @@ const testing = createPreset(testingRuleNames);
 const aaa = createPreset(aaaRuleNames);
 
 export { aaa, all, architecture, core, docs, testing };
+export type { CodeperfectPreset };

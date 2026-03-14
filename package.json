@@ -10,13 +10,13 @@
     "typescript",
     "linting"
   ],
-  "homepage": "https://github.com/codeperfect/eslint-plugin#readme",
+  "homepage": "https://github.com/parloti/eslint-plugin#readme",
   "bugs": {
-    "url": "https://github.com/codeperfect/eslint-plugin/issues"
+    "url": "https://github.com/parloti/eslint-plugin/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/codeperfect/eslint-plugin.git"
+    "url": "git+https://github.com/parloti/eslint-plugin.git"
   },
   "license": "MIT",
   "author": "CodePerfect",
@@ -41,7 +41,10 @@
     "build": "npm run clean && npm run compile",
     "clean": "npx --yes rimraf dist",
     "compile": "tsc -b -f ./tsconfig.build.json",
+    "docs": "npm run docs:api",
+    "docs:api": "typedoc --options typedoc.json",
     "pack": "npm pack --pack-destination dist",
+    "release:dry-run": "semantic-release --dry-run",
     "\n# --------------- LINTING --------------- #": "",
     "\t• --------------- checking --------------- •": "",
     "eslint": "npx --yes eslint --max-warnings=0",
@@ -80,6 +83,10 @@
     "@eslint/js": "^9.39.2",
     "@types/lodash-es": "^4.17.12",
     "@types/node": "^25.2.1",
+    "@semantic-release/commit-analyzer": "^13.0.1",
+    "@semantic-release/github": "^11.0.6",
+    "@semantic-release/npm": "^12.0.2",
+    "@semantic-release/release-notes-generator": "^14.1.0",
     "@typescript-eslint/rule-tester": "^8.46.2",
     "@vitest/coverage-v8": "^4.0.18",
     "chalk": "^5.6.2",
@@ -92,6 +99,9 @@
     "memfs": "^4.56.11",
     "prettier": "^3.8.1",
     "rimraf": "^6.1.2",
+    "semantic-release": "^25.0.1",
+    "typedoc": "^0.28.14",
+    "typedoc-plugin-markdown": "^4.9.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.46.2",
     "vite-tsconfig-paths": "^6.1.1",

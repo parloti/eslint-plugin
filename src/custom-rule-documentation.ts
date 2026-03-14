@@ -9,7 +9,7 @@ interface CustomRuleDocumentation {
 
 /** Base URL for published custom rule documentation pages. */
 const customRuleDocumentationBaseUrl =
-  "https://github.com/codeperfect/eslint-plugin/blob/main/docs/rules";
+  "https://github.com/parloti/eslint-plugin/blob/main/docs/rules";
 
 /**
  * Creates shared docs metadata for a package-owned custom rule.
