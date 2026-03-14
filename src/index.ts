@@ -14,6 +14,7 @@ export {
   enforceAaaPhasePurityRule,
   enforceAaaStructureRule,
   noInterfaceMemberDocumentationRule,
+  noMultipleDeclaratorsRule,
   noReexportsOutsideBarrelsRule,
   preferInterfaceTypesRule,
   preferViMockedImportRule,

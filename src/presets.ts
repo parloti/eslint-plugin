@@ -16,6 +16,7 @@ const architectureRuleNames = [
 ] as const satisfies readonly CodeperfectRuleName[];
 
 const coreRuleNames = [
+  "no-multiple-declarators",
   "prefer-interface-types",
 ] as const satisfies readonly CodeperfectRuleName[];
 

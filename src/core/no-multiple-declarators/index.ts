@@ -1,0 +1,1 @@
+export { noMultipleDeclaratorsRule } from "./rule";

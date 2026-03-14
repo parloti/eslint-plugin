@@ -11,6 +11,7 @@ describe("codeperfect plugin", () => {
       "enforce-aaa-phase-purity",
       "enforce-aaa-structure",
       "no-interface-member-docs",
+      "no-multiple-declarators",
       "no-reexports-outside-barrels",
       "prefer-interface-types",
       "prefer-vi-mocked-import",

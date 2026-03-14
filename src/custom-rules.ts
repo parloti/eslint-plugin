@@ -7,6 +7,7 @@ import {
   enforceAaaPhasePurityRule,
   enforceAaaStructureRule,
   noInterfaceMemberDocumentationRule,
+  noMultipleDeclaratorsRule,
   noReexportsOutsideBarrelsRule,
   preferInterfaceTypesRule,
   preferViMockedImportRule,
@@ -52,6 +53,10 @@ const customRules = [
   {
     rule: noReexportsOutsideBarrelsRule,
     ruleName: "no-reexports-outside-barrels",
+  },
+  {
+    rule: noMultipleDeclaratorsRule,
+    ruleName: "no-multiple-declarators",
   },
   {
     rule: preferInterfaceTypesRule,

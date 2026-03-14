@@ -5,7 +5,7 @@ export {
   consistentBarrelFilesRule,
   noReexportsOutsideBarrelsRule,
 } from "../architecture";
-export { preferInterfaceTypesRule } from "../core";
+export { noMultipleDeclaratorsRule, preferInterfaceTypesRule } from "../core";
 export {
   noInterfaceMemberDocumentationRule,
   requireExampleLanguageRule,

@@ -55,7 +55,7 @@ const summarizeCustomRuleContract = (
 
 describe("custom rule registry", () => {
   it("covers every package-owned rule with metadata", () => {
-    expect(customRules).toHaveLength(15);
+    expect(customRules).toHaveLength(16);
     expect(
       customRules.map((ruleEntry) => summarizeCustomRuleContract(ruleEntry)),
     ).toStrictEqual([
@@ -118,6 +118,16 @@ describe("custom rule registry", () => {
         schemaIsArray: true,
         type: "problem",
         url: getCustomRuleDocumentationUrl("no-reexports-outside-barrels"),
+      },
+      {
+        createType: "function",
+        description:
+          "Require variable declarations to contain exactly one declarator per statement.",
+        hasMessages: true,
+        ruleName: "no-multiple-declarators",
+        schemaIsArray: true,
+        type: "suggestion",
+        url: getCustomRuleDocumentationUrl("no-multiple-declarators"),
       },
       {
         createType: "function",

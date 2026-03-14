@@ -4,6 +4,7 @@ import {
   barrelFilesExportsOnlyRule,
   consistentBarrelFilesRule,
   noInterfaceMemberDocumentationRule,
+  noMultipleDeclaratorsRule,
   noReexportsOutsideBarrelsRule,
   preferInterfaceTypesRule,
   preferViMockedImportRule,
@@ -30,6 +31,7 @@ describe("rules barrel", () => {
   });
 
   it("re-exports core and documentation rules", () => {
+    expect(noMultipleDeclaratorsRule).toBe(core.noMultipleDeclaratorsRule);
     expect(preferInterfaceTypesRule).toBe(core.preferInterfaceTypesRule);
     expect(noInterfaceMemberDocumentationRule).toBe(
       documentation.noInterfaceMemberDocumentationRule,

@@ -39,6 +39,7 @@ describe("ready-to-use presets", () => {
 
   it("groups the core rules", () => {
     expect(getRuleKeys(core)).toStrictEqual([
+      "codeperfect/no-multiple-declarators",
       "codeperfect/prefer-interface-types",
     ]);
   });

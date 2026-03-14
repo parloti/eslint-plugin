@@ -14,6 +14,7 @@ import {
   enforceAaaPhasePurityRule,
   enforceAaaStructureRule,
   noInterfaceMemberDocumentationRule,
+  noMultipleDeclaratorsRule,
   noReexportsOutsideBarrelsRule,
   preferInterfaceTypesRule,
   preferViMockedImportRule,
@@ -42,6 +43,7 @@ describe("package entrypoint", () => {
       "enforce-aaa-phase-purity",
       "enforce-aaa-structure",
       "no-reexports-outside-barrels",
+      "no-multiple-declarators",
       "prefer-interface-types",
       "no-interface-member-docs",
       "require-example-language",
@@ -70,6 +72,9 @@ describe("package entrypoint", () => {
     );
     expect(codeperfectPlugin.rules?.["no-reexports-outside-barrels"]).toBe(
       noReexportsOutsideBarrelsRule,
+    );
+    expect(codeperfectPlugin.rules?.["no-multiple-declarators"]).toBe(
+      noMultipleDeclaratorsRule,
     );
     expect(codeperfectPlugin.rules?.["prefer-interface-types"]).toBe(
       preferInterfaceTypesRule,
