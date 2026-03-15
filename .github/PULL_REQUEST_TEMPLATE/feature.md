@@ -1,29 +1,45 @@
-## Feature Change
+## ✨ New Feature
 
-### Summary
+### Description
 
-Describe the new rule, preset change, export, or release capability.
+Summarize the new feature and why it’s valuable.
 
-Closes #
+Closes # (issue)
 
-### Implementation Notes
+---
 
-Explain the approach, tradeoffs, and any public API implications.
+### Implementation Details
 
-### Verification
+Explain your approach and any decisions made.
 
-- [ ] Tests were added or updated
-- [ ] `npm run validate` passed
-- [ ] `npm run validate` passed a second time
-- [ ] `npm run docs` was run when docs or exports changed
+---
 
-### Change Type
+### Screenshots / Demos
 
-- [ ] New rule or preset capability
-- [ ] Public API addition
-- [ ] Documentation or tooling addition
-- [ ] Breaking change
+📸 Include visuals or GIFs to showcase the feature in action (if applicable).
 
-### Follow-Up
+---
 
-List any remaining adoption notes, migration work, or release caveats.
+### Usage Instructions
+
+🧪 Provide steps to test or use the new feature:
+
+- Navigate to…
+- Click on…
+- Observe…
+
+---
+
+### Type of change
+
+- [ ] 🌟 New feature (non-breaking)
+- [ ] 💥 Breaking change
+
+---
+
+### Checklist
+
+- [ ] ✅ Tests added/updated
+- [ ] 🧹 Lint/format passes
+- [ ] 📚 Docs updated with examples
+- [ ] 🔗 Linked to relevant issues or discussions

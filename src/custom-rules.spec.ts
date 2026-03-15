@@ -55,7 +55,7 @@ const summarizeCustomRuleContract = (
 
 describe("custom rule registry", () => {
   it("covers every package-owned rule with metadata", () => {
-    expect(customRules).toHaveLength(16);
+    expect(customRules).toHaveLength(17);
     expect(
       customRules.map((ruleEntry) => summarizeCustomRuleContract(ruleEntry)),
     ).toStrictEqual([
@@ -178,6 +178,16 @@ describe("custom rule registry", () => {
         schemaIsArray: true,
         type: "suggestion",
         url: getCustomRuleDocumentationUrl("prefer-vi-mocked-import"),
+      },
+      {
+        createType: "function",
+        description:
+          "Prefer minimal nested casts in vi.mock/vi.doMock factory return objects when TypeScript rejects the module shape.",
+        hasMessages: true,
+        ruleName: "prefer-vitest-incremental-casts",
+        schemaIsArray: true,
+        type: "suggestion",
+        url: getCustomRuleDocumentationUrl("prefer-vitest-incremental-casts"),
       },
       {
         createType: "function",

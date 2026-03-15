@@ -1,23 +1,20 @@
-## Documentation Update
+## 📄 Documentation Update
 
-### Summary
+### Description
 
-Describe what changed and why the existing docs were not sufficient.
+Describe what documentation was added/changed.
 
-### Scope
+---
 
-- [ ] `README.md`
-- [ ] `docs/design`
-- [ ] `docs/rules`
-- [ ] `docs/api`
-- [ ] GitHub templates or workflows
+### Type of change
 
-### Validation
+- [ ] 📄 Docs update only
+- [ ] 🔧 Other (specify)
 
-- [ ] Content matches current code or workflow behavior
-- [ ] Links were checked
-- [ ] `npm run docs` was run if API docs changed
+---
 
-### Notes
+### Checklist
 
-Call out any intentional follow-up docs work that remains.
+- [ ] ✏️ Grammar and clarity checked
+- [ ] 🔍 Matches codebase changes
+- [ ] 🔗 Linked to relevant sections

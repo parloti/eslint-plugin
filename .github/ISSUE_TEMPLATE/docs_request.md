@@ -1,25 +1,24 @@
-## Documentation Request
+## 📄 Documentation Request
 
-### Summary
+### Description
 
-Describe what documentation is missing, incorrect, or outdated.
+📝 What needs to be documented or improved?
 
-### Area
+---
 
-- `docs/rules`
-- `docs/design`
-- `docs/api`
-- `README.md`
-- GitHub templates or workflows
+### Type of Change
 
-### Related Files Or Features
+- 📄 New documentation
+- ✏️ Update to existing documentation
 
-Link the relevant rule, preset, source file, workflow, or release behavior.
+---
 
-### Expected Outcome
+### Related Code/Feature
 
-Describe what a release-ready version of the documentation should clarify.
+🔗 Link to relevant files or PRs.
+
+---
 
 ### Additional Context
 
-Include examples, broken links, or screenshots if they help.
+📎 Add resources, screenshots, or examples.

@@ -1,5 +1,3 @@
-/* v8 ignore file */
-
 export {
   barrelFilesExportsOnlyRule,
   consistentBarrelFilesRule,
@@ -16,6 +14,7 @@ export {
   enforceAaaPhasePurityRule,
   enforceAaaStructureRule,
   preferViMockedImportRule,
+  preferVitestIncrementalCastsRule,
   requireAaaSectionsRule,
   requireActResultCaptureRule,
   requireTestCompanionRule,

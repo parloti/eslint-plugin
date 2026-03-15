@@ -1,0 +1,1 @@
+export { preferVitestIncrementalCastsRule } from "./rule";

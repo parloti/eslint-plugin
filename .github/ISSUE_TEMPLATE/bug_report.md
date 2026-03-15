@@ -1,34 +1,46 @@
-## Bug Report
+## 🐛 Bug Report
 
-### Summary
+### Title
 
-Describe the incorrect rule, preset, packaging, or release behavior.
+📌 A short, descriptive title for the bug
 
-### Reproduction
+---
 
-1. Show the relevant ESLint config or command.
-2. Include the file or snippet that triggers the issue.
-3. Describe the observed output, lint message, or release failure.
+### Description
 
-### Expected Behavior
+📝 Provide a clear and concise description of the bug.
 
-Describe the expected lint result, package output, or workflow behavior.
+---
+
+### Reproduction Steps
+
+1. Step one...
+2. Step two...
+3. Step three...
+
+---
+
+### Expected vs. Actual Behavior
+
+✅ **Expected:** What you thought would happen  
+❌ **Actual:** What really happened
+
+---
 
 ### Environment
 
-- Plugin version:
-- ESLint version:
-- TypeScript version:
-- Node.js version:
-- Package manager:
+- 💻 OS:
+- 🌐 Browser/Version:
+- ⚙️ Version:
 
-### Scope
+---
 
-- A specific rule
-- A preset export
-- Documentation
-- Release automation
+### Temporary Workaround
+
+🛠️ Is there a way to bypass the issue for now?
+
+---
 
 ### Additional Context
 
-Include stack traces, screenshots, workflow logs, or a minimal reproduction repository if available.
+📎 Add screenshots, logs, or any relevant files.

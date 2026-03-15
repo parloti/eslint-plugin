@@ -1,25 +1,30 @@
-## Bug Fix
+## 🐛 Bug Fix
 
-### Summary
+### Description
 
-Describe the defect and the package area changed.
+Describe the bug and what this PR changes.
 
-Fixes #
+Fixes # (issue)
 
-### Validation
+---
 
-- [ ] Reproduction added or updated
-- [ ] `npm run validate` passed
-- [ ] `npm run validate` passed a second time
-- [ ] `npm run docs` was run when docs or the public API changed
+### Reproduction Steps
 
-### Impact
+1. Go to '...'
+2. Click on '....'
+3. See error
 
-- [ ] Rule behavior fix
-- [ ] Preset or export fix
-- [ ] Documentation fix
-- [ ] Release workflow fix
+---
 
-### Notes
+### Type of change
 
-List any edge cases, remaining risks, or follow-up work.
+- [ ] 🐞 Bug fix (non-breaking change)
+- [ ] 💥 Breaking change
+
+---
+
+### Checklist
+
+- [ ] ✅ Tests added/updated
+- [ ] 🧹 Lint/format passes
+- [ ] 📝 Documentation updated

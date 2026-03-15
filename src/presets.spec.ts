@@ -58,6 +58,7 @@ describe("ready-to-use presets", () => {
       "codeperfect/enforce-aaa-phase-purity",
       "codeperfect/enforce-aaa-structure",
       "codeperfect/prefer-vi-mocked-import",
+      "codeperfect/prefer-vitest-incremental-casts",
       "codeperfect/require-aaa-sections",
       "codeperfect/require-act-result-capture",
       "codeperfect/require-test-companion",

@@ -37,6 +37,7 @@ const testingRuleNames = [
   "enforce-aaa-phase-purity",
   "enforce-aaa-structure",
   "prefer-vi-mocked-import",
+  "prefer-vitest-incremental-casts",
   "require-aaa-sections",
   "require-act-result-capture",
   "require-test-companion",

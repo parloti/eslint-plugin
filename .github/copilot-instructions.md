@@ -2,9 +2,9 @@
 
 ## Project overview
 
-This package exports an ESLint plugin plus package-owned custom rules; the root entry point [src/index.ts](src/index.ts) re-exports the default plugin object, the rule registry, and each rule module.
-Package-owned custom rules are routed through [src/rules](src/rules), while the owning domain folders keep the concrete implementations.
-There is no shared-config composition layer in this repository. Local lint configuration lives only in [eslint.config.ts](eslint.config.ts).
+- This package exports a shareable flat ESLint config; entry point `config()` in [src/index.ts](src/index.ts) composes plugin configs and returns `defineConfig(...)`.
+- Configuration is still owned by the domain folders, but shared config entrypoints are routed through [src/configs](src/configs). Each module returns `Linter.Config[]` (often async), while package-owned custom rules are routed through [src/rules](src/rules).
+- Optional plugins are loaded via dynamic `import()` and must safely return `[]` if unavailable (see `vitest()` in [src/testing/vitest.ts](src/testing/vitest.ts)).
 
 ## Key patterns to follow
 

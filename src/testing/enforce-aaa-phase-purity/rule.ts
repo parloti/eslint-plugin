@@ -79,7 +79,6 @@ const enforceAaaPhasePurityRule: Rule.RuleModule = {
             continue;
           }
 
-          /* v8 ignore start -- concrete Assert-phase behaviors are covered by rule tests; this guard's remaining branch artifact comes from source-mapped phase discrimination. */
           if (statement.phase === "Assert") {
             if (hasAwait(statement.node)) {
               context.report({
@@ -101,7 +100,6 @@ const enforceAaaPhasePurityRule: Rule.RuleModule = {
               });
             }
           }
-          /* v8 ignore stop */
         }
 
         if (!hasMeaningfulAct) {

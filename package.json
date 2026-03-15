@@ -70,6 +70,7 @@
     "test": "npx --yes vitest run"
   },
   "dependencies": {
+    "@typescript-eslint/utils": "^8.46.2",
     "minimatch": "^9.0.5"
   },
   "peerDependencies": {

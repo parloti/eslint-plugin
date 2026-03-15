@@ -1,5 +1,3 @@
-/* v8 ignore file */
-
 export {
   codeperfectPlugin,
   codeperfectPlugin as default,
@@ -19,6 +17,7 @@ export {
   noReexportsOutsideBarrelsRule,
   preferInterfaceTypesRule,
   preferViMockedImportRule,
+  preferVitestIncrementalCastsRule,
   requireAaaSectionsRule,
   requireActResultCaptureRule,
   requireExampleLanguageRule,

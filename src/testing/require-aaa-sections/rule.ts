@@ -150,11 +150,9 @@ function buildMissingSectionFixes(
         : phase === "Act"
           ? middleStatement
           : lastStatement;
-    /* v8 ignore start -- guarded by the empty-statements early return above. */
     if (anchorNode === void 0) {
       continue;
     }
-    /* v8 ignore stop */
 
     const existing = anchorMap.get(anchorNode.range[0]) ?? [];
     existing.push(phase);
@@ -168,7 +166,6 @@ function buildMissingSectionFixes(
     const statementLine = analysis.sourceText
       .slice(0, offset)
       .split(/\r\n|\n/u).length;
-    /* v8 ignore start -- fixer anchors always point to real statement lines in analyzed test blocks. */
     const previousLine = sourceLines[statementLine - 2] ?? "";
     const lineStartRange = getLineStartRange(
       analysis.sourceText,
@@ -179,7 +176,6 @@ function buildMissingSectionFixes(
       previousLine.trim().length > 0;
     const indentation =
       /^\s*/u.exec(sourceLines[statementLine - 1] ?? "")?.[0] ?? "";
-    /* v8 ignore stop */
 
     return fixer.insertTextBeforeRange(
       lineStartRange,

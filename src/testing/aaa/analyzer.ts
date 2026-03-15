@@ -361,11 +361,9 @@ function isValidAssertStatement(statement: ESTree.Statement): boolean {
   }
 
   return statement.declarations.every((declaration) => {
-    /* v8 ignore start -- the parser used in this repo emits undefined rather than null for uninitialized declarators. */
     if (declaration.init === null) {
       return true;
     }
-    /* v8 ignore stop */
 
     const init = unwrapExpression(declaration.init);
     return !isActionExpression(init);
@@ -376,7 +374,6 @@ function usesPrefix(name: string, prefix: "actual" | "expected"): boolean {
   return name === prefix || name.startsWith(prefix);
 }
 
-/* v8 ignore start -- valid analyzer callers always request an existing statement line. */
 function getLineStartRange(sourceText: string, line: number): [number, number] {
   let currentLine = 1;
 
@@ -391,16 +388,13 @@ function getLineStartRange(sourceText: string, line: number): [number, number] {
   }
   return [sourceText.length, sourceText.length];
 }
-/* v8 ignore stop */
 
-/* v8 ignore start -- the indentation regex always matches, but the fallback keeps the helper total-safe. */
 function getIndentationAtOffset(sourceText: string, offset: number): string {
   const lineStart = sourceText.lastIndexOf("\n", Math.max(0, offset - 1)) + 1;
   const linePrefix = sourceText.slice(lineStart, offset);
   const indentation = /^\s*/u.exec(linePrefix);
   return indentation?.[0] ?? "";
 }
-/* v8 ignore stop */
 
 function getAssertOperands(expression: ESTree.CallExpression):
   | {
@@ -459,7 +453,6 @@ function getExpectOperands(expression: ESTree.CallExpression):
   return void 0;
 }
 
-/* v8 ignore start -- the fallback branches are retained for helper totality but are not reachable from current analyzer entry points. */
 function getExpressionName(
   expression: ESTree.Expression | ESTree.PrivateIdentifier | ESTree.Super,
 ): string | undefined {
@@ -480,7 +473,6 @@ function getExpressionName(
 
   return void 0;
 }
-/* v8 ignore stop */
 
 function getIdentifierName(
   expression: ESTree.Expression | undefined,
@@ -488,7 +480,6 @@ function getIdentifierName(
   return expression?.type === "Identifier" ? expression.name : void 0;
 }
 
-/* v8 ignore start -- callers only ask for invoked names after action-expression checks that narrow to call/new expressions. */
 function getInvokedName(
   expression: ESTree.Expression | undefined,
 ): string | undefined {
@@ -501,7 +492,6 @@ function getInvokedName(
   }
   return void 0;
 }
-/* v8 ignore stop */
 
 function getNewline(text: string): "\n" | "\r\n" {
   return text.includes("\r\n") ? "\r\n" : "\n";
@@ -518,9 +508,7 @@ function getStatementExpression(
     statement.type === "VariableDeclaration" &&
     statement.declarations.length === 1
   ) {
-    /* v8 ignore start -- valid ESTree variable declarations always carry the matched declarator. */
     return statement.declarations[0]?.init ?? void 0;
-    /* v8 ignore stop */
   }
 
   return void 0;

@@ -18,6 +18,7 @@ import {
   noReexportsOutsideBarrelsRule,
   preferInterfaceTypesRule,
   preferViMockedImportRule,
+  preferVitestIncrementalCastsRule,
   requireAaaSectionsRule,
   requireActResultCaptureRule,
   requireExampleLanguageRule,
@@ -49,6 +50,7 @@ describe("package entrypoint", () => {
       "require-example-language",
       "single-line-jsdoc",
       "prefer-vi-mocked-import",
+      "prefer-vitest-incremental-casts",
       "require-aaa-sections",
       "require-act-result-capture",
       "require-test-companion",
@@ -90,6 +92,9 @@ describe("package entrypoint", () => {
     );
     expect(codeperfectPlugin.rules?.["prefer-vi-mocked-import"]).toBe(
       preferViMockedImportRule,
+    );
+    expect(codeperfectPlugin.rules?.["prefer-vitest-incremental-casts"]).toBe(
+      preferVitestIncrementalCastsRule,
     );
     expect(codeperfectPlugin.rules?.["require-aaa-sections"]).toBe(
       requireAaaSectionsRule,
