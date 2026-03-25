@@ -16,28 +16,39 @@ import {
 
 describe("no interface member docs rule", () => {
   it("exposes metadata", () => {
-    expect(noInterfaceMemberDocumentationRule.meta?.type).toBe("problem");
+    // Arrange
+    const ruleType = noInterfaceMemberDocumentationRule.meta?.type;
 
-    expectTypeOf(noInterfaceMemberDocumentationRule.create).toBeFunction();
+    // Act
+    const createType = typeof noInterfaceMemberDocumentationRule.create;
+
+    // Assert
+    expect(ruleType).toBe("problem");
+    expect(createType).toBe("function");
   });
 
   it("reports and fixes interface member param docs", () => {
+    // Arrange
     const { context, node, reports, sourceText } = createInterfaceSample();
 
-    runFunctionListener(context, node);
+    // Act
+    const actualOutput = (() => {
+      runFunctionListener(context, node);
 
+      return applyFixes(sourceText, getFixes(reports));
+    })();
+
+    // Assert
     expect(reports).toHaveLength(3);
     expect(reports[0]?.messageId).toBe("interfaceMemberDoc");
-
-    const output = applyFixes(sourceText, getFixes(reports));
-
-    expect(output).toContain("@param context The metadata context.");
-    expect(output).not.toMatch(
+    expect(actualOutput).toContain("@param context The metadata context.");
+    expect(actualOutput).not.toMatch(
       /@param\s+context\.(?:commentValue|full|startOffset)/u,
     );
   });
 
   it("skips inline object types", () => {
+    // Arrange
     const commentValue = [
       "*",
       " * @param context The metadata context.",
@@ -46,18 +57,20 @@ describe("no interface member docs rule", () => {
     ].join("\n");
     const sourceText = buildSourceText(commentValue);
     const comment = createComment(commentValue, sourceText);
-
     const { context, reports } = createContext(sourceText, [comment]);
     const node = createFunctionNode(sourceText, [
       createParameter("TSTypeLiteral"),
     ]);
 
+    // Act
     runFunctionListener(context, node);
 
+    // Assert
     expect(reports).toHaveLength(0);
   });
 
   it("skips when no JSDoc is present", () => {
+    // Arrange
     const sourceText =
       "function getLineMeta(context: LineMetaContext): void {}";
     const { context, reports } = createContext(sourceText, []);
@@ -65,12 +78,15 @@ describe("no interface member docs rule", () => {
       createParameter("TSTypeReference"),
     ]);
 
+    // Act
     runFunctionListener(context, node);
 
+    // Assert
     expect(reports).toHaveLength(0);
   });
 
   it("skips when no parameters exist", () => {
+    // Arrange
     const commentValue = [
       "*",
       " * @param context The metadata context.",
@@ -82,12 +98,15 @@ describe("no interface member docs rule", () => {
     const { context, reports } = createContext(sourceText, [comment]);
     const node = createFunctionNode(sourceText, []);
 
+    // Act
     runFunctionListener(context, node);
 
+    // Assert
     expect(reports).toHaveLength(0);
   });
 
   it("skips when JSDoc comment lacks a range", () => {
+    // Arrange
     const commentValue = [
       "*",
       " * @param context The metadata context.",
@@ -101,12 +120,15 @@ describe("no interface member docs rule", () => {
       createParameter("TSTypeReference"),
     ]);
 
+    // Act
     runFunctionListener(context, node);
 
+    // Assert
     expect(reports).toHaveLength(0);
   });
 
   it("skips when JSDoc start range is missing", () => {
+    // Arrange
     const commentValue = [
       "*",
       " * @param context The metadata context.",
@@ -124,8 +146,10 @@ describe("no interface member docs rule", () => {
       createParameter("TSTypeReference"),
     ]);
 
+    // Act
     runFunctionListener(context, node);
 
+    // Assert
     expect(reports).toHaveLength(0);
   });
 });

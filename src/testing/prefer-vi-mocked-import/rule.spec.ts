@@ -56,6 +56,7 @@ const runFix = (code: string): FixRunResult => {
 
 describe("prefer-vi-mocked-import rule (core)", () => {
   it("autofixes the basic pattern", () => {
+    // Arrange
     const input = [
       "const installDevelopmentDependencies = vi.fn();",
       'vi.mock(import("./dependencies"), () => ({ installDevelopmentDependencies }));',
@@ -63,8 +64,10 @@ describe("prefer-vi-mocked-import rule (core)", () => {
       "",
     ].join("\n");
 
+    // Act
     const { output } = runFix(input);
 
+    // Assert
     expect(output).toBe(
       [
         'import { installDevelopmentDependencies } from "./dependencies";',
@@ -77,6 +80,7 @@ describe("prefer-vi-mocked-import rule (core)", () => {
   });
 
   it("supports vi.doMock and converts string specifier to import()", () => {
+    // Arrange
     const input = [
       "const installDevelopmentDependencies = vi.fn();",
       'vi.doMock("./dependencies", () => ({ installDevelopmentDependencies }));',
@@ -84,8 +88,10 @@ describe("prefer-vi-mocked-import rule (core)", () => {
       "",
     ].join("\n");
 
+    // Act
     const { output } = runFix(input);
 
+    // Assert
     expect(output).toBe(
       [
         'import { installDevelopmentDependencies } from "./dependencies";',
@@ -98,6 +104,7 @@ describe("prefer-vi-mocked-import rule (core)", () => {
   });
 
   it("inlines multiple mocks and rewrites all call sites", () => {
+    // Arrange
     const input = [
       "const a = vi.fn<boolean>();",
       "const b = vi.fn<number>(() => 123);",
@@ -107,8 +114,10 @@ describe("prefer-vi-mocked-import rule (core)", () => {
       "",
     ].join("\n");
 
+    // Act
     const { output } = runFix(input);
 
+    // Assert
     expect(output).toBe(
       [
         'import { a, b } from "./mod";',
@@ -122,6 +131,7 @@ describe("prefer-vi-mocked-import rule (core)", () => {
   });
 
   it("supports alias properties and uses imported export name", () => {
+    // Arrange
     const input = [
       "const c = vi.fn();",
       'vi.mock(import("./mod"), () => ({ d: c }));',
@@ -129,8 +139,10 @@ describe("prefer-vi-mocked-import rule (core)", () => {
       "",
     ].join("\n");
 
+    // Act
     const { output } = runFix(input);
 
+    // Assert
     expect(output).toBe(
       [
         'import { d } from "./mod";',
@@ -143,6 +155,7 @@ describe("prefer-vi-mocked-import rule (core)", () => {
   });
 
   it("merges into an existing import from the same module", () => {
+    // Arrange
     const input = [
       'import { a } from "./mod";',
       "",
@@ -152,8 +165,10 @@ describe("prefer-vi-mocked-import rule (core)", () => {
       "",
     ].join("\n");
 
+    // Act
     const { output } = runFix(input);
 
+    // Assert
     expect(output).toBe(
       [
         'import { a, b } from "./mod";',
@@ -166,6 +181,7 @@ describe("prefer-vi-mocked-import rule (core)", () => {
   });
 
   it("does not report when the local mock is used outside of supported sites", () => {
+    // Arrange
     const input = [
       "const a = vi.fn();",
       "console.log(a);",
@@ -174,15 +190,18 @@ describe("prefer-vi-mocked-import rule (core)", () => {
       "",
     ].join("\n");
 
-    const { messages, output } = runFix(input);
+    // Act
+    const actual = runFix(input);
 
-    expect(messages).toStrictEqual([]);
-    expect(output).toBe(input);
+    // Assert
+    expect(actual.messages).toStrictEqual([]);
+    expect(actual.output).toBe(input);
   });
 });
 
 describe("prefer-vi-mocked-import rule (additional)", () => {
   it("inserts the import after existing imports and handles longhand properties", () => {
+    // Arrange
     const input = [
       'import { something } from "./other";',
       "",
@@ -192,8 +211,10 @@ describe("prefer-vi-mocked-import rule (additional)", () => {
       "",
     ].join("\n");
 
+    // Act
     const { output } = runFix(input);
 
+    // Assert
     expect(output).toBe(
       [
         'import { something } from "./other";',
@@ -207,6 +228,7 @@ describe("prefer-vi-mocked-import rule (additional)", () => {
   });
 
   it("supports block-bodied mock factories", () => {
+    // Arrange
     const input = [
       "const installDevelopmentDependencies = vi.fn();",
       'vi.mock(import("./dependencies"), () => { return { installDevelopmentDependencies }; });',
@@ -214,8 +236,10 @@ describe("prefer-vi-mocked-import rule (additional)", () => {
       "",
     ].join("\n");
 
+    // Act
     const { output } = runFix(input);
 
+    // Assert
     expect(output).toBe(
       [
         'import { installDevelopmentDependencies } from "./dependencies";',
@@ -228,6 +252,7 @@ describe("prefer-vi-mocked-import rule (additional)", () => {
   });
 
   it("preserves CRLF line endings", () => {
+    // Arrange
     const input = [
       "const installDevelopmentDependencies = vi.fn();",
       'vi.mock(import("./dependencies"), () => ({ installDevelopmentDependencies }));',
@@ -235,8 +260,10 @@ describe("prefer-vi-mocked-import rule (additional)", () => {
       "",
     ].join("\r\n");
 
+    // Act
     const { output } = runFix(input);
 
+    // Assert
     expect(output).toBe(
       [
         'import { installDevelopmentDependencies } from "./dependencies";',
@@ -249,6 +276,7 @@ describe("prefer-vi-mocked-import rule (additional)", () => {
   });
 
   it("does not report when the mock import specifier is not a string literal", () => {
+    // Arrange
     const input = [
       "const installDevelopmentDependencies = vi.fn();",
       'const deps = "./dependencies";',
@@ -257,13 +285,16 @@ describe("prefer-vi-mocked-import rule (additional)", () => {
       "",
     ].join("\n");
 
-    const { messages, output } = runFix(input);
+    // Act
+    const actual = runFix(input);
 
-    expect(messages).toStrictEqual([]);
-    expect(output).toBe(input);
+    // Assert
+    expect(actual.messages).toStrictEqual([]);
+    expect(actual.output).toBe(input);
   });
 
   it("does not report when the initializer is not vi.fn()", () => {
+    // Arrange
     const input = [
       "const installDevelopmentDependencies = 123;",
       'vi.mock(import("./dependencies"), () => ({ installDevelopmentDependencies }));',
@@ -271,9 +302,11 @@ describe("prefer-vi-mocked-import rule (additional)", () => {
       "",
     ].join("\n");
 
-    const { messages, output } = runFix(input);
+    // Act
+    const actual = runFix(input);
 
-    expect(messages).toStrictEqual([]);
-    expect(output).toBe(input);
+    // Assert
+    expect(actual.messages).toStrictEqual([]);
+    expect(actual.output).toBe(input);
   });
 });

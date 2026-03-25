@@ -2,8 +2,8 @@ import { afterAll } from "vitest";
 
 import { consistentBarrelFilesRule } from "../../src";
 
-import { createRuleTester } from "./rule-tester";
-import { createTemporaryFixtureManager } from "./temporary-fixtures";
+import { createRuleTester } from "../support/rule-tester";
+import { createTemporaryFixtureManager } from "../support/temporary-fixtures";
 
 const ruleTester = createRuleTester();
 const { cleanupTemporaryDirectories, createFixtureSet } =

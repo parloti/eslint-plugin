@@ -4,6 +4,9 @@ import { codeperfectPlugin } from "./codeperfect-plugin";
 
 describe("codeperfect plugin", () => {
   it("exposes the package-owned rule registry", () => {
+    // Arrange
+
+    // Act & Assert
     expect(Object.keys(codeperfectPlugin.rules).toSorted()).toStrictEqual([
       "assert-actual-expected-names",
       "barrel-files-exports-only",

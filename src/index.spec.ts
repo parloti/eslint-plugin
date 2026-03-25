@@ -30,14 +30,19 @@ import {
 
 describe("package entrypoint", () => {
   it("exports the plugin as the default and named root export", async () => {
+    // Arrange
+
+    // Act
     const moduleExports = await import("./index");
 
+    // Assert
     expect(moduleExports.default).toBe(codeperfectPlugin);
     expect(moduleExports.codeperfectPlugin).toBe(codeperfectPlugin);
   });
 
   it("exports the package-owned rules and registry", () => {
-    expect(customRules.map((entry) => entry.ruleName)).toStrictEqual([
+    // Arrange
+    const expectedRuleNames = [
       "assert-actual-expected-names",
       "barrel-files-exports-only",
       "consistent-barrel-files",
@@ -55,64 +60,69 @@ describe("package entrypoint", () => {
       "require-act-result-capture",
       "require-test-companion",
       "single-act-statement",
-    ]);
+    ];
 
-    expect(codeperfectPlugin.rules?.["assert-actual-expected-names"]).toBe(
+    // Act
+    const ruleRegistry = codeperfectPlugin.rules;
+
+    // Assert
+    expect(customRules.map((entry) => entry.ruleName)).toStrictEqual(
+      expectedRuleNames,
+    );
+    expect(ruleRegistry?.["assert-actual-expected-names"]).toBe(
       assertActualExpectedNamesRule,
     );
-    expect(codeperfectPlugin.rules?.["barrel-files-exports-only"]).toBe(
+    expect(ruleRegistry?.["barrel-files-exports-only"]).toBe(
       barrelFilesExportsOnlyRule,
     );
-    expect(codeperfectPlugin.rules?.["consistent-barrel-files"]).toBe(
+    expect(ruleRegistry?.["consistent-barrel-files"]).toBe(
       consistentBarrelFilesRule,
     );
-    expect(codeperfectPlugin.rules?.["enforce-aaa-phase-purity"]).toBe(
+    expect(ruleRegistry?.["enforce-aaa-phase-purity"]).toBe(
       enforceAaaPhasePurityRule,
     );
-    expect(codeperfectPlugin.rules?.["enforce-aaa-structure"]).toBe(
+    expect(ruleRegistry?.["enforce-aaa-structure"]).toBe(
       enforceAaaStructureRule,
     );
-    expect(codeperfectPlugin.rules?.["no-reexports-outside-barrels"]).toBe(
+    expect(ruleRegistry?.["no-reexports-outside-barrels"]).toBe(
       noReexportsOutsideBarrelsRule,
     );
-    expect(codeperfectPlugin.rules?.["no-multiple-declarators"]).toBe(
+    expect(ruleRegistry?.["no-multiple-declarators"]).toBe(
       noMultipleDeclaratorsRule,
     );
-    expect(codeperfectPlugin.rules?.["prefer-interface-types"]).toBe(
+    expect(ruleRegistry?.["prefer-interface-types"]).toBe(
       preferInterfaceTypesRule,
     );
-    expect(codeperfectPlugin.rules?.["no-interface-member-docs"]).toBe(
+    expect(ruleRegistry?.["no-interface-member-docs"]).toBe(
       noInterfaceMemberDocumentationRule,
     );
-    expect(codeperfectPlugin.rules?.["require-example-language"]).toBe(
+    expect(ruleRegistry?.["require-example-language"]).toBe(
       requireExampleLanguageRule,
     );
-    expect(codeperfectPlugin.rules?.["single-line-jsdoc"]).toBe(
-      singleLineJsdocRule,
-    );
-    expect(codeperfectPlugin.rules?.["prefer-vi-mocked-import"]).toBe(
+    expect(ruleRegistry?.["single-line-jsdoc"]).toBe(singleLineJsdocRule);
+    expect(ruleRegistry?.["prefer-vi-mocked-import"]).toBe(
       preferViMockedImportRule,
     );
-    expect(codeperfectPlugin.rules?.["prefer-vitest-incremental-casts"]).toBe(
+    expect(ruleRegistry?.["prefer-vitest-incremental-casts"]).toBe(
       preferVitestIncrementalCastsRule,
     );
-    expect(codeperfectPlugin.rules?.["require-aaa-sections"]).toBe(
-      requireAaaSectionsRule,
-    );
-    expect(codeperfectPlugin.rules?.["require-act-result-capture"]).toBe(
+    expect(ruleRegistry?.["require-aaa-sections"]).toBe(requireAaaSectionsRule);
+    expect(ruleRegistry?.["require-act-result-capture"]).toBe(
       requireActResultCaptureRule,
     );
-    expect(codeperfectPlugin.rules?.["require-test-companion"]).toBe(
+    expect(ruleRegistry?.["require-test-companion"]).toBe(
       requireTestCompanionRule,
     );
-    expect(codeperfectPlugin.rules?.["single-act-statement"]).toBe(
-      singleActStatementRule,
-    );
+    expect(ruleRegistry?.["single-act-statement"]).toBe(singleActStatementRule);
   });
 
   it("exports the ready-to-use presets", async () => {
+    // Arrange
+
+    // Act
     const moduleExports = await import("./index");
 
+    // Assert
     expect(moduleExports.all).toBe(all);
     expect(moduleExports.architecture).toBe(architecture);
     expect(moduleExports.core).toBe(core);
@@ -122,8 +132,12 @@ describe("package entrypoint", () => {
   });
 
   it("does not expose legacy config factory exports", async () => {
+    // Arrange
+
+    // Act
     const moduleExports = await import("./index");
 
+    // Assert
     expect("config" in moduleExports).toBe(false);
     expect("createConfig" in moduleExports).toBe(false);
     expect("tsConfig" in moduleExports).toBe(false);

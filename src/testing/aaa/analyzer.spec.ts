@@ -8,6 +8,8 @@ import {
   countActStatements,
   getAssertDeclaredIdentifiers,
   getAssertionIdentifiers,
+  getIndentationAtOffset,
+  getLineStartRange,
   getSectionPhases,
   hasAssertion,
   hasAsyncLogic,
@@ -76,19 +78,74 @@ function parseProgram(code: string): ParserAstWithComments {
 
 describe("AAA analyzer helpers", () => {
   it("parses strict AAA section comments and combined markers", () => {
-    expect(getSectionPhases("")).toStrictEqual([]);
-    expect(getSectionPhases("Arrange")).toStrictEqual(["Arrange"]);
-    expect(getSectionPhases("Arrange & Act")).toStrictEqual(["Arrange", "Act"]);
-    expect(getSectionPhases("arrange")).toStrictEqual([]);
-    expect(getSectionPhases("Arrange & cleanup")).toStrictEqual([]);
+    // Arrange
+
+    // Act
+    const phases = {
+      empty: getSectionPhases(""),
+      arrange: getSectionPhases("Arrange"),
+      arrangeAct: getSectionPhases("Arrange & Act"),
+      lowercaseArrange: getSectionPhases("arrange"),
+      cleanup: getSectionPhases("Arrange & cleanup"),
+    };
+
+    // Assert
+    expect(phases.empty).toStrictEqual([]);
+    expect(phases.arrange).toStrictEqual(["Arrange"]);
+    expect(phases.arrangeAct).toStrictEqual(["Arrange", "Act"]);
+    expect(phases.lowercaseArrange).toStrictEqual([]);
+    expect(phases.cleanup).toStrictEqual([]);
   });
 
   it("tracks the canonical AAA order", () => {
-    expect(aaaPhaseOrder.Arrange).toBeLessThan(aaaPhaseOrder.Act);
-    expect(aaaPhaseOrder.Act).toBeLessThan(aaaPhaseOrder.Assert);
+    // Arrange
+
+    // Act
+    const ordering = {
+      arrangeBeforeAct: aaaPhaseOrder.Arrange < aaaPhaseOrder.Act,
+      actBeforeAssert: aaaPhaseOrder.Act < aaaPhaseOrder.Assert,
+    };
+
+    // Assert
+    expect(ordering.arrangeBeforeAct).toBe(true);
+    expect(ordering.actBeforeAssert).toBe(true);
+  });
+
+  it("preserves combined AAA phases for statements", () => {
+    // Arrange
+    const sourceText = [
+      'it("tracks combined sections", () => {',
+      "  // Arrange & Act & Assert",
+      "  expect(run()).toBe(1);",
+      "});",
+    ].join("\n");
+    const program = parseProgram(sourceText);
+    const callExpression = (program.body[0] as ESTree.ExpressionStatement)
+      .expression as ESTree.CallExpression;
+
+    // Act
+    const analysis = analyzeTestBlock(
+      {
+        sourceCode: {
+          ast: program,
+          getAllComments: () => program.comments ?? [],
+          text: sourceText,
+        },
+      } as never,
+      callExpression,
+    );
+
+    // Assert
+    expect(analysis?.statements[0]?.phases).toStrictEqual([
+      "Arrange",
+      "Act",
+      "Assert",
+    ]);
+    expect(countActStatements(analysis!)).toBe(1);
   });
 
   it("detects blank lines before section comments", () => {
+    // Arrange
     const sourceText = [
       "it('x', () => {",
       "  const x = 1;",
@@ -97,6 +154,7 @@ describe("AAA analyzer helpers", () => {
       "});",
     ].join("\n");
 
+    // Act & Assert
     expect(
       hasBlankLineBeforeComment(sourceText, {
         loc: {
@@ -110,65 +168,122 @@ describe("AAA analyzer helpers", () => {
     ).toBe(true);
   });
 
+  it("covers line helpers and unsupported assertion operand shapes", () => {
+    // Arrange
+    const lineStartRange = getLineStartRange("line", 4);
+
+    // Act
+    const indentation = getIndentationAtOffset("value", 3);
+
+    // Assert
+    expect(lineStartRange).toStrictEqual([4, 4]);
+    expect(indentation).toBe("");
+    expect(
+      getAssertionIdentifiers(
+        getFirstFunctionBodyStatement(
+          "assert(actualValue).equal(expectedValue);",
+        ),
+      ),
+    ).toStrictEqual({ actual: void 0, expected: void 0 });
+  });
+
   it("checks actual and expected prefixes", () => {
-    expect(usesPrefix("actualResult", "actual")).toBe(true);
-    expect(usesPrefix("expectedValue", "expected")).toBe(true);
-    expect(usesPrefix("result", "actual")).toBe(false);
+    // Arrange
+
+    // Act
+    const prefixes = {
+      actual: usesPrefix("actualResult", "actual"),
+      expected: usesPrefix("expectedValue", "expected"),
+      missing: usesPrefix("result", "actual"),
+    };
+
+    // Assert
+    expect(prefixes.actual).toBe(true);
+    expect(prefixes.expected).toBe(true);
+    expect(prefixes.missing).toBe(false);
   });
 
   it("extracts assertion identifiers for expect and assert calls", () => {
-    expect(
-      getAssertionIdentifiers(
+    // Arrange
+
+    // Act
+    const identifiers = {
+      expectCall: getAssertionIdentifiers(
         getFirstFunctionBodyStatement(
           "expect(actualResult).toBe(expectedValue);",
         ),
       ),
-    ).toStrictEqual({ actual: "actualResult", expected: "expectedValue" });
-    expect(
-      getAssertionIdentifiers(
+      assertCall: getAssertionIdentifiers(
         getFirstFunctionBodyStatement(
           "assert.equal(actualValue, expectedValue);",
         ),
       ),
-    ).toStrictEqual({ actual: "actualValue", expected: "expectedValue" });
-    expect(
-      getAssertionIdentifiers(
+      spreadActual: getAssertionIdentifiers(
         getFirstFunctionBodyStatement("assert.equal(...values);"),
       ),
-    ).toStrictEqual({ actual: void 0, expected: void 0 });
-    expect(
-      getAssertionIdentifiers(
+      spreadExpected: getAssertionIdentifiers(
         getFirstFunctionBodyStatement("assert.equal(actualValue, ...values);"),
       ),
-    ).toStrictEqual({ actual: void 0, expected: void 0 });
-    expect(
-      getAssertionIdentifiers(
+      expectSpreadActual: getAssertionIdentifiers(
         getFirstFunctionBodyStatement("expect(...values).toBe(expectedValue);"),
       ),
-    ).toStrictEqual({ actual: void 0, expected: "expectedValue" });
-    expect(
-      getAssertionIdentifiers(
+      expectSpreadExpected: getAssertionIdentifiers(
         getFirstFunctionBodyStatement("expect(actualValue).toBe(...values);"),
       ),
-    ).toStrictEqual({ actual: "actualValue", expected: void 0 });
-    expect(
-      getAssertionIdentifiers(
+      memberExpectation: getAssertionIdentifiers(
         getFirstFunctionBodyStatement(
           "service.expectation().toBe(expectedValue);",
         ),
       ),
-    ).toStrictEqual({ actual: void 0, expected: void 0 });
-    expect(
-      getAssertionIdentifiers(
+      declaration: getAssertionIdentifiers(
         getFirstFunctionBodyStatement("const actualValue = 1;"),
       ),
-    ).toStrictEqual({ actual: void 0, expected: void 0 });
-    expect(
-      getAssertionIdentifiers(getFirstFunctionBodyStatement("actualValue;")),
-    ).toStrictEqual({ actual: void 0, expected: void 0 });
+      expression: getAssertionIdentifiers(
+        getFirstFunctionBodyStatement("actualValue;"),
+      ),
+    };
+
+    // Assert
+    expect(identifiers.expectCall).toStrictEqual({
+      actual: "actualResult",
+      expected: "expectedValue",
+    });
+    expect(identifiers.assertCall).toStrictEqual({
+      actual: "actualValue",
+      expected: "expectedValue",
+    });
+    expect(identifiers.spreadActual).toStrictEqual({
+      actual: void 0,
+      expected: void 0,
+    });
+    expect(identifiers.spreadExpected).toStrictEqual({
+      actual: void 0,
+      expected: void 0,
+    });
+    expect(identifiers.expectSpreadActual).toStrictEqual({
+      actual: void 0,
+      expected: "expectedValue",
+    });
+    expect(identifiers.expectSpreadExpected).toStrictEqual({
+      actual: "actualValue",
+      expected: void 0,
+    });
+    expect(identifiers.memberExpectation).toStrictEqual({
+      actual: void 0,
+      expected: void 0,
+    });
+    expect(identifiers.declaration).toStrictEqual({
+      actual: void 0,
+      expected: void 0,
+    });
+    expect(identifiers.expression).toStrictEqual({
+      actual: void 0,
+      expected: void 0,
+    });
   });
 
   it("classifies action, setup, and assertion statements", () => {
+    // Arrange
     const actionStatement = getFirstFunctionBodyStatement(
       "const actualResult = run(input);",
     );
@@ -181,40 +296,92 @@ describe("AAA analyzer helpers", () => {
       "expect(result).toBe(expectedValue);",
     );
 
-    expect(isMeaningfulActStatement(actionStatement)).toBe(true);
-    expect(isSetupLikeStatement(setupStatement)).toBe(true);
-    expect(isSetupLikeStatement(uninitializedSetupStatement)).toBe(true);
-    expect(isMeaningfulActStatement(assertionStatement)).toBe(false);
-    expect(isValidAssertStatement(assertionStatement)).toBe(true);
-    expect(isValidAssertStatement(actionStatement)).toBe(false);
+    // Act
+    const result = {
+      actionStatement: isMeaningfulActStatement(actionStatement),
+      setupStatement: isSetupLikeStatement(setupStatement),
+      uninitializedSetupStatement: isSetupLikeStatement(
+        uninitializedSetupStatement,
+      ),
+      assertionStatement: isMeaningfulActStatement(assertionStatement),
+      validAssertionStatement: isValidAssertStatement(assertionStatement),
+      validActionStatement: isValidAssertStatement(actionStatement),
+      validUninitializedActual: isValidAssertStatement(
+        getFirstFunctionBodyStatement("let actualResult;"),
+      ),
+    };
+
+    // Assert
+    expect(result.actionStatement).toBe(true);
+    expect(result.setupStatement).toBe(true);
+    expect(result.uninitializedSetupStatement).toBe(true);
+    expect(result.assertionStatement).toBe(false);
+    expect(result.validAssertionStatement).toBe(true);
+    expect(result.validActionStatement).toBe(false);
+    expect(result.validUninitializedActual).toBe(true);
+  });
+
+  it("treats setup constructors as setup while keeping rule listeners meaningful", () => {
+    // Arrange
+    const sourceCodeSetup = getFirstFunctionBodyStatement(
+      'const sourceCode = new SourceCode("", ast);',
+    );
+    const eslintSetup = getFirstFunctionBodyStatement(
+      "const eslint = new ESLint({});",
+    );
+    const ruleListenerSetup = getFirstFunctionBodyStatement(
+      "const listeners = customRule.create(context);",
+    );
+
+    // Act
+    const result = {
+      sourceCodeSetup: isSetupLikeStatement(sourceCodeSetup),
+      eslintSetup: isSetupLikeStatement(eslintSetup),
+      ruleListenerSetup: isSetupLikeStatement(ruleListenerSetup),
+    };
+
+    // Assert
+    expect(result.sourceCodeSetup).toBe(true);
+    expect(result.eslintSetup).toBe(true);
+    expect(result.ruleListenerSetup).toBe(false);
   });
 
   it("detects async logic, await usage, and capturable act results", () => {
-    expect(
-      hasAsyncLogic(getFirstFunctionBodyStatement("task.then(handleResult);")),
-    ).toBe(true);
-    expect(
-      hasAsyncLogic(
+    // Arrange
+
+    // Act
+    const result = {
+      asyncThen: hasAsyncLogic(
+        getFirstFunctionBodyStatement("task.then(handleResult);"),
+      ),
+      asyncPromise: hasAsyncLogic(
         getFirstFunctionBodyStatement(
           "const deferred = new Promise((resolve) => resolve(void 0));",
         ),
       ),
-    ).toBe(true);
-    expect(hasAwait(getFirstFunctionBodyStatement("await run(input);"))).toBe(
-      true,
-    );
-    expect(
-      hasCapturableActResult(getFirstFunctionBodyStatement("run(input);")),
-    ).toBe(true);
-    expect(
-      hasCapturableActResult(getFirstFunctionBodyStatement("setValue(input);")),
-    ).toBe(false);
-    expect(
-      hasCapturableActResult(getFirstFunctionBodyStatement("value;")),
-    ).toBe(false);
+      awaitCall: hasAwait(getFirstFunctionBodyStatement("await run(input);")),
+      capturableRun: hasCapturableActResult(
+        getFirstFunctionBodyStatement("run(input);"),
+      ),
+      capturableSetter: hasCapturableActResult(
+        getFirstFunctionBodyStatement("setValue(input);"),
+      ),
+      capturableValue: hasCapturableActResult(
+        getFirstFunctionBodyStatement("value;"),
+      ),
+    };
+
+    // Assert
+    expect(result.asyncThen).toBe(true);
+    expect(result.asyncPromise).toBe(true);
+    expect(result.awaitCall).toBe(true);
+    expect(result.capturableRun).toBe(true);
+    expect(result.capturableSetter).toBe(false);
+    expect(result.capturableValue).toBe(false);
   });
 
   it("detects mutations and safely ignores parent cycles", () => {
+    // Arrange
     const mutationStatement =
       getFirstFunctionBodyStatement("items.push(value);");
     const nonMutationUnaryStatement = getFirstFunctionBodyStatement("!ready;");
@@ -228,18 +395,26 @@ describe("AAA analyzer helpers", () => {
     assertionStatement.duplicate = assertionStatement.expression;
     assertionStatement.parent = assertionStatement;
 
-    expect(hasMutation(mutationStatement)).toBe(true);
-    expect(hasMutation(nonMutationUnaryStatement)).toBe(false);
-    expect(hasAssertion(assertionStatement)).toBe(true);
-    expect(
-      hasBlankLineBeforeComment("// Arrange", {
+    // Act
+    const result = {
+      mutationStatement: hasMutation(mutationStatement),
+      nonMutationUnaryStatement: hasMutation(nonMutationUnaryStatement),
+      assertionStatement: hasAssertion(assertionStatement),
+      blankLineBeforeComment: hasBlankLineBeforeComment("// Arrange", {
         type: "Line",
         value: " Arrange",
       } as never),
-    ).toBe(true);
+    };
+
+    // Assert
+    expect(result.mutationStatement).toBe(true);
+    expect(result.nonMutationUnaryStatement).toBe(false);
+    expect(result.assertionStatement).toBe(true);
+    expect(result.blankLineBeforeComment).toBe(true);
   });
 
   it("analyzes supported test blocks and counts Act statements", () => {
+    // Arrange
     const sourceText = [
       'it("tracks AAA sections", () => {',
       "  // Arrange",
@@ -256,6 +431,7 @@ describe("AAA analyzer helpers", () => {
     const callExpression = (program.body[0] as ESTree.ExpressionStatement)
       .expression as ESTree.CallExpression;
 
+    // Act
     const analysis = analyzeTestBlock(
       {
         sourceCode: {
@@ -267,6 +443,7 @@ describe("AAA analyzer helpers", () => {
       callExpression,
     );
 
+    // Assert
     expect(analysis?.newline).toBe("\n");
     expect(analysis?.sectionComments).toHaveLength(3);
     expect([...getAssertDeclaredIdentifiers(analysis!).keys()]).toStrictEqual(
@@ -276,6 +453,7 @@ describe("AAA analyzer helpers", () => {
   });
 
   it("detects CRLF newlines and tolerates statements without location metadata", () => {
+    // Arrange
     const sourceText = [
       'it("tracks AAA sections", () => {',
       "  // Arrange",
@@ -296,99 +474,118 @@ describe("AAA analyzer helpers", () => {
     const firstStatement =
       callback.body.type === "BlockStatement" ? callback.body.body[0] : void 0;
 
-    if (firstStatement === void 0) {
-      throw new TypeError("Expected a function body statement.");
-    }
-
-    (
-      firstStatement as ESTree.Statement & {
-        loc?: ESTree.SourceLocation | null;
+    // Act
+    const analysis = (() => {
+      if (firstStatement === void 0) {
+        throw new TypeError("Expected a function body statement.");
       }
-    ).loc = null;
 
-    const analysis = analyzeTestBlock(
-      {
-        sourceCode: {
-          ast: program,
-          getAllComments: () => program.comments ?? [],
-          text: sourceText,
-        },
-      } as never,
-      callExpression,
-    );
+      (
+        firstStatement as ESTree.Statement & {
+          loc?: ESTree.SourceLocation | null;
+        }
+      ).loc = null;
 
+      return analyzeTestBlock(
+        {
+          sourceCode: {
+            ast: program,
+            getAllComments: () => program.comments ?? [],
+            text: sourceText,
+          },
+        } as never,
+        callExpression,
+      );
+    })();
+
+    // Assert
     expect(analysis?.newline).toBe("\r\n");
     expect(analysis?.statements[0]?.phase).toBeUndefined();
+    expect(analysis?.statements[0]?.phases).toStrictEqual([]);
   });
 
   it("covers computed calls, chained calls, and unsupported phase analysis", () => {
-    expect(isSetupLikeStatement(getFirstFunctionBodyStatement("value;"))).toBe(
-      false,
-    );
-    expect(
-      isSetupLikeStatement(
+    // Arrange
+    const helperSourceText = "helper();";
+    const helperProgram = parseProgram(helperSourceText);
+    const helperCallExpression = (
+      helperProgram.body[0] as ESTree.ExpressionStatement
+    ).expression as ESTree.CallExpression;
+    const todoSourceText = 'it("todo");';
+    const todoProgram = parseProgram(todoSourceText);
+    const todoCallExpression = (
+      todoProgram.body[0] as ESTree.ExpressionStatement
+    ).expression as ESTree.CallExpression;
+
+    // Act
+    const result = {
+      valueSetup: isSetupLikeStatement(getFirstFunctionBodyStatement("value;")),
+      dependencySetup: isSetupLikeStatement(
         getFirstFunctionBodyStatement("dependencies[key]();"),
       ),
-    ).toBe(false);
-    expect(
-      hasCapturableActResult(
+      optionalCall: hasCapturableActResult(
         getFirstFunctionBodyStatement("dependencies?.run?.(input);"),
       ),
-    ).toBe(true);
-    expect(
-      hasCapturableActResult(
+      computedCall: hasCapturableActResult(
         getFirstFunctionBodyStatement("dependencies[key](input);"),
       ),
-    ).toBe(true);
-    expect(
-      hasCapturableActResult(
+      stringComputedCall: hasCapturableActResult(
         getFirstFunctionBodyStatement('dependencies["run"](input);'),
       ),
-    ).toBe(true);
-    expect(
-      analyzeTestBlock(
+      helperAnalysis: analyzeTestBlock(
         {
           sourceCode: {
-            ast: parseProgram("helper();"),
+            ast: helperProgram,
             getAllComments: () => [],
-            text: "helper();",
+            text: helperSourceText,
           },
         } as never,
-        (parseProgram("helper();").body[0] as ESTree.ExpressionStatement)
-          .expression as ESTree.CallExpression,
+        helperCallExpression,
       ),
-    ).toBeUndefined();
-    expect(
-      analyzeTestBlock(
+      todoAnalysis: analyzeTestBlock(
         {
           sourceCode: {
-            ast: parseProgram('it("todo");'),
+            ast: todoProgram,
             getAllComments: () => [],
-            text: 'it("todo");',
+            text: todoSourceText,
           },
         } as never,
-        (parseProgram('it("todo");').body[0] as ESTree.ExpressionStatement)
-          .expression as ESTree.CallExpression,
+        todoCallExpression,
       ),
-    ).toBeUndefined();
+    };
+
+    // Assert
+    expect(result.valueSetup).toBe(false);
+    expect(result.dependencySetup).toBe(false);
+    expect(result.optionalCall).toBe(true);
+    expect(result.computedCall).toBe(true);
+    expect(result.stringComputedCall).toBe(true);
+    expect(result.helperAnalysis).toBeUndefined();
+    expect(result.todoAnalysis).toBeUndefined();
   });
 
   it("treats non-expression and multi-declaration statements as non-actions", () => {
-    expect(
-      isMeaningfulActStatement(
+    // Arrange
+
+    // Act
+    const result = {
+      conditionalAction: isMeaningfulActStatement(
+        getFirstFunctionBodyStatement("if (ready) { run(); }"),
+      ),
+      multiDeclarationAction: isMeaningfulActStatement(
         getFirstFunctionBodyStatement(
           "const actualResult = run(), nextResult = run();",
         ),
       ),
-    ).toBe(false);
-    expect(
-      isMeaningfulActStatement(
-        getFirstFunctionBodyStatement("if (ready) { run(); }"),
-      ),
-    ).toBe(false);
+    };
+
+    // Assert
+    expect(result.multiDeclarationAction).toBe(false);
+    expect(result.conditionalAction).toBe(false);
   });
 
   it("handles super member expressions as unnamed invocations", () => {
+    // Arrange
     const program = parseProgram(
       [
         "class Child extends Base {",
@@ -399,38 +596,84 @@ describe("AAA analyzer helpers", () => {
       ].join("\n"),
     );
     const classDeclaration = program.body[0] as ESTree.ClassDeclaration;
-    const method = classDeclaration.body.body[0];
 
-    if (
-      method?.type !== "MethodDefinition" ||
-      method.value.body?.body[0] === void 0
-    ) {
-      throw new TypeError("Expected a class method statement.");
-    }
+    // Act
+    const method = (() => {
+      const methodValue = classDeclaration.body.body[0];
 
-    expect(hasCapturableActResult(method.value.body.body[0])).toBe(true);
+      if (
+        methodValue?.type !== "MethodDefinition" ||
+        methodValue.value.body?.body[0] === void 0
+      ) {
+        throw new TypeError("Expected a class method statement.");
+      }
+
+      return methodValue;
+    })();
+
+    // Assert
+    expect(hasCapturableActResult(method.value.body.body[0]!)).toBe(true);
+  });
+
+  it("treats constructor super calls as capturable actions", () => {
+    // Arrange
+    const program = parseProgram(
+      [
+        "class Child extends Base {",
+        "  constructor() {",
+        "    super();",
+        "  }",
+        "}",
+      ].join("\n"),
+    );
+    const classDeclaration = program.body[0] as ESTree.ClassDeclaration;
+
+    // Act
+    const constructor = (() => {
+      const constructorValue = classDeclaration.body.body[0];
+
+      if (
+        constructorValue?.type !== "MethodDefinition" ||
+        constructorValue.value.body?.body[0] === void 0
+      ) {
+        throw new TypeError("Expected a constructor statement.");
+      }
+
+      return constructorValue;
+    })();
+
+    // Assert
+    expect(hasCapturableActResult(constructor.value.body.body[0]!)).toBe(true);
   });
 
   it("covers assert member calls and non-assert member calls", () => {
-    expect(
-      hasAssertion(
+    // Arrange
+
+    // Act
+    const result = {
+      assertMemberCall: hasAssertion(
         getFirstFunctionBodyStatement("assert.equal(actual, expected);"),
       ),
-    ).toBe(true);
-    expect(
-      hasAssertion(getFirstFunctionBodyStatement("service.execute(actual);")),
-    ).toBe(false);
-    expect(
-      isSetupLikeStatement(
+      nonAssertMemberCall: hasAssertion(
+        getFirstFunctionBodyStatement("service.execute(actual);"),
+      ),
+      setupLikeComputedDependency: isSetupLikeStatement(
         getFirstFunctionBodyStatement("dependencies[key]();"),
       ),
-    ).toBe(false);
-    expect(hasAssertion(getFirstFunctionBodyStatement("(factory())();"))).toBe(
-      false,
-    );
+      indirectFactoryCall: hasAssertion(
+        getFirstFunctionBodyStatement("(factory())();"),
+      ),
+    };
+
+    // Assert
+    expect(result.assertMemberCall).toBe(true);
+    expect(result.nonAssertMemberCall).toBe(false);
+    expect(result.setupLikeComputedDependency).toBe(false);
+    expect(result.indirectFactoryCall).toBe(false);
   });
 
   it("collects assert-local declared identifiers", () => {
+    // Arrange
     const sourceText = [
       'it("tracks assert locals", () => {',
       "  // Arrange",
@@ -448,6 +691,8 @@ describe("AAA analyzer helpers", () => {
     const program = parseProgram(sourceText);
     const callExpression = (program.body[0] as ESTree.ExpressionStatement)
       .expression as ESTree.CallExpression;
+
+    // Act
     const analysis = analyzeTestBlock(
       {
         sourceCode: {
@@ -459,6 +704,7 @@ describe("AAA analyzer helpers", () => {
       callExpression,
     );
 
+    // Assert
     expect([...getAssertDeclaredIdentifiers(analysis!).keys()]).toStrictEqual([
       "actualResult",
       "expectedValue",
@@ -466,6 +712,7 @@ describe("AAA analyzer helpers", () => {
   });
 
   it("ignores destructured Assert declarations when collecting identifiers", () => {
+    // Arrange
     const sourceText = [
       'it("tracks assert locals", () => {',
       "  // Arrange",
@@ -482,6 +729,8 @@ describe("AAA analyzer helpers", () => {
     const program = parseProgram(sourceText);
     const callExpression = (program.body[0] as ESTree.ExpressionStatement)
       .expression as ESTree.CallExpression;
+
+    // Act
     const analysis = analyzeTestBlock(
       {
         sourceCode: {
@@ -493,6 +742,7 @@ describe("AAA analyzer helpers", () => {
       callExpression,
     );
 
+    // Assert
     expect([...getAssertDeclaredIdentifiers(analysis!).keys()]).toStrictEqual(
       [],
     );

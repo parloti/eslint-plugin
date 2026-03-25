@@ -15,12 +15,44 @@ Keeping source files and tests paired makes gaps obvious and encourages localize
 
 ## Invalid
 
+```text
+feature.ts
+```
+
 ```ts
-// feature.ts exists without feature.spec.ts
+// feature.ts
+export const feature = 1;
+```
+
+```text
+feature.test.ts
+```
+
+```ts
+// feature.test.ts
+export {};
 ```
 
 ## Valid
 
-```ts
-// feature.ts and feature.spec.ts exist in the same folder
+```text
+feature.ts
+feature.spec.ts
 ```
+
+```ts
+// feature.ts
+export const feature = 1;
+```
+
+```ts
+// feature.spec.ts
+export {};
+```
+
+```text
+feature.ts
+feature.test.ts
+```
+
+That pairing is also valid when the repository uses `.test.ts` as the configured companion pattern.

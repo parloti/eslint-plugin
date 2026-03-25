@@ -1,7 +1,47 @@
 import type { Rule } from "eslint";
+import type * as ESTree from "estree";
 
 import { createRuleDocumentation } from "../../custom-rule-documentation";
 import { analyzeTestBlock, hasCapturableActResult } from "../aaa";
+
+function isHelperDrivenAct(statement: ESTree.Statement): boolean {
+  if (statement.type !== "ExpressionStatement") {
+    return false;
+  }
+
+  const { expression } = statement;
+  if (expression.type !== "CallExpression") {
+    return false;
+  }
+
+  if (
+    expression.callee.type === "MemberExpression" &&
+    expression.callee.object.type === "Identifier" &&
+    expression.callee.property.type === "Identifier" &&
+    expression.callee.property.name === "create" &&
+    /Rule$/u.test(expression.callee.object.name)
+  ) {
+    return true;
+  }
+
+  if (
+    expression.callee.type === "MemberExpression" &&
+    expression.callee.object.type === "Identifier" &&
+    expression.callee.object.name === "context" &&
+    expression.callee.property.type === "Identifier" &&
+    expression.callee.property.name === "report"
+  ) {
+    return true;
+  }
+
+  if (expression.callee.type !== "Identifier") {
+    return false;
+  }
+
+  return /^(?:report[A-Z]\w*|run(?:FunctionListener|Listener|Rule))$/u.test(
+    expression.callee.name,
+  );
+}
 
 const requireActResultCaptureRule: Rule.RuleModule = {
   create(context: Rule.RuleContext): Rule.RuleListener {
@@ -14,7 +54,9 @@ const requireActResultCaptureRule: Rule.RuleModule = {
 
         for (const statement of analysis.statements) {
           if (
-            statement.phase !== "Act" ||
+            !statement.phases.includes("Act") ||
+            statement.phases.includes("Assert") ||
+            isHelperDrivenAct(statement.node) ||
             !hasCapturableActResult(statement.node)
           ) {
             continue;

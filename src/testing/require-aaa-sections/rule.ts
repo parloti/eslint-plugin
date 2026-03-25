@@ -133,15 +133,15 @@ function buildMissingSectionFixes(
 
   const anchorMap = new Map<number, AaaPhase[]>();
   const sourceLines = analysis.sourceText.split(/\r\n|\n/u);
-  const firstStatement = analysis.statements[0]?.node;
+  const firstStatement = analysis.statements[0]!.node;
   const middleStatement =
     analysis.statements[
       Math.min(
         analysis.statements.length - 1,
         Math.floor(analysis.statements.length / 2),
       )
-    ]?.node;
-  const lastStatement = analysis.statements.at(-1)?.node;
+    ]!.node;
+  const lastStatement = analysis.statements.at(-1)!.node;
 
   for (const phase of missingSections) {
     const anchorNode =
@@ -150,9 +150,6 @@ function buildMissingSectionFixes(
         : phase === "Act"
           ? middleStatement
           : lastStatement;
-    if (anchorNode === void 0) {
-      continue;
-    }
 
     const existing = anchorMap.get(anchorNode.range[0]) ?? [];
     existing.push(phase);
@@ -166,7 +163,7 @@ function buildMissingSectionFixes(
     const statementLine = analysis.sourceText
       .slice(0, offset)
       .split(/\r\n|\n/u).length;
-    const previousLine = sourceLines[statementLine - 2] ?? "";
+    const previousLine = sourceLines[statementLine - 2]!;
     const lineStartRange = getLineStartRange(
       analysis.sourceText,
       statementLine,
@@ -174,8 +171,7 @@ function buildMissingSectionFixes(
     const needsLeadingBlankLine =
       sortedPhases.some((phase) => phase !== "Arrange") &&
       previousLine.trim().length > 0;
-    const indentation =
-      /^\s*/u.exec(sourceLines[statementLine - 1] ?? "")?.[0] ?? "";
+    const indentation = /^\s*/u.exec(sourceLines[statementLine - 1]!)![0];
 
     return fixer.insertTextBeforeRange(
       lineStartRange,

@@ -4,10 +4,14 @@ import { buildAllowedRanges, collectMemberRewrites } from "./match-rewrites";
 
 describe("prefer-vi-mocked-import match-rewrites", () => {
   it("exports collectMemberRewrites", () => {
+    // Arrange
+
+    // Act & Assert
     expect(collectMemberRewrites).toBeTypeOf("function");
   });
 
   it("includes declaration id ranges when declaration exists", () => {
+    // Arrange
     const allowed = buildAllowedRanges(
       [
         {
@@ -32,10 +36,12 @@ describe("prefer-vi-mocked-import match-rewrites", () => {
       [],
     );
 
+    // Act & Assert
     expect(allowed.has("10:11")).toBe(true);
   });
 
   it("skips declaration id range when declaration is absent", () => {
+    // Arrange
     const allowed = buildAllowedRanges(
       [
         {
@@ -50,6 +56,7 @@ describe("prefer-vi-mocked-import match-rewrites", () => {
       [],
     );
 
+    // Act & Assert
     expect(allowed.has("10:11")).toBe(false);
   });
 });

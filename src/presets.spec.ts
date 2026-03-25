@@ -13,15 +13,29 @@ function getRuleKeys(config: RulesConfig): string[] {
 
 describe("ready-to-use presets", () => {
   it("registers the codeperfect plugin on every preset", () => {
-    expect(all.plugins?.["codeperfect"]).toBe(codeperfectPlugin);
-    expect(architecture.plugins?.["codeperfect"]).toBe(codeperfectPlugin);
-    expect(core.plugins?.["codeperfect"]).toBe(codeperfectPlugin);
-    expect(docs.plugins?.["codeperfect"]).toBe(codeperfectPlugin);
-    expect(testing.plugins?.["codeperfect"]).toBe(codeperfectPlugin);
-    expect(aaa.plugins?.["codeperfect"]).toBe(codeperfectPlugin);
+    // Arrange
+    const actualPlugins = [
+      all.plugins?.["codeperfect"],
+      architecture.plugins?.["codeperfect"],
+      core.plugins?.["codeperfect"],
+      docs.plugins?.["codeperfect"],
+      testing.plugins?.["codeperfect"],
+      aaa.plugins?.["codeperfect"],
+    ];
+
+    // Act
+    const expectedPlugins = Array.from({ length: actualPlugins.length }).fill(
+      codeperfectPlugin,
+    );
+
+    // Assert
+    expect(actualPlugins).toStrictEqual(expectedPlugins);
   });
 
   it("enables every package-owned rule in the all preset", () => {
+    // Arrange
+
+    // Act & Assert
     expect(getRuleKeys(all)).toStrictEqual(
       Object.keys(codeperfectRules)
         .map((ruleName) => `codeperfect/${ruleName}`)
@@ -30,6 +44,9 @@ describe("ready-to-use presets", () => {
   });
 
   it("groups the architecture rules", () => {
+    // Arrange
+
+    // Act & Assert
     expect(getRuleKeys(architecture)).toStrictEqual([
       "codeperfect/barrel-files-exports-only",
       "codeperfect/consistent-barrel-files",
@@ -38,6 +55,9 @@ describe("ready-to-use presets", () => {
   });
 
   it("groups the core rules", () => {
+    // Arrange
+
+    // Act & Assert
     expect(getRuleKeys(core)).toStrictEqual([
       "codeperfect/no-multiple-declarators",
       "codeperfect/prefer-interface-types",
@@ -45,6 +65,9 @@ describe("ready-to-use presets", () => {
   });
 
   it("groups the docs rules", () => {
+    // Arrange
+
+    // Act & Assert
     expect(getRuleKeys(docs)).toStrictEqual([
       "codeperfect/no-interface-member-docs",
       "codeperfect/require-example-language",
@@ -53,6 +76,9 @@ describe("ready-to-use presets", () => {
   });
 
   it("groups the testing rules", () => {
+    // Arrange
+
+    // Act & Assert
     expect(getRuleKeys(testing)).toStrictEqual([
       "codeperfect/assert-actual-expected-names",
       "codeperfect/enforce-aaa-phase-purity",
@@ -67,6 +93,9 @@ describe("ready-to-use presets", () => {
   });
 
   it("groups the AAA rules", () => {
+    // Arrange
+
+    // Act & Assert
     expect(getRuleKeys(aaa)).toStrictEqual([
       "codeperfect/enforce-aaa-phase-purity",
       "codeperfect/enforce-aaa-structure",

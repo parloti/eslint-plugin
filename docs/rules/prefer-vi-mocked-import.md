@@ -20,8 +20,47 @@ const mockedClient = vi.fn();
 vi.mock("./client", () => ({ client: mockedClient }));
 ```
 
+```ts
+const installDevelopmentDependencies = vi.fn();
+vi.mock(import("./dependencies"), () => ({ installDevelopmentDependencies }));
+installDevelopmentDependencies.mockResolvedValue(void 0);
+```
+
+## Autofix example
+
+Before:
+
+```ts
+const installDevelopmentDependencies = vi.fn();
+vi.mock(import("./dependencies"), () => ({ installDevelopmentDependencies }));
+installDevelopmentDependencies.mockResolvedValue(void 0);
+```
+
+After:
+
+```ts
+import { installDevelopmentDependencies } from "./dependencies";
+
+vi.mock(import("./dependencies"), () => ({ installDevelopmentDependencies: vi.fn() }));
+vi.mocked(installDevelopmentDependencies).mockResolvedValue(void 0);
+```
+
 ## Valid
 
 ```ts
 vi.mock("./client", () => ({ client: vi.fn() }));
+```
+
+```ts
+const installDevelopmentDependencies = vi.fn();
+console.log(installDevelopmentDependencies);
+vi.mock(import("./dependencies"), () => ({ installDevelopmentDependencies }));
+installDevelopmentDependencies.mockResolvedValue(void 0);
+```
+
+```ts
+import { installDevelopmentDependencies } from "./dependencies";
+
+vi.mock(import("./dependencies"), () => ({ installDevelopmentDependencies: vi.fn() }));
+vi.mocked(installDevelopmentDependencies).mockResolvedValue(void 0);
 ```

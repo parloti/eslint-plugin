@@ -8,6 +8,9 @@ import {
 
 describe(getCustomRuleDocumentationUrl, () => {
   it("builds the canonical rule URL", () => {
+    // Arrange
+
+    // Act & Assert
     expect(getCustomRuleDocumentationUrl("prefer-interface-types")).toBe(
       `${customRuleDocumentationBaseUrl}/prefer-interface-types.md`,
     );
@@ -16,6 +19,9 @@ describe(getCustomRuleDocumentationUrl, () => {
 
 describe(createRuleDocumentation, () => {
   it("returns the shared custom rule docs shape", () => {
+    // Arrange
+
+    // Act & Assert
     expect(
       createRuleDocumentation("prefer-interface-types", "Rule description"),
     ).toStrictEqual({

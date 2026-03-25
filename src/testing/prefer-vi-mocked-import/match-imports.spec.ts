@@ -4,32 +4,36 @@ import { resolveImportPlan } from "./match-imports";
 
 describe("prefer-vi-mocked-import match-imports", () => {
   it("exports resolveImportPlan", () => {
-    expect(resolveImportPlan).toBeTypeOf("function");
+    // Arrange
+
+    // Act & Assert
+    expect(typeof resolveImportPlan).toBe("function");
   });
 
   it("returns insert plan after namespace import for same module", () => {
-    const plan = resolveImportPlan(
-      {
-        body: [
-          {
-            range: [0, 25],
-            source: { type: "Literal", value: "./mod" },
-            specifiers: [
-              {
-                local: { name: "mod" },
-                type: "ImportNamespaceSpecifier",
-              },
-            ],
-            type: "ImportDeclaration",
-          },
-        ],
-        sourceType: "module",
-        type: "Program",
-      } as never,
-      "./mod",
-      ["a"],
-    );
+    // Arrange
+    const program = {
+      body: [
+        {
+          range: [0, 25],
+          source: { type: "Literal", value: "./mod" },
+          specifiers: [
+            {
+              local: { name: "mod" },
+              type: "ImportNamespaceSpecifier",
+            },
+          ],
+          type: "ImportDeclaration",
+        },
+      ],
+      sourceType: "module",
+      type: "Program",
+    } as never;
 
+    // Act
+    const plan = resolveImportPlan(program, "./mod", ["a"]);
+
+    // Assert
     expect(plan).toStrictEqual({
       insert: { afterRange: [0, 25] },
       moduleSpecifier: "./mod",
@@ -38,32 +42,33 @@ describe("prefer-vi-mocked-import match-imports", () => {
   });
 
   it("returns update plan preserving default and existing named imports", () => {
-    const plan = resolveImportPlan(
-      {
-        body: [
-          {
-            range: [0, 30],
-            source: { type: "Literal", value: "./mod" },
-            specifiers: [
-              {
-                local: { name: "mod" },
-                type: "ImportDefaultSpecifier",
-              },
-              {
-                imported: { name: "existing", type: "Identifier" },
-                type: "ImportSpecifier",
-              },
-            ],
-            type: "ImportDeclaration",
-          },
-        ],
-        sourceType: "module",
-        type: "Program",
-      } as never,
-      "./mod",
-      ["a"],
-    );
+    // Arrange
+    const program = {
+      body: [
+        {
+          range: [0, 30],
+          source: { type: "Literal", value: "./mod" },
+          specifiers: [
+            {
+              local: { name: "mod" },
+              type: "ImportDefaultSpecifier",
+            },
+            {
+              imported: { name: "existing", type: "Identifier" },
+              type: "ImportSpecifier",
+            },
+          ],
+          type: "ImportDeclaration",
+        },
+      ],
+      sourceType: "module",
+      type: "Program",
+    } as never;
 
+    // Act
+    const plan = resolveImportPlan(program, "./mod", ["a"]);
+
+    // Assert
     expect(plan).toStrictEqual({
       moduleSpecifier: "./mod",
       names: ["a"],
@@ -76,28 +81,29 @@ describe("prefer-vi-mocked-import match-imports", () => {
   });
 
   it("inserts when import source is not a string literal", () => {
-    const plan = resolveImportPlan(
-      {
-        body: [
-          {
-            range: [0, 30],
-            source: { type: "Literal", value: 123 },
-            specifiers: [
-              {
-                imported: { name: "existing", type: "Identifier" },
-                type: "ImportSpecifier",
-              },
-            ],
-            type: "ImportDeclaration",
-          },
-        ],
-        sourceType: "module",
-        type: "Program",
-      } as never,
-      "./mod",
-      ["a"],
-    );
+    // Arrange
+    const program = {
+      body: [
+        {
+          range: [0, 30],
+          source: { type: "Literal", value: 123 },
+          specifiers: [
+            {
+              imported: { name: "existing", type: "Identifier" },
+              type: "ImportSpecifier",
+            },
+          ],
+          type: "ImportDeclaration",
+        },
+      ],
+      sourceType: "module",
+      type: "Program",
+    } as never;
 
+    // Act
+    const plan = resolveImportPlan(program, "./mod", ["a"]);
+
+    // Assert
     expect(plan).toStrictEqual({
       insert: { afterRange: [0, 30] },
       moduleSpecifier: "./mod",

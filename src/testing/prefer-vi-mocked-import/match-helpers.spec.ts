@@ -1,4 +1,4 @@
-import { describe, expect, expectTypeOf, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import {
   getFactoryReturnObject,
@@ -10,63 +10,110 @@ import {
 
 describe("prefer-vi-mocked-import match-helpers", () => {
   it("exposes helper functions", () => {
-    expect(getNewline("a\n")).toBe("\n");
+    // Arrange
+    const newline = getNewline("a\n");
 
-    expectTypeOf(hasRange).toBeFunction();
-    expectTypeOf(isViFunctionCall).toBeFunction();
+    // Act
+    const helperTypes = {
+      hasRange: typeof hasRange,
+      isViFunctionCall: typeof isViFunctionCall,
+    };
+
+    // Assert
+    expect(newline).toBe("\n");
+    expect(helperTypes.hasRange).toBe("function");
+    expect(helperTypes.isViFunctionCall).toBe("function");
   });
 
   it("returns undefined when factory is not an arrow function", () => {
-    expect(getFactoryReturnObject({ type: "Identifier" } as never)).toBe(
-      void 0,
-    );
+    // Arrange
+    const factory = {
+      type: "Identifier",
+    } as never;
+
+    // Act
+    const factoryReturnObject = getFactoryReturnObject(factory);
+
+    // Assert
+    expect(factoryReturnObject).toBe(void 0);
   });
 
   it("returns undefined when block-bodied factory does not return an object", () => {
-    expect(
-      getFactoryReturnObject({
-        body: {
-          body: [
-            {
-              argument: { type: "Literal", value: 1 },
-              type: "ReturnStatement",
-            },
-          ],
-          type: "BlockStatement",
-        },
-        type: "ArrowFunctionExpression",
-      } as never),
-    ).toBe(void 0);
+    // Arrange
+    const factory = {
+      body: {
+        body: [
+          {
+            argument: { type: "Literal", value: 1 },
+            type: "ReturnStatement",
+          },
+        ],
+        type: "BlockStatement",
+      },
+      type: "ArrowFunctionExpression",
+    } as never;
+
+    // Act
+    const factoryReturnObject = getFactoryReturnObject(factory);
+
+    // Assert
+    expect(factoryReturnObject).toBe(void 0);
   });
 
   it("returns undefined for arrow factories with non-block expression bodies", () => {
-    expect(
-      getFactoryReturnObject({
-        body: { name: "x", type: "Identifier" },
-        type: "ArrowFunctionExpression",
-      } as never),
-    ).toBe(void 0);
+    // Arrange
+    const factory = {
+      body: { name: "x", type: "Identifier" },
+      type: "ArrowFunctionExpression",
+    } as never;
+
+    // Act
+    const factoryReturnObject = getFactoryReturnObject(factory);
+
+    // Assert
+    expect(factoryReturnObject).toBe(void 0);
   });
 
   it("returns undefined for unsupported module argument expressions", () => {
-    expect(getModuleSpecifier({ name: "x", type: "Identifier" } as never)).toBe(
-      void 0,
-    );
+    // Arrange
+    const argument = {
+      name: "x",
+      type: "Identifier",
+    } as never;
+
+    // Act
+    const moduleSpecifier = getModuleSpecifier(argument);
+
+    // Assert
+    expect(moduleSpecifier).toBe(void 0);
   });
 
   it("detects string specifier from plain literals", () => {
-    expect(getModuleSpecifier({ type: "Literal", value: "./x" } as never)).toBe(
-      "./x",
-    );
+    // Arrange
+    const argument = {
+      type: "Literal",
+      value: "./x",
+    } as never;
+
+    // Act
+    const moduleSpecifier = getModuleSpecifier(argument);
+
+    // Assert
+    expect(moduleSpecifier).toBe("./x");
   });
 
   it("returns false for call expressions that are not member calls", () => {
-    expect(
-      isViFunctionCall({
-        arguments: [],
-        callee: { name: "fn", type: "Identifier" },
-        type: "CallExpression",
-      } as never),
-    ).toBe(false);
+    // Arrange
+    const callExpression = {
+      arguments: [],
+      callee: { name: "fn", type: "Identifier" },
+      type: "CallExpression",
+    } as never;
+
+    // Act
+    const isViCall = isViFunctionCall(callExpression);
+
+    // Assert
+    expect(isViCall).toBe(false);
   });
 });

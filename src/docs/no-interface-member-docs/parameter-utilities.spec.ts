@@ -70,74 +70,114 @@ const createFunctionNode = (parameters: unknown[]): Rule.Node =>
 
 describe("parameter utilities", () => {
   it("collects parameter type annotations", () => {
+    // Arrange
     const node = createFunctionNode([createParameter("TSTypeReference")]);
+
+    // Act
     const lookup = getParameterTypeLookup(node);
 
+    // Assert
     expect(lookup.get("value")?.type).toBe("TSTypeReference");
   });
 
   it("handles rest and parameter properties", () => {
+    // Arrange
     const rest = { argument: createParameter("TSTypeReference") };
     const property = { parameter: createParameter("TSTypeReference") };
-    const node = createFunctionNode([rest, property]);
-    const lookup = getParameterTypeLookup(node);
 
+    // Act
+    const lookup = getParameterTypeLookup(createFunctionNode([rest, property]));
+
+    // Assert
     expect(lookup.get("value")?.type).toBe("TSTypeReference");
   });
 
   it("handles assignment patterns", () => {
+    // Arrange
     const assignment = {
       left: createParameter("TSTypeReference"),
       type: "AssignmentPattern",
     };
     const node = createFunctionNode([assignment]);
+
+    // Act
     const lookup = getParameterTypeLookup(node);
 
+    // Assert
     expect(lookup.get("value")?.type).toBe("TSTypeReference");
   });
 
   it("skips parameters without type annotations", () => {
+    // Arrange
     const node = createFunctionNode([createBareParameter()]);
+
+    // Act
     const lookup = getParameterTypeLookup(node);
 
+    // Assert
     expect(lookup.size).toBe(0);
   });
 
   it("skips when params is not an array", () => {
+    // Arrange
     const node = {
       params: "nope",
       type: "FunctionDeclaration",
     } as unknown as Rule.Node;
+
+    // Act
     const lookup = getParameterTypeLookup(node);
 
+    // Assert
     expect(lookup.size).toBe(0);
   });
 
   it("skips non-object parameters", () => {
+    // Arrange
     const node = createFunctionNode([void 0]);
+
+    // Act
     const lookup = getParameterTypeLookup(node);
 
+    // Assert
     expect(lookup.size).toBe(0);
   });
 
   it("skips non-identifier parameters", () => {
+    // Arrange
     const node = createFunctionNode([{ name: "value", type: "ObjectPattern" }]);
+
+    // Act
     const lookup = getParameterTypeLookup(node);
 
+    // Assert
     expect(lookup.size).toBe(0);
   });
 
   it("skips when node is not an object", () => {
-    const lookup = getParameterTypeLookup(void 0 as unknown as Rule.Node);
+    // Arrange
+    const node = void 0 as unknown as Rule.Node;
 
+    // Act
+    const lookup = getParameterTypeLookup(node);
+
+    // Assert
     expect(lookup.size).toBe(0);
   });
 
   it("detects named type references", () => {
-    const named = isNamedTypeReference({ type: "TSTypeReference" });
-    const literal = isNamedTypeReference({ type: "TSTypeLiteral" });
+    // Arrange
+    const namedType = { type: "TSTypeReference" };
+    const literalType = { type: "TSTypeLiteral" };
 
-    expect(named).toBe(true);
-    expect(literal).toBe(false);
+    // Act
+    const result = {
+      literal: isNamedTypeReference(literalType),
+      named: isNamedTypeReference(namedType),
+    };
+
+    // Assert
+    expect(result.named).toBe(true);
+    expect(result.literal).toBe(false);
   });
 });

@@ -1,6 +1,6 @@
 import { requireAaaSectionsRule } from "../../src";
 
-import { createRuleTester } from "./rule-tester";
+import { createRuleTester } from "../support/rule-tester";
 
 const ruleTester = createRuleTester();
 
@@ -88,6 +88,16 @@ ruleTester.run("require-aaa-sections", requireAaaSectionsRule, {
         "",
         "  // Assert",
         "  expect(actualResult).toBe(1);",
+        "});",
+      ].join("\n"),
+      filename: "example.spec.ts",
+    },
+    {
+      code: [
+        'it("accepts combined AAA comments", () => {',
+        "",
+        "  // Arrange & Act & Assert",
+        "  expect(run()).toBe(1);",
         "});",
       ].join("\n"),
       filename: "example.spec.ts",

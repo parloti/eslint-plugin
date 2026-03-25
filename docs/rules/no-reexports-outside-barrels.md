@@ -16,6 +16,10 @@ Re-exports should stay inside designated barrels. Non-barrel modules should only
 ## Invalid
 
 ```ts
+export * from "./dependency";
+```
+
+```ts
 import { feature } from "./dependency";
 export { feature };
 ```
@@ -23,5 +27,18 @@ export { feature };
 ## Valid
 
 ```ts
+// index.ts
+export * from "./feature";
+```
+
+```ts
 export const feature = 1;
+```
+
+```ts
+function createFeature() {
+	return 1;
+}
+
+export { createFeature };
 ```

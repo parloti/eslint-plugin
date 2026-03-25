@@ -20,18 +20,22 @@ const createContext = (): Rule.RuleContext =>
 
 describe("require-test-companion utilities", () => {
   it("normalizes options", () => {
+    // Arrange
     const options = getOptions([{ enforceIn: ["**"] }]);
 
+    // Act & Assert
     expect(options.enforceIn).toStrictEqual(["**"]);
   });
 
   it("builds a listener", () => {
+    // Arrange
     const listener = buildListenerForFilename(
       createContext(),
       "/repo/src/feature.ts",
       getOptions([]),
     );
 
+    // Act & Assert
     expect(listener).toBeTypeOf("object");
   });
 });

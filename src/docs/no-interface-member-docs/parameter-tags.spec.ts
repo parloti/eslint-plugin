@@ -35,51 +35,71 @@ const createLine = (text: string): CommentLine => ({
 
 describe("parameter tag parsing", () => {
   it("parses member parameter tags", () => {
+    // Arrange
     const line = createLine(" * @param context.member The description.");
+
+    // Act
     const tag = parseParameterTagLine(line);
 
+    // Assert
     expect(tag?.baseName).toBe("context");
     expect(tag?.fullName).toBe("context.member");
   });
 
   it("parses optional member tags with defaults", () => {
+    // Arrange
     const line = createLine(" * @param [context.value=1] The value.");
+
+    // Act
     const tag = parseParameterTagLine(line);
 
+    // Assert
     expect(tag?.baseName).toBe("context");
     expect(tag?.fullName).toBe("context.value");
   });
 
   it("skips base parameter tags", () => {
+    // Arrange
     const line = createLine(" * @param context The description.");
 
+    // Act & Assert
     expect(parseParameterTagLine(line)).toBeUndefined();
   });
 
   it("skips empty member names", () => {
+    // Arrange
     const line = createLine(" * @param context. The description.");
 
+    // Act & Assert
     expect(parseParameterTagLine(line)).toBeUndefined();
   });
 
   it("skips non-param lines", () => {
+    // Arrange
     const line = createLine(" * @returns The description.");
 
+    // Act & Assert
     expect(parseParameterTagLine(line)).toBeUndefined();
   });
 
   it("skips param tags without names", () => {
+    // Arrange
     const line = createLine(" * @param");
 
+    // Act & Assert
     expect(parseParameterTagLine(line)).toBeUndefined();
   });
 
   it("parses tags with type annotations", () => {
+    // Arrange
     const line = createLine(
       " * @param {string} context.member The description.",
     );
+
+    // Act
     const tag = parseParameterTagLine(line);
 
+    // Assert
     expect(tag?.baseName).toBe("context");
     expect(tag?.fullName).toBe("context.member");
   });

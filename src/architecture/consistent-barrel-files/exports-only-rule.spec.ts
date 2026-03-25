@@ -30,38 +30,52 @@ describe("barrel files exports-only rule (enforced)", () => {
   });
 
   it("allows empty barrel files", () => {
-    const reports = runTemporaryIndex(createBody(), allowAllFolders);
+    // Arrange
+    const body = createBody();
 
+    // Act
+    const reports = runTemporaryIndex(body, allowAllFolders);
+
+    // Assert
     expect(reports).toStrictEqual([]);
   });
 
   it("uses default options for barrel detection", () => {
-    const reports = runDefaultIndex(createBody(createImportDeclaration()));
+    // Arrange
+    const body = createBody(createImportDeclaration());
 
+    // Act
+    const reports = runDefaultIndex(body);
+
+    // Assert
     expect(reports).toHaveLength(1);
     expect(reports[0]?.messageId).toBe("invalidBarrelContent");
   });
 
   it("accepts string names for barrel detection", () => {
+    // Arrange
     const options: BarrelFilesExportsOnlyOptions = {
       folders: ["tmp/**"],
       names: "index.ts",
     };
-    const reports = runTemporaryIndex(
-      createBody(createImportDeclaration()),
-      options,
-    );
+    const body = createBody(createImportDeclaration());
 
+    // Act
+    const reports = runTemporaryIndex(body, options);
+
+    // Assert
     expect(reports).toHaveLength(1);
     expect(reports[0]?.messageId).toBe("invalidBarrelContent");
   });
 
   it("allows re-export statements", () => {
-    const reports = runTemporaryIndex(
-      createBody(createExportAll(), createExportNamedFrom()),
-      allowAllFolders,
-    );
+    // Arrange
+    const body = createBody(createExportAll(), createExportNamedFrom());
 
+    // Act
+    const reports = runTemporaryIndex(body, allowAllFolders);
+
+    // Assert
     expect(reports).toStrictEqual([]);
   });
 
@@ -70,8 +84,10 @@ describe("barrel files exports-only rule (enforced)", () => {
     ["exported declarations", createBody(createExportWithDeclaration())],
     ["exports without sources", createBody(createExportWithoutSource())],
   ])("reports on %s", (_label, body) => {
+    // Act
     const reports = runTemporaryIndex(body, allowAllFolders);
 
+    // Assert
     expect(reports).toHaveLength(1);
     expect(reports[0]?.messageId).toBe("invalidBarrelContent");
   });
@@ -90,53 +106,66 @@ describe("barrel files exports-only rule (skips)", () => {
   });
 
   it("skips non-barrel files", () => {
-    const reports = runTemporaryFeature(
-      createBody(createImportDeclaration()),
-      allowAllFolders,
-    );
+    // Arrange
+    const body = createBody(createImportDeclaration());
 
+    // Act
+    const reports = runTemporaryFeature(body, allowAllFolders);
+
+    // Assert
     expect(reports).toStrictEqual([]);
   });
 
   it.each([["names are empty", { folders: ["tmp/**"], names: "   " }]])(
     "skips when %s",
     (_label, options) => {
-      const reports = runTemporaryIndex(
-        createBody(createImportDeclaration()),
-        options,
-      );
+      // Arrange
+      const body = createBody(createImportDeclaration());
 
+      // Act
+      const reports = runTemporaryIndex(body, options);
+
+      // Assert
       expect(reports).toStrictEqual([]);
     },
   );
 
   it("skips when folders are blank", () => {
-    const reports = runTemporaryIndex(createBody(createImportDeclaration()), {
+    // Arrange
+    const body = createBody(createImportDeclaration());
+    const options = {
       folders: "   ",
       names: ["index.ts"],
-    });
+    };
 
+    // Act
+    const reports = runTemporaryIndex(body, options);
+
+    // Assert
     expect(reports).toStrictEqual([]);
   });
 
   it("skips when filename is not absolute", () => {
-    const reports = runRule(
-      "relative/index.ts",
-      createBody(createImportDeclaration()),
-      allowAllFolders,
-    );
+    // Arrange
+    const filePath = "relative/index.ts";
+    const body = createBody(createImportDeclaration());
 
+    // Act
+    const reports = runRule(filePath, body, allowAllFolders);
+
+    // Assert
     expect(reports).toStrictEqual([]);
   });
 
   it("skips when file is outside the repo", () => {
+    // Arrange
     const filePath = path.resolve(process.cwd(), "..", "outside", "index.ts");
-    const reports = runRule(
-      filePath,
-      createBody(createImportDeclaration()),
-      allowAllFolders,
-    );
+    const body = createBody(createImportDeclaration());
 
+    // Act
+    const reports = runRule(filePath, body, allowAllFolders);
+
+    // Assert
     expect(reports).toStrictEqual([]);
   });
 });

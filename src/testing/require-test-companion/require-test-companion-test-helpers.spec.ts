@@ -13,31 +13,56 @@ describe("require-test-companion test helpers", () => {
   });
 
   it("creates temporary files", () => {
-    const filePath = createTemporaryFile("tmp", "feature.ts");
+    // Arrange
+    const directoryName = "tmp";
+    const fileName = "feature.ts";
 
+    // Act
+    const filePath = createTemporaryFile(directoryName, fileName);
+
+    // Assert
     expect(filePath).toContain("feature.ts");
   });
 
   it("creates temporary file pairs", () => {
+    // Arrange
     const [sourcePath, testPath] = createTemporaryPair(
       "tmp",
       "feature.ts",
       "feature.spec.ts",
     );
 
-    expect(sourcePath).toContain("feature.ts");
-    expect(testPath).toContain("feature.spec.ts");
+    // Act
+    const result = {
+      sourcePath,
+      testPath,
+    };
+
+    // Assert
+    expect(result.sourcePath).toContain("feature.ts");
+    expect(result.testPath).toContain("feature.spec.ts");
   });
 
   it("runs rule helpers", () => {
-    const reports = runRule("relative.ts", { enforceIn: ["**"] });
+    // Arrange
+    const filePath = "relative.ts";
+    const options = { enforceIn: ["**"] };
 
+    // Act
+    const reports = runRule(filePath, options);
+
+    // Assert
     expect(reports).toStrictEqual([]);
   });
 
   it("runs rule helpers with defaults", () => {
-    const reports = runRule("relative.ts");
+    // Arrange
+    const filePath = "relative.ts";
 
+    // Act
+    const reports = runRule(filePath);
+
+    // Assert
     expect(reports).toStrictEqual([]);
   });
 });

@@ -6,32 +6,52 @@ import { applyFixes, createFixer, getFixes, getFixText } from "./test-helpers";
 
 describe("docs test helpers", () => {
   it("extracts fix text", () => {
+    // Arrange
     const fixer = createFixer();
+
+    // Act
     const fix = fixer.replaceTextRange([0, 0], "ok");
 
+    // Assert
     expect(getFixText(fix)).toBe("ok");
   });
 
   it("handles iterable and missing fix text", () => {
+    // Arrange
     const fixer = createFixer();
-    const fix = fixer.insertTextAfterRange([0, 0], "ok");
 
-    expect(getFixText()).toBeUndefined();
-    expect(getFixText([fix])).toBe("ok");
+    // Act
+    const result = (() => {
+      const fix = fixer.insertTextAfterRange([0, 0], "ok");
+
+      return {
+        fixText: getFixText([fix]),
+        missingFixText: getFixText(),
+      };
+    })();
+
+    // Assert
+    expect(result.missingFixText).toBeUndefined();
+    expect(result.fixText).toBe("ok");
   });
 
   it("applies collected fixes", () => {
+    // Arrange
     const fixes = getFixes([
       {
         fix: (fixer): Rule.Fix => fixer.replaceTextRange([0, 0], "ok"),
       },
     ]);
+
+    // Act
     const output = applyFixes("", fixes);
 
+    // Assert
     expect(output).toBe("ok");
   });
 
   it("collects iterable and optional fixes", () => {
+    // Arrange
     const fixes = getFixes([
       { fix: void 0 },
       {
@@ -39,14 +59,20 @@ describe("docs test helpers", () => {
       },
     ]);
 
+    // Act
+    const firstFix = fixes[0];
+
+    // Assert
     expect(fixes).toHaveLength(1);
-    expect(fixes[0]?.text).toBe("ok");
+    expect(firstFix?.text).toBe("ok");
   });
 
   it("creates fixer methods", () => {
+    // Arrange
     const fixer = createFixer();
     const syntaxElement = { type: "Identifier" };
 
+    // Act
     const results = [
       fixer.insertTextAfter(syntaxElement, "a").text,
       fixer.insertTextAfterRange([0, 0], "b").text,
@@ -58,6 +84,7 @@ describe("docs test helpers", () => {
       fixer.replaceTextRange([0, 0], "f").text,
     ];
 
+    // Assert
     expect(results).toStrictEqual(["a", "b", "c", "d", "", "", "e", "f"]);
   });
 });

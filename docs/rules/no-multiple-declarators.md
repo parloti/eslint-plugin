@@ -20,7 +20,33 @@ const availableRules = new Set(Object.keys(rules ?? {})),
   customError = buildCustomErrorRules(availableRules);
 ```
 
+```ts
+export const availableRules = new Set(Object.keys(rules ?? {})),
+  customError = buildCustomErrorRules(availableRules);
+```
+
+```ts
+const availableRules = new Set(Object.keys(rules ?? {})),
+  /* keep */ customError = buildCustomErrorRules(availableRules);
+```
+
 ## Valid
+
+```ts
+const availableRules = new Set(Object.keys(rules ?? {}));
+const customError = buildCustomErrorRules(availableRules);
+```
+
+## Autofix example
+
+Before:
+
+```ts
+const availableRules = new Set(Object.keys(rules ?? {})),
+  customError = buildCustomErrorRules(availableRules);
+```
+
+After:
 
 ```ts
 const availableRules = new Set(Object.keys(rules ?? {}));

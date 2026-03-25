@@ -24,6 +24,60 @@ Language-tagged examples render better in editors and documentation tooling, and
  */
 ```
 
+```ts
+/**
+ * @example const value = 1;
+ */
+export function demo(): void {}
+```
+
+## Autofix examples
+
+Before:
+
+```ts
+/**
+ * @example const value = 1;
+ */
+export function demo(): void {}
+```
+
+After:
+
+```ts
+/**
+ * @example
+ * ```typescript
+ *  const value = 1;
+ * ```
+ */
+export function demo(): void {}
+```
+
+Before:
+
+```ts
+/**
+ * @example
+ * ```
+ * const value = 1;
+ * ```
+ */
+export function demo(): void {}
+```
+
+After:
+
+```ts
+/**
+ * @example
+ * ```typescript
+ * const value = 1;
+ * ```
+ */
+export function demo(): void {}
+```
+
 ## Valid
 
 ```ts
@@ -33,4 +87,14 @@ Language-tagged examples render better in editors and documentation tooling, and
  * value();
  * ```
  */
+```
+
+```ts
+/**
+ * @example
+ * ```typescript
+ * const value = 1;
+ * ```
+ */
+export function demo(): void {}
 ```

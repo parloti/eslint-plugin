@@ -6,12 +6,19 @@ import { requireExampleLanguageRule } from "./rule";
 
 describe("require example language rule", () => {
   it("exposes metadata", () => {
-    expect(requireExampleLanguageRule.meta?.type).toBe("problem");
+    // Arrange
+    const ruleType = requireExampleLanguageRule.meta?.type;
 
-    expectTypeOf(requireExampleLanguageRule.create).toBeFunction();
+    // Act
+    const createType = typeof requireExampleLanguageRule.create;
+
+    // Assert
+    expect(ruleType).toBe("problem");
+    expect(createType).toBe("function");
   });
 
   it("ignores non-block or non-jsdoc comments", () => {
+    // Arrange
     let reportCalls = 0;
     const report = ((): void => {
       reportCalls += 1;
@@ -24,13 +31,13 @@ describe("require example language rule", () => {
       ],
     } as SourceCode;
 
-    const context = {
+    // Act
+    requireExampleLanguageRule.create({
       report,
       sourceCode,
-    } as Rule.RuleContext;
+    } as Rule.RuleContext);
 
-    requireExampleLanguageRule.create(context);
-
+    // Assert
     expect(reportCalls).toBe(0);
   });
 });

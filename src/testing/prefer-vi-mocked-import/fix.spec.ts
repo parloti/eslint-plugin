@@ -175,10 +175,14 @@ function replaceTextRange(range: [number, number], text: string): Rule.Fix {
 
 describe("prefer-vi-mocked-import fix", () => {
   it("exports buildFix", () => {
+    // Arrange
+
+    // Act & Assert
     expect(buildFix).toBeTypeOf("function");
   });
 
   it("skips binding replacement when declaration is missing", () => {
+    // Arrange
     const match = createMatch();
     match.bindings = [
       {
@@ -190,38 +194,43 @@ describe("prefer-vi-mocked-import fix", () => {
       },
     ];
 
-    const fixes = buildFix(match, createFixer());
-    const replaceTexts = fixes
+    // Act
+    const replaceTexts = buildFix(match, createFixer())
       .filter((fix) => isStubFix(fix))
       .filter((fix) => fix.type === "replace")
       .map((fix) => fix.text);
 
+    // Assert
     expect(replaceTexts).not.toContain("missing: vi.fn()");
   });
 
   it("skips import work when no names are planned", () => {
+    // Arrange
     const match = createMatch();
     match.importPlan = { moduleSpecifier: "./mod", names: [] };
 
-    const fixes = buildFix(match, createFixer());
-    const insertFixes = fixes
+    // Act
+    const insertFixes = buildFix(match, createFixer())
       .filter((fix) => isStubFix(fix))
       .filter(
         (fix) => fix.type === "insertAfter" || fix.type === "insertBefore",
       );
 
+    // Assert
     expect(insertFixes).toStrictEqual([]);
   });
 
   it("inserts import at the top when insert plan is omitted", () => {
+    // Arrange
     const match = createMatch();
     match.importPlan = { moduleSpecifier: "./mod", names: ["a"] };
 
-    const fixes = buildFix(match, createFixer());
-    const beforeFix = fixes
+    // Act
+    const beforeFix = buildFix(match, createFixer())
       .filter((fix) => isStubFix(fix))
       .find((fix) => fix.type === "insertBefore");
 
+    // Assert
     expect(beforeFix).toBeDefined();
     expect(beforeFix).toMatchObject({
       range: [0, 0],
@@ -231,6 +240,7 @@ describe("prefer-vi-mocked-import fix", () => {
   });
 
   it("keeps default import when updating existing import", () => {
+    // Arrange
     const match = createMatch();
     match.importPlan = {
       moduleSpecifier: "./mod",
@@ -242,24 +252,27 @@ describe("prefer-vi-mocked-import fix", () => {
       },
     };
 
-    const fixes = buildFix(match, createFixer());
-    const replaceTexts = fixes
+    // Act
+    const replaceTexts = buildFix(match, createFixer())
       .filter((fix) => isStubFix(fix))
       .filter((fix) => fix.type === "replace")
       .map((fix) => fix.text);
 
+    // Assert
     expect(replaceTexts).toContain('import mod, { a } from "./mod";');
   });
 
   it("removes trailing declaration until source end without newline", () => {
+    // Arrange
     const match = createMatch();
     match.sourceText = "const a = vi.fn();";
 
-    const fixes = buildFix(match, createFixer());
-    const removal = fixes
+    // Act
+    const removal = buildFix(match, createFixer())
       .filter((fix) => isStubFix(fix))
       .find((fix) => fix.type === "remove");
 
+    // Assert
     expect(removal).toBeDefined();
     expect(removal).toMatchObject({ range: [0, 18], type: "remove" });
   });

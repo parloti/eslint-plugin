@@ -17,11 +17,6 @@ interface PropertyReplacement {
   range: TSESTree.Range;
 }
 
-interface ParenthesizedExpressionNode {
-  expression: TSESTree.Expression;
-  type: "ParenthesizedExpression";
-}
-
 type SupportedProperty = TSESTree.Property & {
   computed: false;
   kind: "init";
@@ -31,6 +26,7 @@ type SupportedProperty = TSESTree.Property & {
 
 interface BuildPropertyReplacementContext {
   checker: ts.TypeChecker;
+  keyName: string;
   moduleSpecifier: string;
   property: SupportedProperty;
   services: ReturnType<typeof ESLintUtils.getParserServices>;
@@ -140,6 +136,7 @@ function buildPropertyReplacement(
 ): PropertyReplacement | undefined {
   const {
     checker,
+    keyName,
     moduleSpecifier,
     property,
     sourceText,
@@ -152,12 +149,6 @@ function buildPropertyReplacement(
     baseValue.range[0],
     baseValue.range[1],
   );
-  const keyName = getPropertyName(property.key);
-
-  if (keyName === void 0) {
-    return void 0;
-  }
-
   const tsBaseValue = services.esTreeNodeToTSNodeMap.get(baseValue);
   const tsPropertyKey = services.esTreeNodeToTSNodeMap.get(property.key);
   const sourceType = checker.getTypeAtLocation(tsBaseValue);
@@ -170,7 +161,7 @@ function buildPropertyReplacement(
     property.key.range[0],
     property.key.range[1],
   );
-  const propertyTypeText = `${getModuleTypeText(moduleSpecifier)}[${JSON.stringify(keyName)}]`;
+  const propertyTypeText = `typeof import(${JSON.stringify(moduleSpecifier)})[${JSON.stringify(keyName)}]`;
   const valueText = needsCast
     ? `${baseValueText} as ${propertyTypeText}`
     : baseValueText;
@@ -287,6 +278,7 @@ function collectMatch(context: CollectMatchContext): MatchResult | undefined {
 
     const replacement = buildPropertyReplacement({
       checker,
+      keyName: propertyName,
       moduleSpecifier,
       property,
       services,
@@ -313,7 +305,7 @@ function collectMatch(context: CollectMatchContext): MatchResult | undefined {
   let replacementText = objectText;
 
   if (outerCastRequired) {
-    replacementText = `(${objectText}) as ${getModuleTypeText(moduleSpecifier)}`;
+    replacementText = `(${objectText}) as typeof import(${JSON.stringify(moduleSpecifier)})`;
   } else if (
     shouldWrapImplicitObject(
       factoryArgument,
@@ -376,10 +368,6 @@ function getModuleSpecifier(
     : void 0;
 }
 
-function getModuleTypeText(moduleSpecifier: string): string {
-  return `typeof import(${JSON.stringify(moduleSpecifier)})`;
-}
-
 function getPropertyName(
   propertyKey: TSESTree.PropertyName,
 ): string | undefined {
@@ -387,18 +375,10 @@ function getPropertyName(
     return propertyKey.name;
   }
 
-  if (propertyKey.type === TSESTree.AST_NODE_TYPES.Literal) {
-    if (
-      typeof propertyKey.value === "string" ||
-      typeof propertyKey.value === "number"
-    ) {
-      return String(propertyKey.value);
-    }
-
-    return void 0;
-  }
-
-  return void 0;
+  const propertyValue = (propertyKey as TSESTree.Literal).value;
+  return typeof propertyValue === "string" || typeof propertyValue === "number"
+    ? String(propertyValue)
+    : void 0;
 }
 
 function isOuterCastRequired(context: OuterCastContext): boolean {
@@ -453,12 +433,6 @@ function isSupportedProperty(
   );
 }
 
-function isParenthesizedExpression(
-  expression: TSESTree.Expression,
-): expression is TSESTree.Expression & ParenthesizedExpressionNode {
-  return (expression as { type?: string }).type === "ParenthesizedExpression";
-}
-
 function shouldWrapImplicitObject(
   factoryArgument:
     | TSESTree.ArrowFunctionExpression
@@ -496,12 +470,8 @@ function resolveFactoryTargetType(
   }
 
   const tsCallExpression = services.esTreeNodeToTSNodeMap.get(callExpression);
-  const firstArgument = tsCallExpression.arguments[0];
-  const secondArgument = tsCallExpression.arguments[1];
-
-  if (firstArgument === void 0 || secondArgument === void 0) {
-    return void 0;
-  }
+  const firstArgument = tsCallExpression.arguments[0]!;
+  const secondArgument = tsCallExpression.arguments[1]!;
 
   const firstArgumentType = checker.getTypeAtLocation(firstArgument);
   const calleeType = checker.getTypeAtLocation(tsCallExpression.expression);
@@ -558,11 +528,7 @@ function normalizeObjectLikeType(
     return void 0;
   }
 
-  const awaitedType =
-    typeof checker.getAwaitedType === "function"
-      ? checker.getAwaitedType(targetType)
-      : targetType;
-  const resolvedType = awaitedType ?? targetType;
+  const resolvedType = checker.getAwaitedType(targetType) as ts.Type;
 
   if (hasObjectShape(checker, resolvedType)) {
     return resolvedType;
@@ -594,14 +560,6 @@ function unwrapExpression(
   let currentExpression = expression;
 
   while (true) {
-    if (isParenthesizedExpression(currentExpression)) {
-      const parenthesizedExpression =
-        currentExpression as ParenthesizedExpressionNode;
-
-      currentExpression = parenthesizedExpression.expression;
-      continue;
-    }
-
     switch (currentExpression.type) {
       case TSESTree.AST_NODE_TYPES.TSAsExpression:
       case TSESTree.AST_NODE_TYPES.TSSatisfiesExpression:

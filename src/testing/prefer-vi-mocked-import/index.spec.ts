@@ -4,6 +4,9 @@ import { preferViMockedImportRule } from "./index";
 
 describe("prefer-vi-mocked-import index", () => {
   it("exports the rule", () => {
+    // Arrange
+
+    // Act & Assert
     expect(preferViMockedImportRule).toBeDefined();
   });
 });

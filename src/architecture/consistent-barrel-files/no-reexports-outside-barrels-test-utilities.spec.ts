@@ -9,30 +9,44 @@ import { createBody } from "./test-helpers";
 
 describe("no-reexports test utilities", () => {
   it("runs the rule with an empty program", () => {
-    const reports = runRule(`${process.cwd()}/src/feature.ts`, createBody(), {
+    // Arrange
+    const filePath = `${process.cwd()}/src/feature.ts`;
+    const body = createBody();
+    const options = {
       folders: ["**"],
-    });
+    };
 
+    // Act
+    const reports = runRule(filePath, body, options);
+
+    // Assert
     expect(reports).toStrictEqual([]);
   });
 
   it("creates temporary runners", () => {
+    // Arrange
     const temporaryDirectories: string[] = [];
     const runner = createTemporaryRunner(temporaryDirectories);
     const body = createBody();
 
-    const reports = [
-      runner.runDefaultFeature(body),
-      runner.runTemporaryFeature(body),
-      runner.runTemporaryFeature(body, { folders: ["tmp/**"] }),
-      runner.runTemporaryIndex(body),
-      runner.runTemporaryIndex(body, { folders: ["tmp/**"] }),
-    ];
+    // Act
+    const reports = (() => {
+      try {
+        return [
+          runner.runDefaultFeature(body),
+          runner.runTemporaryFeature(body),
+          runner.runTemporaryFeature(body, { folders: ["tmp/**"] }),
+          runner.runTemporaryIndex(body),
+          runner.runTemporaryIndex(body, { folders: ["tmp/**"] }),
+        ];
+      } finally {
+        for (const directory of temporaryDirectories.splice(0)) {
+          fs.rmSync(directory, { force: true, recursive: true });
+        }
+      }
+    })();
 
-    for (const directory of temporaryDirectories.splice(0)) {
-      fs.rmSync(directory, { force: true, recursive: true });
-    }
-
+    // Assert
     expect(reports.flat()).toStrictEqual([]);
   });
 });

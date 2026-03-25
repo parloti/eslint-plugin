@@ -19,31 +19,57 @@ import * as testing from "../testing";
 
 describe("rules barrel", () => {
   it("re-exports architecture rules", () => {
-    expect(barrelFilesExportsOnlyRule).toBe(
+    // Arrange
+    const actualRules = [
+      barrelFilesExportsOnlyRule,
+      consistentBarrelFilesRule,
+      noReexportsOutsideBarrelsRule,
+    ];
+
+    // Act
+    const expectedRules = [
       architecture.barrelFilesExportsOnlyRule,
-    );
-    expect(consistentBarrelFilesRule).toBe(
       architecture.consistentBarrelFilesRule,
-    );
-    expect(noReexportsOutsideBarrelsRule).toBe(
       architecture.noReexportsOutsideBarrelsRule,
-    );
+    ];
+
+    // Assert
+    expect(actualRules).toStrictEqual(expectedRules);
   });
 
   it("re-exports core and documentation rules", () => {
-    expect(noMultipleDeclaratorsRule).toBe(core.noMultipleDeclaratorsRule);
-    expect(preferInterfaceTypesRule).toBe(core.preferInterfaceTypesRule);
-    expect(noInterfaceMemberDocumentationRule).toBe(
+    // Arrange
+    const actualRules = [
+      noMultipleDeclaratorsRule,
+      preferInterfaceTypesRule,
+      noInterfaceMemberDocumentationRule,
+      requireExampleLanguageRule,
+      singleLineJsdocRule,
+    ];
+
+    // Act
+    const expectedRules = [
+      core.noMultipleDeclaratorsRule,
+      core.preferInterfaceTypesRule,
       documentation.noInterfaceMemberDocumentationRule,
-    );
-    expect(requireExampleLanguageRule).toBe(
       documentation.requireExampleLanguageRule,
-    );
-    expect(singleLineJsdocRule).toBe(documentation.singleLineJsdocRule);
+      documentation.singleLineJsdocRule,
+    ];
+
+    // Assert
+    expect(actualRules).toStrictEqual(expectedRules);
   });
 
   it("re-exports testing rules", () => {
-    expect(preferViMockedImportRule).toBe(testing.preferViMockedImportRule);
-    expect(requireTestCompanionRule).toBe(testing.requireTestCompanionRule);
+    // Arrange
+
+    // Act
+    const actualRules = [preferViMockedImportRule, requireTestCompanionRule];
+
+    // Assert
+    expect(actualRules).toStrictEqual([
+      testing.preferViMockedImportRule,
+      testing.requireTestCompanionRule,
+    ]);
   });
 });

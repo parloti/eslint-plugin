@@ -140,11 +140,17 @@ describe("single-line-jsdoc rule", () => {
   const multiLineCommentValue = "*\n * line one\n * line two\n ";
 
   it("reports multi-line JSDoc that fits on one line", () => {
+    // Arrange
     const comment = createComment(documentCommentValue, sourceText, { endLine: 3 });
     const { context, reports } = createContext([comment]);
-    singleLineJsdocRule.create(context);
-    const fixText = getFixText(reports[0]?.fix?.(createFixer()) ?? void 0);
 
+    // Act
+    const fixText = (() => {
+      singleLineJsdocRule.create(context);
+      return getFixText(reports[0]?.fix?.(createFixer()) ?? void 0);
+    })();
+
+    // Assert
     expect(reports).toHaveLength(1);
     expect(reports[0]?.messageId).toBe("singleLine");
     expect(String(fixText)).toBe("/** doc */");
@@ -165,12 +171,16 @@ describe("single-line-jsdoc rule", () => {
   });
 
   it("respects max line length", () => {
+    // Arrange
     const comment = createComment("*\n * short text\n ", sourceText, { endLine: 3 });
     const { context, reports } = createContext([comment], {
       maxLineLength: 10,
     });
+
+    // Act
     singleLineJsdocRule.create(context);
 
+    // Assert
     expect(reports).toHaveLength(0);
   });
 });
@@ -179,25 +189,34 @@ describe("single-line-jsdoc rule edge cases", () => {
   const sourceText = "function demo() {}";
 
   it("falls back to default when max line length is non-positive", () => {
+    // Arrange
     const comment = createComment(documentCommentValue, sourceText, { endLine: 3 });
     const { context, reports } = createContext([comment], {
       maxLineLength: 0,
     });
+
+    // Act
     singleLineJsdocRule.create(context);
 
+    // Assert
     expect(reports).toHaveLength(1);
     expect(reports[0]?.messageId).toBe("singleLine");
   });
 
   it("skips empty JSDoc content", () => {
+    // Arrange
     const comment = createComment("*\n *\n ", sourceText, { endLine: 3 });
     const { context, reports } = createContext([comment]);
+
+    // Act
     singleLineJsdocRule.create(context);
 
+    // Assert
     expect(reports).toHaveLength(0);
   });
 
   it("skips non-jsdoc comments", () => {
+    // Arrange
     const comment: Comment = {
       loc: {
         end: { column: 0, line: 1 },
@@ -208,12 +227,16 @@ describe("single-line-jsdoc rule edge cases", () => {
       value: " doc",
     } as Comment;
     const { context, reports } = createContext([comment]);
+
+    // Act
     singleLineJsdocRule.create(context);
 
+    // Assert
     expect(reports).toHaveLength(0);
   });
 
   it("skips comments without loc", () => {
+    // Arrange
     const comment: Comment = {
       loc: void 0,
       range: [0, 0],
@@ -221,23 +244,31 @@ describe("single-line-jsdoc rule edge cases", () => {
       value: "*\n * doc\n ",
     } as Comment;
     const { context, reports } = createContext([comment]);
+
+    // Act
     singleLineJsdocRule.create(context);
 
+    // Assert
     expect(reports).toHaveLength(0);
   });
 
   it("skips comments without range", () => {
+    // Arrange
     const comment = {
       ...createComment(documentCommentValue, sourceText, { endLine: 3 }),
       range: void 0,
     } as Comment;
     const { context, reports } = createContext([comment]);
+
+    // Act
     singleLineJsdocRule.create(context);
 
+    // Assert
     expect(reports).toHaveLength(0);
   });
 
   it("skips JSDoc for function-like nodes", () => {
+    // Arrange
     const nodes = [
       { type: "FunctionDeclaration" },
       { type: "ArrowFunctionExpression" },
@@ -252,10 +283,16 @@ describe("single-line-jsdoc rule edge cases", () => {
       { declaration: { type: "FunctionDeclaration" }, type: "ExportNamedDeclaration" },
       { declaration: { type: "FunctionDeclaration" }, type: "ExportDefaultDeclaration" },
     ];
-    const comments = nodes.map((nodeValue, index) => {
-      void nodeValue;
-      return createComment(documentCommentValue, sourceText, { endLine: index + 2, startLine: index + 1 });
-    });
+      const comments: Comment[] = [];
+      for (const [index, nodeValue] of nodes.entries()) {
+        void nodeValue;
+        comments.push(
+          createComment(documentCommentValue, sourceText, {
+            endLine: index + 2,
+            startLine: index + 1,
+          }),
+        );
+      }
     const getTokenAfter = (comment: Comment): TokenAfter | undefined => {
       const index = comments.indexOf(comment);
       return index === -1 ? void 0 : { range: [index, index + 1] };
@@ -265,14 +302,20 @@ describe("single-line-jsdoc rule edge cases", () => {
       getNodeByRangeIndex,
       getTokenAfter,
     });
+
+    // Act
     singleLineJsdocRule.create(context);
 
+    // Assert
     expect(reports).toHaveLength(0);
   });
 
   it("reports when lookups fail", () => {
+    // Arrange
     const comment = createComment(documentCommentValue, sourceText, { endLine: 2 });
     const tokenAfterRange: TokenAfter = { range: [0, 1] };
+
+    // Act
     const reportsList = [
       runRuleWithOverrides(comment),
       runRuleWithOverrides(comment, { getNodeByRangeIndex: () => ({ type: "Literal" }) }),
@@ -293,6 +336,8 @@ describe("single-line-jsdoc rule edge cases", () => {
         getTokenAfter: (): TokenAfter => tokenAfterRange,
       }),
     ];
+
+    // Assert
     for (const reports of reportsList) {
       expect(reports).toHaveLength(1);
     }

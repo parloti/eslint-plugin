@@ -116,13 +116,20 @@ const runRule = (context: Rule.RuleContext, node: MockNode): void => {
 
 describe("no-multiple-declarators rule", () => {
   it("exposes metadata", () => {
-    expect(noMultipleDeclaratorsRule.meta?.type).toBe("suggestion");
-    expect(noMultipleDeclaratorsRule.meta?.fixable).toBe("code");
+    // Arrange
+    const meta = noMultipleDeclaratorsRule.meta;
 
-    expectTypeOf(noMultipleDeclaratorsRule.create).toBeFunction();
+    // Act
+    const create = noMultipleDeclaratorsRule.create;
+
+    // Assert
+    expect(meta?.type).toBe("suggestion");
+    expect(meta?.fixable).toBe("code");
+    expect(typeof create).toBe("function");
   });
 
   it("reports declarations with multiple declarators", () => {
+    // Arrange
     const sourceText =
       "const availableRules = rules, customError = buildError();";
     const declaration = createVariableDeclaration(
@@ -133,8 +140,10 @@ describe("no-multiple-declarators rule", () => {
     );
     const { context, reports } = createContext(sourceText);
 
+    // Act
     runRule(context, declaration);
 
+    // Assert
     expect(reports).toHaveLength(1);
     expect(reports[0]?.messageId).toBe("singleDeclarator");
     expect(reports[0]?.nodeType).toBe("VariableDeclaration");
@@ -142,6 +151,7 @@ describe("no-multiple-declarators rule", () => {
   });
 
   it("skips declarations that already have one declarator", () => {
+    // Arrange
     const sourceText = "const availableRules = rules;";
     const declaration = createVariableDeclaration(
       sourceText,
@@ -151,12 +161,15 @@ describe("no-multiple-declarators rule", () => {
     );
     const { context, reports } = createContext(sourceText);
 
+    // Act
     runRule(context, declaration);
 
+    // Assert
     expect(reports).toStrictEqual([]);
   });
 
   it("skips malformed declaration nodes without a declarations array", () => {
+    // Arrange
     const sourceText = "const availableRules = rules;";
     const declaration: MockNode = {
       kind: "const",
@@ -165,12 +178,15 @@ describe("no-multiple-declarators rule", () => {
     };
     const { context, reports } = createContext(sourceText);
 
+    // Act
     runRule(context, declaration);
 
+    // Assert
     expect(reports).toStrictEqual([]);
   });
 
   it("splits standalone declarations with a conservative autofix", () => {
+    // Arrange
     const sourceText = [
       "if (ready) {",
       "  const availableRules = new Set(Object.keys(rules ?? {})), customError = buildCustomErrorRules(availableRules);",
@@ -189,8 +205,10 @@ describe("no-multiple-declarators rule", () => {
     );
     const { context, reports } = createContext(sourceText);
 
+    // Act
     runRule(context, declaration);
 
+    // Assert
     expect(applyFixes(sourceText, getFixes(reports))).toBe(
       [
         "if (ready) {",
@@ -202,6 +220,7 @@ describe("no-multiple-declarators rule", () => {
   });
 
   it("fixes destructuring declarators when they are otherwise safe", () => {
+    // Arrange
     const sourceText =
       "const { availableRules } = source, customError = buildError(availableRules);";
     const declaration = createVariableDeclaration(
@@ -215,8 +234,10 @@ describe("no-multiple-declarators rule", () => {
     );
     const { context, reports } = createContext(sourceText);
 
+    // Act
     runRule(context, declaration);
 
+    // Assert
     expect(applyFixes(sourceText, getFixes(reports))).toBe(
       [
         "const { availableRules } = source;",
@@ -226,6 +247,7 @@ describe("no-multiple-declarators rule", () => {
   });
 
   it("fixes let declarations without initializers", () => {
+    // Arrange
     const sourceText = "let availableRules, customError = buildError();";
     const declaration = createVariableDeclaration(
       sourceText,
@@ -235,14 +257,17 @@ describe("no-multiple-declarators rule", () => {
     );
     const { context, reports } = createContext(sourceText);
 
+    // Act
     runRule(context, declaration);
 
+    // Assert
     expect(applyFixes(sourceText, getFixes(reports))).toBe(
       ["let availableRules;", "let customError = buildError();"].join("\n"),
     );
   });
 
   it("falls back to sourceCode.getText() when the text property is unavailable", () => {
+    // Arrange
     const sourceText =
       "const availableRules = rules, customError = buildError();";
     const declaration = createVariableDeclaration(
@@ -253,8 +278,10 @@ describe("no-multiple-declarators rule", () => {
     );
     const { context, reports } = createContext(sourceText, { omitText: true });
 
+    // Act
     runRule(context, declaration);
 
+    // Assert
     expect(applyFixes(sourceText, getFixes(reports))).toBe(
       [
         "const availableRules = rules;",
@@ -264,6 +291,7 @@ describe("no-multiple-declarators rule", () => {
   });
 
   it("reports loop initializers without exposing a fix", () => {
+    // Arrange
     const sourceText =
       "for (let index = 0, total = 1; index < total; index += 1) {}";
     const declaration = createVariableDeclaration(
@@ -280,14 +308,17 @@ describe("no-multiple-declarators rule", () => {
     declaration.parent = parent;
     const { context, reports } = createContext(sourceText);
 
+    // Act
     runRule(context, declaration);
 
+    // Assert
     expect(reports).toHaveLength(1);
     expect(reports[0]?.messageId).toBe("singleDeclarator");
     expect(reports[0]?.fix).toBeUndefined();
   });
 
   it("reports for-of loop declarations without exposing a fix", () => {
+    // Arrange
     const sourceText = "for (const key of entries) {}";
     const declaration = createVariableDeclaration(
       sourceText,
@@ -303,14 +334,17 @@ describe("no-multiple-declarators rule", () => {
     declaration.parent = parent;
     const { context, reports } = createContext(sourceText);
 
+    // Act
     runRule(context, declaration);
 
+    // Assert
     expect(reports).toHaveLength(1);
     expect(reports[0]?.messageId).toBe("singleDeclarator");
     expect(reports[0]?.fix).toBeUndefined();
   });
 
   it("reports separator comments without exposing a fix", () => {
+    // Arrange
     const sourceText =
       "const availableRules = rules, /* keep */ customError = buildError();";
     const declaration = createVariableDeclaration(
@@ -321,14 +355,17 @@ describe("no-multiple-declarators rule", () => {
     );
     const { context, reports } = createContext(sourceText);
 
+    // Act
     runRule(context, declaration);
 
+    // Assert
     expect(reports).toHaveLength(1);
     expect(reports[0]?.messageId).toBe("singleDeclarator");
     expect(reports[0]?.fix).toBeUndefined();
   });
 
   it("reports declarations with missing declarator ranges without exposing a fix", () => {
+    // Arrange
     const sourceText =
       "const availableRules = rules, customError = buildError();";
     const declaration = createVariableDeclaration(
@@ -344,14 +381,17 @@ describe("no-multiple-declarators rule", () => {
 
     const { context, reports } = createContext(sourceText);
 
+    // Act
     runRule(context, declaration);
 
+    // Assert
     expect(reports).toHaveLength(1);
     expect(reports[0]?.messageId).toBe("singleDeclarator");
     expect(reports[0]?.fix).toBeUndefined();
   });
 
   it("reports declarations without fix metadata when the declaration kind is unavailable", () => {
+    // Arrange
     const sourceText =
       "const availableRules = rules, customError = buildError();";
     const declaration = createVariableDeclaration(
@@ -364,14 +404,17 @@ describe("no-multiple-declarators rule", () => {
     delete declaration.kind;
     const { context, reports } = createContext(sourceText);
 
+    // Act
     runRule(context, declaration);
 
+    // Assert
     expect(reports).toHaveLength(1);
     expect(reports[0]?.messageId).toBe("singleDeclarator");
     expect(reports[0]?.fix).toBeUndefined();
   });
 
   it("reports exported declarations without exposing a fix", () => {
+    // Arrange
     const sourceText =
       "export const availableRules = rules, customError = buildError();";
     const declaration = createVariableDeclaration(
@@ -387,14 +430,17 @@ describe("no-multiple-declarators rule", () => {
     declaration.parent = parent;
     const { context, reports } = createContext(sourceText);
 
+    // Act
     runRule(context, declaration);
 
+    // Assert
     expect(reports).toHaveLength(1);
     expect(reports[0]?.messageId).toBe("singleDeclarator");
     expect(reports[0]?.fix).toBeUndefined();
   });
 
   it("reports export-default wrapped declarations without exposing a fix", () => {
+    // Arrange
     const sourceText =
       "const availableRules = rules, customError = buildError();";
     const declaration = createVariableDeclaration(
@@ -410,8 +456,10 @@ describe("no-multiple-declarators rule", () => {
     declaration.parent = parent;
     const { context, reports } = createContext(sourceText);
 
+    // Act
     runRule(context, declaration);
 
+    // Assert
     expect(reports).toHaveLength(1);
     expect(reports[0]?.messageId).toBe("singleDeclarator");
     expect(reports[0]?.fix).toBeUndefined();

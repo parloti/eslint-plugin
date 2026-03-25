@@ -125,6 +125,7 @@ afterEach(async () => {
 
 describe("prefer-vitest-incremental-casts rule", () => {
   it("casts only the mismatching properties inside a simple vi.doMock factory", async () => {
+    // Arrange
     const input = [
       "const disableTypeChecked = { rules: [] as string[] };",
       'const parser = { parseForESLint: (_code: string) => ({ ast: "ok" }) };',
@@ -138,8 +139,10 @@ describe("prefer-vitest-incremental-casts rule", () => {
       "",
     ].join("\n");
 
+    // Act
     const { output } = await runFix(input);
 
+    // Assert
     expect(output).toBe(
       [
         "const disableTypeChecked = { rules: [] as string[] };",
@@ -157,6 +160,7 @@ describe("prefer-vitest-incremental-casts rule", () => {
   });
 
   it("removes dirty broad casts and rebuilds the minimal nested cast form", async () => {
+    // Arrange
     const input = [
       "const disableTypeChecked = { rules: [] as string[] };",
       'const parser = { parseForESLint: (_code: string) => ({ ast: "ok" }) };',
@@ -170,8 +174,10 @@ describe("prefer-vitest-incremental-casts rule", () => {
       "",
     ].join("\n");
 
+    // Act
     const { output } = await runFix(input);
 
+    // Assert
     expect(output).toBe(
       [
         "const disableTypeChecked = { rules: [] as string[] };",
@@ -189,6 +195,7 @@ describe("prefer-vitest-incremental-casts rule", () => {
   });
 
   it("supports block-bodied vi.mock factories", async () => {
+    // Arrange
     const input = [
       "const disableTypeChecked = { rules: [] as string[] };",
       'const parser = { parseForESLint: (_code: string) => ({ ast: "ok" }) };',
@@ -204,8 +211,10 @@ describe("prefer-vitest-incremental-casts rule", () => {
       "",
     ].join("\n");
 
+    // Act
     const { output } = await runFix(input);
 
+    // Assert
     expect(output).toBe(
       [
         "const disableTypeChecked = { rules: [] as string[] };",
@@ -225,6 +234,7 @@ describe("prefer-vitest-incremental-casts rule", () => {
   });
 
   it("supports async factories without touching assignable passthroughs", async () => {
+    // Arrange
     const input = [
       "const disableTypeChecked = { rules: [] as string[] };",
       'const parser = { parseForESLint: (_code: string) => ({ ast: "ok" }) };',
@@ -241,8 +251,10 @@ describe("prefer-vitest-incremental-casts rule", () => {
       "",
     ].join("\n");
 
+    // Act
     const { output } = await runFix(input);
 
+    // Assert
     expect(output).toBe(
       [
         "const disableTypeChecked = { rules: [] as string[] };",
@@ -263,6 +275,7 @@ describe("prefer-vitest-incremental-casts rule", () => {
   });
 
   it("collapses parenthesized passthrough properties back to the minimal shorthand form", async () => {
+    // Arrange
     const input = [
       "const disableTypeChecked = { rules: [] as string[] };",
       'const parser = { parseForESLint: (_code: string) => ({ ast: "ok" }) };',
@@ -276,8 +289,10 @@ describe("prefer-vitest-incremental-casts rule", () => {
       "",
     ].join("\n");
 
+    // Act
     const { output } = await runFix(input);
 
+    // Assert
     expect(output).toBe(
       [
         "const disableTypeChecked = { rules: [] as string[] };",
@@ -295,6 +310,7 @@ describe("prefer-vitest-incremental-casts rule", () => {
   });
 
   it("uses the call-signature fallback when contextual typing is unavailable", async () => {
+    // Arrange
     const input = [
       'const vi: { doMock(specifier: Promise<typeof import("fixture-module")>, factory: () => typeof import("fixture-module")): void } = undefined as never;',
       "const disableTypeChecked = { rules: [] as string[] };",
@@ -309,8 +325,10 @@ describe("prefer-vitest-incremental-casts rule", () => {
       "",
     ].join("\n");
 
+    // Act
     const { output } = await runFix(input);
 
+    // Assert
     expect(output).toBe(
       [
         'const vi: { doMock(specifier: Promise<typeof import("fixture-module")>, factory: () => typeof import("fixture-module")): void } = undefined as never;',
@@ -329,6 +347,7 @@ describe("prefer-vitest-incremental-casts rule", () => {
   });
 
   it("handles union contextual return types that contain a single object-like branch", async () => {
+    // Arrange
     const input = [
       'const vi: { doMock(specifier: Promise<typeof import("fixture-module")>, factory: () => Partial<typeof import("fixture-module")> | undefined): void } = undefined as never;',
       "const disableTypeChecked = { rules: [] as string[] };",
@@ -343,8 +362,10 @@ describe("prefer-vitest-incremental-casts rule", () => {
       "",
     ].join("\n");
 
+    // Act
     const { output } = await runFix(input);
 
+    // Assert
     expect(output).toBe(
       [
         'const vi: { doMock(specifier: Promise<typeof import("fixture-module")>, factory: () => Partial<typeof import("fixture-module")> | undefined): void } = undefined as never;',
@@ -363,6 +384,7 @@ describe("prefer-vitest-incremental-casts rule", () => {
   });
 
   it("does not report when the resolved factory target type is not object-like", async () => {
+    // Arrange
     const input = [
       'const vi: { doMock(specifier: Promise<typeof import("fixture-module")>, factory: () => string | number): void } = undefined as never;',
       "const disableTypeChecked = { rules: [] as string[] };",
@@ -377,13 +399,16 @@ describe("prefer-vitest-incremental-casts rule", () => {
       "",
     ].join("\n");
 
-    const { messages, output } = await runFix(input);
+    // Act
+    const actual = await runFix(input);
 
-    expect(messages).toStrictEqual([]);
-    expect(output).toBe(input);
+    // Assert
+    expect(actual.messages).toStrictEqual([]);
+    expect(actual.output).toBe(input);
   });
 
   it("ignores non-vitest calls", async () => {
+    // Arrange
     const input = [
       "const disableTypeChecked = { rules: [] as string[] };",
       'const parser = { parseForESLint: (_code: string) => ({ ast: "ok" }) };',
@@ -397,13 +422,50 @@ describe("prefer-vitest-incremental-casts rule", () => {
       "",
     ].join("\n");
 
-    const { messages, output } = await runFix(input);
+    // Act
+    const actual = await runFix(input);
 
-    expect(messages).toStrictEqual([]);
-    expect(output).toBe(input);
+    // Assert
+    expect(actual.messages).toStrictEqual([]);
+    expect(actual.output).toBe(input);
+  });
+
+  it("does not report direct non-string module specifiers", async () => {
+    // Arrange
+    const customDeclarationText = [
+      'declare module "fixture-module" {',
+      "  export const configs: { disableTypeChecked: { rules: string[]; strict: boolean } };",
+      "  export const parser: { parseForESLint(code: string): { ast: string } };",
+      "  export const plugin: { meta: { name: string } };",
+      "}",
+      "",
+      "declare const vi: {",
+      '  doMock(specifier: never, factory: () => Partial<typeof import("fixture-module")>): void;',
+      "};",
+      "",
+    ].join("\n");
+    const input = [
+      "const disableTypeChecked = { rules: [] as string[] };",
+      'const parser = { parseForESLint: (_code: string) => ({ ast: "ok" }) };',
+      'const plugin = { meta: { name: "fixture" } };',
+      "vi.doMock(123 as never, () => ({",
+      "  configs: { disableTypeChecked },",
+      "  parser,",
+      "  plugin,",
+      "}));",
+      "",
+    ].join("\n");
+
+    // Act
+    const actual = await runFix(input, customDeclarationText);
+
+    // Assert
+    expect(actual.messages).toStrictEqual([]);
+    expect(actual.output).toBe(input);
   });
 
   it("does not report spread-heavy factories in the first pass", async () => {
+    // Arrange
     const input = [
       "const disableTypeChecked = { rules: [] as string[] };",
       'const parser = { parseForESLint: (_code: string) => ({ ast: "ok" }) };',
@@ -418,13 +480,16 @@ describe("prefer-vitest-incremental-casts rule", () => {
       "",
     ].join("\n");
 
-    const { messages, output } = await runFix(input);
+    // Act
+    const actual = await runFix(input);
 
-    expect(messages).toStrictEqual([]);
-    expect(output).toBe(input);
+    // Assert
+    expect(actual.messages).toStrictEqual([]);
+    expect(actual.output).toBe(input);
   });
 
   it("supports function-expression factories with string module specifiers and quoted keys", async () => {
+    // Arrange
     const customDeclarationText = [
       'declare module "fixture-module" {',
       "  export const configs: { disableTypeChecked: { rules: string[]; strict: boolean } };",
@@ -453,8 +518,10 @@ describe("prefer-vitest-incremental-casts rule", () => {
       "",
     ].join("\n");
 
+    // Act
     const { output } = await runFix(input, customDeclarationText);
 
+    // Assert
     expect(output).toBe(
       [
         "const disableTypeChecked = { rules: [] as string[] };",
@@ -474,6 +541,7 @@ describe("prefer-vitest-incremental-casts rule", () => {
   });
 
   it("rewrites parenthesized implicit object returns without adding an outer cast when partial targets allow it", async () => {
+    // Arrange
     const input = [
       "const disableTypeChecked = { rules: [] as string[] };",
       'const parser = { parseForESLint: (_code: string) => ({ ast: "ok" }) };',
@@ -487,8 +555,10 @@ describe("prefer-vitest-incremental-casts rule", () => {
       "",
     ].join("\n");
 
+    // Act
     const { output } = await runFix(input);
 
+    // Assert
     expect(output).toBe(
       [
         "const disableTypeChecked = { rules: [] as string[] };",
@@ -505,19 +575,70 @@ describe("prefer-vitest-incremental-casts rule", () => {
     );
   });
 
+  it("unwraps deeply parenthesized passthrough property values", async () => {
+    // Arrange
+    const input = [
+      "const disableTypeChecked = { rules: [] as string[] };",
+      'const parser = { parseForESLint: (_code: string) => ({ ast: "ok" }) };',
+      'const plugin = { meta: { name: "fixture" } };',
+      "",
+      'vi.doMock(import("fixture-module"), () => ({',
+      "  configs: { disableTypeChecked },",
+      "  parser: (((parser))),",
+      "  plugin,",
+      "}));",
+      "",
+    ].join("\n");
+
+    // Act
+    const { output } = await runFix(input);
+
+    // Assert
+    expect(output).toBe(
+      [
+        "const disableTypeChecked = { rules: [] as string[] };",
+        'const parser = { parseForESLint: (_code: string) => ({ ast: "ok" }) };',
+        'const plugin = { meta: { name: "fixture" } };',
+        "",
+        'vi.doMock(import("fixture-module"), () => ({',
+        '  configs: { disableTypeChecked } as typeof import("fixture-module")["configs"],',
+        "  parser,",
+        "  plugin,",
+        "}));",
+        "",
+      ].join("\n"),
+    );
+  });
+
   it("does not report non-function factory arguments", async () => {
+    // Arrange
     const input = [
       'vi.doMock(import("fixture-module"), undefined as never);',
       "",
     ].join("\n");
 
-    const { messages, output } = await runFix(input);
+    // Act
+    const actual = await runFix(input);
 
-    expect(messages).toStrictEqual([]);
-    expect(output).toBe(input);
+    // Assert
+    expect(actual.messages).toStrictEqual([]);
+    expect(actual.output).toBe(input);
+  });
+
+  it("does not report calls without a factory argument", async () => {
+    // Arrange
+    const input = ['vi.doMock(import("fixture-module"));', ""].join("\n");
+
+    // Act
+    const actual = await runFix(input);
+
+    // Assert
+    expect(actual.messages).toStrictEqual([]);
+    expect(actual.output).toBe(input);
   });
 
   it("does not report factories without return statements", async () => {
+    // Arrange
     const input = [
       'vi.doMock(import("fixture-module"), () => {',
       '  const parser = "unused";',
@@ -526,26 +647,32 @@ describe("prefer-vitest-incremental-casts rule", () => {
       "",
     ].join("\n");
 
-    const { messages, output } = await runFix(input);
+    // Act
+    const actual = await runFix(input);
 
-    expect(messages).toStrictEqual([]);
-    expect(output).toBe(input);
+    // Assert
+    expect(actual.messages).toStrictEqual([]);
+    expect(actual.output).toBe(input);
   });
 
   it("does not report factories that return non-object expressions", async () => {
+    // Arrange
     const input = [
       'const parser = { parseForESLint: (_code: string) => ({ ast: "ok" }) };',
       'vi.doMock(import("fixture-module"), () => parser);',
       "",
     ].join("\n");
 
-    const { messages, output } = await runFix(input);
+    // Act
+    const actual = await runFix(input);
 
-    expect(messages).toStrictEqual([]);
-    expect(output).toBe(input);
+    // Assert
+    expect(actual.messages).toStrictEqual([]);
+    expect(actual.output).toBe(input);
   });
 
   it("does not report dynamic import specifiers that are not string literals", async () => {
+    // Arrange
     const input = [
       'const moduleSpecifier = "fixture-module";',
       "const disableTypeChecked = { rules: [] as string[] };",
@@ -560,13 +687,16 @@ describe("prefer-vitest-incremental-casts rule", () => {
       "",
     ].join("\n");
 
-    const { messages, output } = await runFix(input);
+    // Act
+    const actual = await runFix(input);
 
-    expect(messages).toStrictEqual([]);
-    expect(output).toBe(input);
+    // Assert
+    expect(actual.messages).toStrictEqual([]);
+    expect(actual.output).toBe(input);
   });
 
   it("does not report spread call arguments", async () => {
+    // Arrange
     const input = [
       "const disableTypeChecked = { rules: [] as string[] };",
       'const parser = { parseForESLint: (_code: string) => ({ ast: "ok" }) };',
@@ -576,13 +706,16 @@ describe("prefer-vitest-incremental-casts rule", () => {
       "",
     ].join("\n");
 
-    const { messages, output } = await runFix(input);
+    // Act
+    const actual = await runFix(input);
 
-    expect(messages).toStrictEqual([]);
-    expect(output).toBe(input);
+    // Assert
+    expect(actual.messages).toStrictEqual([]);
+    expect(actual.output).toBe(input);
   });
 
   it("does not throw when parser services are unavailable", async () => {
+    // Arrange
     const eslint = new ESLint({
       fix: true,
       ignore: false,
@@ -604,15 +737,19 @@ describe("prefer-vitest-incremental-casts rule", () => {
       ],
       overrideConfigFile: true,
     });
+
+    // Act
     const [result] = await eslint.lintText(
       'vi.doMock("fixture-module", () => ({ parser: { parseForESLint() {} } }));',
       { filePath: "example.js" },
     );
 
+    // Assert
     expect(result?.messages).toStrictEqual([]);
   });
 
   it("does not report numeric property names that do not exist on the target module", async () => {
+    // Arrange
     const customDeclarationText = [
       'declare module "fixture-module" {',
       "  export const configs: { disableTypeChecked: { rules: string[]; strict: boolean } };",
@@ -636,13 +773,36 @@ describe("prefer-vitest-incremental-casts rule", () => {
       "",
     ].join("\n");
 
-    const { messages, output } = await runFix(input, customDeclarationText);
+    // Act
+    const actual = await runFix(input, customDeclarationText);
 
-    expect(messages).toStrictEqual([]);
-    expect(output).toBe(input);
+    // Assert
+    expect(actual.messages).toStrictEqual([]);
+    expect(actual.output).toBe(input);
+  });
+
+  it("does not report literal property keys that cannot map to module members", async () => {
+    // Arrange
+    const input = [
+      'const parser = { parseForESLint: (_code: string) => ({ ast: "ok" }) };',
+      'const plugin = { meta: { name: "fixture" } };',
+      'vi.doMock(import("fixture-module"), () => ({',
+      "  1n: parser,",
+      "  plugin,",
+      "}));",
+      "",
+    ].join("\n");
+
+    // Act
+    const actual = await runFix(input);
+
+    // Assert
+    expect(actual.messages).toStrictEqual([]);
+    expect(actual.output).toBe(input);
   });
 
   it("does not report when fallback signature analysis cannot resolve an object target", async () => {
+    // Arrange
     const customDeclarationText = [
       'declare module "fixture-module" {',
       "  export const configs: { disableTypeChecked: { rules: string[]; strict: boolean } };",
@@ -670,13 +830,16 @@ describe("prefer-vitest-incremental-casts rule", () => {
       "",
     ].join("\n");
 
-    const { messages, output } = await runFix(input, customDeclarationText);
+    // Act
+    const actual = await runFix(input, customDeclarationText);
 
-    expect(messages).toStrictEqual([]);
-    expect(output).toBe(input);
+    // Assert
+    expect(actual.messages).toStrictEqual([]);
+    expect(actual.output).toBe(input);
   });
 
   it("does not report unions with multiple object-like branches", async () => {
+    // Arrange
     const customDeclarationText = [
       'declare module "fixture-module" {',
       "  export const configs: { disableTypeChecked: { rules: string[]; strict: boolean } };",
@@ -703,13 +866,16 @@ describe("prefer-vitest-incremental-casts rule", () => {
       "",
     ].join("\n");
 
-    const { messages, output } = await runFix(input, customDeclarationText);
+    // Act
+    const actual = await runFix(input, customDeclarationText);
 
-    expect(messages).toStrictEqual([]);
-    expect(output).toBe(input);
+    // Assert
+    expect(actual.messages).toStrictEqual([]);
+    expect(actual.output).toBe(input);
   });
 
   it("adds an outer cast when the resolved target type is callable", async () => {
+    // Arrange
     const customDeclarationText = [
       'declare module "fixture-module" {',
       "  export const configs: { disableTypeChecked: { rules: string[]; strict: boolean } };",
@@ -742,8 +908,10 @@ describe("prefer-vitest-incremental-casts rule", () => {
       "",
     ].join("\n");
 
+    // Act
     const { output } = await runFix(input, customDeclarationText);
 
+    // Assert
     expect(output).toBe(
       [
         "const disableTypeChecked = { rules: [] as string[] };",
@@ -761,6 +929,7 @@ describe("prefer-vitest-incremental-casts rule", () => {
   });
 
   it("adds an outer cast when the resolved target type is constructable", async () => {
+    // Arrange
     const customDeclarationText = [
       'declare module "fixture-module" {',
       "  export const configs: { disableTypeChecked: { rules: string[]; strict: boolean } };",
@@ -794,8 +963,10 @@ describe("prefer-vitest-incremental-casts rule", () => {
       "",
     ].join("\n");
 
+    // Act
     const { output } = await runFix(input, customDeclarationText);
 
+    // Assert
     expect(output).toBe(
       [
         "const disableTypeChecked = { rules: [] as string[] };",

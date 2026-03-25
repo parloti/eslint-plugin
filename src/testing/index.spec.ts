@@ -23,32 +23,33 @@ import * as singleActStatement from "./single-act-statement";
 
 describe("testing rules", () => {
   it("re-exports the testing rule modules", () => {
-    expect(assertActualExpectedNamesRule).toBe(
+    // Arrange
+    const actualRules = [
+      assertActualExpectedNamesRule,
+      enforceAaaPhasePurityRule,
+      enforceAaaStructureRule,
+      preferViMockedImportRule,
+      preferVitestIncrementalCastsRule,
+      requireAaaSectionsRule,
+      requireActResultCaptureRule,
+      requireTestCompanionRule,
+      singleActStatementRule,
+    ];
+
+    // Act
+    const expectedRules = [
       assertActualExpectedNames.assertActualExpectedNamesRule,
-    );
-    expect(enforceAaaPhasePurityRule).toBe(
       enforceAaaPhasePurity.enforceAaaPhasePurityRule,
-    );
-    expect(enforceAaaStructureRule).toBe(
       enforceAaaStructure.enforceAaaStructureRule,
-    );
-    expect(preferViMockedImportRule).toBe(
       preferViMockedImport.preferViMockedImportRule,
-    );
-    expect(preferVitestIncrementalCastsRule).toBe(
       preferVitestIncrementalCasts.preferVitestIncrementalCastsRule,
-    );
-    expect(requireAaaSectionsRule).toBe(
       requireAaaSections.requireAaaSectionsRule,
-    );
-    expect(requireActResultCaptureRule).toBe(
       requireActResultCapture.requireActResultCaptureRule,
-    );
-    expect(requireTestCompanionRule).toBe(
       requireTestCompanion.requireTestCompanionRule,
-    );
-    expect(singleActStatementRule).toBe(
       singleActStatement.singleActStatementRule,
-    );
+    ];
+
+    // Assert
+    expect(actualRules).toStrictEqual(expectedRules);
   });
 });

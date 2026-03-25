@@ -4,11 +4,17 @@ import { singleActStatementRule } from "./rule";
 
 describe("single-act-statement rule", () => {
   it("defines metadata and messages", () => {
-    expect(singleActStatementRule.meta?.messages).toHaveProperty(
-      "multipleActStatements",
-    );
-    expect(singleActStatementRule.meta?.docs?.description).toContain(
-      "single top-level statement",
-    );
+    // Arrange
+    const messages = singleActStatementRule.meta?.messages;
+
+    // Act
+    const descriptionIncludesSingleAct =
+      singleActStatementRule.meta?.docs?.description?.includes(
+        "single top-level statement",
+      );
+
+    // Assert
+    expect(messages).toHaveProperty("multipleActStatements");
+    expect(descriptionIncludesSingleAct).toBe(true);
   });
 });

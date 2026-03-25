@@ -13,14 +13,24 @@ import {
 
 describe("no-reexports utilities", () => {
   it("normalizes options and checks barrels", () => {
+    // Arrange
     const state = getOptions([{ folders: ["src/**"], names: ["index.ts"] }]);
     const barrel = `${process.cwd()}/src/index.ts`;
+    const featurePath = `${process.cwd()}/src/feature.ts`;
 
-    expect(isBarrelFile(barrel, state)).toBe(true);
-    expect(shouldLintFile(`${process.cwd()}/src/feature.ts`, state)).toBe(true);
+    // Act
+    const result = {
+      barrelDetected: isBarrelFile(barrel, state),
+      featureShouldLint: shouldLintFile(featurePath, state),
+    };
+
+    // Assert
+    expect(result.barrelDetected).toBe(true);
+    expect(result.featureShouldLint).toBe(true);
   });
 
   it("collects imports and detects export usage", () => {
+    // Arrange
     const body = [
       {
         specifiers: [{ local: { name: "feature" } }],
@@ -33,40 +43,70 @@ describe("no-reexports utilities", () => {
         type: "ExportNamedDeclaration",
       },
     ] as [AST.Program["body"][number], AST.Program["body"][number]];
-    const importedNames = collectImportedNames(body);
     const [, exportStatement] = body;
 
-    expect(importedNames.has("feature")).toBe(true);
-    expect(hasImportedExport(exportStatement, importedNames)).toBe(true);
+    // Act
+    const result = (() => {
+      const importedNames = collectImportedNames(body);
+
+      return {
+        hasReexportedImport: hasImportedExport(exportStatement, importedNames),
+        importedNames,
+      };
+    })();
+
+    // Assert
+    expect(result.importedNames.has("feature")).toBe(true);
+    expect(result.hasReexportedImport).toBe(true);
   });
 
   it("skips non-lintable paths", () => {
+    // Arrange
     const state = getOptions([{ folders: ["src/**"], names: ["index.ts"] }]);
-
-    expect(shouldLintFile("relative.ts", state)).toBe(false);
-
     const outside = path.resolve(process.cwd(), "..", "outside.ts");
 
-    expect(shouldLintFile(outside, state)).toBe(false);
+    // Act
+    const result = {
+      outsideShouldLint: shouldLintFile(outside, state),
+      relativeShouldLint: shouldLintFile("relative.ts", state),
+    };
+
+    // Assert
+    expect(result.relativeShouldLint).toBe(false);
+    expect(result.outsideShouldLint).toBe(false);
   });
 
   it("skips when options are empty", () => {
+    // Arrange
     const state = getOptions([{ folders: [], names: [] }]);
 
-    expect(shouldLintFile(`${process.cwd()}/src/feature.ts`, state)).toBe(
-      false,
+    // Act
+    const featureShouldLint = shouldLintFile(
+      `${process.cwd()}/src/feature.ts`,
+      state,
     );
+
+    // Assert
+    expect(featureShouldLint).toBe(false);
   });
 
   describe.runIf(path.sep === "\\")("windows paths", () => {
     it("skips files on another root", () => {
+      // Arrange
       const { root } = path.parse(process.cwd());
       const driveLetter = root[0]?.toUpperCase() ?? "C";
       const otherDrive = driveLetter === "C" ? "Z" : "C";
-      const foreignPath = path.win32.join(`${otherDrive}:`, "outside.ts");
       const state = getOptions([{ folders: ["src/**"], names: ["index.ts"] }]);
 
-      expect(shouldLintFile(foreignPath, state)).toBe(false);
+      // Act
+      const shouldLint = (() => {
+        const foreignPath = path.win32.join(`${otherDrive}:`, "outside.ts");
+
+        return shouldLintFile(foreignPath, state);
+      })();
+
+      // Assert
+      expect(shouldLint).toBe(false);
     });
   });
 });

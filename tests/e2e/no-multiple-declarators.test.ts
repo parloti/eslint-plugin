@@ -1,6 +1,6 @@
 import { noMultipleDeclaratorsRule } from "../../src";
 
-import { createRuleTester } from "./rule-tester";
+import { createRuleTester } from "../support/rule-tester";
 
 const ruleTester = createRuleTester();
 

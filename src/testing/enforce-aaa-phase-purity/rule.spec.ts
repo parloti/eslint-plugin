@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { Linter } from "eslint";
 import { parser } from "typescript-eslint";
 
@@ -35,31 +35,38 @@ function runRule(code: string) {
 
 describe("enforce-aaa-phase-purity rule", () => {
   it("defines metadata and messages", () => {
-    expect(enforceAaaPhasePurityRule.meta?.messages).toHaveProperty(
-      "missingMeaningfulAct",
-    );
-    expect(enforceAaaPhasePurityRule.meta?.docs?.description).toContain(
-      "phases",
-    );
+    // Arrange
+    const messages = enforceAaaPhasePurityRule.meta?.messages;
+
+    // Act
+    const descriptionIncludesPhases =
+      enforceAaaPhasePurityRule.meta?.docs?.description?.includes("phases");
+
+    // Assert
+    expect(messages).toHaveProperty("missingMeaningfulAct");
+    expect(descriptionIncludesPhases).toBe(true);
   });
 
   it("reports arrange assertions, assert awaits, and non-assertion assert code", () => {
-    const messages = runRule(
-      [
-        'it("covers extra branches", async () => {',
-        "  // Arrange",
-        "  expect(true).toBe(true);",
-        "",
-        "  // Act",
-        "  const actualResult = run();",
-        "",
-        "  // Assert",
-        "  await verify(actualResult);",
-        "  console.log(actualResult);",
-        "});",
-      ].join("\n"),
-    );
+    // Arrange
+    const code = [
+      'it("covers extra branches", async () => {',
+      "  // Arrange",
+      "  expect(true).toBe(true);",
+      "",
+      "  // Act",
+      "  const actualResult = run();",
+      "",
+      "  // Assert",
+      "  await verify(actualResult);",
+      "  console.log(actualResult);",
+      "});",
+    ].join("\n");
 
+    // Act
+    const messages = runRule(code);
+
+    // Assert
     expect(messages.map((message) => message.messageId)).toStrictEqual([
       "assertionOutsideAssert",
       "awaitOutsideAct",
@@ -69,72 +76,227 @@ describe("enforce-aaa-phase-purity rule", () => {
   });
 
   it("skips files that do not declare all AAA sections", () => {
-    expect(
-      runRule(
-        [
-          'it("skips incomplete markup", () => {',
-          "  const actualResult = run();",
-          "  expect(actualResult).toBe(1);",
-          "});",
-        ].join("\n"),
-      ),
-    ).toStrictEqual([]);
+    // Arrange
+    const code = [
+      'it("skips incomplete markup", () => {',
+      "  const actualResult = run();",
+      "  expect(actualResult).toBe(1);",
+      "});",
+    ].join("\n");
+
+    // Act
+    const messages = runRule(code);
+
+    // Assert
+    expect(messages).toStrictEqual([]);
   });
 
   it("reports await usage inside Assert", () => {
-    expect(
-      runRule(
-        [
-          'it("awaits in assert", async () => {',
-          "  // Arrange",
-          "  const input = 1;",
-          "",
-          "  // Act",
-          "  const actualResult = run(input);",
-          "",
-          "  // Assert",
-          "  await verify(actualResult);",
-          "});",
-        ].join("\n"),
-      ).map((message) => message.messageId),
-    ).toStrictEqual(["awaitOutsideAct", "nonAssertionInAssert"]);
+    // Arrange
+    const code = [
+      'it("awaits in assert", async () => {',
+      "  // Arrange",
+      "  const input = 1;",
+      "",
+      "  // Act",
+      "  const actualResult = run(input);",
+      "",
+      "  // Assert",
+      "  await verify(actualResult);",
+      "});",
+    ].join("\n");
+
+    // Act
+    const messageIds = runRule(code).map((message) => message.messageId);
+
+    // Assert
+    expect(messageIds).toStrictEqual([
+      "awaitOutsideAct",
+      "nonAssertionInAssert",
+    ]);
   });
 
   it("reports mutation inside Assert", () => {
-    expect(
-      runRule(
-        [
-          'it("mutates in assert", () => {',
-          "  // Arrange",
-          "  const items = [1];",
-          "",
-          "  // Act",
-          "  const actualResult = run(items);",
-          "",
-          "  // Assert",
-          "  items.push(actualResult);",
-          "});",
-        ].join("\n"),
-      ).map((message) => message.messageId),
-    ).toStrictEqual(["mutationAfterAct"]);
+    // Arrange
+    const code = [
+      'it("mutates in assert", () => {',
+      "  // Arrange",
+      "  const items = [1];",
+      "",
+      "  // Act",
+      "  const actualResult = run(items);",
+      "",
+      "  // Assert",
+      "  items.push(actualResult);",
+      "});",
+    ].join("\n");
+
+    // Act
+    const messageIds = runRule(code).map((message) => message.messageId);
+
+    // Assert
+    expect(messageIds).toStrictEqual(["mutationAfterAct"]);
   });
 
   it("accepts a clean AAA flow", () => {
-    expect(
-      runRule(
-        [
-          'it("stays clean", async () => {',
-          "  // Arrange",
-          "  const input = 1;",
-          "",
-          "  // Act",
-          "  const actualResult = await run(input);",
-          "",
-          "  // Assert",
-          "  expect(actualResult).toBe(1);",
-          "});",
-        ].join("\n"),
-      ),
-    ).toStrictEqual([]);
+    // Arrange
+    const code = [
+      'it("stays clean", async () => {',
+      "  // Arrange",
+      "  const input = 1;",
+      "",
+      "  // Act",
+      "  const actualResult = await run(input);",
+      "",
+      "  // Assert",
+      "  expect(actualResult).toBe(1);",
+      "});",
+    ].join("\n");
+
+    // Act
+    const messages = runRule(code);
+
+    // Assert
+    expect(messages).toStrictEqual([]);
+  });
+
+  it("reports arrange actions, async arrange work, act setup, and missing meaningful acts", () => {
+    // Arrange
+    const code = [
+      'it("covers arrange and act edge cases", async () => {',
+      "  // Arrange",
+      "  await run(input);",
+      "",
+      "  // Act",
+      "  const fixture = createFixture();",
+      "",
+      "  // Assert",
+      "  expect(fixture).toBeDefined();",
+      "});",
+    ].join("\n");
+
+    // Act
+    const messages = runRule(code);
+
+    // Assert
+    expect(messages.map((message) => message.messageId)).toStrictEqual([
+      "awaitOutsideAct",
+      "asyncInArrange",
+      "actionInArrange",
+    ]);
+  });
+
+  it("ignores statements that appear before the first AAA section marker", () => {
+    // Arrange
+    const code = [
+      'it("allows pre-section statements", () => {',
+      "  helper();",
+      "  // Arrange",
+      "  const input = 1;",
+      "",
+      "  // Act",
+      "  const actualResult = run(input);",
+      "",
+      "  // Assert",
+      "  expect(actualResult).toBe(1);",
+      "});",
+    ].join("\n");
+
+    // Act
+    const messages = runRule(code);
+
+    // Assert
+    expect(messages).toStrictEqual([]);
+  });
+
+  it("treats destructured act results as meaningful when asserted", () => {
+    // Arrange
+    const code = [
+      'it("tracks destructured act results", () => {',
+      "  // Arrange",
+      "  const input = 1;",
+      "",
+      "  // Act",
+      "  const { value: actualValue = input, ...rest } = getObject(input);",
+      "  const [, first = input, ...others] = getList(input);",
+      "",
+      "  // Assert",
+      "  let pendingResult;",
+      "  const summary = actualValue;",
+      "  expect(summary).toBe(input);",
+      "  expect(rest).toBeDefined();",
+      "  expect(first).toBe(input);",
+      "  expect(others).toBeDefined();",
+      "});",
+    ].join("\n");
+
+    // Act
+    const messages = runRule(code);
+
+    // Assert
+    expect(messages).toStrictEqual([]);
+  });
+
+  it("ignores unsupported declaration patterns when collecting asserted act results", async () => {
+    // Arrange
+    const report = vi.fn();
+    const analysis = {
+      sectionComments: [
+        { phases: ["Arrange"] },
+        { phases: ["Act"] },
+        { phases: ["Assert"] },
+      ],
+      statements: [
+        {
+          node: {
+            declarations: [
+              {
+                id: { type: "Literal", value: 1 },
+                init: null,
+                type: "VariableDeclarator",
+              },
+            ],
+            kind: "const",
+            type: "VariableDeclaration",
+          },
+          phases: ["Act"],
+        },
+      ],
+    };
+
+    vi.resetModules();
+    vi.doMock("../aaa", () => ({
+      analyzeTestBlock: () => analysis,
+      hasAssertion: () => false,
+      hasAsyncLogic: () => false,
+      hasAwait: () => false,
+      hasCapturableActResult: () => false,
+      hasMutation: () => false,
+      isMeaningfulActStatement: () => false,
+      isSetupLikeStatement: () => false,
+      isValidAssertStatement: () => false,
+    }));
+
+    // Act
+    const reportCalls = await (async () => {
+      const { enforceAaaPhasePurityRule: mockedRule } = await import("./rule");
+
+      try {
+        mockedRule.create({ report } as never).CallExpression?.({
+          type: "CallExpression",
+        } as never);
+
+        return report.mock.calls;
+      } finally {
+        vi.doUnmock("../aaa");
+        vi.resetModules();
+      }
+    })();
+
+    // Assert
+    expect(reportCalls).toHaveLength(1);
+    expect(reportCalls[0]?.[0]).toMatchObject({
+      messageId: "missingMeaningfulAct",
+    });
   });
 });

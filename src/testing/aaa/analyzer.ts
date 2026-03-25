@@ -32,18 +32,21 @@ const phaseNames = ["Arrange", "Act", "Assert"] as const satisfies readonly [
   AaaPhase,
 ];
 const setupLikeNames =
-  /^(arrange|build|create|fixture|given|make|mock|seed|setup|spy|stub)/u;
+  /^(arrange|build|create|fixture|get|given|make|mock|parse|seed|setup|spy|stub|write)/u;
 const utilityMethodNames = new Set([
   "advanceTimersByTime",
   "clearAllMocks",
   "debug",
   "fn",
   "info",
+  "join",
   "log",
   "mockImplementation",
   "mockRejectedValue",
   "mockResolvedValue",
   "mockReturnValue",
+  "push",
+  "resolve",
   "resetAllMocks",
   "useFakeTimers",
   "warn",
@@ -97,13 +100,6 @@ function analyzeTestBlock(
       comment: comment as LocatedComment,
       phases: getSectionPhases(comment.value),
     }));
-  const flattenedSections = sectionComments.flatMap((sectionComment) =>
-    sectionComment.phases.map((phase) => ({
-      line: sectionComment.comment.loc.start.line,
-      phase,
-    })),
-  );
-
   return {
     body: callback.body,
     bodyLineCount:
@@ -112,17 +108,22 @@ function analyzeTestBlock(
     newline: getNewline(sourceCode.text),
     sectionComments,
     sourceText: sourceCode.text,
-    statements: callback.body.body.map((statement) => ({
-      node: statement as LocatedNode<ESTree.Statement>,
-      phase: getStatementPhase(statement, flattenedSections),
-    })),
+    statements: callback.body.body.map((statement) => {
+      const phases = getStatementPhases(statement, sectionComments);
+
+      return {
+        node: statement as LocatedNode<ESTree.Statement>,
+        phase: phases.at(-1),
+        phases,
+      };
+    }),
   };
 }
 
 function countActStatements(analysis: TestBlockAnalysis): number {
   return analysis.statements.filter(
     (statement) =>
-      statement.phase === "Act" &&
+      statement.phases.includes("Act") &&
       (statement.node.type === "ExpressionStatement" ||
         statement.node.type === "VariableDeclaration"),
   ).length;
@@ -167,7 +168,7 @@ function getAssertDeclaredIdentifiers(
 
   for (const statement of analysis.statements) {
     if (
-      statement.phase !== "Assert" ||
+      !statement.phases.includes("Assert") ||
       statement.node.type !== "VariableDeclaration"
     ) {
       continue;
@@ -284,7 +285,9 @@ function hasCapturableActResult(statement: ESTree.Statement): boolean {
     return false;
   }
 
-  const calleeName = getInvokedName(expression);
+  const calleeName = getInvokedName(
+    expression as ESTree.CallExpression | ESTree.NewExpression,
+  );
   return (
     calleeName === void 0 ||
     (!voidLikeMethodNames.has(calleeName) &&
@@ -393,7 +396,7 @@ function getIndentationAtOffset(sourceText: string, offset: number): string {
   const lineStart = sourceText.lastIndexOf("\n", Math.max(0, offset - 1)) + 1;
   const linePrefix = sourceText.slice(lineStart, offset);
   const indentation = /^\s*/u.exec(linePrefix);
-  return indentation?.[0] ?? "";
+  return indentation![0];
 }
 
 function getAssertOperands(expression: ESTree.CallExpression):
@@ -481,16 +484,9 @@ function getIdentifierName(
 }
 
 function getInvokedName(
-  expression: ESTree.Expression | undefined,
+  expression: ESTree.CallExpression | ESTree.NewExpression,
 ): string | undefined {
-  const unwrappedExpression = unwrapExpression(expression);
-  if (
-    unwrappedExpression?.type === "CallExpression" ||
-    unwrappedExpression?.type === "NewExpression"
-  ) {
-    return getExpressionName(unwrappedExpression.callee);
-  }
-  return void 0;
+  return getExpressionName(expression.callee);
 }
 
 function getNewline(text: string): "\n" | "\r\n" {
@@ -508,31 +504,31 @@ function getStatementExpression(
     statement.type === "VariableDeclaration" &&
     statement.declarations.length === 1
   ) {
-    return statement.declarations[0]?.init ?? void 0;
+    return statement.declarations[0]!.init as ESTree.Expression | undefined;
   }
 
   return void 0;
 }
 
-function getStatementPhase(
+function getStatementPhases(
   statement: ESTree.Statement,
-  flattenedSections: Array<{ line: number; phase: AaaPhase }>,
-): AaaPhase | undefined {
+  sectionComments: TestBlockAnalysis["sectionComments"],
+): AaaPhase[] {
   const statementLine = statement.loc?.start.line;
   if (statementLine === void 0) {
-    return void 0;
+    return [];
   }
 
-  let currentPhase: AaaPhase | undefined;
-  for (const section of flattenedSections) {
-    if (section.line > statementLine) {
+  let currentPhases: AaaPhase[] = [];
+  for (const sectionComment of sectionComments) {
+    if (sectionComment.comment.loc.start.line > statementLine) {
       break;
     }
 
-    currentPhase = section.phase;
+    currentPhases = sectionComment.phases;
   }
 
-  return currentPhase;
+  return currentPhases;
 }
 
 function getSupportedTestCall(node: ESTree.CallExpression):
@@ -621,6 +617,19 @@ function isAssertionCall(node: ESTree.CallExpression): boolean {
   return false;
 }
 
+function isRuleCreateInvocation(
+  expression: ESTree.CallExpression | ESTree.NewExpression,
+): boolean {
+  return (
+    expression.type === "CallExpression" &&
+    expression.callee.type === "MemberExpression" &&
+    expression.callee.object.type === "Identifier" &&
+    expression.callee.property.type === "Identifier" &&
+    expression.callee.property.name === "create" &&
+    /Rule$/u.test(expression.callee.object.name)
+  );
+}
+
 function isRangeWithin(
   range: [number, number],
   container: [number, number],
@@ -641,6 +650,20 @@ function isUtilityLikeExpression(
 
   const calleeName = getExpressionName(unwrappedExpression.callee);
   if (calleeName === void 0) {
+    return false;
+  }
+
+  if (
+    unwrappedExpression.type === "NewExpression" &&
+    (calleeName === "Map" ||
+      calleeName === "Set" ||
+      calleeName === "SourceCode" ||
+      calleeName === "ESLint")
+  ) {
+    return true;
+  }
+
+  if (isRuleCreateInvocation(unwrappedExpression)) {
     return false;
   }
 

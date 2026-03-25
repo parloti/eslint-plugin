@@ -17,6 +17,7 @@ Barrel files should remain simple aggregation points. Import statements and exec
 
 ```ts
 import { feature } from "./feature";
+export { feature };
 ```
 
 ## Valid
@@ -24,4 +25,13 @@ import { feature } from "./feature";
 ```ts
 export * from "./feature";
 export { feature } from "./feature";
+```
+
+```ts
+// index.ts
+```
+
+```ts
+// feature.ts
+import { feature } from "./dependency";
 ```

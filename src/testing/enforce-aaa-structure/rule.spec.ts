@@ -4,11 +4,17 @@ import { enforceAaaStructureRule } from "./rule";
 
 describe("enforce-aaa-structure rule", () => {
   it("defines metadata and messages", () => {
-    expect(enforceAaaStructureRule.meta?.messages).toHaveProperty(
-      "duplicateSection",
-    );
-    expect(enforceAaaStructureRule.meta?.docs?.description).toContain(
-      "Arrange, Act, Assert",
-    );
+    // Arrange
+    const messages = enforceAaaStructureRule.meta?.messages;
+
+    // Act
+    const descriptionIncludesAaa =
+      enforceAaaStructureRule.meta?.docs?.description?.includes(
+        "Arrange, Act, Assert",
+      );
+
+    // Assert
+    expect(messages).toHaveProperty("duplicateSection");
+    expect(descriptionIncludesAaa).toBe(true);
   });
 });

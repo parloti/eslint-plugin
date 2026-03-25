@@ -7,13 +7,32 @@ import * as preferInterfaceTypes from "./prefer-interface-types";
 import { preferInterfaceTypesRule } from "./prefer-interface-types";
 describe("core rules", () => {
   it("re-exports the core rule modules", () => {
-    expect(core.noMultipleDeclaratorsRule).toBe(noMultipleDeclaratorsRule);
-    expect(noMultipleDeclarators.noMultipleDeclaratorsRule).toBe(
-      noMultipleDeclaratorsRule,
-    );
-    expect(core.preferInterfaceTypesRule).toBe(preferInterfaceTypesRule);
-    expect(preferInterfaceTypes.preferInterfaceTypesRule).toBe(
-      preferInterfaceTypesRule,
-    );
+    // Arrange
+    const actualExports = [
+      Object.is(core.noMultipleDeclaratorsRule, noMultipleDeclaratorsRule),
+      Object.is(
+        noMultipleDeclarators.noMultipleDeclaratorsRule,
+        noMultipleDeclaratorsRule,
+      ),
+      Object.is(core.preferInterfaceTypesRule, preferInterfaceTypesRule),
+      Object.is(
+        preferInterfaceTypes.preferInterfaceTypesRule,
+        preferInterfaceTypesRule,
+      ),
+    ];
+
+    // Act
+    const [
+      exportsCoreNoMultipleDeclarators,
+      exportsModuleNoMultipleDeclarators,
+      exportsCorePreferInterfaceTypes,
+      exportsModulePreferInterfaceTypes,
+    ] = actualExports;
+
+    // Assert
+    expect(exportsCoreNoMultipleDeclarators).toBe(true);
+    expect(exportsModuleNoMultipleDeclarators).toBe(true);
+    expect(exportsCorePreferInterfaceTypes).toBe(true);
+    expect(exportsModulePreferInterfaceTypes).toBe(true);
   });
 });

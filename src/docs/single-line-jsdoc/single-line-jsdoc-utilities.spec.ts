@@ -11,26 +11,42 @@ import {
 
 describe("single-line-jsdoc utilities", () => {
   it("normalizes max line length", () => {
-    expect(normalizeMaxLineLength([])).toBe(80);
-    expect(normalizeMaxLineLength([{ maxLineLength: 10 }])).toBe(10);
+    // Arrange
+    const configuredOptions = [{ maxLineLength: 10 }];
+
+    // Act
+    const result = {
+      defaultMaxLineLength: normalizeMaxLineLength([]),
+      configuredMaxLineLength: normalizeMaxLineLength(configuredOptions),
+    };
+
+    // Assert
+    expect(result.defaultMaxLineLength).toBe(80);
+    expect(result.configuredMaxLineLength).toBe(10);
   });
 
   it("reports when a multiline comment fits", () => {
+    // Arrange
     const reports: Rule.ReportDescriptor[] = [];
     const context = {
       report: (descriptor: Rule.ReportDescriptor) => {
         reports.push(descriptor);
       },
     } as Rule.RuleContext;
-    const comment: Comment = {
-      loc: { end: { column: 0, line: 3 }, start: { column: 0, line: 1 } },
-      range: [0, 10],
-      type: "Block",
-      value: "*\n * ok\n ",
-    } as Comment;
 
-    reportIfSingleLine(context, comment, 80);
+    // Act
+    reportIfSingleLine(
+      context,
+      {
+        loc: { end: { column: 0, line: 3 }, start: { column: 0, line: 1 } },
+        range: [0, 10],
+        type: "Block",
+        value: "*\n * ok\n ",
+      } as Comment,
+      80,
+    );
 
+    // Assert
     expect(reports).toHaveLength(1);
   });
 });

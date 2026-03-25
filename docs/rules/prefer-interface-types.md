@@ -19,6 +19,12 @@ Named types improve readability, reuse, and documentation quality. Inline object
 function saveUser(user: { id: string; name: string }) {}
 ```
 
+```ts
+function demo(input: { value: string }): { value: string } {
+  return input;
+}
+```
+
 ## Valid
 
 ```ts
@@ -28,4 +34,29 @@ interface UserInput {
 }
 
 function saveUser(user: UserInput) {}
+```
+
+```ts
+interface DemoInput {
+  value: string;
+}
+
+function demo(input: DemoInput): DemoInput {
+  return input;
+}
+```
+
+```ts
+type DemoInput = { value: string };
+
+const demo = (...values: DemoInput[]): DemoInput => values[0]!;
+```
+
+```ts
+type SaveUserInput = {
+  id: string;
+  name: string;
+};
+
+function saveUser(user: SaveUserInput): void {}
 ```

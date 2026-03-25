@@ -4,11 +4,17 @@ import { requireActResultCaptureRule } from "./rule";
 
 describe("require-act-result-capture rule", () => {
   it("defines metadata and messages", () => {
-    expect(requireActResultCaptureRule.meta?.messages).toHaveProperty(
-      "captureActResult",
-    );
-    expect(requireActResultCaptureRule.meta?.docs?.description).toContain(
-      "Act expressions",
-    );
+    // Arrange
+    const messages = requireActResultCaptureRule.meta?.messages;
+
+    // Act
+    const descriptionIncludesActExpressions =
+      requireActResultCaptureRule.meta?.docs?.description?.includes(
+        "Act expressions",
+      );
+
+    // Assert
+    expect(messages).toHaveProperty("captureActResult");
+    expect(descriptionIncludesActExpressions).toBe(true);
   });
 });

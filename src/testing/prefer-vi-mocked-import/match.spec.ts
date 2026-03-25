@@ -35,147 +35,168 @@ function createContext(ast: unknown): TestContext {
 
 describe("prefer-vi-mocked-import match", () => {
   it("exports collectMatch", () => {
-    expect(collectMatch).toBeTypeOf("function");
+    // Arrange
+
+    // Act & Assert
+    expect(typeof collectMatch).toBe("function");
   });
 
   it("returns undefined when no top-level mock call exists", () => {
-    const match = collectMatch(
-      createContext({
-        body: [{ type: "EmptyStatement" }],
-        sourceType: "module",
-        type: "Program",
-      }) as never,
-    );
+    // Arrange
+    const context = createContext({
+      body: [{ type: "EmptyStatement" }],
+      sourceType: "module",
+      type: "Program",
+    }) as never;
 
+    // Act
+    const match = collectMatch(context);
+
+    // Assert
     expect(match).toBe(void 0);
   });
 
   it("returns undefined when find returns a non-call expression statement", () => {
-    const match = collectMatch(
-      createContext({
-        body: {
-          find: () => ({
-            expression: { name: "x", type: "Identifier" },
-            type: "ExpressionStatement",
-          }),
-        },
-      }) as never,
-    );
+    // Arrange
+    const context = createContext({
+      body: {
+        find: () => ({
+          expression: { name: "x", type: "Identifier" },
+          type: "ExpressionStatement",
+        }),
+      },
+    }) as never;
 
+    // Act
+    const match = collectMatch(context);
+
+    // Assert
     expect(match).toBe(void 0);
   });
 
   it("returns undefined for mock calls with missing arguments", () => {
-    const match = collectMatch(
-      createContext({
-        body: [
-          {
-            expression: {
-              arguments: [],
-              callee: {
-                computed: false,
-                object: { name: "vi", type: "Identifier" },
-                property: { name: "mock", type: "Identifier" },
-                type: "MemberExpression",
-              },
-              type: "CallExpression",
+    // Arrange
+    const context = createContext({
+      body: [
+        {
+          expression: {
+            arguments: [],
+            callee: {
+              computed: false,
+              object: { name: "vi", type: "Identifier" },
+              property: { name: "mock", type: "Identifier" },
+              type: "MemberExpression",
             },
-            type: "ExpressionStatement",
+            type: "CallExpression",
           },
-        ],
-        sourceType: "module",
-        type: "Program",
-      }) as never,
-    );
+          type: "ExpressionStatement",
+        },
+      ],
+      sourceType: "module",
+      type: "Program",
+    }) as never;
 
+    // Act
+    const match = collectMatch(context);
+
+    // Assert
     expect(match).toBe(void 0);
   });
 
   it("returns undefined for spread mock arguments", () => {
-    const match = collectMatch(
-      createContext({
-        body: [
-          {
-            expression: {
-              arguments: [
-                {
-                  argument: { name: "module", type: "Identifier" },
-                  type: "SpreadElement",
-                },
-                {
-                  body: { properties: [], type: "ObjectExpression" },
-                  type: "ArrowFunctionExpression",
-                },
-              ],
-              callee: {
-                computed: false,
-                object: { name: "vi", type: "Identifier" },
-                property: { name: "mock", type: "Identifier" },
-                type: "MemberExpression",
+    // Arrange
+    const context = createContext({
+      body: [
+        {
+          expression: {
+            arguments: [
+              {
+                argument: { name: "module", type: "Identifier" },
+                type: "SpreadElement",
               },
-              type: "CallExpression",
+              {
+                body: { properties: [], type: "ObjectExpression" },
+                type: "ArrowFunctionExpression",
+              },
+            ],
+            callee: {
+              computed: false,
+              object: { name: "vi", type: "Identifier" },
+              property: { name: "mock", type: "Identifier" },
+              type: "MemberExpression",
             },
-            type: "ExpressionStatement",
+            type: "CallExpression",
           },
-        ],
-        sourceType: "module",
-        type: "Program",
-      }) as never,
-    );
+          type: "ExpressionStatement",
+        },
+      ],
+      sourceType: "module",
+      type: "Program",
+    }) as never;
 
+    // Act
+    const match = collectMatch(context);
+
+    // Assert
     expect(match).toBe(void 0);
   });
 
   it("returns undefined when specifier expression has no range", () => {
-    const match = collectMatch(
-      createContext({
-        body: [
-          {
-            expression: {
-              arguments: [
-                { type: "Literal", value: "./mod" },
-                {
-                  body: { properties: [], type: "ObjectExpression" },
-                  type: "ArrowFunctionExpression",
-                },
-              ],
-              callee: {
-                computed: false,
-                object: { name: "vi", type: "Identifier" },
-                property: { name: "mock", type: "Identifier" },
-                type: "MemberExpression",
+    // Arrange
+    const context = createContext({
+      body: [
+        {
+          expression: {
+            arguments: [
+              { type: "Literal", value: "./mod" },
+              {
+                body: { properties: [], type: "ObjectExpression" },
+                type: "ArrowFunctionExpression",
               },
-              type: "CallExpression",
+            ],
+            callee: {
+              computed: false,
+              object: { name: "vi", type: "Identifier" },
+              property: { name: "mock", type: "Identifier" },
+              type: "MemberExpression",
             },
-            type: "ExpressionStatement",
+            type: "CallExpression",
           },
-        ],
-        sourceType: "module",
-        type: "Program",
-      }) as never,
-    );
+          type: "ExpressionStatement",
+        },
+      ],
+      sourceType: "module",
+      type: "Program",
+    }) as never;
 
+    // Act
+    const match = collectMatch(context);
+
+    // Assert
     expect(match).toBe(void 0);
   });
 
   it("ignores call expressions that are not member invocations", () => {
-    const match = collectMatch(
-      createContext({
-        body: [
-          {
-            expression: {
-              arguments: [],
-              callee: { name: "mock", type: "Identifier" },
-              type: "CallExpression",
-            },
-            type: "ExpressionStatement",
+    // Arrange
+    const context = createContext({
+      body: [
+        {
+          expression: {
+            arguments: [],
+            callee: { name: "mock", type: "Identifier" },
+            type: "CallExpression",
           },
-        ],
-        sourceType: "module",
-        type: "Program",
-      }) as never,
-    );
+          type: "ExpressionStatement",
+        },
+      ],
+      sourceType: "module",
+      type: "Program",
+    }) as never;
 
+    // Act
+    const match = collectMatch(context);
+
+    // Assert
     expect(match).toBe(void 0);
   });
 });

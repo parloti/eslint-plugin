@@ -31,82 +31,95 @@ const createProgramAst = (sourceText: string): AST.Program => ({
 
 describe("require example language reporting", () => {
   it("builds a report descriptor", () => {
+    // Arrange
     const sourceCode = new SourceCode("", createProgramAst(""));
+    const reportInput = {
+      comment: {
+        loc: { end: { column: 0, line: 1 }, start: { column: 0, line: 1 } },
+        range: [0, 2],
+        type: "Block",
+        value: "*",
+      } as Comment,
+      example: {
+        content: "",
+        endIndex: 0,
+        endOffset: 0,
+        lineIndex: 0,
+        prefix: "",
+        startOffset: 0,
+      } as Example,
+      hasOtherExamples: false,
+      problem: "missingFence" as const,
+      sourceCode,
+    };
 
-    expect(
-      buildReportDescriptor({
-        comment: {
-          loc: { end: { column: 0, line: 1 }, start: { column: 0, line: 1 } },
-          range: [0, 2],
-          type: "Block",
-          value: "*",
-        } as Comment,
-        example: {
-          content: "",
-          endIndex: 0,
-          endOffset: 0,
-          lineIndex: 0,
-          prefix: "",
-          startOffset: 0,
-        } as Example,
-        hasOtherExamples: false,
-        problem: "missingFence",
-        sourceCode,
-      }),
-    ).toBeDefined();
+    // Act
+    const descriptor = buildReportDescriptor(reportInput);
+
+    // Assert
+    expect(descriptor).toBeDefined();
   });
 
   it("returns a descriptor without a fixer when range is missing", () => {
+    // Arrange
     const sourceCode = new SourceCode("", createProgramAst(""));
+    const reportInput = {
+      comment: {
+        loc: { end: { column: 0, line: 1 }, start: { column: 0, line: 1 } },
+        type: "Block",
+        value: "*",
+      } as Comment,
+      example: {
+        content: "",
+        endIndex: 0,
+        endOffset: 0,
+        lineIndex: 0,
+        prefix: "",
+        startOffset: 0,
+      } as Example,
+      hasOtherExamples: false,
+      problem: "missingFence" as const,
+      sourceCode,
+    };
 
-    expect(
-      buildReportDescriptor({
-        comment: {
-          loc: { end: { column: 0, line: 1 }, start: { column: 0, line: 1 } },
-          type: "Block",
-          value: "*",
-        } as Comment,
-        example: {
-          content: "",
-          endIndex: 0,
-          endOffset: 0,
-          lineIndex: 0,
-          prefix: "",
-          startOffset: 0,
-        } as Example,
-        hasOtherExamples: false,
-        problem: "missingFence",
-        sourceCode,
-      }),
-    ).toBeDefined();
+    // Act
+    const descriptor = buildReportDescriptor(reportInput);
+
+    // Assert
+    expect(descriptor).toBeDefined();
   });
 
   it("returns a descriptor when location data is missing", () => {
+    // Arrange
     const sourceCode = new SourceCode("", createProgramAst(""));
+    const reportInput = {
+      comment: {
+        range: [0, 2],
+        type: "Block",
+        value: "*",
+      } as Comment,
+      example: {
+        content: "",
+        endIndex: 0,
+        endOffset: 0,
+        lineIndex: 0,
+        prefix: "",
+        startOffset: 0,
+      } as Example,
+      hasOtherExamples: false,
+      problem: "missingFence" as const,
+      sourceCode,
+    };
 
-    expect(
-      buildReportDescriptor({
-        comment: {
-          range: [0, 2],
-          type: "Block",
-          value: "*",
-        } as Comment,
-        example: {
-          content: "",
-          endIndex: 0,
-          endOffset: 0,
-          lineIndex: 0,
-          prefix: "",
-          startOffset: 0,
-        } as Example,
-        hasOtherExamples: false,
-        problem: "missingFence",
-        sourceCode,
-      }),
-    ).toBeDefined();
+    // Act
+    const descriptor = buildReportDescriptor(reportInput);
+
+    // Assert
+    expect(descriptor).toBeDefined();
   });
 
   it("skips reporting when example content is valid", () => {
+    // Arrange
     const sourceCode = new SourceCode("", createProgramAst(""));
     let reportCalls = 0;
     const report = ((): void => {
@@ -114,6 +127,7 @@ describe("require example language reporting", () => {
     }) as Rule.RuleContext["report"];
     const reportExampleUnsafe = reportExample;
 
+    // Act
     reportExampleUnsafe({
       comment: {
         loc: { end: { column: 0, line: 1 }, start: { column: 0, line: 1 } },
@@ -133,17 +147,21 @@ describe("require example language reporting", () => {
       hasOtherExamples: false,
     });
 
+    // Assert
     expect(reportCalls).toBe(0);
   });
 
   it("reports when example content is invalid", () => {
+    // Arrange
     const sourceCode = new SourceCode("", createProgramAst(""));
     let reportCalls = 0;
+    let reportDescriptor: Rule.ReportDescriptor | undefined;
     const report = ((descriptor: Rule.ReportDescriptor): void => {
       reportCalls += 1;
-      expect(descriptor).toMatchObject({ messageId: "missingFence" });
+      reportDescriptor = descriptor;
     }) as Rule.RuleContext["report"];
 
+    // Act
     reportExample({
       comment: {
         loc: { end: { column: 0, line: 1 }, start: { column: 0, line: 1 } },
@@ -163,6 +181,8 @@ describe("require example language reporting", () => {
       hasOtherExamples: false,
     });
 
+    // Assert
     expect(reportCalls).toBe(1);
+    expect(reportDescriptor).toMatchObject({ messageId: "missingFence" });
   });
 });

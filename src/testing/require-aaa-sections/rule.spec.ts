@@ -35,44 +35,58 @@ function runFix(code: string) {
 
 describe("require-aaa-sections rule", () => {
   it("defines metadata and fix support", () => {
-    expect(requireAaaSectionsRule.meta?.fixable).toBe("code");
-    expect(requireAaaSectionsRule.meta?.messages).toHaveProperty(
-      "missingSections",
-    );
+    // Arrange
+    const fixable = requireAaaSectionsRule.meta?.fixable;
+
+    // Act
+    const messages = requireAaaSectionsRule.meta?.messages;
+
+    // Assert
+    expect(fixable).toBe("code");
+    expect(messages).toHaveProperty("missingSections");
   });
 
   it("does not crash when a multi-line empty test body cannot place section comments", () => {
-    const result = runFix(
-      ['it("is empty", () => {', "", "", "", "});"].join("\n"),
-    );
+    // Arrange
+    const code = ['it("is empty", () => {', "", "", "", "});"].join("\n");
 
+    // Act
+    const result = runFix(code);
+
+    // Assert
     expect(result.fixed).toBe(false);
     expect(result.messages[0]?.messageId).toBe("missingSections");
   });
 
   it("combines missing section comments when one statement must represent multiple boundaries", () => {
-    const result = runFix(
-      [
-        'it("combines boundaries", () => {',
-        "  // Arrange",
-        "",
-        "  expect(run()).toBe(1);",
-        "});",
-      ].join("\n"),
-    );
+    // Arrange
+    const code = [
+      'it("combines boundaries", () => {',
+      "  // Arrange",
+      "",
+      "  expect(run()).toBe(1);",
+      "});",
+    ].join("\n");
 
+    // Act
+    const result = runFix(code);
+
+    // Assert
     expect(result.output).toContain("// Act & Assert");
   });
 
   it("does not offer a fix when the body is too short", () => {
-    const result = runFix(
-      [
-        'it("stays report-only for short bodies", () => {',
-        "  run();",
-        "});",
-      ].join("\n"),
-    );
+    // Arrange
+    const code = [
+      'it("stays report-only for short bodies", () => {',
+      "  run();",
+      "});",
+    ].join("\n");
 
+    // Act
+    const result = runFix(code);
+
+    // Assert
     expect(result.fixed).toBe(false);
     expect(result.messages[0]?.messageId).toBe("missingSections");
   });

@@ -23,6 +23,27 @@ When a parameter already uses a named interface or type alias, nested `@param` t
 function getLineMeta(context: LineMetaContext): void {}
 ```
 
+## Autofix example
+
+Before:
+
+```ts
+/**
+ * @param context The metadata context.
+ * @param context.commentValue The full comment value.
+ */
+function getLineMeta(context: LineMetaContext): void {}
+```
+
+After:
+
+```ts
+/**
+ * @param context The metadata context.
+ */
+function getLineMeta(context: LineMetaContext): void {}
+```
+
 ## Valid
 
 ```ts
@@ -30,4 +51,11 @@ function getLineMeta(context: LineMetaContext): void {}
  * @param context The metadata context.
  */
 function getLineMeta(context: { commentValue: string }): void {}
+```
+
+```ts
+/**
+ * @param context The metadata context.
+ */
+function getLineMeta(context: LineMetaContext): void {}
 ```

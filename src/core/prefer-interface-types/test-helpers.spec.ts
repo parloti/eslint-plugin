@@ -15,32 +15,35 @@ import {
 
 describe("prefer-interface-types test helpers", () => {
   it("creates context and runs listeners", () => {
+    // Arrange
     const { context, reports } = createContext();
     const node = createFunctionNode({ params: [] });
 
+    // Act
     runListener(context, node);
 
+    // Assert
     expect(reports).toStrictEqual([]);
   });
 
   it("creates helper nodes", () => {
+    // Arrange
     const typeAnnotation = createTypeAnnotation("TSTypeLiteral");
     const parameter = createParameter("TSTypeReference");
     const bareParameter = createBareParameter();
-    const parameterProperty = createParameterProperty("TSTypeLiteral");
-    const restParameter = createRestParameter("TSTypeLiteral");
-    const node = createFunctionNode({ params: [parameter] });
 
-    expect(
-      [
-        typeAnnotation.typeAnnotation.type,
-        parameter.type,
-        bareParameter.type,
-        parameterProperty.type,
-        restParameter.type,
-        node.type,
-      ].join("|"),
-    ).toBe(
+    // Act
+    const actualTypes = [
+      typeAnnotation.typeAnnotation.type,
+      parameter.type,
+      bareParameter.type,
+      createParameterProperty("TSTypeLiteral").type,
+      createRestParameter("TSTypeLiteral").type,
+      createFunctionNode({ params: [parameter] }).type,
+    ].join("|");
+
+    // Assert
+    expect(actualTypes).toBe(
       [
         "TSTypeLiteral",
         "Identifier",
@@ -53,11 +56,14 @@ describe("prefer-interface-types test helpers", () => {
   });
 
   it("records report entries", () => {
+    // Arrange
     const { context, reports } = createContext();
     const node = createFunctionNode({ params: [] });
 
+    // Act
     context.report({ messageId: "ok", node: node as unknown as Rule.Node });
 
+    // Assert
     expect(reports).toStrictEqual([
       { messageId: "ok", nodeType: "FunctionDeclaration" },
     ]);

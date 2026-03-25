@@ -21,8 +21,47 @@ Short documentation should stay compact. Single-line JSDoc improves readability 
  */
 ```
 
+```ts
+/**
+ * doc
+ */
+const value = 1;
+```
+
+## Autofix example
+
+Before:
+
+```ts
+/**
+ * doc
+ */
+const value = 1;
+```
+
+After:
+
+```ts
+/** doc */
+const value = 1;
+```
+
 ## Valid
 
 ```ts
 /** Returns the value. */
+```
+
+```ts
+/** doc */
+const value = 1;
+```
+
+```ts
+/**
+ * @param value Input value.
+ */
+function demo(value: string): string {
+	return value;
+}
 ```

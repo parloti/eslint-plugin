@@ -22,7 +22,10 @@ const assertActualExpectedNamesRule: Rule.RuleModule = {
         const reportedNames = new Set<string>();
 
         for (const statement of analysis.statements) {
-          if (statement.phase !== "Assert" || !hasAssertion(statement.node)) {
+          if (
+            !statement.phases.includes("Assert") ||
+            !hasAssertion(statement.node)
+          ) {
             continue;
           }
 

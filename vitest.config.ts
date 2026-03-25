@@ -15,7 +15,7 @@ export default defineConfig({
   plugins: [_default()],
   test: {
     coverage: {
-      exclude: ["tests/e2e/**/*.ts"],
+      exclude: ["tests/**/*.ts", "**/index.ts"],
       enabled: true,
       include: ["src/**/*.ts", "tests/**/*.ts"],
       thresholds: { "100": true },

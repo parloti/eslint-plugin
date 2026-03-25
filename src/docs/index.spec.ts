@@ -11,12 +11,26 @@ import * as singleLineJsdoc from "./single-line-jsdoc";
 
 describe("docs rules", () => {
   it("re-exports the documentation rule modules", () => {
-    expect(noInterfaceMemberDocumentationRule).toBe(
-      noInterfaceMemberDocs.noInterfaceMemberDocumentationRule,
-    );
-    expect(requireExampleLanguageRule).toBe(
-      requireExampleLanguage.requireExampleLanguageRule,
-    );
-    expect(singleLineJsdocRule).toBe(singleLineJsdoc.singleLineJsdocRule);
+    // Arrange
+    const actualExports = [
+      Object.is(
+        noInterfaceMemberDocumentationRule,
+        noInterfaceMemberDocs.noInterfaceMemberDocumentationRule,
+      ),
+      Object.is(
+        requireExampleLanguageRule,
+        requireExampleLanguage.requireExampleLanguageRule,
+      ),
+      Object.is(singleLineJsdocRule, singleLineJsdoc.singleLineJsdocRule),
+    ];
+
+    // Act
+    const [exportsNoInterfaceMemberDocs, exportsRequireExampleLanguage, exportsSingleLineJsdoc] =
+      actualExports;
+
+    // Assert
+    expect(exportsNoInterfaceMemberDocs).toBe(true);
+    expect(exportsRequireExampleLanguage).toBe(true);
+    expect(exportsSingleLineJsdoc).toBe(true);
   });
 });

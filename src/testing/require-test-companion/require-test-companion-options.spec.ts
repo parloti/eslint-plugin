@@ -10,21 +10,45 @@ import {
 
 describe("require-test-companion options", () => {
   it("normalizes defaults", () => {
-    const state = getOptions([]);
+    // Arrange
+    const options: [] = [];
 
+    // Act
+    const state = getOptions(options);
+
+    // Assert
     expect(state.enforceIn.length).toBeGreaterThan(0);
     expect(state.testSuffixes.length).toBeGreaterThan(0);
   });
 
   it("checks file types", () => {
-    expect(isTypeScriptFile(`file${TYPESCRIPT_EXTENSION}`)).toBe(true);
-    expect(isTypeScriptFile("file.d.ts")).toBe(false);
+    // Arrange
+    const declarationFilename = "file.d.ts";
+    const sourceFilename = `file${TYPESCRIPT_EXTENSION}`;
+
+    // Act
+    const result = {
+      declarationFile: isTypeScriptFile(declarationFilename),
+      sourceFile: isTypeScriptFile(sourceFilename),
+    };
+
+    // Assert
+    expect(result.sourceFile).toBe(true);
+    expect(result.declarationFile).toBe(false);
   });
 
   it("checks path patterns", () => {
+    // Arrange
     const filename = `${process.cwd()}/src/index.ts`;
 
-    expect(isLintableFilename(filename)).toBe(true);
-    expect(isPathMatch(filename, ["src/**"])).toBe(true);
+    // Act
+    const result = {
+      lintableFilename: isLintableFilename(filename),
+      pathMatch: isPathMatch(filename, ["src/**"]),
+    };
+
+    // Assert
+    expect(result.lintableFilename).toBe(true);
+    expect(result.pathMatch).toBe(true);
   });
 });

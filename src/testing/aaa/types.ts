@@ -25,6 +25,7 @@ interface SectionComment {
 interface StatementPhase {
   node: LocatedNode<ESTree.Statement>;
   phase: AaaPhase | undefined;
+  phases: AaaPhase[];
 }
 
 interface TestBlockAnalysis {

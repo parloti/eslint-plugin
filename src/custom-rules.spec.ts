@@ -55,10 +55,17 @@ const summarizeCustomRuleContract = (
 
 describe("custom rule registry", () => {
   it("covers every package-owned rule with metadata", () => {
-    expect(customRules).toHaveLength(17);
-    expect(
-      customRules.map((ruleEntry) => summarizeCustomRuleContract(ruleEntry)),
-    ).toStrictEqual([
+    // Arrange
+    const expectedRuleCount = 17;
+
+    // Act
+    const actualRuleSummaries = customRules.map((ruleEntry) =>
+      summarizeCustomRuleContract(ruleEntry),
+    );
+
+    // Assert
+    expect(customRules).toHaveLength(expectedRuleCount);
+    expect(actualRuleSummaries).toStrictEqual([
       {
         createType: "function",
         description:
