@@ -2,7 +2,7 @@
 
 ## Summary
 
-Enforce or forbid barrel files with consistent, allowed names.
+Enforce a consistent barrel file strategy by either requiring or forbidding barrel files with allowed names.
 
 ## Enabled by
 
@@ -11,44 +11,98 @@ Enforce or forbid barrel files with consistent, allowed names.
 
 ## Why this rule exists
 
-Repositories should choose a clear barrel-file strategy. Mixed naming or partially-adopted barrels create ambiguous import surfaces and inconsistent folder conventions.
+Repositories should choose a clear barrel-file strategy. Mixed naming or partially adopted barrels create ambiguous import surfaces and inconsistent folder conventions.
+
+## Options
+
+```typescript
+type Options = {
+  enforce?: boolean; // default: true
+  allowedNames?: string[]; // default: ["index"]
+};
+```
+
+* `enforce: true`
+
+  * Folders must include a barrel file with an allowed name
+* `enforce: false`
+
+  * Barrel files with allowed names must not exist
+* `allowedNames`
+
+  * Defines which filenames are considered barrel files (e.g. `"index"`, `"mod"`, etc.)
+
+## Rule Details
+
+* A "barrel file" is any file whose name matches one of the `allowedNames`
+* The rule applies to folders containing at least one non-barrel module file
+* All folders must follow the same strategy:
+
+  * either consistently include a barrel file (`enforce: true`)
+  * or consistently avoid them (`enforce: false`)
+* Mixed usage across folders is not allowed
 
 ## Invalid
 
-```text
+### Missing required barrel file (`enforce: true`)
+
+```tree
 feature/
-	feature.ts
+  feature.ts
 ```
 
-```text
+### Forbidden barrel file present (`enforce: false`)
+
+```tree
 feature/
-	feature.ts
-	index.ts
+  feature.ts
+  index.ts
 ```
 
-With `{ enforce: false }`, the second structure is invalid because the folder contains a forbidden barrel file.
+### Mixed strategy across folders
+
+```tree
+featureA/
+  featureA.ts
+  index.ts
+
+featureB/
+  featureB.ts
+```
 
 ## Valid
 
-```text
+### Enforced barrel files (`enforce: true`)
+
+```tree
 feature/
-	feature.ts
-	index.ts
+  feature.ts
+  index.ts
 ```
 
-```ts
+```typescript
 // feature/index.ts
 export * from "./feature";
 ```
 
-```ts
+```typescript
 // feature/feature.ts
 export const feature = 1;
 ```
 
-```text
+### No barrel files (`enforce: false`)
+
+```tree
 feature/
-	feature.ts
+  feature.ts
 ```
 
-That last structure is also valid when the rule is configured with `{ enforce: false }`.
+### Custom allowed barrel names
+
+With `{ allowedNames: ["mod"] }`:
+
+```tree
+feature/
+  feature.ts
+  mod.ts
+```

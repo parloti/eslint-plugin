@@ -2,7 +2,7 @@
 
 ## Summary
 
-Require one variable declarator per declaration statement.
+Require exactly one variable declarator per declaration statement.
 
 ## Enabled by
 
@@ -11,48 +11,89 @@ Require one variable declarator per declaration statement.
 
 ## Why this rule exists
 
-Splitting declarations makes diffs smaller, simplifies reordering, and prevents unrelated variables from sharing a single statement.
+Splitting declarations improves readability, produces cleaner diffs, and avoids coupling unrelated variables in a single statement.
+
+## Rule Details
+
+- Each `const`, `let`, or `var` declaration must declare exactly one variable
+- Multiple declarators in a single statement are disallowed, regardless of formatting
+- The rule applies to:
+  - standalone declarations
+  - exported declarations
+
+### Examples of disallowed patterns
+
+- comma-separated declarators
+- multi-line declarator lists
+- declarators separated by comments
 
 ## Invalid
 
-```ts
+```typescript
 const availableRules = new Set(Object.keys(rules ?? {})),
   customError = buildCustomErrorRules(availableRules);
 ```
 
-```ts
+```typescript
 export const availableRules = new Set(Object.keys(rules ?? {})),
   customError = buildCustomErrorRules(availableRules);
 ```
 
-```ts
+```typescript
 const availableRules = new Set(Object.keys(rules ?? {})),
   /* keep */ customError = buildCustomErrorRules(availableRules);
 ```
 
 ## Valid
 
-```ts
+```typescript
 const availableRules = new Set(Object.keys(rules ?? {}));
 const customError = buildCustomErrorRules(availableRules);
 ```
 
-## Autofix example
+```typescript
+let count = 0;
+```
 
-Before:
+```typescript
+var value = compute();
+```
 
-```ts
+```typescript
+export const availableRules = new Set(Object.keys(rules ?? {}));
+export const customError = buildCustomErrorRules(availableRules);
+```
+
+## Autofix
+
+Splits multi-declarator statements into multiple single-declarator statements.
+
+### Before
+
+```typescript
 const availableRules = new Set(Object.keys(rules ?? {})),
   customError = buildCustomErrorRules(availableRules);
 ```
 
-After:
+### After
 
-```ts
+```typescript
 const availableRules = new Set(Object.keys(rules ?? {}));
 const customError = buildCustomErrorRules(availableRules);
 ```
 
-## Autofix behavior
+## Autofix Behavior
 
-The rule auto-fixes straightforward standalone declarations. It still reports risky cases such as loop initializers, exported declarations, or separators that contain comments, but leaves those for manual cleanup.
+The rule auto-fixes only safe, standalone declarations.
+
+The following cases are reported but not auto-fixed:
+
+* declarations inside loop initializers
+
+  ```typescript
+  for (let i = 0, j = 0; i < 10; i++) {}
+  ```
+* declarations with inline comments between declarators
+* complex exported declarations where splitting may affect formatting or comments
+
+Manual refactoring is required in these cases to preserve intent and formatting.
