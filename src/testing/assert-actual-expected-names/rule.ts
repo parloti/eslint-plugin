@@ -9,6 +9,9 @@ import {
   usesPrefix,
 } from "../aaa";
 
+/**
+ *
+ */
 const assertActualExpectedNamesRule: Rule.RuleModule = {
   create(context: Rule.RuleContext): Rule.RuleListener {
     return {

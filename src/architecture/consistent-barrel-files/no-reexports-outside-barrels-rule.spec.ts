@@ -23,7 +23,7 @@ import {
 
 describe("no reexports outside barrels rule (enforced)", () => {
   const temporaryDirectories: string[] = [];
-  const allowAllFolders: NoReexportsOutsideBarrelsOptions = { folders: ["**"] };
+  const defaultOptions: NoReexportsOutsideBarrelsOptions = {};
   const { runDefaultFeature, runTemporaryFeature, runTemporaryIndex } =
     createTemporaryRunner(temporaryDirectories);
 
@@ -48,8 +48,7 @@ describe("no reexports outside barrels rule (enforced)", () => {
   it("accepts string names for barrel detection", () => {
     // Arrange
     const options: NoReexportsOutsideBarrelsOptions = {
-      folders: ["tmp/**"],
-      names: "index.ts",
+      allowedBarrelNames: ["index"],
     };
 
     // Act
@@ -64,7 +63,7 @@ describe("no reexports outside barrels rule (enforced)", () => {
     ["export named from re-exports", createBody(createExportNamedFrom())],
   ])("reports on %s", (_label, body) => {
     // Act
-    const reports = runTemporaryFeature(body, allowAllFolders);
+    const reports = runTemporaryFeature(body, defaultOptions);
 
     // Assert
     expect(reports).toHaveLength(1);
@@ -88,7 +87,7 @@ describe("no reexports outside barrels rule (enforced)", () => {
     ],
   ])("reports on %s", (_label, body) => {
     // Act
-    const reports = runTemporaryFeature(body, allowAllFolders);
+    const reports = runTemporaryFeature(body, defaultOptions);
 
     // Assert
     expect(reports).toHaveLength(1);
@@ -106,7 +105,7 @@ describe("no reexports outside barrels rule (enforced)", () => {
     ],
   ])("allows %s", (_label, body) => {
     // Act
-    const reports = runTemporaryFeature(body, allowAllFolders);
+    const reports = runTemporaryFeature(body, defaultOptions);
 
     // Assert
     expect(reports).toStrictEqual([]);
@@ -115,7 +114,7 @@ describe("no reexports outside barrels rule (enforced)", () => {
 
 describe("no reexports outside barrels rule (skips)", () => {
   const temporaryDirectories: string[] = [];
-  const allowAllFolders: NoReexportsOutsideBarrelsOptions = { folders: ["**"] };
+  const defaultOptions: NoReexportsOutsideBarrelsOptions = {};
   const { runTemporaryFeature, runTemporaryIndex } =
     createTemporaryRunner(temporaryDirectories);
 
@@ -129,8 +128,7 @@ describe("no reexports outside barrels rule (skips)", () => {
     // Arrange
     const body = createBody(createExportAll());
     const options = {
-      folders: ["tmp/**"],
-      names: ["index.ts"],
+      allowedBarrelNames: ["index"],
     };
 
     // Act
@@ -140,31 +138,13 @@ describe("no reexports outside barrels rule (skips)", () => {
     expect(reports).toStrictEqual([]);
   });
 
-  it.each(["names are empty", "folders are empty"])(
-    "skips when %s",
-    (label) => {
-      // Arrange
-      const options: NoReexportsOutsideBarrelsOptions =
-        label === "names are empty"
-          ? { folders: ["tmp/**"], names: "   " }
-          : { folders: "   ", names: ["index.ts"] };
-      const body = createBody(createExportAll());
-
-      // Act
-      const reports = runTemporaryFeature(body, options);
-
-      // Assert
-      expect(reports).toStrictEqual([]);
-    },
-  );
-
   it("skips when filename is not absolute", () => {
     // Arrange
     const filePath = "relative/feature.ts";
     const body = createBody(createExportAll());
 
     // Act
-    const reports = runRule(filePath, body, allowAllFolders);
+    const reports = runRule(filePath, body, defaultOptions);
 
     // Assert
     expect(reports).toStrictEqual([]);
@@ -176,7 +156,7 @@ describe("no reexports outside barrels rule (skips)", () => {
     const body = createBody(createExportAll());
 
     // Act
-    const reports = runRule(filePath, body, allowAllFolders);
+    const reports = runRule(filePath, body, defaultOptions);
 
     // Assert
     expect(reports).toStrictEqual([]);

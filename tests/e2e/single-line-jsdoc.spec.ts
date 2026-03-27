@@ -1,7 +1,9 @@
 import { singleLineJsdocRule } from "../../src";
-
 import { createRuleTester } from "../support/rule-tester";
 
+/**
+ *
+ */
 const ruleTester = createRuleTester();
 
 ruleTester.run("single-line-jsdoc", singleLineJsdocRule, {

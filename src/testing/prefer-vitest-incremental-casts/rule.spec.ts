@@ -1,20 +1,35 @@
+import { ESLint } from "eslint";
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-
-import { ESLint } from "eslint";
 import { parser } from "typescript-eslint";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { preferVitestIncrementalCastsRule } from "./rule";
 
+/**
+ *
+ */
 interface FixRunResult {
+  /**
+   *
+   */
   messages: Awaited<ReturnType<ESLint["lintText"]>>[number]["messages"];
+
+  /**
+   *
+   */
   output: string;
 }
 
+/**
+ *
+ */
 const tempDirectories: string[] = [];
 
+/**
+ *
+ */
 const declarationText = [
   'declare module "fixture-module" {',
   "  export const configs: { disableTypeChecked: { rules: string[]; strict: boolean } };",
@@ -34,6 +49,11 @@ const declarationText = [
   "",
 ].join("\n");
 
+/**
+ * @param code
+ * @param customDeclarationText
+ * @example
+ */
 async function runFix(
   code: string,
   customDeclarationText = declarationText,

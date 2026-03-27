@@ -1,101 +1,26 @@
 import type { Rule } from "eslint";
 import type * as ESTree from "estree";
 
+import type { TestBlockAnalysis } from "../aaa";
+
 import { createRuleDocumentation } from "../../custom-rule-documentation";
 import {
   analyzeTestBlock,
   hasAssertion,
-  hasCapturableActResult,
   hasAsyncLogic,
   hasAwait,
+  hasCapturableActResult,
   hasMutation,
   isMeaningfulActStatement,
   isSetupLikeStatement,
   isValidAssertStatement,
-  type TestBlockAnalysis,
 } from "../aaa";
 
-function collectReferencedIdentifiers(
-  node: ESTree.Node,
-  identifiers: Set<string>,
-): void {
-  if (node.type === "Identifier") {
-    identifiers.add(node.name);
-    return;
-  }
-
-  for (const [key, value] of Object.entries(node)) {
-    if (key === "parent") {
-      continue;
-    }
-
-    if (Array.isArray(value)) {
-      for (const item of value) {
-        if (isNode(item)) {
-          collectReferencedIdentifiers(item, identifiers);
-        }
-      }
-      continue;
-    }
-
-    if (isNode(value)) {
-      collectReferencedIdentifiers(value, identifiers);
-    }
-  }
-}
-
-function getActDeclaredIdentifiers(statement: ESTree.Statement): Set<string> {
-  const identifiers = new Set<string>();
-
-  if (statement.type !== "VariableDeclaration") {
-    return identifiers;
-  }
-
-  for (const declaration of statement.declarations) {
-    collectPatternIdentifiers(declaration.id, identifiers);
-  }
-
-  return identifiers;
-}
-
-function getAssertReferencedIdentifiers(
-  analysis: TestBlockAnalysis,
-): Set<string> {
-  const identifiers = new Set<string>();
-
-  for (const statement of analysis.statements) {
-    if (!statement.phases.includes("Assert")) {
-      continue;
-    }
-
-    if (statement.node.type === "VariableDeclaration") {
-      for (const declaration of statement.node.declarations) {
-        if (declaration.init !== null && declaration.init !== void 0) {
-          collectReferencedIdentifiers(declaration.init, identifiers);
-        }
-      }
-      continue;
-    }
-
-    collectReferencedIdentifiers(statement.node, identifiers);
-  }
-
-  return identifiers;
-}
-
-function isActResultAsserted(
-  assertReferencedIdentifiers: Set<string>,
-  statement: ESTree.Statement,
-): boolean {
-  for (const identifier of getActDeclaredIdentifiers(statement)) {
-    if (assertReferencedIdentifiers.has(identifier)) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
+/**
+ * @param pattern
+ * @param identifiers
+ * @example
+ */
 function collectPatternIdentifiers(
   pattern: ESTree.Pattern,
   identifiers: Set<string>,
@@ -138,15 +63,128 @@ function collectPatternIdentifiers(
   }
 }
 
+/**
+ * @param node
+ * @param identifiers
+ * @example
+ */
+function collectReferencedIdentifiers(
+  node: ESTree.Node,
+  identifiers: Set<string>,
+): void {
+  if (node.type === "Identifier") {
+    identifiers.add(node.name);
+    return;
+  }
+
+  for (const [key, value] of Object.entries(node)) {
+    if (key === "parent") {
+      continue;
+    }
+
+    if (Array.isArray(value)) {
+      for (const item of value) {
+        if (isNode(item)) {
+          collectReferencedIdentifiers(item, identifiers);
+        }
+      }
+      continue;
+    }
+
+    if (isNode(value)) {
+      collectReferencedIdentifiers(value, identifiers);
+    }
+  }
+}
+
+/**
+ * @param statement
+ * @example
+ */
+function getActDeclaredIdentifiers(statement: ESTree.Statement): Set<string> {
+  const identifiers = new Set<string>();
+
+  if (statement.type !== "VariableDeclaration") {
+    return identifiers;
+  }
+
+  for (const declaration of statement.declarations) {
+    collectPatternIdentifiers(declaration.id, identifiers);
+  }
+
+  return identifiers;
+}
+
+/**
+ * @param analysis
+ * @example
+ */
+function getAssertReferencedIdentifiers(
+  analysis: TestBlockAnalysis,
+): Set<string> {
+  const identifiers = new Set<string>();
+
+  for (const statement of analysis.statements) {
+    if (!statement.phases.includes("Assert")) {
+      continue;
+    }
+
+    if (statement.node.type === "VariableDeclaration") {
+      for (const declaration of statement.node.declarations) {
+        if (declaration.init !== null && declaration.init !== void 0) {
+          collectReferencedIdentifiers(declaration.init, identifiers);
+        }
+      }
+      continue;
+    }
+
+    collectReferencedIdentifiers(statement.node, identifiers);
+  }
+
+  return identifiers;
+}
+
+/**
+ * @param assertReferencedIdentifiers
+ * @param statement
+ * @example
+ */
+function isActResultAsserted(
+  assertReferencedIdentifiers: Set<string>,
+  statement: ESTree.Statement,
+): boolean {
+  for (const identifier of getActDeclaredIdentifiers(statement)) {
+    if (assertReferencedIdentifiers.has(identifier)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/**
+ * @param value
+ * @example
+ */
 function isNode(value: unknown): value is ESTree.Node {
   return (
     typeof value === "object" &&
     value !== null &&
     "type" in value &&
-    typeof (value as { type?: unknown }).type === "string"
+    typeof (
+      value as {
+        /**
+         *
+         */
+        type?: unknown;
+      }
+    ).type === "string"
   );
 }
 
+/**
+ *
+ */
 const enforceAaaPhasePurityRule: Rule.RuleModule = {
   create(context: Rule.RuleContext): Rule.RuleListener {
     return {

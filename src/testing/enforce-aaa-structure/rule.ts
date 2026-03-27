@@ -3,6 +3,9 @@ import type { Rule } from "eslint";
 import { createRuleDocumentation } from "../../custom-rule-documentation";
 import { aaaPhaseOrder, analyzeTestBlock, getFlattenedSections } from "../aaa";
 
+/**
+ *
+ */
 const enforceAaaStructureRule: Rule.RuleModule = {
   create(context: Rule.RuleContext): Rule.RuleListener {
     return {

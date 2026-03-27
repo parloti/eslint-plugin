@@ -3,6 +3,9 @@ import type { Rule } from "eslint";
 import { createRuleDocumentation } from "../../custom-rule-documentation";
 import { analyzeTestBlock, countActStatements } from "../aaa";
 
+/**
+ *
+ */
 const singleActStatementRule: Rule.RuleModule = {
   create(context: Rule.RuleContext): Rule.RuleListener {
     return {

@@ -1,7 +1,9 @@
 import { requireActResultCaptureRule } from "../../src";
-
 import { createRuleTester } from "../support/rule-tester";
 
+/**
+ *
+ */
 const ruleTester = createRuleTester();
 
 ruleTester.run("require-act-result-capture", requireActResultCaptureRule, {

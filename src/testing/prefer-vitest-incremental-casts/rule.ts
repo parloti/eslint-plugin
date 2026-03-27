@@ -1,63 +1,200 @@
 import type { Rule } from "eslint";
+
 import { ESLintUtils, TSESTree } from "@typescript-eslint/utils";
 import ts from "typescript";
 
 import { createRuleDocumentation } from "../../custom-rule-documentation";
 
-type MessageIds = "preferVitestIncrementalCasts";
-type Options = [];
+/**
+ *
+ */
+interface BuildPropertyReplacementContext {
+  /**
+   *
+   */
+  checker: ts.TypeChecker;
 
+  /**
+   *
+   */
+  keyName: string;
+
+  /**
+   *
+   */
+  moduleSpecifier: string;
+
+  /**
+   *
+   */
+  property: SupportedProperty;
+
+  /**
+   *
+   */
+  services: ReturnType<typeof ESLintUtils.getParserServices>;
+
+  /**
+   *
+   */
+  sourceText: string;
+
+  /**
+   *
+   */
+  targetPropertySymbol: ts.Symbol;
+
+  /**
+   *
+   */
+  targetType: ts.Type;
+}
+
+/**
+ *
+ */
+interface CollectMatchContext {
+  /**
+   *
+   */
+  callExpression: TSESTree.CallExpression;
+
+  /**
+   *
+   */
+  checker: ts.TypeChecker;
+
+  /**
+   *
+   */
+  services: ReturnType<typeof ESLintUtils.getParserServices>;
+
+  /**
+   *
+   */
+  sourceText: string;
+}
+
+/**
+ *
+ */
 interface MatchResult {
+  /**
+   *
+   */
   replacementText: string;
+
+  /**
+   *
+   */
   returnExpressionRange: TSESTree.Range;
 }
 
-interface PropertyReplacement {
-  replacementText: string;
-  range: TSESTree.Range;
-}
+/**
+ *
+ */
+type MessageIds = "preferVitestIncrementalCasts";
 
-type SupportedProperty = TSESTree.Property & {
-  computed: false;
-  kind: "init";
-  method: false;
-  value: TSESTree.Expression;
-};
+/**
+ *
+ */
+type Options = [];
 
-interface BuildPropertyReplacementContext {
-  checker: ts.TypeChecker;
-  keyName: string;
-  moduleSpecifier: string;
-  property: SupportedProperty;
-  services: ReturnType<typeof ESLintUtils.getParserServices>;
-  sourceText: string;
-  targetPropertySymbol: ts.Symbol;
-  targetType: ts.Type;
-}
-
-interface CollectMatchContext {
-  callExpression: TSESTree.CallExpression;
-  checker: ts.TypeChecker;
-  services: ReturnType<typeof ESLintUtils.getParserServices>;
-  sourceText: string;
-}
-
+/**
+ *
+ */
 interface OuterCastContext {
+  /**
+   *
+   */
   checker: ts.TypeChecker;
+
+  /**
+   *
+   */
   propertyNames: ReadonlySet<string>;
+
+  /**
+   *
+   */
   targetType: ts.Type;
 }
 
+/**
+ *
+ */
+interface PropertyReplacement {
+  /**
+   *
+   */
+  range: TSESTree.Range;
+
+  /**
+   *
+   */
+  replacementText: string;
+}
+
+/**
+ *
+ */
 interface ResolveFactoryTargetTypeContext {
+  /**
+   *
+   */
   callExpression: TSESTree.CallExpression;
+
+  /**
+   *
+   */
   checker: ts.TypeChecker;
+
+  /**
+   *
+   */
   factoryArgument:
     | TSESTree.ArrowFunctionExpression
     | TSESTree.FunctionExpression;
+
+  /**
+   *
+   */
   objectExpression: TSESTree.ObjectExpression;
+
+  /**
+   *
+   */
   services: ReturnType<typeof ESLintUtils.getParserServices>;
 }
 
+/**
+ *
+ */
+type SupportedProperty = TSESTree.Property & {
+  /**
+   *
+   */
+  computed: false;
+
+  /**
+   *
+   */
+  kind: "init";
+
+  /**
+   *
+   */
+  method: false;
+
+  /**
+   *
+   */
+  value: TSESTree.Expression;
+};
+
+/**
+ *
+ */
 const createRule = ESLintUtils.RuleCreator.withoutDocs;
 
 /** Enforce minimal nested casts for `vi.mock`/`vi.doMock` factory return objects. */
@@ -116,6 +253,12 @@ const preferVitestIncrementalCastsRule = createRule<Options, MessageIds>({
   name: "prefer-vitest-incremental-casts",
 }) as unknown as Rule.RuleModule;
 
+/**
+ * @param text
+ * @param replacements
+ * @param offset
+ * @example
+ */
 function applyTextReplacements(
   text: string,
   replacements: readonly PropertyReplacement[],
@@ -131,6 +274,10 @@ function applyTextReplacements(
     }, text);
 }
 
+/**
+ * @param context
+ * @example
+ */
 function buildPropertyReplacement(
   context: BuildPropertyReplacementContext,
 ): PropertyReplacement | undefined {
@@ -139,10 +286,10 @@ function buildPropertyReplacement(
     keyName,
     moduleSpecifier,
     property,
+    services,
     sourceText,
     targetPropertySymbol,
     targetType,
-    services,
   } = context;
   const baseValue = unwrapExpression(property.value);
   const baseValueText = sourceText.slice(
@@ -180,6 +327,13 @@ function buildPropertyReplacement(
     : { range: property.range, replacementText };
 }
 
+/**
+ * @param property
+ * @param baseValue
+ * @param keyName
+ * @param needsCast
+ * @example
+ */
 function canUseShorthand(
   property: SupportedProperty,
   baseValue: TSESTree.Expression,
@@ -196,6 +350,10 @@ function canUseShorthand(
   );
 }
 
+/**
+ * @param context
+ * @example
+ */
 function collectMatch(context: CollectMatchContext): MatchResult | undefined {
   const { callExpression, checker, services, sourceText } = context;
   if (!isVitestMockCall(callExpression)) {
@@ -328,6 +486,10 @@ function collectMatch(context: CollectMatchContext): MatchResult | undefined {
       };
 }
 
+/**
+ * @param factoryArgument
+ * @example
+ */
 function getFactoryReturnExpression(
   factoryArgument:
     | TSESTree.ArrowFunctionExpression
@@ -346,6 +508,10 @@ function getFactoryReturnExpression(
   return returnStatement?.argument ?? void 0;
 }
 
+/**
+ * @param moduleArgument
+ * @example
+ */
 function getModuleSpecifier(
   moduleArgument: TSESTree.Expression,
 ): string | undefined {
@@ -368,6 +534,10 @@ function getModuleSpecifier(
     : void 0;
 }
 
+/**
+ * @param propertyKey
+ * @example
+ */
 function getPropertyName(
   propertyKey: TSESTree.PropertyName,
 ): string | undefined {
@@ -381,6 +551,24 @@ function getPropertyName(
     : void 0;
 }
 
+/**
+ * @param checker
+ * @param targetType
+ * @example
+ */
+function hasObjectShape(checker: ts.TypeChecker, targetType: ts.Type): boolean {
+  return (
+    checker.getPropertiesOfType(targetType).length > 0 ||
+    checker.getSignaturesOfType(targetType, ts.SignatureKind.Call).length > 0 ||
+    checker.getSignaturesOfType(targetType, ts.SignatureKind.Construct).length >
+      0
+  );
+}
+
+/**
+ * @param context
+ * @example
+ */
 function isOuterCastRequired(context: OuterCastContext): boolean {
   const { checker, propertyNames, targetType } = context;
 
@@ -406,6 +594,26 @@ function isOuterCastRequired(context: OuterCastContext): boolean {
     );
 }
 
+/**
+ * @param property
+ * @example
+ */
+function isSupportedProperty(
+  property: TSESTree.ObjectLiteralElement,
+): property is SupportedProperty {
+  return (
+    property.type === TSESTree.AST_NODE_TYPES.Property &&
+    !property.computed &&
+    property.kind === "init" &&
+    !property.method &&
+    property.value.type !== TSESTree.AST_NODE_TYPES.AssignmentPattern
+  );
+}
+
+/**
+ * @param node
+ * @example
+ */
 function isVitestMockCall(node: TSESTree.CallExpression): boolean {
   if (node.callee.type !== TSESTree.AST_NODE_TYPES.MemberExpression) {
     return false;
@@ -421,32 +629,40 @@ function isVitestMockCall(node: TSESTree.CallExpression): boolean {
   );
 }
 
-function isSupportedProperty(
-  property: TSESTree.ObjectLiteralElement,
-): property is SupportedProperty {
-  return (
-    property.type === TSESTree.AST_NODE_TYPES.Property &&
-    !property.computed &&
-    property.kind === "init" &&
-    !property.method &&
-    property.value.type !== TSESTree.AST_NODE_TYPES.AssignmentPattern
+/**
+ * @param checker
+ * @param targetType
+ * @example
+ */
+function normalizeObjectLikeType(
+  checker: ts.TypeChecker,
+  targetType: ts.Type | undefined,
+): ts.Type | undefined {
+  if (targetType === void 0) {
+    return void 0;
+  }
+
+  const resolvedType = checker.getAwaitedType(targetType)!;
+
+  if (hasObjectShape(checker, resolvedType)) {
+    return resolvedType;
+  }
+
+  if (!resolvedType.isUnion()) {
+    return void 0;
+  }
+
+  const objectLikeTypes = resolvedType.types.filter((type) =>
+    hasObjectShape(checker, type),
   );
+
+  return objectLikeTypes.length === 1 ? objectLikeTypes[0] : void 0;
 }
 
-function shouldWrapImplicitObject(
-  factoryArgument:
-    | TSESTree.ArrowFunctionExpression
-    | TSESTree.FunctionExpression,
-  returnExpression: TSESTree.Expression,
-  objectExpression: TSESTree.ObjectExpression,
-): boolean {
-  return (
-    factoryArgument.body.type !== TSESTree.AST_NODE_TYPES.BlockStatement &&
-    (returnExpression.range[0] !== objectExpression.range[0] ||
-      returnExpression.range[1] !== objectExpression.range[1])
-  );
-}
-
+/**
+ * @param context
+ * @example
+ */
 function resolveFactoryTargetType(
   context: ResolveFactoryTargetTypeContext,
 ): ts.Type | undefined {
@@ -520,40 +736,30 @@ function resolveFactoryTargetType(
   return void 0;
 }
 
-function normalizeObjectLikeType(
-  checker: ts.TypeChecker,
-  targetType: ts.Type | undefined,
-): ts.Type | undefined {
-  if (targetType === void 0) {
-    return void 0;
-  }
-
-  const resolvedType = checker.getAwaitedType(targetType) as ts.Type;
-
-  if (hasObjectShape(checker, resolvedType)) {
-    return resolvedType;
-  }
-
-  if (!resolvedType.isUnion()) {
-    return void 0;
-  }
-
-  const objectLikeTypes = resolvedType.types.filter((type) =>
-    hasObjectShape(checker, type),
-  );
-
-  return objectLikeTypes.length === 1 ? objectLikeTypes[0] : void 0;
-}
-
-function hasObjectShape(checker: ts.TypeChecker, targetType: ts.Type): boolean {
+/**
+ * @param factoryArgument
+ * @param returnExpression
+ * @param objectExpression
+ * @example
+ */
+function shouldWrapImplicitObject(
+  factoryArgument:
+    | TSESTree.ArrowFunctionExpression
+    | TSESTree.FunctionExpression,
+  returnExpression: TSESTree.Expression,
+  objectExpression: TSESTree.ObjectExpression,
+): boolean {
   return (
-    checker.getPropertiesOfType(targetType).length > 0 ||
-    checker.getSignaturesOfType(targetType, ts.SignatureKind.Call).length > 0 ||
-    checker.getSignaturesOfType(targetType, ts.SignatureKind.Construct).length >
-      0
+    factoryArgument.body.type !== TSESTree.AST_NODE_TYPES.BlockStatement &&
+    (returnExpression.range[0] !== objectExpression.range[0] ||
+      returnExpression.range[1] !== objectExpression.range[1])
   );
 }
 
+/**
+ * @param expression
+ * @example
+ */
 function unwrapExpression(
   expression: TSESTree.Expression,
 ): TSESTree.Expression {

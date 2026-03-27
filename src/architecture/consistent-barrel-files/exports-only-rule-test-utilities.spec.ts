@@ -12,12 +12,9 @@ describe("exports-only rule test utilities", () => {
     // Arrange
     const filePath = `${process.cwd()}/src/index.ts`;
     const body = createBody();
-    const options = {
-      folders: ["**"],
-    };
 
     // Act
-    const reports = runRule(filePath, body, options);
+    const reports = runRule(filePath, body);
 
     // Assert
     expect(reports).toStrictEqual([]);
@@ -34,10 +31,11 @@ describe("exports-only rule test utilities", () => {
       try {
         return [
           runner.runDefaultIndex(body),
+          runner.runTemporaryBarrel("mod.ts", body, [
+            { allowedBarrelNames: ["mod"] },
+          ]),
           runner.runTemporaryIndex(body),
-          runner.runTemporaryIndex(body, { folders: ["tmp/**"] }),
           runner.runTemporaryFeature(body),
-          runner.runTemporaryFeature(body, { folders: ["tmp/**"] }),
         ];
       } finally {
         for (const directory of temporaryDirectories.splice(0)) {

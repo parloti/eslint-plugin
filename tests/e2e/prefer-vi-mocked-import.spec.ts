@@ -1,7 +1,9 @@
 import { preferViMockedImportRule } from "../../src";
-
 import { createRuleTester } from "../support/rule-tester";
 
+/**
+ *
+ */
 const ruleTester = createRuleTester();
 
 ruleTester.run("prefer-vi-mocked-import", preferViMockedImportRule, {

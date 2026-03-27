@@ -1,7 +1,9 @@
 import { singleActStatementRule } from "../../src";
-
 import { createRuleTester } from "../support/rule-tester";
 
+/**
+ *
+ */
 const ruleTester = createRuleTester();
 
 ruleTester.run("single-act-statement", singleActStatementRule, {

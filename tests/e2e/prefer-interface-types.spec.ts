@@ -1,7 +1,9 @@
 import { preferInterfaceTypesRule } from "../../src";
-
 import { createRuleTester } from "../support/rule-tester";
 
+/**
+ *
+ */
 const ruleTester = createRuleTester();
 
 ruleTester.run("prefer-interface-types", preferInterfaceTypesRule, {

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, expectTypeOf, it } from "vitest";
 
 import { collectMatch } from "./match";
 
@@ -38,7 +38,7 @@ describe("prefer-vi-mocked-import match", () => {
     // Arrange
 
     // Act & Assert
-    expect(typeof collectMatch).toBe("function");
+    expectTypeOf(collectMatch).toBeFunction();
   });
 
   it("returns undefined when no top-level mock call exists", () => {

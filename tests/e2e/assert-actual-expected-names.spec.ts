@@ -1,7 +1,9 @@
 import { assertActualExpectedNamesRule } from "../../src";
-
 import { createRuleTester } from "../support/rule-tester";
 
+/**
+ *
+ */
 const ruleTester = createRuleTester();
 
 ruleTester.run("assert-actual-expected-names", assertActualExpectedNamesRule, {

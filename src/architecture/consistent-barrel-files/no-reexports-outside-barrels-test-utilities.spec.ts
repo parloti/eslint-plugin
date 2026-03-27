@@ -12,12 +12,9 @@ describe("no-reexports test utilities", () => {
     // Arrange
     const filePath = `${process.cwd()}/src/feature.ts`;
     const body = createBody();
-    const options = {
-      folders: ["**"],
-    };
 
     // Act
-    const reports = runRule(filePath, body, options);
+    const reports = runRule(filePath, body);
 
     // Assert
     expect(reports).toStrictEqual([]);
@@ -35,9 +32,7 @@ describe("no-reexports test utilities", () => {
         return [
           runner.runDefaultFeature(body),
           runner.runTemporaryFeature(body),
-          runner.runTemporaryFeature(body, { folders: ["tmp/**"] }),
           runner.runTemporaryIndex(body),
-          runner.runTemporaryIndex(body, { folders: ["tmp/**"] }),
         ];
       } finally {
         for (const directory of temporaryDirectories.splice(0)) {

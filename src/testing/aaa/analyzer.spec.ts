@@ -1,6 +1,7 @@
-import { describe, expect, it } from "vitest";
-import { parser } from "typescript-eslint";
 import type * as ESTree from "estree";
+
+import { parser } from "typescript-eslint";
+import { describe, expect, it } from "vitest";
 
 import {
   aaaPhaseOrder,
@@ -23,31 +24,65 @@ import {
   usesPrefix,
 } from "./analyzer";
 
+/**
+ *
+ */
 interface ParseForEslintOptions {
+  /**
+   *
+   */
   loc: boolean;
+
+  /**
+   *
+   */
   range: boolean;
+
+  /**
+   *
+   */
   sourceType: "module";
 }
 
-interface ParserFixtureResult {
-  ast: ESTree.Program;
+/**
+ *
+ */
+interface ParserAstWithComments extends ESTree.Program {
+  /**
+   *
+   */
+  comments?: ReturnType<
+    import("eslint").Rule.RuleContext["sourceCode"]["getAllComments"]
+  >[number][];
 }
 
+/**
+ *
+ */
 interface ParserFixtureAdapter {
+  /**
+   *
+   */
   parseForESLint: (
     sourceText: string,
     options: ParseForEslintOptions,
   ) => ParserFixtureResult;
 }
 
-interface ParserAstWithComments extends ESTree.Program {
-  comments?: Array<
-    ReturnType<
-      import("eslint").Rule.RuleContext["sourceCode"]["getAllComments"]
-    >[number]
-  >;
+/**
+ *
+ */
+interface ParserFixtureResult {
+  /**
+   *
+   */
+  ast: ESTree.Program;
 }
 
+/**
+ * @param code
+ * @example
+ */
 function getFirstFunctionBodyStatement(code: string) {
   const program = (parser as unknown as ParserFixtureAdapter).parseForESLint(
     `async function demo(): Promise<void> {\n${code}\n}`,
@@ -68,6 +103,10 @@ function getFirstFunctionBodyStatement(code: string) {
   return declaration.body.body[0];
 }
 
+/**
+ * @param code
+ * @example
+ */
 function parseProgram(code: string): ParserAstWithComments {
   return (parser as unknown as ParserFixtureAdapter).parseForESLint(code, {
     loc: true,
@@ -76,17 +115,17 @@ function parseProgram(code: string): ParserAstWithComments {
   }).ast as ParserAstWithComments;
 }
 
-describe("AAA analyzer helpers", () => {
+describe("aAA analyzer helpers", () => {
   it("parses strict AAA section comments and combined markers", () => {
     // Arrange
 
     // Act
     const phases = {
-      empty: getSectionPhases(""),
       arrange: getSectionPhases("Arrange"),
       arrangeAct: getSectionPhases("Arrange & Act"),
-      lowercaseArrange: getSectionPhases("arrange"),
       cleanup: getSectionPhases("Arrange & cleanup"),
+      empty: getSectionPhases(""),
+      lowercaseArrange: getSectionPhases("arrange"),
     };
 
     // Assert
@@ -102,8 +141,8 @@ describe("AAA analyzer helpers", () => {
 
     // Act
     const ordering = {
-      arrangeBeforeAct: aaaPhaseOrder.Arrange < aaaPhaseOrder.Act,
       actBeforeAssert: aaaPhaseOrder.Act < aaaPhaseOrder.Assert,
+      arrangeBeforeAct: aaaPhaseOrder.Arrange < aaaPhaseOrder.Act,
     };
 
     // Assert
@@ -208,21 +247,18 @@ describe("AAA analyzer helpers", () => {
 
     // Act
     const identifiers = {
-      expectCall: getAssertionIdentifiers(
-        getFirstFunctionBodyStatement(
-          "expect(actualResult).toBe(expectedValue);",
-        ),
-      ),
       assertCall: getAssertionIdentifiers(
         getFirstFunctionBodyStatement(
           "assert.equal(actualValue, expectedValue);",
         ),
       ),
-      spreadActual: getAssertionIdentifiers(
-        getFirstFunctionBodyStatement("assert.equal(...values);"),
+      declaration: getAssertionIdentifiers(
+        getFirstFunctionBodyStatement("const actualValue = 1;"),
       ),
-      spreadExpected: getAssertionIdentifiers(
-        getFirstFunctionBodyStatement("assert.equal(actualValue, ...values);"),
+      expectCall: getAssertionIdentifiers(
+        getFirstFunctionBodyStatement(
+          "expect(actualResult).toBe(expectedValue);",
+        ),
       ),
       expectSpreadActual: getAssertionIdentifiers(
         getFirstFunctionBodyStatement("expect(...values).toBe(expectedValue);"),
@@ -230,16 +266,19 @@ describe("AAA analyzer helpers", () => {
       expectSpreadExpected: getAssertionIdentifiers(
         getFirstFunctionBodyStatement("expect(actualValue).toBe(...values);"),
       ),
+      expression: getAssertionIdentifiers(
+        getFirstFunctionBodyStatement("actualValue;"),
+      ),
       memberExpectation: getAssertionIdentifiers(
         getFirstFunctionBodyStatement(
           "service.expectation().toBe(expectedValue);",
         ),
       ),
-      declaration: getAssertionIdentifiers(
-        getFirstFunctionBodyStatement("const actualValue = 1;"),
+      spreadActual: getAssertionIdentifiers(
+        getFirstFunctionBodyStatement("assert.equal(...values);"),
       ),
-      expression: getAssertionIdentifiers(
-        getFirstFunctionBodyStatement("actualValue;"),
+      spreadExpected: getAssertionIdentifiers(
+        getFirstFunctionBodyStatement("assert.equal(actualValue, ...values);"),
       ),
     };
 
@@ -299,13 +338,13 @@ describe("AAA analyzer helpers", () => {
     // Act
     const result = {
       actionStatement: isMeaningfulActStatement(actionStatement),
+      assertionStatement: isMeaningfulActStatement(assertionStatement),
       setupStatement: isSetupLikeStatement(setupStatement),
       uninitializedSetupStatement: isSetupLikeStatement(
         uninitializedSetupStatement,
       ),
-      assertionStatement: isMeaningfulActStatement(assertionStatement),
-      validAssertionStatement: isValidAssertStatement(assertionStatement),
       validActionStatement: isValidAssertStatement(actionStatement),
+      validAssertionStatement: isValidAssertStatement(assertionStatement),
       validUninitializedActual: isValidAssertStatement(
         getFirstFunctionBodyStatement("let actualResult;"),
       ),
@@ -335,9 +374,9 @@ describe("AAA analyzer helpers", () => {
 
     // Act
     const result = {
-      sourceCodeSetup: isSetupLikeStatement(sourceCodeSetup),
       eslintSetup: isSetupLikeStatement(eslintSetup),
       ruleListenerSetup: isSetupLikeStatement(ruleListenerSetup),
+      sourceCodeSetup: isSetupLikeStatement(sourceCodeSetup),
     };
 
     // Assert
@@ -351,13 +390,13 @@ describe("AAA analyzer helpers", () => {
 
     // Act
     const result = {
-      asyncThen: hasAsyncLogic(
-        getFirstFunctionBodyStatement("task.then(handleResult);"),
-      ),
       asyncPromise: hasAsyncLogic(
         getFirstFunctionBodyStatement(
           "const deferred = new Promise((resolve) => resolve(void 0));",
         ),
+      ),
+      asyncThen: hasAsyncLogic(
+        getFirstFunctionBodyStatement("task.then(handleResult);"),
       ),
       awaitCall: hasAwait(getFirstFunctionBodyStatement("await run(input);")),
       capturableRun: hasCapturableActResult(
@@ -387,8 +426,23 @@ describe("AAA analyzer helpers", () => {
     const nonMutationUnaryStatement = getFirstFunctionBodyStatement("!ready;");
     const assertionStatement = getFirstFunctionBodyStatement(
       "expect(result).toBe(expectedValue);",
-    ) as Extract<typeof mutationStatement, { type: "ExpressionStatement" }> & {
+    ) as Extract<
+      typeof mutationStatement,
+      {
+        /**
+         *
+         */
+        type: "ExpressionStatement";
+      }
+    > & {
+      /**
+       *
+       */
       duplicate?: object;
+
+      /**
+       *
+       */
       parent?: object;
     };
 
@@ -397,13 +451,13 @@ describe("AAA analyzer helpers", () => {
 
     // Act
     const result = {
-      mutationStatement: hasMutation(mutationStatement),
-      nonMutationUnaryStatement: hasMutation(nonMutationUnaryStatement),
       assertionStatement: hasAssertion(assertionStatement),
       blankLineBeforeComment: hasBlankLineBeforeComment("// Arrange", {
         type: "Line",
         value: " Arrange",
       } as never),
+      mutationStatement: hasMutation(mutationStatement),
+      nonMutationUnaryStatement: hasMutation(nonMutationUnaryStatement),
     };
 
     // Assert
@@ -482,6 +536,9 @@ describe("AAA analyzer helpers", () => {
 
       (
         firstStatement as ESTree.Statement & {
+          /**
+           *
+           */
           loc?: ESTree.SourceLocation | null;
         }
       ).loc = null;
@@ -519,18 +576,11 @@ describe("AAA analyzer helpers", () => {
 
     // Act
     const result = {
-      valueSetup: isSetupLikeStatement(getFirstFunctionBodyStatement("value;")),
-      dependencySetup: isSetupLikeStatement(
-        getFirstFunctionBodyStatement("dependencies[key]();"),
-      ),
-      optionalCall: hasCapturableActResult(
-        getFirstFunctionBodyStatement("dependencies?.run?.(input);"),
-      ),
       computedCall: hasCapturableActResult(
         getFirstFunctionBodyStatement("dependencies[key](input);"),
       ),
-      stringComputedCall: hasCapturableActResult(
-        getFirstFunctionBodyStatement('dependencies["run"](input);'),
+      dependencySetup: isSetupLikeStatement(
+        getFirstFunctionBodyStatement("dependencies[key]();"),
       ),
       helperAnalysis: analyzeTestBlock(
         {
@@ -542,6 +592,12 @@ describe("AAA analyzer helpers", () => {
         } as never,
         helperCallExpression,
       ),
+      optionalCall: hasCapturableActResult(
+        getFirstFunctionBodyStatement("dependencies?.run?.(input);"),
+      ),
+      stringComputedCall: hasCapturableActResult(
+        getFirstFunctionBodyStatement('dependencies["run"](input);'),
+      ),
       todoAnalysis: analyzeTestBlock(
         {
           sourceCode: {
@@ -552,6 +608,7 @@ describe("AAA analyzer helpers", () => {
         } as never,
         todoCallExpression,
       ),
+      valueSetup: isSetupLikeStatement(getFirstFunctionBodyStatement("value;")),
     };
 
     // Assert
@@ -654,14 +711,14 @@ describe("AAA analyzer helpers", () => {
       assertMemberCall: hasAssertion(
         getFirstFunctionBodyStatement("assert.equal(actual, expected);"),
       ),
+      indirectFactoryCall: hasAssertion(
+        getFirstFunctionBodyStatement("(factory())();"),
+      ),
       nonAssertMemberCall: hasAssertion(
         getFirstFunctionBodyStatement("service.execute(actual);"),
       ),
       setupLikeComputedDependency: isSetupLikeStatement(
         getFirstFunctionBodyStatement("dependencies[key]();"),
-      ),
-      indirectFactoryCall: hasAssertion(
-        getFirstFunctionBodyStatement("(factory())();"),
       ),
     };
 

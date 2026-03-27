@@ -4,6 +4,10 @@ import type * as ESTree from "estree";
 import { createRuleDocumentation } from "../../custom-rule-documentation";
 import { analyzeTestBlock, hasCapturableActResult } from "../aaa";
 
+/**
+ * @param statement
+ * @example
+ */
 function isHelperDrivenAct(statement: ESTree.Statement): boolean {
   if (statement.type !== "ExpressionStatement") {
     return false;
@@ -19,7 +23,7 @@ function isHelperDrivenAct(statement: ESTree.Statement): boolean {
     expression.callee.object.type === "Identifier" &&
     expression.callee.property.type === "Identifier" &&
     expression.callee.property.name === "create" &&
-    /Rule$/u.test(expression.callee.object.name)
+    expression.callee.object.name.endsWith("Rule")
   ) {
     return true;
   }
@@ -43,6 +47,9 @@ function isHelperDrivenAct(statement: ESTree.Statement): boolean {
   );
 }
 
+/**
+ *
+ */
 const requireActResultCaptureRule: Rule.RuleModule = {
   create(context: Rule.RuleContext): Rule.RuleListener {
     return {

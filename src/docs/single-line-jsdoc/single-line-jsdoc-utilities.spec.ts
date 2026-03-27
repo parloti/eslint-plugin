@@ -16,8 +16,8 @@ describe("single-line-jsdoc utilities", () => {
 
     // Act
     const result = {
-      defaultMaxLineLength: normalizeMaxLineLength([]),
       configuredMaxLineLength: normalizeMaxLineLength(configuredOptions),
+      defaultMaxLineLength: normalizeMaxLineLength([]),
     };
 
     // Assert

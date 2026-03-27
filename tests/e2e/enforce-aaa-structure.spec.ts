@@ -1,7 +1,9 @@
 import { enforceAaaStructureRule } from "../../src";
-
 import { createRuleTester } from "../support/rule-tester";
 
+/**
+ *
+ */
 const ruleTester = createRuleTester();
 
 ruleTester.run("enforce-aaa-structure", enforceAaaStructureRule, {

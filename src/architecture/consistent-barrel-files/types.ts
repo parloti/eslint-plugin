@@ -1,31 +1,22 @@
 /** Type definition for rule data. */
 interface BarrelFilesExportsOnlyOptions {
-  /** Folders helper value. */
-  folders?: string | string[];
-
-  /** Names helper value. */
-  names?: string | string[];
+  /** AllowedBarrelNames helper value. */
+  allowedBarrelNames?: string[];
 }
 
 /** Type definition for rule data. */
 interface ConsistentBarrelFilesOptions {
+  /** AllowedNames helper value. */
+  allowedNames?: string[];
+
   /** Enforce helper value. */
   enforce?: boolean;
-
-  /** Folders helper value. */
-  folders?: string | string[];
-
-  /** Names helper value. */
-  names?: string | string[];
 }
 
 /** Type definition for rule data. */
 interface NoReexportsOutsideBarrelsOptions {
-  /** Folders helper value. */
-  folders?: string | string[];
-
-  /** Names helper value. */
-  names?: string | string[];
+  /** AllowedBarrelNames helper value. */
+  allowedBarrelNames?: string[];
 }
 
 export type {

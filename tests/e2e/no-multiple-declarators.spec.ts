@@ -1,7 +1,9 @@
 import { noMultipleDeclaratorsRule } from "../../src";
-
 import { createRuleTester } from "../support/rule-tester";
 
+/**
+ *
+ */
 const ruleTester = createRuleTester();
 
 ruleTester.run("no-multiple-declarators", noMultipleDeclaratorsRule, {

@@ -12,6 +12,9 @@ import {
   hasBlankLineBeforeComment,
 } from "../aaa";
 
+/**
+ *
+ */
 const requireAaaSectionsRule: Rule.RuleModule = {
   create(context: Rule.RuleContext): Rule.RuleListener {
     return {
@@ -45,83 +48,12 @@ const requireAaaSectionsRule: Rule.RuleModule = {
   },
 };
 
-function reportBlankLineSeparators(
-  context: Rule.RuleContext,
-  analysis: TestBlockAnalysis,
-): void {
-  for (const sectionComment of getPhaseBoundaryComments(analysis)) {
-    if (
-      hasBlankLineBeforeComment(analysis.sourceText, sectionComment.comment)
-    ) {
-      continue;
-    }
-
-    context.report({
-      data: { section: sectionComment.phases.join(" & ") },
-      fix: (fixer) =>
-        fixer.insertTextBeforeRange(
-          getLineStartRange(
-            analysis.sourceText,
-            sectionComment.comment.loc.start.line,
-          ),
-          analysis.newline,
-        ),
-      messageId: "blankLineBeforeSection",
-      node: sectionComment.comment,
-    });
-  }
-}
-
-function reportCodeBeforeArrange(
-  context: Rule.RuleContext,
-  analysis: TestBlockAnalysis,
-): void {
-  const firstArrangeLine = analysis.sectionComments.find((sectionComment) =>
-    sectionComment.phases.includes("Arrange"),
-  )?.comment.loc.start.line;
-  if (firstArrangeLine === void 0) {
-    return;
-  }
-
-  const statementBeforeArrange = analysis.statements.find(
-    (statement) => statement.node.loc.start.line < firstArrangeLine,
-  );
-  if (statementBeforeArrange === void 0) {
-    return;
-  }
-
-  context.report({
-    messageId: "codeBeforeArrange",
-    node: statementBeforeArrange.node,
-  });
-}
-
-function reportMissingSections(
-  context: Rule.RuleContext,
-  analysis: TestBlockAnalysis,
-): void {
-  const presentSections = new Set(
-    analysis.sectionComments.flatMap((sectionComment) => sectionComment.phases),
-  );
-  const missingSections = (["Arrange", "Act", "Assert"] as const).filter(
-    (phase) => !presentSections.has(phase),
-  );
-
-  if (missingSections.length === 0) {
-    return;
-  }
-
-  context.report({
-    data: { sections: missingSections.join(", ") },
-    fix:
-      analysis.bodyLineCount >= 3
-        ? (fixer) => buildMissingSectionFixes(analysis, missingSections, fixer)
-        : null,
-    messageId: "missingSections",
-    node: analysis.callExpression,
-  });
-}
-
+/**
+ * @param analysis
+ * @param missingSections
+ * @param fixer
+ * @example
+ */
 function buildMissingSectionFixes(
   analysis: TestBlockAnalysis,
   missingSections: readonly AaaPhase[],
@@ -177,6 +109,98 @@ function buildMissingSectionFixes(
       lineStartRange,
       `${needsLeadingBlankLine ? analysis.newline : ""}${indentation}// ${sortedPhases.join(" & ")}${analysis.newline}`,
     );
+  });
+}
+
+/**
+ * @param context
+ * @param analysis
+ * @example
+ */
+function reportBlankLineSeparators(
+  context: Rule.RuleContext,
+  analysis: TestBlockAnalysis,
+): void {
+  for (const sectionComment of getPhaseBoundaryComments(analysis)) {
+    if (
+      hasBlankLineBeforeComment(analysis.sourceText, sectionComment.comment)
+    ) {
+      continue;
+    }
+
+    context.report({
+      data: { section: sectionComment.phases.join(" & ") },
+      fix: (fixer) =>
+        fixer.insertTextBeforeRange(
+          getLineStartRange(
+            analysis.sourceText,
+            sectionComment.comment.loc.start.line,
+          ),
+          analysis.newline,
+        ),
+      messageId: "blankLineBeforeSection",
+      node: sectionComment.comment,
+    });
+  }
+}
+
+/**
+ * @param context
+ * @param analysis
+ * @example
+ */
+function reportCodeBeforeArrange(
+  context: Rule.RuleContext,
+  analysis: TestBlockAnalysis,
+): void {
+  const firstArrangeLine = analysis.sectionComments.find((sectionComment) =>
+    sectionComment.phases.includes("Arrange"),
+  )?.comment.loc.start.line;
+  if (firstArrangeLine === void 0) {
+    return;
+  }
+
+  const statementBeforeArrange = analysis.statements.find(
+    (statement) => statement.node.loc.start.line < firstArrangeLine,
+  );
+  if (statementBeforeArrange === void 0) {
+    return;
+  }
+
+  context.report({
+    messageId: "codeBeforeArrange",
+    node: statementBeforeArrange.node,
+  });
+}
+
+/**
+ * @param context
+ * @param analysis
+ * @example
+ */
+function reportMissingSections(
+  context: Rule.RuleContext,
+  analysis: TestBlockAnalysis,
+): void {
+  const presentSections = new Set(
+    analysis.sectionComments.flatMap((sectionComment) => sectionComment.phases),
+  );
+  const missingSections = (["Arrange", "Act", "Assert"] as const).filter(
+    (phase) => !presentSections.has(phase),
+  );
+
+  if (missingSections.length === 0) {
+    return;
+  }
+
+  context.report({
+    data: { sections: missingSections.join(", ") },
+    fix:
+      analysis.bodyLineCount >= 3
+        ? (fixer) => buildMissingSectionFixes(analysis, missingSections, fixer)
+        : null,
+    messageId: "missingSections",
+    node: analysis.callExpression,
   });
 }
 

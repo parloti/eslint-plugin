@@ -1,9 +1,13 @@
-import { describe, expect, it } from "vitest";
 import { Linter } from "eslint";
 import { parser } from "typescript-eslint";
+import { describe, expect, it } from "vitest";
 
 import { requireAaaSectionsRule } from "./rule";
 
+/**
+ * @param code
+ * @example
+ */
 function runFix(code: string) {
   const linter = new Linter({ configType: "flat" });
 

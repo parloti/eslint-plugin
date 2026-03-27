@@ -1,12 +1,21 @@
 import type { Rule } from "eslint";
 
-import tseslint from "typescript-eslint";
 import { RuleTester } from "@typescript-eslint/rule-tester";
+import tseslint from "typescript-eslint";
 import * as vitest from "vitest";
 
+/**
+ *
+ */
 const e2eRuleTestTimeout = 45_000;
 
+/**
+ *
+ */
 interface E2ERuleTester {
+  /**
+   *
+   */
   run: (
     name: string,
     rule: Rule.RuleModule,
@@ -16,10 +25,16 @@ interface E2ERuleTester {
 
 RuleTester.afterAll = vitest.afterAll;
 RuleTester.describe = vitest.describe;
-RuleTester.it = (name, test) => vitest.it(name, test, e2eRuleTestTimeout);
-RuleTester.itOnly = (name, test) =>
+RuleTester.it = (name, test) => {
+  vitest.it(name, test, e2eRuleTestTimeout);
+};
+RuleTester.itOnly = (name, test) => {
   vitest.it.only(name, test, e2eRuleTestTimeout);
+};
 
+/**
+ * @example
+ */
 const createRuleTester = (): E2ERuleTester => {
   const ruleTester = new RuleTester({
     languageOptions: {

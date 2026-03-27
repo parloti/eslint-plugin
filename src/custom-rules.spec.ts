@@ -79,7 +79,7 @@ describe("custom rule registry", () => {
       {
         createType: "function",
         description:
-          "Require barrel files to only contain re-export statements.",
+          "Require barrel files to only contain re-export statements or type-only declarations.",
         hasMessages: true,
         ruleName: "barrel-files-exports-only",
         schemaIsArray: true,

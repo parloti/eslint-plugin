@@ -3,12 +3,18 @@ import { parser } from "typescript-eslint";
 import { describe, expect, it } from "vitest";
 
 import { enforceAaaPhasePurityRule } from "../../src";
-
 import { createRuleTester } from "../support/rule-tester";
 
+/**
+ *
+ */
 const ruleTester = createRuleTester();
 
-function runRule(code: string): Array<string | undefined> {
+/**
+ * @param code
+ * @example
+ */
+function runRule(code: string): (string | undefined)[] {
   const linter = new Linter({ configType: "flat" });
 
   return linter

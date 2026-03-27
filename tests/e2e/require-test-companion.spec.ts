@@ -1,23 +1,40 @@
 import { afterAll } from "vitest";
 
 import { requireTestCompanionRule } from "../../src";
-
 import { createRuleTester } from "../support/rule-tester";
 import { createTemporaryFixtureManager } from "../support/temporary-fixtures";
 
+/**
+ *
+ */
 const ruleTester = createRuleTester();
+
+/**
+ *
+ */
 const { cleanupTemporaryDirectories, createFixtureSet } =
   createTemporaryFixtureManager();
 
 afterAll(cleanupTemporaryDirectories);
 
+/**
+ *
+ */
 const sourceWithTest = createFixtureSet({
   "feature.spec.ts": "export {};",
   "feature.ts": "export const feature = 1;",
 });
+
+/**
+ *
+ */
 const sourceWithoutTest = createFixtureSet({
   "feature.ts": "export const feature = 1;",
 });
+
+/**
+ *
+ */
 const testWithoutSource = createFixtureSet({
   "feature.test.ts": "export {};",
 });

@@ -1,12 +1,17 @@
 import { afterAll } from "vitest";
 
 import { preferVitestIncrementalCastsRule } from "../../src";
-
 import { createRuleTester } from "../support/rule-tester";
 import { createTemporaryFixtureManager } from "../support/temporary-fixtures";
 
+/**
+ *
+ */
 const ruleTester = createRuleTester();
 
+/**
+ *
+ */
 const declarationText = [
   'declare module "fixture-module" {',
   "  export const configs: { disableTypeChecked: { rules: string[]; strict: boolean } };",
@@ -21,6 +26,9 @@ const declarationText = [
   "",
 ].join("\n");
 
+/**
+ *
+ */
 const tsconfigText = JSON.stringify(
   {
     compilerOptions: {
@@ -36,11 +44,18 @@ const tsconfigText = JSON.stringify(
   2,
 );
 
+/**
+ *
+ */
 const { cleanupTemporaryDirectories, createFixtureSet } =
   createTemporaryFixtureManager();
 
 afterAll(cleanupTemporaryDirectories);
 
+/**
+ * @param code
+ * @example
+ */
 const createTypeAwareCase = (code: string) => {
   const fixtureSet = createFixtureSet({
     "example.spec.ts": code,

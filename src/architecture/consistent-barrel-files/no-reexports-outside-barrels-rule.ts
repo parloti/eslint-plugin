@@ -96,25 +96,10 @@ const noReexportsOutsideBarrelsRule: Rule.RuleModule = {
       {
         additionalProperties: false,
         properties: {
-          folders: {
-            oneOf: [
-              { type: "string" },
-              {
-                items: { type: "string" },
-                minItems: 1,
-                type: "array",
-              },
-            ],
-          },
-          names: {
-            oneOf: [
-              { type: "string" },
-              {
-                items: { type: "string" },
-                minItems: 1,
-                type: "array",
-              },
-            ],
+          allowedBarrelNames: {
+            items: { type: "string" },
+            minItems: 1,
+            type: "array",
           },
         },
         type: "object",

@@ -5,33 +5,101 @@ import { describe, expect, expectTypeOf, it } from "vitest";
 import { applyFixes, getFixes } from "../../docs/test-helpers";
 import { noMultipleDeclaratorsRule } from "./rule";
 
-type Range = [number, number];
-
-interface MockNode {
-  declarations?: MockNode[];
-  init?: MockNode | null;
-  kind?: string;
-  left?: MockNode;
-  parent?: MockNode;
-  range?: Range;
-  type: string;
-}
-
-interface ReportEntry {
-  fix: null | Rule.ReportFixer | undefined;
-  messageId: string | undefined;
-  nodeType: string | undefined;
-}
-
-interface RuleContextState {
-  context: Rule.RuleContext;
-  reports: ReportEntry[];
-}
-
+/**
+ *
+ */
 interface ContextOptions {
+  /**
+   *
+   */
   omitText?: boolean;
 }
 
+/**
+ *
+ */
+interface MockNode {
+  /**
+   *
+   */
+  declarations?: MockNode[];
+
+  /**
+   *
+   */
+  init?: MockNode | null;
+
+  /**
+   *
+   */
+  kind?: string;
+
+  /**
+   *
+   */
+  left?: MockNode;
+
+  /**
+   *
+   */
+  parent?: MockNode;
+
+  /**
+   *
+   */
+  range?: Range;
+
+  /**
+   *
+   */
+  type: string;
+}
+
+/**
+ *
+ */
+type Range = [number, number];
+
+/**
+ *
+ */
+interface ReportEntry {
+  /**
+   *
+   */
+  fix: null | Rule.ReportFixer | undefined;
+
+  /**
+   *
+   */
+  messageId: string | undefined;
+
+  /**
+   *
+   */
+  nodeType: string | undefined;
+}
+
+/**
+ *
+ */
+interface RuleContextState {
+  /**
+   *
+   */
+  context: Rule.RuleContext;
+
+  /**
+   *
+   */
+  reports: ReportEntry[];
+}
+
+/**
+ * @param sourceText
+ * @param options
+ * @example
+ */
 const createContext = (
   sourceText: string,
   options?: ContextOptions,
@@ -67,6 +135,13 @@ const createContext = (
   return { context, reports };
 };
 
+/**
+ * @param sourceText
+ * @param statementText
+ * @param declaratorTexts
+ * @param kind
+ * @example
+ */
 const createVariableDeclaration = (
   sourceText: string,
   statementText: string,
@@ -105,6 +180,11 @@ const createVariableDeclaration = (
   return declarationNode;
 };
 
+/**
+ * @param context
+ * @param node
+ * @example
+ */
 const runRule = (context: Rule.RuleContext, node: MockNode): void => {
   const listeners = noMultipleDeclaratorsRule.create(context);
   const listener = listeners.VariableDeclaration as
@@ -117,15 +197,16 @@ const runRule = (context: Rule.RuleContext, node: MockNode): void => {
 describe("no-multiple-declarators rule", () => {
   it("exposes metadata", () => {
     // Arrange
-    const meta = noMultipleDeclaratorsRule.meta;
+    const { meta } = noMultipleDeclaratorsRule;
 
     // Act
-    const create = noMultipleDeclaratorsRule.create;
+    const { create } = noMultipleDeclaratorsRule;
 
     // Assert
     expect(meta?.type).toBe("suggestion");
     expect(meta?.fixable).toBe("code");
-    expect(typeof create).toBe("function");
+
+    expectTypeOf(create).toBeFunction();
   });
 
   it("reports declarations with multiple declarators", () => {

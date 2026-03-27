@@ -13,7 +13,7 @@ Scope:
 Run only this suite with:
 
 ```bash
-npm test -- tests/e2e/*.spec.ts --coverage.enabled=false
+npm test -- tests/e2e/*.test.ts --coverage.enabled=false
 ```
 
 Run the full package validation with:

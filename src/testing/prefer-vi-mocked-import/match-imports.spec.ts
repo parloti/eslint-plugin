@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, expectTypeOf, it } from "vitest";
 
 import { resolveImportPlan } from "./match-imports";
 
@@ -7,7 +7,7 @@ describe("prefer-vi-mocked-import match-imports", () => {
     // Arrange
 
     // Act & Assert
-    expect(typeof resolveImportPlan).toBe("function");
+    expectTypeOf(resolveImportPlan).toBeFunction();
   });
 
   it("returns insert plan after namespace import for same module", () => {

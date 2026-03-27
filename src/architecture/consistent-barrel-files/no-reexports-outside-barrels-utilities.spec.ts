@@ -14,7 +14,7 @@ import {
 describe("no-reexports utilities", () => {
   it("normalizes options and checks barrels", () => {
     // Arrange
-    const state = getOptions([{ folders: ["src/**"], names: ["index.ts"] }]);
+    const state = getOptions([{ allowedBarrelNames: ["index"] }]);
     const barrel = `${process.cwd()}/src/index.ts`;
     const featurePath = `${process.cwd()}/src/feature.ts`;
 
@@ -62,7 +62,7 @@ describe("no-reexports utilities", () => {
 
   it("skips non-lintable paths", () => {
     // Arrange
-    const state = getOptions([{ folders: ["src/**"], names: ["index.ts"] }]);
+    const state = getOptions([{ allowedBarrelNames: ["index"] }]);
     const outside = path.resolve(process.cwd(), "..", "outside.ts");
 
     // Act
@@ -76,18 +76,22 @@ describe("no-reexports utilities", () => {
     expect(result.outsideShouldLint).toBe(false);
   });
 
-  it("skips when options are empty", () => {
+  it("supports custom barrel stems", () => {
     // Arrange
-    const state = getOptions([{ folders: [], names: [] }]);
+    const state = getOptions([{ allowedBarrelNames: ["mod"] }]);
 
     // Act
-    const featureShouldLint = shouldLintFile(
-      `${process.cwd()}/src/feature.ts`,
-      state,
-    );
+    const result = {
+      barrelDetected: isBarrelFile(`${process.cwd()}/src/mod.ts`, state),
+      featureShouldLint: shouldLintFile(
+        `${process.cwd()}/src/feature.ts`,
+        state,
+      ),
+    };
 
     // Assert
-    expect(featureShouldLint).toBe(false);
+    expect(result.barrelDetected).toBe(true);
+    expect(result.featureShouldLint).toBe(true);
   });
 
   describe.runIf(path.sep === "\\")("windows paths", () => {
@@ -96,7 +100,7 @@ describe("no-reexports utilities", () => {
       const { root } = path.parse(process.cwd());
       const driveLetter = root[0]?.toUpperCase() ?? "C";
       const otherDrive = driveLetter === "C" ? "Z" : "C";
-      const state = getOptions([{ folders: ["src/**"], names: ["index.ts"] }]);
+      const state = getOptions([{ allowedBarrelNames: ["index"] }]);
 
       // Act
       const shouldLint = (() => {

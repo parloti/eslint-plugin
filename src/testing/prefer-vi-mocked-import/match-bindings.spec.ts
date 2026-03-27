@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, expectTypeOf, it } from "vitest";
 
 import type { Declaration } from "./types";
 
@@ -9,7 +9,7 @@ describe("prefer-vi-mocked-import match-bindings", () => {
     // Arrange
 
     // Act & Assert
-    expect(typeof collectBindings).toBe("function");
+    expectTypeOf(collectBindings).toBeFunction();
   });
 
   it("ignores properties with keys that do not include a range", () => {

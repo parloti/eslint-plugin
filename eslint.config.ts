@@ -1,29 +1,16 @@
+import { config } from "@codeperfect/eslint-config";
 import { defineConfig } from "eslint/config";
-import globals from "globals";
-import { parser } from "typescript-eslint";
+import { all } from "./src";
 
-import codeperfectPlugin from "./src";
+const shared = await config({
+  disabledPlugins: [
+    "boundaries",
+    "codeperfect",
+    "rxjs-x",
+    "jasmine",
+    "jest",
+    "playwright",
+  ],
+});
 
-export default defineConfig(
-  {
-    ignores: ["coverage/**", "dist/**"],
-  },
-  {
-    files: ["**/*.ts"],
-    languageOptions: {
-      ecmaVersion: "latest",
-      globals: globals.node,
-      parser,
-      sourceType: "module",
-    },
-    plugins: {
-      codeperfect: codeperfectPlugin,
-    },
-    rules: Object.fromEntries(
-      Object.keys(codeperfectPlugin.rules).map((ruleName) => [
-        `codeperfect/${ruleName}`,
-        "error",
-      ]),
-    ),
-  },
-);
+export default defineConfig(shared, all);

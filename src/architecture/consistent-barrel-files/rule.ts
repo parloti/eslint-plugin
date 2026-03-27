@@ -33,33 +33,18 @@ const consistentBarrelFilesRule: Rule.RuleModule = {
       forbiddenBarrel:
         "Barrel files are forbidden. Remove the barrel file '{{name}}'.",
       missingBarrel:
-        "Each folder must include a barrel file named one of: {{names}}.",
+        "Each folder must include a barrel file named with one of these stems: {{names}}.",
     },
     schema: [
       {
         additionalProperties: false,
         properties: {
+          allowedNames: {
+            items: { type: "string" },
+            minItems: 1,
+            type: "array",
+          },
           enforce: { type: "boolean" },
-          folders: {
-            oneOf: [
-              { type: "string" },
-              {
-                items: { type: "string" },
-                minItems: 1,
-                type: "array",
-              },
-            ],
-          },
-          names: {
-            oneOf: [
-              { type: "string" },
-              {
-                items: { type: "string" },
-                minItems: 1,
-                type: "array",
-              },
-            ],
-          },
         },
         type: "object",
       },

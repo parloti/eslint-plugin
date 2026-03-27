@@ -4,8 +4,6 @@ import type * as ESTree from "estree";
 import { SourceCode } from "eslint";
 import path from "node:path";
 
-import type { BarrelFilesExportsOnlyOptions } from "./types";
-
 import { barrelFilesExportsOnlyRule } from "./exports-only-rule";
 import { createProgram, createRepoDirectory } from "./test-helpers";
 
@@ -20,8 +18,8 @@ interface RuleContextParameters {
   /** Filename field value. */
   filename: string;
 
-  /** Options helper value. */
-  options?: BarrelFilesExportsOnlyOptions;
+  /** Options field value. */
+  options: readonly unknown[];
 
   /** Reports field value. */
   reports: RuleReport[];
@@ -44,8 +42,8 @@ interface TemporaryFileOptions {
   /** Filename field value. */
   filename: string;
 
-  /** Options helper value. */
-  options?: BarrelFilesExportsOnlyOptions;
+  /** Options field value. */
+  options?: readonly unknown[];
 
   /** Root field value. */
   root: "src" | "tmp";
@@ -56,17 +54,18 @@ interface TemporaryRunner {
   /** RunDefaultIndex field value. */
   runDefaultIndex: (body: ESTree.Program["body"]) => RuleReport[];
 
-  /** RunTemporaryFeature field value. */
-  runTemporaryFeature: (
+  /** RunTemporaryBarrel field value. */
+  runTemporaryBarrel: (
+    filename: string,
     body: ESTree.Program["body"],
-    options?: BarrelFilesExportsOnlyOptions,
+    options?: readonly unknown[],
   ) => RuleReport[];
 
+  /** RunTemporaryFeature field value. */
+  runTemporaryFeature: (body: ESTree.Program["body"]) => RuleReport[];
+
   /** RunTemporaryIndex field value. */
-  runTemporaryIndex: (
-    body: ESTree.Program["body"],
-    options?: BarrelFilesExportsOnlyOptions,
-  ) => RuleReport[];
+  runTemporaryIndex: (body: ESTree.Program["body"]) => RuleReport[];
 }
 
 /**
@@ -89,7 +88,7 @@ const createRuleContext = (
       ecmaVersion: "latest",
       sourceType: "module",
     },
-    options: parameters.options === void 0 ? [] : [parameters.options],
+    options: parameters.options,
     parserOptions: {},
     parserPath: void 0,
     physicalFilename: parameters.filename,
@@ -115,15 +114,15 @@ const createRuleContext = (
 const runRule = (
   filename: string,
   body: ESTree.Program["body"],
-  options?: BarrelFilesExportsOnlyOptions,
+  options: readonly unknown[] = [],
 ): RuleReport[] => {
   const reports: RuleReport[] = [];
   const sourceCode = new SourceCode("", createProgram(body));
   const context = createRuleContext({
     filename,
+    options,
     reports,
     sourceCode,
-    ...(options === void 0 ? {} : { options }),
   });
   const listeners = barrelFilesExportsOnlyRule.create(context);
   const programListener = listeners.Program;
@@ -156,29 +155,25 @@ const createTemporaryRunner = (
   const runDefaultIndex = (body: ESTree.Program["body"]): RuleReport[] =>
     runForTemporaryFile({ body, filename: "index.ts", root: "src" });
 
-  const runTemporaryIndex = (
+  const runTemporaryBarrel = (
+    filename: string,
     body: ESTree.Program["body"],
-    options?: BarrelFilesExportsOnlyOptions,
+    options: readonly unknown[] = [],
   ): RuleReport[] =>
-    runForTemporaryFile({
-      body,
-      filename: "index.ts",
-      root: "tmp",
-      ...(options === void 0 ? {} : { options }),
-    });
+    runForTemporaryFile({ body, filename, options, root: "tmp" });
 
-  const runTemporaryFeature = (
-    body: ESTree.Program["body"],
-    options?: BarrelFilesExportsOnlyOptions,
-  ): RuleReport[] =>
-    runForTemporaryFile({
-      body,
-      filename: "feature.ts",
-      root: "tmp",
-      ...(options === void 0 ? {} : { options }),
-    });
+  const runTemporaryIndex = (body: ESTree.Program["body"]): RuleReport[] =>
+    runForTemporaryFile({ body, filename: "index.ts", root: "tmp" });
 
-  return { runDefaultIndex, runTemporaryFeature, runTemporaryIndex };
+  const runTemporaryFeature = (body: ESTree.Program["body"]): RuleReport[] =>
+    runForTemporaryFile({ body, filename: "feature.ts", root: "tmp" });
+
+  return {
+    runDefaultIndex,
+    runTemporaryBarrel,
+    runTemporaryFeature,
+    runTemporaryIndex,
+  };
 };
 
 export { createTemporaryRunner, runRule };

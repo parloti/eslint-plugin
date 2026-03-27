@@ -1,25 +1,64 @@
 import fs from "node:fs";
 import path from "node:path";
 
+/**
+ *
+ */
 interface FixtureSet {
+  /**
+   *
+   */
   directory: string;
+
+  /**
+   *
+   */
   filePaths: Record<string, string>;
+
+  /**
+   *
+   */
   folderGlob: string;
+
+  /**
+   *
+   */
   folderGlobs: string[];
+
+  /**
+   *
+   */
   getFilePath: (relativePath: string) => string;
 }
 
+/**
+ *
+ */
 interface TemporaryFixtureManager {
+  /**
+   *
+   */
   cleanupTemporaryDirectories: () => void;
+
+  /**
+   *
+   */
   createFixtureSet: (
     files: Record<string, string>,
     root?: "src" | "tmp",
   ) => FixtureSet;
 }
 
+/**
+ * @param filePath
+ * @example
+ */
 const toPosixPath = (filePath: string): string =>
   filePath.split(path.sep).join("/");
 
+/**
+ * @example
+ */
 const createTemporaryFixtureManager = (): TemporaryFixtureManager => {
   const temporaryDirectories: string[] = [];
 

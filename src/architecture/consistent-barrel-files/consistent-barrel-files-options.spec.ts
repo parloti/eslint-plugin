@@ -15,8 +15,7 @@ describe("consistent-barrel-files options", () => {
     const state = getOptions(rawOptions);
 
     // Assert
-    expect(state.folders.length).toBeGreaterThan(0);
-    expect(state.names.length).toBeGreaterThan(0);
+    expect(state.allowedNames).toStrictEqual(["index"]);
   });
 
   it("checks lintable filenames", () => {
@@ -34,7 +33,7 @@ describe("consistent-barrel-files options", () => {
     expect(result.lintableFilename).toBe(true);
   });
 
-  it("verifies folder matching for linting", () => {
+  it("verifies repo file matching for linting", () => {
     // Arrange
     const rawOptions: [] = [];
     const filename = `${process.cwd()}/src/index.ts`;
@@ -43,6 +42,6 @@ describe("consistent-barrel-files options", () => {
     const state = getOptions(rawOptions);
 
     // Assert
-    expect(shouldLintFile(filename, state.folders, state.names)).toBe(true);
+    expect(shouldLintFile(filename, state.allowedNames)).toBe(true);
   });
 });

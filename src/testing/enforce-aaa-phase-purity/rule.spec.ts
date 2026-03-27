@@ -1,9 +1,13 @@
-import { describe, expect, it, vi } from "vitest";
 import { Linter } from "eslint";
 import { parser } from "typescript-eslint";
+import { describe, expect, it, vi } from "vitest";
 
 import { enforceAaaPhasePurityRule } from "./rule";
 
+/**
+ * @param code
+ * @example
+ */
 function runRule(code: string) {
   const linter = new Linter({ configType: "flat" });
 
@@ -265,7 +269,7 @@ describe("enforce-aaa-phase-purity rule", () => {
     };
 
     vi.resetModules();
-    vi.doMock("../aaa", () => ({
+    vi.doMock(import("../aaa"), () => ({
       analyzeTestBlock: () => analysis,
       hasAssertion: () => false,
       hasAsyncLogic: () => false,

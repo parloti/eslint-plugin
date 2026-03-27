@@ -1,7 +1,9 @@
 import { requireAaaSectionsRule } from "../../src";
-
 import { createRuleTester } from "../support/rule-tester";
 
+/**
+ *
+ */
 const ruleTester = createRuleTester();
 
 ruleTester.run("require-aaa-sections", requireAaaSectionsRule, {

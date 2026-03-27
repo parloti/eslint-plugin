@@ -201,6 +201,36 @@ const createExportWithDeclaration = (): ESTree.ExportNamedDeclaration => {
 };
 
 /**
+ * @example
+ */
+const createExportInterfaceDeclaration = (): ESTree.Program["body"][number] =>
+  ({
+    declaration: {
+      body: { body: [], type: "TSInterfaceBody" },
+      id: createIdentifier("Feature"),
+      type: "TSInterfaceDeclaration",
+    },
+    specifiers: [],
+    type: "ExportNamedDeclaration",
+  }) as unknown as ESTree.Program["body"][number];
+
+/**
+ * @example
+ */
+const createExportTypeAliasDeclaration = (): ESTree.Program["body"][number] =>
+  ({
+    declaration: {
+      id: createIdentifier("Feature"),
+      type: "TSTypeAliasDeclaration",
+      typeAnnotation: {
+        type: "TSStringKeyword",
+      },
+    },
+    specifiers: [],
+    type: "ExportNamedDeclaration",
+  }) as unknown as ESTree.Program["body"][number];
+
+/**
  * Creates a named export without a source value.
  * @param specifiers Export specifiers to include.
  * @returns Export declaration node for tests.
@@ -276,8 +306,10 @@ export {
   createBody,
   createExportAll,
   createExportDefaultIdentifier,
+  createExportInterfaceDeclaration,
   createExportNamedFrom,
   createExportSpecifier,
+  createExportTypeAliasDeclaration,
   createExportWithDeclaration,
   createExportWithoutSource,
   createImportDeclaration,

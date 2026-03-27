@@ -1,165 +1,69 @@
 import type { AST, Rule } from "eslint";
 
-import { minimatch } from "minimatch";
-import path from "node:path";
-
 import type { BarrelFilesExportsOnlyOptions } from "./types";
 
 import { createRuleDocumentation } from "../../custom-rule-documentation";
+import {
+  isBarrelFile,
+  isLintableModuleFile,
+  normalizeAllowedBarrelNames,
+} from "./barrel-file-utilities";
 
-/** Default value used by this module. */
-const DEFAULT_BARREL_NAMES = ["index.ts", "index.tsx", "index.js", "index.jsx"];
-
-/** Default folder globs for barrel exports-only checks. */
-const DEFAULT_FOLDER_GLOBS = ["src/*/**"];
-
-/** Type definition for rule data. */
+/**
+ *
+ */
 interface BarrelFilesExportsOnlyState {
-  /** Folders field value. */
-  folders: string[];
+  /**
+   *
+   */
+  allowedBarrelNames: string[];
 
-  /** Names field value. */
-  names: string[];
-
-  /** NamesSet field value. */
-  namesSet: Set<string>;
+  /**
+   *
+   */
+  allowedBarrelNamesSet: Set<string>;
 }
 
 /**
- * Normalizes a string list option into a clean list.
- * @param value Raw option value.
- * @param defaults Default list when the option is empty.
- * @returns Normalized string list.
+ * @param options
  * @example
- * ```typescript
- * const names = normalizeList("index.ts", ["index.ts"]);
- * ```
- */
-const normalizeList = (value: unknown, defaults: string[]): string[] => {
-  if (Array.isArray(value)) {
-    return value
-      .filter((entry): entry is string => typeof entry === "string")
-      .map((entry) => entry.trim())
-      .filter((entry) => entry.length > 0);
-  }
-
-  if (typeof value === "string") {
-    const trimmed = value.trim();
-    return trimmed.length === 0 ? [] : [trimmed];
-  }
-
-  return [...defaults];
-};
-
-/**
- * Builds the rule options state from raw options.
- * @param options Raw rule options.
- * @returns Normalized rule options.
- * @example
- * ```typescript
- * const state = getOptions([{}]);
- * ```
  */
 const getOptions = (
   options: readonly unknown[],
 ): BarrelFilesExportsOnlyState => {
   const rawOptions = options[0] as BarrelFilesExportsOnlyOptions | undefined;
-  const folders = normalizeList(rawOptions?.folders, DEFAULT_FOLDER_GLOBS);
-  const names = normalizeList(rawOptions?.names, DEFAULT_BARREL_NAMES);
-
-  return { folders, names, namesSet: new Set(names) };
-};
-
-/**
- * Checks whether the filename is valid for linting.
- * @param filename Absolute filename.
- * @returns True when the filename is lintable.
- * @example
- * ```typescript
- * const ok = isLintableFilename("/repo/src/index.ts");
- * ```
- */
-const isLintableFilename = (filename: string): boolean =>
-  filename.length > 0 && path.isAbsolute(filename);
-
-/**
- * Normalizes a filename to a repo-relative path.
- * @param filename Absolute filename.
- * @returns Relative path using forward slashes.
- * @example
- * ```typescript
- * const relative = normalizeRelativePath("/repo/src/index.ts");
- * ```
- */
-const normalizeRelativePath = (filename: string): string =>
-  path.relative(process.cwd(), filename).split(path.sep).join("/");
-
-/**
- * Checks whether a file path matches any configured folder globs.
- * @param filename Absolute filename.
- * @param folders Folder glob patterns.
- * @returns True when the filename is within configured folders.
- * @example
- * ```typescript
- * const ok = isPathInFolders("/repo/src/index.ts", ["src/**"]);
- * ```
- */
-const isPathInFolders = (filename: string, folders: string[]): boolean => {
-  const relativePath = normalizeRelativePath(filename);
-
-  if (relativePath.startsWith("..") || path.isAbsolute(relativePath)) {
-    return false;
-  }
-
-  return folders.some((folder) =>
-    minimatch(relativePath, folder, { dot: true }),
+  const allowedBarrelNames = normalizeAllowedBarrelNames(
+    rawOptions?.allowedBarrelNames,
   );
+
+  return {
+    allowedBarrelNames,
+    allowedBarrelNamesSet: new Set(allowedBarrelNames),
+  };
 };
 
 /**
- * Determines whether a file should be linted by this rule.
- * @param filename Absolute filename.
- * @param options Normalized rule options.
- * @returns True when the file should be checked.
+ * @param value
  * @example
- * ```typescript
- * const ok = shouldLintFile("/repo/src/index.ts", state);
- * ```
  */
-const shouldLintFile = (
-  filename: string,
-  options: ReturnType<typeof getOptions>,
-): boolean => {
-  if (!isLintableFilename(filename)) {
+const isTypeOnlyDeclaration = (value: unknown): boolean => {
+  if (value === null || typeof value !== "object") {
     return false;
   }
 
-  if (options.folders.length === 0 || options.names.length === 0) {
-    return false;
-  }
+  const declarationType = (
+    value as {
+      /**
+       *
+       */
+      type?: unknown;
+    }
+  ).type;
 
-  return isPathInFolders(filename, options.folders);
-};
-
-/**
- * Determines whether a file is a barrel file under the rule options.
- * @param filename Absolute filename.
- * @param options Normalized rule options.
- * @returns True when the file is a barrel file.
- * @example
- * ```typescript
- * const ok = isBarrelFile("/repo/src/index.ts", state);
- * ```
- */
-const isBarrelFile = (
-  filename: string,
-  options: ReturnType<typeof getOptions>,
-): boolean => {
-  if (!shouldLintFile(filename, options)) {
-    return false;
-  }
-
-  return options.namesSet.has(path.basename(filename));
+  return (
+    declarationType === "TSInterfaceDeclaration" ||
+    declarationType === "TSTypeAliasDeclaration"
+  );
 };
 
 /**
@@ -185,7 +89,7 @@ const isAllowedBarrelStatement = (
   const declaration = statement.declaration ?? void 0;
 
   if (declaration !== void 0) {
-    return false;
+    return isTypeOnlyDeclaration(declaration);
   }
 
   const source = statement.source ?? void 0;
@@ -207,9 +111,12 @@ const isAllowedBarrelStatement = (
 const buildListenerForFile = (
   context: Rule.RuleContext,
   filename: string,
-  options: ReturnType<typeof getOptions>,
+  options: BarrelFilesExportsOnlyState,
 ): Rule.RuleListener => {
-  if (!isBarrelFile(filename, options)) {
+  if (
+    !isLintableModuleFile(filename) ||
+    !isBarrelFile(filename, options.allowedBarrelNamesSet)
+  ) {
     return {};
   }
 
@@ -246,35 +153,20 @@ const barrelFilesExportsOnlyRule: Rule.RuleModule = {
   meta: {
     docs: createRuleDocumentation(
       "barrel-files-exports-only",
-      "Require barrel files to only contain re-export statements.",
+      "Require barrel files to only contain re-export statements or type-only declarations.",
     ),
     messages: {
       invalidBarrelContent:
-        "Barrel files must only re-export from other modules and contain no imports or declarations.",
+        "Barrel files must only contain re-export statements or type-only declarations.",
     },
     schema: [
       {
         additionalProperties: false,
         properties: {
-          folders: {
-            oneOf: [
-              { type: "string" },
-              {
-                items: { type: "string" },
-                minItems: 1,
-                type: "array",
-              },
-            ],
-          },
-          names: {
-            oneOf: [
-              { type: "string" },
-              {
-                items: { type: "string" },
-                minItems: 1,
-                type: "array",
-              },
-            ],
+          allowedBarrelNames: {
+            items: { type: "string" },
+            minItems: 1,
+            type: "array",
           },
         },
         type: "object",

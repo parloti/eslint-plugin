@@ -3,10 +3,20 @@ import { describe, expect, it } from "vitest";
 import { codeperfectPlugin, codeperfectRules } from "./codeperfect-plugin";
 import { aaa, all, architecture, core, docs, testing } from "./presets";
 
-type RulesConfig = {
+/**
+ *
+ */
+interface RulesConfig {
+  /**
+   *
+   */
   rules?: Record<string, unknown>;
-};
+}
 
+/**
+ * @param config
+ * @example
+ */
 function getRuleKeys(config: RulesConfig): string[] {
   return Object.keys(config.rules ?? {}).toSorted();
 }

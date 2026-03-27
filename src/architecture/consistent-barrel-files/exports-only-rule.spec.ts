@@ -2,8 +2,6 @@ import fs from "node:fs";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 
-import type { BarrelFilesExportsOnlyOptions } from "./types";
-
 import {
   createTemporaryRunner,
   runRule,
@@ -11,7 +9,9 @@ import {
 import {
   createBody,
   createExportAll,
+  createExportInterfaceDeclaration,
   createExportNamedFrom,
+  createExportTypeAliasDeclaration,
   createExportWithDeclaration,
   createExportWithoutSource,
   createImportDeclaration,
@@ -19,8 +19,7 @@ import {
 
 describe("barrel files exports-only rule (enforced)", () => {
   const temporaryDirectories: string[] = [];
-  const allowAllFolders: BarrelFilesExportsOnlyOptions = { folders: ["**"] };
-  const { runDefaultIndex, runTemporaryIndex } =
+  const { runDefaultIndex, runTemporaryBarrel, runTemporaryIndex } =
     createTemporaryRunner(temporaryDirectories);
 
   afterEach(() => {
@@ -34,7 +33,7 @@ describe("barrel files exports-only rule (enforced)", () => {
     const body = createBody();
 
     // Act
-    const reports = runTemporaryIndex(body, allowAllFolders);
+    const reports = runTemporaryIndex(body);
 
     // Assert
     expect(reports).toStrictEqual([]);
@@ -52,20 +51,18 @@ describe("barrel files exports-only rule (enforced)", () => {
     expect(reports[0]?.messageId).toBe("invalidBarrelContent");
   });
 
-  it("accepts string names for barrel detection", () => {
+  it("allows exported type-only declarations", () => {
     // Arrange
-    const options: BarrelFilesExportsOnlyOptions = {
-      folders: ["tmp/**"],
-      names: "index.ts",
-    };
-    const body = createBody(createImportDeclaration());
+    const body = createBody(
+      createExportInterfaceDeclaration(),
+      createExportTypeAliasDeclaration(),
+    );
 
     // Act
-    const reports = runTemporaryIndex(body, options);
+    const reports = runTemporaryIndex(body);
 
     // Assert
-    expect(reports).toHaveLength(1);
-    expect(reports[0]?.messageId).toBe("invalidBarrelContent");
+    expect(reports).toStrictEqual([]);
   });
 
   it("allows re-export statements", () => {
@@ -73,7 +70,20 @@ describe("barrel files exports-only rule (enforced)", () => {
     const body = createBody(createExportAll(), createExportNamedFrom());
 
     // Act
-    const reports = runTemporaryIndex(body, allowAllFolders);
+    const reports = runTemporaryIndex(body);
+
+    // Assert
+    expect(reports).toStrictEqual([]);
+  });
+
+  it("supports custom barrel names", () => {
+    // Arrange
+    const body = createBody(createExportNamedFrom());
+
+    // Act
+    const reports = runTemporaryBarrel("mod.ts", body, [
+      { allowedBarrelNames: ["mod"] },
+    ]);
 
     // Assert
     expect(reports).toStrictEqual([]);
@@ -81,11 +91,19 @@ describe("barrel files exports-only rule (enforced)", () => {
 
   it.each([
     ["import declarations", createBody(createImportDeclaration())],
+    [
+      "exported non-type function declarations",
+      createBody({
+        declaration: { type: "FunctionDeclaration" },
+        specifiers: [],
+        type: "ExportNamedDeclaration",
+      } as never),
+    ],
     ["exported declarations", createBody(createExportWithDeclaration())],
     ["exports without sources", createBody(createExportWithoutSource())],
   ])("reports on %s", (_label, body) => {
     // Act
-    const reports = runTemporaryIndex(body, allowAllFolders);
+    const reports = runTemporaryIndex(body);
 
     // Assert
     expect(reports).toHaveLength(1);
@@ -95,9 +113,7 @@ describe("barrel files exports-only rule (enforced)", () => {
 
 describe("barrel files exports-only rule (skips)", () => {
   const temporaryDirectories: string[] = [];
-  const allowAllFolders: BarrelFilesExportsOnlyOptions = { folders: ["**"] };
-  const { runTemporaryFeature, runTemporaryIndex } =
-    createTemporaryRunner(temporaryDirectories);
+  const { runTemporaryFeature } = createTemporaryRunner(temporaryDirectories);
 
   afterEach(() => {
     for (const directory of temporaryDirectories.splice(0)) {
@@ -110,36 +126,7 @@ describe("barrel files exports-only rule (skips)", () => {
     const body = createBody(createImportDeclaration());
 
     // Act
-    const reports = runTemporaryFeature(body, allowAllFolders);
-
-    // Assert
-    expect(reports).toStrictEqual([]);
-  });
-
-  it.each([["names are empty", { folders: ["tmp/**"], names: "   " }]])(
-    "skips when %s",
-    (_label, options) => {
-      // Arrange
-      const body = createBody(createImportDeclaration());
-
-      // Act
-      const reports = runTemporaryIndex(body, options);
-
-      // Assert
-      expect(reports).toStrictEqual([]);
-    },
-  );
-
-  it("skips when folders are blank", () => {
-    // Arrange
-    const body = createBody(createImportDeclaration());
-    const options = {
-      folders: "   ",
-      names: ["index.ts"],
-    };
-
-    // Act
-    const reports = runTemporaryIndex(body, options);
+    const reports = runTemporaryFeature(body);
 
     // Assert
     expect(reports).toStrictEqual([]);
@@ -151,7 +138,7 @@ describe("barrel files exports-only rule (skips)", () => {
     const body = createBody(createImportDeclaration());
 
     // Act
-    const reports = runRule(filePath, body, allowAllFolders);
+    const reports = runRule(filePath, body);
 
     // Assert
     expect(reports).toStrictEqual([]);
@@ -163,7 +150,7 @@ describe("barrel files exports-only rule (skips)", () => {
     const body = createBody(createImportDeclaration());
 
     // Act
-    const reports = runRule(filePath, body, allowAllFolders);
+    const reports = runRule(filePath, body);
 
     // Assert
     expect(reports).toStrictEqual([]);

@@ -2,55 +2,146 @@ import type { Rule } from "eslint";
 
 import { createRuleDocumentation } from "../../custom-rule-documentation";
 
-type Range = [number, number];
-
+/**
+ *
+ */
 interface BaseNode {
+  /**
+   *
+   */
   parent?: BaseNode;
+
+  /**
+   *
+   */
   range?: Range;
+
+  /**
+   *
+   */
   type: string;
 }
 
+/**
+ *
+ */
 interface ForInOrOfStatementNode extends BaseNode {
+  /**
+   *
+   */
   left?: BaseNode;
 }
 
+/**
+ *
+ */
 interface ForStatementNode extends BaseNode {
+  /**
+   *
+   */
   init?: BaseNode | null;
 }
 
+/**
+ *
+ */
+type Range = [number, number];
+
+/**
+ *
+ */
 interface SourceCodeAccess {
+  /**
+   *
+   */
   getText: (node?: BaseNode) => string;
+
+  /**
+   *
+   */
   text?: string;
 }
 
+/**
+ *
+ */
 interface VariableDeclarationNode extends BaseNode {
+  /**
+   *
+   */
   declarations?: VariableDeclaratorNode[];
+
+  /**
+   *
+   */
   kind?: string;
 }
 
+/**
+ *
+ */
 interface VariableDeclaratorNode extends BaseNode {}
 
+/**
+ *
+ */
 const commentPattern = /\/\/|\/\*/u;
+
+/**
+ *
+ */
 const loopParentTypes = new Set(["ForInStatement", "ForOfStatement"]);
 
+/**
+ * @param context
+ * @example
+ */
 const getSourceCode = (context: Rule.RuleContext): SourceCodeAccess =>
   context.sourceCode as unknown as SourceCodeAccess;
 
+/**
+ * @param sourceCode
+ * @example
+ */
 const getSourceText = (sourceCode: SourceCodeAccess): string =>
   typeof sourceCode.text === "string" ? sourceCode.text : sourceCode.getText();
 
+/**
+ * @param node
+ * @example
+ */
 const hasRange = (
   node: BaseNode | undefined,
-): node is BaseNode & { range: Range } =>
-  Array.isArray(node?.range) && node.range.length === 2;
+): node is BaseNode & {
+  /**
+   *
+   */
+  range: Range;
+} => Array.isArray(node?.range) && node.range.length === 2;
 
+/**
+ * @param node
+ * @example
+ */
 const hasFixData = (
   node: VariableDeclarationNode,
-): node is VariableDeclarationNode & { kind: string; range: Range } =>
+): node is VariableDeclarationNode & {
+  /**
+   *
+   */
+  kind: string; /**
+   *
+   */
+  range: Range;
+} =>
   Array.isArray(node.range) &&
   node.range.length === 2 &&
   typeof node.kind === "string";
 
+/**
+ * @param node
+ * @example
+ */
 const isLoopInitializer = (node: VariableDeclarationNode): boolean => {
   const { parent } = node;
 
@@ -65,10 +156,19 @@ const isLoopInitializer = (node: VariableDeclarationNode): boolean => {
   return false;
 };
 
+/**
+ * @param node
+ * @example
+ */
 const isWrappedExport = (node: VariableDeclarationNode): boolean =>
   node.parent?.type === "ExportDefaultDeclaration" ||
   node.parent?.type === "ExportNamedDeclaration";
 
+/**
+ * @param sourceText
+ * @param start
+ * @example
+ */
 const getLineIndent = (sourceText: string, start: number): string => {
   const lineStart = sourceText.lastIndexOf("\n", start - 1) + 1;
   const linePrefix = sourceText.slice(lineStart, start);
@@ -76,6 +176,11 @@ const getLineIndent = (sourceText: string, start: number): string => {
   return linePrefix.replace(/[^\t ].*$/u, "");
 };
 
+/**
+ * @param declarations
+ * @param sourceText
+ * @example
+ */
 const hasSeparatorComment = (
   declarations: readonly VariableDeclaratorNode[],
   sourceText: string,
@@ -104,6 +209,12 @@ const hasSeparatorComment = (
   return false;
 };
 
+/**
+ * @param node
+ * @param declarations
+ * @param sourceText
+ * @example
+ */
 const canFix = (
   node: VariableDeclarationNode,
   declarations: readonly VariableDeclaratorNode[],
@@ -120,9 +231,28 @@ const canFix = (
   return !hasSeparatorComment(declarations, sourceText);
 };
 
+/**
+ * @param node
+ * @param declarations
+ * @param sourceCode
+ * @example
+ */
 const buildReplacement = (
-  node: VariableDeclarationNode & { kind: string; range: Range },
-  declarations: readonly (VariableDeclaratorNode & { range: Range })[],
+  node: VariableDeclarationNode & {
+    /**
+     *
+     */
+    kind: string; /**
+     *
+     */
+    range: Range;
+  },
+  declarations: readonly (VariableDeclaratorNode & {
+    /**
+     *
+     */
+    range: Range;
+  })[],
   sourceCode: SourceCodeAccess,
 ): string => {
   const sourceText = getSourceText(sourceCode);
@@ -133,6 +263,11 @@ const buildReplacement = (
     .join(`\n${indent}`);
 };
 
+/**
+ * @param context
+ * @param node
+ * @example
+ */
 const reportVariableDeclaration = (
   context: Rule.RuleContext,
   node: VariableDeclarationNode,
@@ -149,7 +284,14 @@ const reportVariableDeclaration = (
 
   if (fixable) {
     const fixedNode = node as VariableDeclarationNode & {
+      /**
+       *
+       */
       kind: string;
+
+      /**
+       *
+       */
       range: Range;
     };
 
@@ -159,7 +301,12 @@ const reportVariableDeclaration = (
           fixedNode.range,
           buildReplacement(
             fixedNode,
-            declarations as (VariableDeclaratorNode & { range: Range })[],
+            declarations as (VariableDeclaratorNode & {
+              /**
+               *
+               */
+              range: Range;
+            })[],
             sourceCode,
           ),
         ),
@@ -176,6 +323,9 @@ const reportVariableDeclaration = (
   });
 };
 
+/**
+ *
+ */
 const noMultipleDeclaratorsRule: Rule.RuleModule = {
   create(context: Rule.RuleContext): Rule.RuleListener {
     return {
