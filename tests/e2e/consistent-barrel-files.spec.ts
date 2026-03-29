@@ -1,70 +1,38 @@
-import { afterAll } from "vitest";
+import { afterAll, describe, expect, it } from "vitest";
 
 import { consistentBarrelFilesRule } from "../../src";
-import { createRuleTester } from "../support/rule-tester";
-import { createTemporaryFixtureManager } from "../support/temporary-fixtures";
+import { createTemporaryFixtureManager, runRuleCase } from "../support";
 
-/**
- *
- */
-const ruleTester = createRuleTester();
+describe("consistent-barrel-files e2e", () => {
+  const { cleanupTemporaryDirectories, createFixtureSet } =
+    createTemporaryFixtureManager();
 
-/**
- *
- */
-const { cleanupTemporaryDirectories, createFixtureSet } =
-  createTemporaryFixtureManager();
+  afterAll(cleanupTemporaryDirectories);
 
-afterAll(cleanupTemporaryDirectories);
+  const validFeature = createFixtureSet({
+    "feature.ts": "export const feature = 1;",
+    "index.ts": 'export * from "./feature";',
+  });
+  const missingBarrel = createFixtureSet({
+    "feature.ts": "export const feature = 1;",
+  });
+  const forbiddenBarrel = createFixtureSet({
+    "feature.ts": "export const feature = 1;",
+    "index.ts": 'export * from "./feature";',
+  });
+  const customNamedBarrel = createFixtureSet({
+    "feature.ts": "export const feature = 1;",
+    "mod.ts": 'export * from "./feature";',
+  });
+  const declarationNamedBarrel = createFixtureSet({
+    "feature.ts": "export const feature = 1;",
+    "index.d.ts": "export interface FeatureDeclaration {}",
+  });
+  const barrelOnlyFolder = createFixtureSet({
+    "index.ts": 'export * from "./feature";',
+  });
 
-/**
- *
- */
-const validFeature = createFixtureSet({
-  "feature.ts": "export const feature = 1;",
-  "index.ts": 'export * from "./feature";',
-});
-
-/**
- *
- */
-const missingBarrel = createFixtureSet({
-  "feature.ts": "export const feature = 1;",
-});
-
-/**
- *
- */
-const forbiddenBarrel = createFixtureSet({
-  "feature.ts": "export const feature = 1;",
-  "index.ts": 'export * from "./feature";',
-});
-
-/**
- *
- */
-const customNamedBarrel = createFixtureSet({
-  "feature.ts": "export const feature = 1;",
-  "mod.ts": 'export * from "./feature";',
-});
-
-/**
- *
- */
-const declarationNamedBarrel = createFixtureSet({
-  "feature.ts": "export const feature = 1;",
-  "index.d.ts": "export interface FeatureDeclaration {}",
-});
-
-/**
- *
- */
-const barrelOnlyFolder = createFixtureSet({
-  "index.ts": 'export * from "./feature";',
-});
-
-ruleTester.run("consistent-barrel-files", consistentBarrelFilesRule, {
-  invalid: [
+  it.each([
     {
       code: "export const feature = 1;",
       errors: [{ messageId: "missingBarrel" }],
@@ -81,8 +49,23 @@ ruleTester.run("consistent-barrel-files", consistentBarrelFilesRule, {
       errors: [{ messageId: "missingBarrel" }],
       filename: declarationNamedBarrel.getFilePath("feature.ts"),
     },
-  ],
-  valid: [
+  ])("rejects missing or forbidden barrels %#", (testCase) => {
+    // Arrange
+
+    // Act
+    const result = runRuleCase(
+      "consistent-barrel-files",
+      consistentBarrelFilesRule,
+      testCase,
+    );
+
+    // Assert
+    expect(result.messageIds).toStrictEqual(
+      testCase.errors.map((error) => error.messageId),
+    );
+  });
+
+  it.each([
     {
       code: "export const feature = 1;",
       filename: validFeature.getFilePath("feature.ts"),
@@ -97,5 +80,17 @@ ruleTester.run("consistent-barrel-files", consistentBarrelFilesRule, {
       filename: barrelOnlyFolder.getFilePath("index.ts"),
       options: [{ enforce: false }],
     },
-  ],
+  ])("accepts configured barrel layouts %#", (testCase) => {
+    // Arrange
+
+    // Act
+    const result = runRuleCase(
+      "consistent-barrel-files",
+      consistentBarrelFilesRule,
+      testCase,
+    );
+
+    // Assert
+    expect(result.messageIds).toStrictEqual([]);
+  });
 });

@@ -3,6 +3,7 @@ import type * as ESTree from "estree";
 
 import { SourceCode } from "eslint";
 import path from "node:path";
+import { cwd } from "node:process";
 
 import { barrelFilesExportsOnlyRule } from "./exports-only-rule";
 import { createProgram, createRepoDirectory } from "./test-helpers";
@@ -81,7 +82,7 @@ const createRuleContext = (
   parameters: RuleContextParameters,
 ): Rule.RuleContext =>
   ({
-    cwd: process.cwd(),
+    cwd: cwd(),
     filename: parameters.filename,
     id: "barrel-files-exports-only",
     languageOptions: {

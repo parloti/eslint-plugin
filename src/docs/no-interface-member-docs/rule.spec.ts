@@ -1,4 +1,4 @@
-import { describe, expect, expectTypeOf, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import type { Comment } from "./test-helpers";
 
@@ -32,7 +32,7 @@ describe("no interface member docs rule", () => {
     const { context, node, reports, sourceText } = createInterfaceSample();
 
     // Act
-    const actualOutput = (() => {
+    const actualOutput = ((): string => {
       runFunctionListener(context, node);
 
       return applyFixes(sourceText, getFixes(reports));

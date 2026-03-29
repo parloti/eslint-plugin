@@ -1,20 +1,17 @@
 import type { Rule } from "eslint";
 
-import type { AaaPhase, TestBlockAnalysis } from "../aaa";
+import type { TestBlockAnalysis } from "../aaa";
 
 import { createRuleDocumentation } from "../../custom-rule-documentation";
 import {
-  aaaPhaseOrder,
   analyzeTestBlock,
-  getIndentationAtOffset,
   getLineStartRange,
   getPhaseBoundaryComments,
   hasBlankLineBeforeComment,
 } from "../aaa";
+import { buildMissingSectionFixes } from "./missing-section-fixes";
 
-/**
- *
- */
+/** Enforces explicit AAA section comments and spacing within supported test blocks. */
 const requireAaaSectionsRule: Rule.RuleModule = {
   create(context: Rule.RuleContext): Rule.RuleListener {
     return {
@@ -49,73 +46,13 @@ const requireAaaSectionsRule: Rule.RuleModule = {
 };
 
 /**
- * @param analysis
- * @param missingSections
- * @param fixer
+ * Reports section comments that are missing a blank line above them.
+ * @param context ESLint rule context.
+ * @param analysis Parsed test-block analysis.
  * @example
- */
-function buildMissingSectionFixes(
-  analysis: TestBlockAnalysis,
-  missingSections: readonly AaaPhase[],
-  fixer: Rule.RuleFixer,
-): Rule.Fix[] {
-  if (analysis.statements.length === 0) {
-    return [];
-  }
-
-  const anchorMap = new Map<number, AaaPhase[]>();
-  const sourceLines = analysis.sourceText.split(/\r\n|\n/u);
-  const firstStatement = analysis.statements[0]!.node;
-  const middleStatement =
-    analysis.statements[
-      Math.min(
-        analysis.statements.length - 1,
-        Math.floor(analysis.statements.length / 2),
-      )
-    ]!.node;
-  const lastStatement = analysis.statements.at(-1)!.node;
-
-  for (const phase of missingSections) {
-    const anchorNode =
-      phase === "Arrange"
-        ? firstStatement
-        : phase === "Act"
-          ? middleStatement
-          : lastStatement;
-
-    const existing = anchorMap.get(anchorNode.range[0]) ?? [];
-    existing.push(phase);
-    anchorMap.set(anchorNode.range[0], existing);
-  }
-
-  return [...anchorMap.entries()].map(([offset, phases]) => {
-    const sortedPhases = phases.toSorted(
-      (left, right) => aaaPhaseOrder[left] - aaaPhaseOrder[right],
-    );
-    const statementLine = analysis.sourceText
-      .slice(0, offset)
-      .split(/\r\n|\n/u).length;
-    const previousLine = sourceLines[statementLine - 2]!;
-    const lineStartRange = getLineStartRange(
-      analysis.sourceText,
-      statementLine,
-    );
-    const needsLeadingBlankLine =
-      sortedPhases.some((phase) => phase !== "Arrange") &&
-      previousLine.trim().length > 0;
-    const indentation = /^\s*/u.exec(sourceLines[statementLine - 1]!)![0];
-
-    return fixer.insertTextBeforeRange(
-      lineStartRange,
-      `${needsLeadingBlankLine ? analysis.newline : ""}${indentation}// ${sortedPhases.join(" & ")}${analysis.newline}`,
-    );
-  });
-}
-
-/**
- * @param context
- * @param analysis
- * @example
+ * ```typescript
+ * reportBlankLineSeparators({ report() {} } as never, { sectionComments: [], sourceText: "" } as never);
+ * ```
  */
 function reportBlankLineSeparators(
   context: Rule.RuleContext,
@@ -123,31 +60,33 @@ function reportBlankLineSeparators(
 ): void {
   for (const sectionComment of getPhaseBoundaryComments(analysis)) {
     if (
-      hasBlankLineBeforeComment(analysis.sourceText, sectionComment.comment)
+      !hasBlankLineBeforeComment(analysis.sourceText, sectionComment.comment)
     ) {
-      continue;
-    }
-
-    context.report({
-      data: { section: sectionComment.phases.join(" & ") },
-      fix: (fixer) =>
-        fixer.insertTextBeforeRange(
-          getLineStartRange(
-            analysis.sourceText,
-            sectionComment.comment.loc.start.line,
+      context.report({
+        data: { section: sectionComment.phases.join(" & ") },
+        fix: (fixer) =>
+          fixer.insertTextBeforeRange(
+            getLineStartRange(
+              analysis.sourceText,
+              sectionComment.comment.loc.start.line,
+            ),
+            analysis.newline,
           ),
-          analysis.newline,
-        ),
-      messageId: "blankLineBeforeSection",
-      node: sectionComment.comment,
-    });
+        messageId: "blankLineBeforeSection",
+        node: sectionComment.comment,
+      });
+    }
   }
 }
 
 /**
- * @param context
- * @param analysis
+ * Reports executable statements that appear before the first Arrange section.
+ * @param context ESLint rule context.
+ * @param analysis Parsed test-block analysis.
  * @example
+ * ```typescript
+ * reportCodeBeforeArrange({ report() {} } as never, { sectionComments: [], statements: [] } as never);
+ * ```
  */
 function reportCodeBeforeArrange(
   context: Rule.RuleContext,
@@ -174,9 +113,13 @@ function reportCodeBeforeArrange(
 }
 
 /**
- * @param context
- * @param analysis
+ * Reports any AAA section markers that are missing from a supported test block.
+ * @param context ESLint rule context.
+ * @param analysis Parsed test-block analysis.
  * @example
+ * ```typescript
+ * reportMissingSections({ report() {} } as never, { sectionComments: [] } as never);
+ * ```
  */
 function reportMissingSections(
   context: Rule.RuleContext,
@@ -197,8 +140,9 @@ function reportMissingSections(
     data: { sections: missingSections.join(", ") },
     fix:
       analysis.bodyLineCount >= 3
-        ? (fixer) => buildMissingSectionFixes(analysis, missingSections, fixer)
-        : null,
+        ? (fixer: Rule.RuleFixer): Rule.Fix[] =>
+            buildMissingSectionFixes(analysis, missingSections, fixer)
+        : void 0,
     messageId: "missingSections",
     node: analysis.callExpression,
   });

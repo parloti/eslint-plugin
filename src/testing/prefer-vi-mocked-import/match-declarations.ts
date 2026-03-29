@@ -8,7 +8,7 @@ import { hasRange, isViFunctionCall } from "./match-helpers";
 /**
  * Collects top-level `const x = vi.fn(...)` declarations.
  * @param program Program node.
- * @param sourceCode
+ * @param sourceCode Source code wrapper used to inspect attached comments.
  * @returns Declarations by local name.
  * @example
  * ```typescript
@@ -32,6 +32,72 @@ function collectDeclarations(
 }
 
 /**
+ * Finds the earliest attached leading comment range for a declaration.
+ * @param commentsBefore Comments that appear before the declaration.
+ * @param sourceCode Source code wrapper used to inspect interstitial text.
+ * @param statementStart Original declaration start offset.
+ * @returns Earliest attached comment start, or the statement start.
+ * @example
+ * ```typescript
+ * const start = getAttachedCommentStart([], void 0, 10);
+ * void start;
+ * ```
+ */
+function getAttachedCommentStart(
+  commentsBefore: readonly ESTree.Comment[],
+  sourceCode: Rule.RuleContext["sourceCode"] | undefined,
+  statementStart: number,
+): number {
+  let removalStart = statementStart;
+  let nextStart = statementStart;
+
+  for (const comment of commentsBefore.toReversed()) {
+    const commentStart = getNextAttachedCommentStart(
+      comment,
+      sourceCode,
+      nextStart,
+    );
+    if (commentStart === void 0) {
+      break;
+    }
+
+    removalStart = commentStart;
+    nextStart = commentStart;
+  }
+
+  return removalStart;
+}
+
+/**
+ * Returns the next attached comment start when a comment remains linked to the declaration.
+ * @param comment Candidate leading comment.
+ * @param sourceCode Source code wrapper used to inspect interstitial text.
+ * @param nextStart Current boundary that the comment must attach to.
+ * @returns Comment start when attached, otherwise `undefined`.
+ * @example
+ * ```typescript
+ * const start = getNextAttachedCommentStart({ type: "Block", value: "x" } as never, void 0, 5);
+ * void start;
+ * ```
+ */
+function getNextAttachedCommentStart(
+  comment: ESTree.Comment,
+  sourceCode: Rule.RuleContext["sourceCode"] | undefined,
+  nextStart: number,
+): number | undefined {
+  const commentRange = comment.range;
+
+  if (commentRange === void 0) {
+    return void 0;
+  }
+
+  const [commentStart, commentEnd] = commentRange;
+  const gapText = sourceCode?.text.slice(commentEnd, nextStart) ?? "";
+
+  return isAttachedLeadingGap(gapText) ? commentStart : void 0;
+}
+
+/**
  * Returns the declaration removal range, including directly attached comments.
  * @param statement Variable declaration statement.
  * @param sourceCode Source code wrapper when available.
@@ -44,40 +110,20 @@ function collectDeclarations(
  */
 function getRemovalRange(
   statement: ESTree.VariableDeclaration & {
-    /**
-     *
-     */
+    /** Source range for the full declaration statement. */
     range: [number, number];
   },
   sourceCode?: Rule.RuleContext["sourceCode"],
 ): [number, number] {
-  const statementStart = statement.range[0];
+  const [statementStart, statementEnd] = statement.range;
   const commentsBefore = sourceCode?.getCommentsBefore(statement) ?? [];
+  const removalStart = getAttachedCommentStart(
+    commentsBefore,
+    sourceCode,
+    statementStart,
+  );
 
-  if (commentsBefore.length === 0) {
-    return statement.range;
-  }
-
-  let removalStart = statementStart;
-  let nextStart = statementStart;
-
-  for (const comment of [...commentsBefore].reverse()) {
-    const commentRange = comment.range;
-
-    if (commentRange === void 0) {
-      break;
-    }
-
-    const gapText = sourceCode?.text.slice(commentRange[1], nextStart) ?? "";
-    if (!isAttachedLeadingGap(gapText)) {
-      break;
-    }
-
-    removalStart = commentRange[0];
-    nextStart = commentRange[0];
-  }
-
-  return [removalStart, statement.range[1]];
+  return [removalStart, statementEnd];
 }
 
 /**
@@ -92,14 +138,14 @@ function getRemovalRange(
  */
 function isAttachedLeadingGap(gapText: string): boolean {
   return (
-    /^[\t \r\n]*$/u.test(gapText) && !/(\r?\n)[\t ]*(\r?\n)/u.test(gapText)
+    /^[\t \r\n]*$/u.test(gapText) && !/(?:\r?\n)[\t ]*(?:\r?\n)/u.test(gapText)
   );
 }
 
 /**
  * Converts one top-level statement into a declaration when supported.
  * @param statement Candidate statement.
- * @param sourceCode
+ * @param sourceCode Source code wrapper used to inspect attached comments.
  * @returns Declaration when statement matches the rule shape.
  * @example
  * ```typescript

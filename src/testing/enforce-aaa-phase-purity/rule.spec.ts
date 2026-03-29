@@ -1,41 +1,7 @@
-import { Linter } from "eslint";
-import { parser } from "typescript-eslint";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import { enforceAaaPhasePurityRule } from "./rule";
-
-/**
- * @param code
- * @example
- */
-function runRule(code: string) {
-  const linter = new Linter({ configType: "flat" });
-
-  return linter.verify(
-    code,
-    [
-      {
-        files: ["**/*.ts"],
-        languageOptions: {
-          ecmaVersion: 2022,
-          parser,
-          sourceType: "module",
-        },
-        plugins: {
-          codeperfect: {
-            rules: {
-              "enforce-aaa-phase-purity": enforceAaaPhasePurityRule,
-            },
-          },
-        },
-        rules: {
-          "codeperfect/enforce-aaa-phase-purity": "error",
-        },
-      },
-    ],
-    "example.spec.ts",
-  );
-}
+import { runRule, runRuleWithMockedAnalysis } from "./rule-test-helpers";
 
 describe("enforce-aaa-phase-purity rule", () => {
   it("defines metadata and messages", () => {
@@ -243,8 +209,7 @@ describe("enforce-aaa-phase-purity rule", () => {
 
   it("ignores unsupported declaration patterns when collecting asserted act results", async () => {
     // Arrange
-    const report = vi.fn();
-    const analysis = {
+    const analysis: Parameters<typeof runRuleWithMockedAnalysis>[0] = {
       sectionComments: [
         { phases: ["Arrange"] },
         { phases: ["Act"] },
@@ -255,8 +220,14 @@ describe("enforce-aaa-phase-purity rule", () => {
           node: {
             declarations: [
               {
-                id: { type: "Literal", value: 1 },
-                init: null,
+                id: {
+                  computed: false,
+                  object: { name: "result", type: "Identifier" },
+                  optional: false,
+                  property: { name: "value", type: "Identifier" },
+                  type: "MemberExpression",
+                },
+                init: void 0,
                 type: "VariableDeclarator",
               },
             ],
@@ -268,34 +239,8 @@ describe("enforce-aaa-phase-purity rule", () => {
       ],
     };
 
-    vi.resetModules();
-    vi.doMock(import("../aaa"), () => ({
-      analyzeTestBlock: () => analysis,
-      hasAssertion: () => false,
-      hasAsyncLogic: () => false,
-      hasAwait: () => false,
-      hasCapturableActResult: () => false,
-      hasMutation: () => false,
-      isMeaningfulActStatement: () => false,
-      isSetupLikeStatement: () => false,
-      isValidAssertStatement: () => false,
-    }));
-
     // Act
-    const reportCalls = await (async () => {
-      const { enforceAaaPhasePurityRule: mockedRule } = await import("./rule");
-
-      try {
-        mockedRule.create({ report } as never).CallExpression?.({
-          type: "CallExpression",
-        } as never);
-
-        return report.mock.calls;
-      } finally {
-        vi.doUnmock("../aaa");
-        vi.resetModules();
-      }
-    })();
+    const reportCalls = await runRuleWithMockedAnalysis(analysis);
 
     // Assert
     expect(reportCalls).toHaveLength(1);

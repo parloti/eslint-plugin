@@ -1,8 +1,9 @@
 import type { AST, Rule } from "eslint";
 
 import { SourceCode } from "eslint";
-import fs from "node:fs";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
+import { cwd } from "node:process";
 
 import type { RequireTestCompanionOptions } from "./types";
 
@@ -33,9 +34,9 @@ const temporaryDirectories: string[] = [];
  * ```
  */
 const createRepoDirectory = (root: "src" | "tmp"): string => {
-  const baseDirectory = path.join(process.cwd(), root);
-  fs.mkdirSync(baseDirectory, { recursive: true });
-  return fs.mkdtempSync(path.join(baseDirectory, "test-companion-"));
+  const baseDirectory = path.join(cwd(), root);
+  mkdirSync(baseDirectory, { recursive: true });
+  return mkdtempSync(path.join(baseDirectory, "test-companion-"));
 };
 
 /**
@@ -47,7 +48,7 @@ const createRepoDirectory = (root: "src" | "tmp"): string => {
  * ```
  */
 const writeFile = (filePath: string): void => {
-  fs.writeFileSync(filePath, "export const value = 1;", "utf8");
+  writeFileSync(filePath, "export const value = 1;", "utf8");
 };
 
 /**
@@ -154,7 +155,7 @@ const createRuleContext = (
   sourceCode: SourceCode,
 ): Rule.RuleContext =>
   ({
-    cwd: process.cwd(),
+    cwd: cwd(),
     filename,
     id: "require-test-companion",
     languageOptions: {
@@ -223,7 +224,7 @@ const runRule = (
  */
 const cleanupTemporaryDirectories = (): void => {
   for (const directory of temporaryDirectories.splice(0)) {
-    fs.rmSync(directory, { force: true, recursive: true });
+    rmSync(directory, { force: true, recursive: true });
   }
 };
 

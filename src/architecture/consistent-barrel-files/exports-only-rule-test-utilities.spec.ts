@@ -1,4 +1,5 @@
-import fs from "node:fs";
+import { rmSync } from "node:fs";
+import { cwd } from "node:process";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -8,9 +9,9 @@ import {
 import { createBody } from "./test-helpers";
 
 describe("exports-only rule test utilities", () => {
-  it("runs the rule with an empty program", () => {
+  it("runs the rule with an empty program", (): void => {
     // Arrange
-    const filePath = `${process.cwd()}/src/index.ts`;
+    const filePath = `${cwd()}/src/index.ts`;
     const body = createBody();
 
     // Act
@@ -20,14 +21,14 @@ describe("exports-only rule test utilities", () => {
     expect(reports).toStrictEqual([]);
   });
 
-  it("creates temporary runners", () => {
+  it("creates temporary runners", (): void => {
     // Arrange
     const temporaryDirectories: string[] = [];
     const runner = createTemporaryRunner(temporaryDirectories);
     const body = createBody();
 
     // Act
-    const reports = (() => {
+    const reports = ((): ReturnType<typeof runRule>[] => {
       try {
         return [
           runner.runDefaultIndex(body),
@@ -39,7 +40,7 @@ describe("exports-only rule test utilities", () => {
         ];
       } finally {
         for (const directory of temporaryDirectories.splice(0)) {
-          fs.rmSync(directory, { force: true, recursive: true });
+          rmSync(directory, { force: true, recursive: true });
         }
       }
     })();

@@ -1,46 +1,26 @@
-import { afterAll } from "vitest";
+import { afterAll, describe, expect, it } from "vitest";
 
 import { requireTestCompanionRule } from "../../src";
-import { createRuleTester } from "../support/rule-tester";
-import { createTemporaryFixtureManager } from "../support/temporary-fixtures";
+import { createTemporaryFixtureManager, runRuleCase } from "../support";
 
-/**
- *
- */
-const ruleTester = createRuleTester();
+describe("require-test-companion e2e", () => {
+  const { cleanupTemporaryDirectories, createFixtureSet } =
+    createTemporaryFixtureManager();
 
-/**
- *
- */
-const { cleanupTemporaryDirectories, createFixtureSet } =
-  createTemporaryFixtureManager();
+  afterAll(cleanupTemporaryDirectories);
 
-afterAll(cleanupTemporaryDirectories);
+  const sourceWithTest = createFixtureSet({
+    "feature.spec.ts": "export {};",
+    "feature.ts": "export const feature = 1;",
+  });
+  const sourceWithoutTest = createFixtureSet({
+    "feature.ts": "export const feature = 1;",
+  });
+  const testWithoutSource = createFixtureSet({
+    "feature.test.ts": "export {};",
+  });
 
-/**
- *
- */
-const sourceWithTest = createFixtureSet({
-  "feature.spec.ts": "export {};",
-  "feature.ts": "export const feature = 1;",
-});
-
-/**
- *
- */
-const sourceWithoutTest = createFixtureSet({
-  "feature.ts": "export const feature = 1;",
-});
-
-/**
- *
- */
-const testWithoutSource = createFixtureSet({
-  "feature.test.ts": "export {};",
-});
-
-ruleTester.run("require-test-companion", requireTestCompanionRule, {
-  invalid: [
+  it.each([
     {
       code: "export const feature = 1;",
       errors: [{ messageId: "missingTest" }],
@@ -53,8 +33,23 @@ ruleTester.run("require-test-companion", requireTestCompanionRule, {
       filename: testWithoutSource.getFilePath("feature.test.ts"),
       options: [{ enforceIn: testWithoutSource.folderGlobs }],
     },
-  ],
-  valid: [
+  ])("rejects missing source/test companions %#", (testCase) => {
+    // Arrange
+
+    // Act
+    const result = runRuleCase(
+      "require-test-companion",
+      requireTestCompanionRule,
+      testCase,
+    );
+
+    // Assert
+    expect(result.messageIds).toStrictEqual(
+      testCase.errors.map((error) => error.messageId),
+    );
+  });
+
+  it.each([
     {
       code: "export const feature = 1;",
       filename: sourceWithTest.getFilePath("feature.ts"),
@@ -65,5 +60,17 @@ ruleTester.run("require-test-companion", requireTestCompanionRule, {
       filename: sourceWithTest.getFilePath("feature.spec.ts"),
       options: [{ enforceIn: sourceWithTest.folderGlobs }],
     },
-  ],
+  ])("accepts matched source/test companions %#", (testCase) => {
+    // Arrange
+
+    // Act
+    const result = runRuleCase(
+      "require-test-companion",
+      requireTestCompanionRule,
+      testCase,
+    );
+
+    // Assert
+    expect(result.messageIds).toStrictEqual([]);
+  });
 });

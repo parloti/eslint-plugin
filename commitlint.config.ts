@@ -1,3 +1,5 @@
+/* eslint-disable codeperfect/consistent-barrel-files -- Root tool config files are intentionally not barrel files. */
+
 import type { ParserPreset, UserConfig } from "@commitlint/types";
 
 import _default from "@commitlint/config-conventional";
@@ -16,6 +18,7 @@ interface ParserOptions {
 type ParserPresetWithConventional = ParserPreset & {
   /** Optional conventional changelog parser options. */
   conventionalChangelog?: ParserOptions;
+
   /** Optional recommended bump parser options. */
   recommendedBumpOpts?: ParserOptions;
 };
@@ -45,7 +48,7 @@ const createEmojiParser = async (): Promise<ParserPresetWithConventional> => {
     ),
   };
 
-  const baseParserPreset = (await createPreset()) as ParserPreset;
+  const baseParserPreset = await createPreset();
   return {
     ...baseParserPreset,
     conventionalChangelog: { parserOpts: parserOptions },

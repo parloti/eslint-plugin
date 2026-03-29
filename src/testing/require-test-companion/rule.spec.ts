@@ -1,4 +1,5 @@
 import path from "node:path";
+import { cwd } from "node:process";
 import { afterEach, describe, expect, it } from "vitest";
 
 import type { RequireTestCompanionOptions } from "./types";
@@ -133,7 +134,7 @@ describe("require-test-companion rule edge cases", () => {
 
   it("skips when path is outside cwd", () => {
     // Arrange
-    const filePath = path.join(process.cwd(), "..", "outside.ts");
+    const filePath = path.join(cwd(), "..", "outside.ts");
 
     // Act
     const reports = runRule(filePath, { enforceIn: ["**"] });

@@ -1,21 +1,29 @@
 import { describe, expect, it } from "vitest";
 
 import { codeperfectPlugin, codeperfectRules } from "./codeperfect-plugin";
-import { aaa, all, architecture, core, docs, testing } from "./presets";
+import {
+  aaa,
+  all,
+  architecture,
+  core,
+  documentation,
+  testing,
+} from "./presets";
 
-/**
- *
- */
+/** Minimal config shape used by preset tests. */
 interface RulesConfig {
-  /**
-   *
-   */
+  /** Optional rule map from the generated config. */
   rules?: Record<string, unknown>;
 }
 
 /**
- * @param config
+ * Returns sorted rule keys for a preset config.
+ * @param config Preset config to inspect.
+ * @returns Sorted rule keys.
  * @example
+ * ```typescript
+ * const keys = getRuleKeys({ rules: { "codeperfect/example": "error" } });
+ * ```
  */
 function getRuleKeys(config: RulesConfig): string[] {
   return Object.keys(config.rules ?? {}).toSorted();
@@ -28,7 +36,7 @@ describe("ready-to-use presets", () => {
       all.plugins?.["codeperfect"],
       architecture.plugins?.["codeperfect"],
       core.plugins?.["codeperfect"],
-      docs.plugins?.["codeperfect"],
+      documentation.plugins?.["codeperfect"],
       testing.plugins?.["codeperfect"],
       aaa.plugins?.["codeperfect"],
     ];
@@ -78,7 +86,7 @@ describe("ready-to-use presets", () => {
     // Arrange
 
     // Act & Assert
-    expect(getRuleKeys(docs)).toStrictEqual([
+    expect(getRuleKeys(documentation)).toStrictEqual([
       "codeperfect/no-interface-member-docs",
       "codeperfect/require-example-language",
       "codeperfect/single-line-jsdoc",

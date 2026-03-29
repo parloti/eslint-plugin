@@ -1,13 +1,10 @@
+import { describe, expect, it } from "vitest";
+
 import { enforceAaaStructureRule } from "../../src";
-import { createRuleTester } from "../support/rule-tester";
+import { runRuleCase } from "../support";
 
-/**
- *
- */
-const ruleTester = createRuleTester();
-
-ruleTester.run("enforce-aaa-structure", enforceAaaStructureRule, {
-  invalid: [
+describe("enforce-aaa-structure e2e", () => {
+  it.each([
     {
       code: [
         'it("orders AAA phases", () => {',
@@ -43,9 +40,25 @@ ruleTester.run("enforce-aaa-structure", enforceAaaStructureRule, {
       errors: [{ messageId: "duplicateSection" }],
       filename: "example.spec.ts",
     },
-  ],
-  valid: [
-    {
+  ])("rejects invalid AAA ordering %#", (testCase) => {
+    // Arrange
+
+    // Act
+    const result = runRuleCase(
+      "enforce-aaa-structure",
+      enforceAaaStructureRule,
+      testCase,
+    );
+
+    // Assert
+    expect(result.messageIds).toStrictEqual(
+      testCase.errors.map((error) => error.messageId),
+    );
+  });
+
+  it("accepts a single AAA flow", () => {
+    // Arrange
+    const testCase = {
       code: [
         'it.only("keeps a single AAA flow", () => {',
         "  // Arrange",
@@ -59,6 +72,16 @@ ruleTester.run("enforce-aaa-structure", enforceAaaStructureRule, {
         "});",
       ].join("\n"),
       filename: "example.spec.ts",
-    },
-  ],
+    };
+
+    // Act
+    const result = runRuleCase(
+      "enforce-aaa-structure",
+      enforceAaaStructureRule,
+      testCase,
+    );
+
+    // Assert
+    expect(result.messageIds).toStrictEqual([]);
+  });
 });

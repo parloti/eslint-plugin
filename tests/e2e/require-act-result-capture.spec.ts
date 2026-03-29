@@ -1,14 +1,12 @@
+import { describe, expect, it } from "vitest";
+
 import { requireActResultCaptureRule } from "../../src";
-import { createRuleTester } from "../support/rule-tester";
+import { runRuleCase } from "../support";
 
-/**
- *
- */
-const ruleTester = createRuleTester();
-
-ruleTester.run("require-act-result-capture", requireActResultCaptureRule, {
-  invalid: [
-    {
+describe("require-act-result-capture e2e", () => {
+  it("rejects uncaptured Act results", () => {
+    // Arrange
+    const testCase = {
       code: [
         'it("captures act results", () => {',
         "  // Arrange",
@@ -23,9 +21,22 @@ ruleTester.run("require-act-result-capture", requireActResultCaptureRule, {
       ].join("\n"),
       errors: [{ messageId: "captureActResult" }],
       filename: "example.spec.ts",
-    },
-  ],
-  valid: [
+    };
+
+    // Act
+    const result = runRuleCase(
+      "require-act-result-capture",
+      requireActResultCaptureRule,
+      testCase,
+    );
+
+    // Assert
+    expect(result.messageIds).toStrictEqual(
+      testCase.errors.map((error) => error.messageId),
+    );
+  });
+
+  it.each([
     {
       code: [
         'it("allows captured results", () => {',
@@ -102,5 +113,17 @@ ruleTester.run("require-act-result-capture", requireActResultCaptureRule, {
       ].join("\n"),
       filename: "example.spec.ts",
     },
-  ],
+  ])("accepts allowed Act patterns %#", (testCase) => {
+    // Arrange
+
+    // Act
+    const result = runRuleCase(
+      "require-act-result-capture",
+      requireActResultCaptureRule,
+      testCase,
+    );
+
+    // Assert
+    expect(result.messageIds).toStrictEqual([]);
+  });
 });

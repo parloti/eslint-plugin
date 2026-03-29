@@ -1,5 +1,6 @@
-import fs from "node:fs";
+import { rmSync } from "node:fs";
 import path from "node:path";
+import { cwd } from "node:process";
 import { afterEach, describe, expect, it } from "vitest";
 
 import {
@@ -24,7 +25,7 @@ describe("barrel files exports-only rule (enforced)", () => {
 
   afterEach(() => {
     for (const directory of temporaryDirectories.splice(0)) {
-      fs.rmSync(directory, { force: true, recursive: true });
+      rmSync(directory, { force: true, recursive: true });
     }
   });
 
@@ -117,7 +118,7 @@ describe("barrel files exports-only rule (skips)", () => {
 
   afterEach(() => {
     for (const directory of temporaryDirectories.splice(0)) {
-      fs.rmSync(directory, { force: true, recursive: true });
+      rmSync(directory, { force: true, recursive: true });
     }
   });
 
@@ -146,7 +147,7 @@ describe("barrel files exports-only rule (skips)", () => {
 
   it("skips when file is outside the repo", () => {
     // Arrange
-    const filePath = path.resolve(process.cwd(), "..", "outside", "index.ts");
+    const filePath = path.resolve(cwd(), "..", "outside", "index.ts");
     const body = createBody(createImportDeclaration());
 
     // Act
@@ -154,5 +155,23 @@ describe("barrel files exports-only rule (skips)", () => {
 
     // Assert
     expect(reports).toStrictEqual([]);
+  });
+
+  it("reports export statements without a source or declaration", () => {
+    // Arrange
+    const filePath = path.join(cwd(), "src", "index.ts");
+    const body = createBody({
+      declaration: "not-a-node",
+      source: void 0,
+      specifiers: [],
+      type: "ExportNamedDeclaration",
+    } as never);
+
+    // Act
+    const reports = runRule(filePath, body);
+
+    // Assert
+    expect(reports).toHaveLength(1);
+    expect(reports[0]?.messageId).toBe("invalidBarrelContent");
   });
 });

@@ -110,18 +110,23 @@ function buildReportDescriptor(
     problem,
     sourceCode,
   });
+  const reportFix =
+    fix === void 0
+      ? void 0
+      : (fixer: Rule.RuleFixer): Iterable<Rule.Fix> | Rule.Fix =>
+          fix(fixer) ?? [];
   const loc = getReportLocation(comment, example);
 
   if (loc !== void 0) {
     return {
-      fix,
+      fix: reportFix,
       loc,
       messageId: problem,
     };
   }
 
   return {
-    fix,
+    fix: reportFix,
     messageId: problem,
     node: sourceCode.ast as Rule.Node,
   };
@@ -151,7 +156,7 @@ function buildReportDescriptor(
  */
 function getFixerForExample(
   context: FixerLookupContext,
-): ((fixer: Rule.RuleFixer) => null | Rule.Fix) | undefined {
+): ((fixer: Rule.RuleFixer) => Rule.Fix | undefined) | undefined {
   const { comment, example, hasOtherExamples, problem, sourceCode } = context;
   const commentOffset = comment.range?.[0];
   const commentValueOffset =

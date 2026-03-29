@@ -1,28 +1,29 @@
 import type { AST } from "eslint";
 import type * as ESTree from "estree";
 
-import fs from "node:fs";
+import { mkdirSync, mkdtempSync } from "node:fs";
 import path from "node:path";
+import { cwd } from "node:process";
 
 /**
- * Creates a temporary repo directory under the given root.
- * @param root Root folder for temp files.
- * @returns The generated directory path.
+ * Creates a temporary repo directory for test fixtures.
+ * @param root Root folder to create the temporary directory under.
+ * @returns The generated temporary directory path.
  * @example
  * ```typescript
  * const directory = createRepoDirectory("tmp");
  * ```
  */
 const createRepoDirectory = (root: "src" | "tmp"): string => {
-  const baseDirectory = path.join(process.cwd(), root);
-  fs.mkdirSync(baseDirectory, { recursive: true });
-  return fs.mkdtempSync(path.join(baseDirectory, "barrel-files-"));
+  const baseDirectory = path.join(cwd(), root);
+  mkdirSync(baseDirectory, { recursive: true });
+  return mkdtempSync(path.join(baseDirectory, "barrel-files-"));
 };
 
 /**
- * Creates a program wrapper around the supplied AST body.
+ * Wraps statements in a program node for SourceCode construction.
  * @param body Program body statements.
- * @returns The AST program.
+ * @returns The AST program wrapper.
  * @example
  * ```typescript
  * const program = createProgram([]);
@@ -31,10 +32,7 @@ const createRepoDirectory = (root: "src" | "tmp"): string => {
 const createProgram = (body: ESTree.Program["body"]): AST.Program => ({
   body,
   comments: [],
-  loc: {
-    end: { column: 0, line: 1 },
-    start: { column: 0, line: 1 },
-  },
+  loc: { end: { column: 0, line: 1 }, start: { column: 0, line: 1 } },
   range: [0, 0],
   sourceType: "module",
   tokens: [],
@@ -42,38 +40,34 @@ const createProgram = (body: ESTree.Program["body"]): AST.Program => ({
 });
 
 /**
- * Creates an ESTree literal node.
- * @param value Literal string to wrap.
- * @returns The literal node.
+ * Creates a string literal node for import and export statements.
+ * @param value Literal value to wrap.
+ * @returns The ESTree literal node.
  * @example
  * ```typescript
  * const literal = createLiteral("./feature");
  * ```
  */
 const createLiteral = (value: string): ESTree.Literal =>
-  ({
-    raw: `'${value}'`,
-    type: "Literal",
-    value,
-  }) satisfies ESTree.Literal;
+  ({ raw: `'${value}'`, type: "Literal", value }) satisfies ESTree.Literal;
 
 /**
- * Creates an ESTree identifier node.
- * @param name Identifier to create.
- * @returns The identifier node.
+ * Converts a raw symbol name into the ESTree shape used by the fixture factories.
+ * @param name Raw symbol text to encode in the AST node.
+ * @returns An ESTree Identifier carrying the supplied symbol text.
  * @example
  * ```typescript
- * const id = createIdentifier("all");
+ * const identifier = createIdentifier("feature");
  * ```
  */
 const createIdentifier = (name: string): ESTree.Identifier =>
   ({ name, type: "Identifier" }) satisfies ESTree.Identifier;
 
 /**
- * Creates an ESTree export specifier.
+ * Creates an export specifier node.
  * @param localName Local identifier name.
  * @param exportedName Exported identifier name.
- * @returns Export specifier node.
+ * @returns The ESTree export specifier.
  * @example
  * ```typescript
  * const specifier = createExportSpecifier("feature");
@@ -90,10 +84,10 @@ const createExportSpecifier = (
   }) satisfies ESTree.ExportSpecifier;
 
 /**
- * Creates an ESTree import specifier.
+ * Creates an import specifier node.
  * @param localName Local identifier name.
  * @param importedName Imported identifier name.
- * @returns Import specifier node.
+ * @returns The ESTree import specifier.
  * @example
  * ```typescript
  * const specifier = createImportSpecifier("feature");
@@ -110,9 +104,9 @@ const createImportSpecifier = (
   }) satisfies ESTree.ImportSpecifier;
 
 /**
- * Creates an ESTree import default specifier.
+ * Creates an import default specifier node.
  * @param localName Local identifier name.
- * @returns Import default specifier node.
+ * @returns The ESTree default import specifier.
  * @example
  * ```typescript
  * const specifier = createImportDefaultSpecifier("feature");
@@ -127,12 +121,12 @@ const createImportDefaultSpecifier = (
   }) satisfies ESTree.ImportDefaultSpecifier;
 
 /**
- * Creates an import declaration for test fixtures.
- * @param specifiers Specifiers to include.
- * @returns Import declaration node for tests.
+ * Creates an import declaration for fixture programs.
+ * @param specifiers Import specifiers to include.
+ * @returns The ESTree import declaration.
  * @example
  * ```typescript
- * const node = createImportDeclaration([createImportSpecifier("feature")]);
+ * const declaration = createImportDeclaration();
  * ```
  */
 const createImportDeclaration = (
@@ -146,11 +140,11 @@ const createImportDeclaration = (
   }) satisfies ESTree.ImportDeclaration;
 
 /**
- * Creates an export-all declaration for test fixtures.
- * @returns The export-all declaration node.
+ * Creates an export-all declaration for fixture programs.
+ * @returns The ESTree export-all declaration.
  * @example
  * ```typescript
- * const node = createExportAll();
+ * const declaration = createExportAll();
  * ```
  */
 const createExportAll = (): ESTree.ExportAllDeclaration =>
@@ -162,11 +156,11 @@ const createExportAll = (): ESTree.ExportAllDeclaration =>
   }) satisfies ESTree.ExportAllDeclaration;
 
 /**
- * Creates a named export-from declaration for test fixtures.
- * @returns Export declaration node for tests.
+ * Creates an export-from declaration for fixture programs.
+ * @returns The ESTree named export declaration.
  * @example
  * ```typescript
- * const node = createExportNamedFrom();
+ * const declaration = createExportNamedFrom();
  * ```
  */
 const createExportNamedFrom = (): ESTree.ExportNamedDeclaration =>
@@ -178,11 +172,11 @@ const createExportNamedFrom = (): ESTree.ExportNamedDeclaration =>
   }) satisfies ESTree.ExportNamedDeclaration;
 
 /**
- * Creates a named export with a local declaration.
- * @returns Export declaration node for tests.
+ * Creates an export declaration with an inline variable declaration.
+ * @returns The ESTree named export declaration.
  * @example
  * ```typescript
- * const node = createExportWithDeclaration();
+ * const declaration = createExportWithDeclaration();
  * ```
  */
 const createExportWithDeclaration = (): ESTree.ExportNamedDeclaration => {
@@ -201,7 +195,12 @@ const createExportWithDeclaration = (): ESTree.ExportNamedDeclaration => {
 };
 
 /**
+ * Creates an exported interface declaration for tests.
+ * @returns The exported interface declaration node.
  * @example
+ * ```typescript
+ * const declaration = createExportInterfaceDeclaration();
+ * ```
  */
 const createExportInterfaceDeclaration = (): ESTree.Program["body"][number] =>
   ({
@@ -215,16 +214,19 @@ const createExportInterfaceDeclaration = (): ESTree.Program["body"][number] =>
   }) as unknown as ESTree.Program["body"][number];
 
 /**
+ * Creates an exported type alias declaration for tests.
+ * @returns The exported type alias declaration node.
  * @example
+ * ```typescript
+ * const declaration = createExportTypeAliasDeclaration();
+ * ```
  */
 const createExportTypeAliasDeclaration = (): ESTree.Program["body"][number] =>
   ({
     declaration: {
       id: createIdentifier("Feature"),
       type: "TSTypeAliasDeclaration",
-      typeAnnotation: {
-        type: "TSStringKeyword",
-      },
+      typeAnnotation: { type: "TSStringKeyword" },
     },
     specifiers: [],
     type: "ExportNamedDeclaration",
@@ -233,10 +235,10 @@ const createExportTypeAliasDeclaration = (): ESTree.Program["body"][number] =>
 /**
  * Creates a named export without a source value.
  * @param specifiers Export specifiers to include.
- * @returns Export declaration node for tests.
+ * @returns The ESTree named export declaration.
  * @example
  * ```typescript
- * const node = createExportWithoutSource([createExportSpecifier("feature")]);
+ * const declaration = createExportWithoutSource();
  * ```
  */
 const createExportWithoutSource = (
@@ -249,12 +251,12 @@ const createExportWithoutSource = (
   }) satisfies ESTree.ExportNamedDeclaration;
 
 /**
- * Creates a default export for an identifier.
+ * Creates a default export declaration for an identifier.
  * @param name Identifier to export.
- * @returns Export default declaration node for tests.
+ * @returns The ESTree default export declaration.
  * @example
  * ```typescript
- * const node = createExportDefaultIdentifier("feature");
+ * const declaration = createExportDefaultIdentifier("feature");
  * ```
  */
 const createExportDefaultIdentifier = (
@@ -266,41 +268,17 @@ const createExportDefaultIdentifier = (
   }) satisfies ESTree.ExportDefaultDeclaration;
 
 /**
- * Collects statements into a program body array.
- * @param statements Statements to include in the program.
+ * Collects statements into a program body.
+ * @param statements Statements to include in the body.
  * @returns The program body array.
  * @example
  * ```typescript
- * const body = createBody(createImportDeclaration());
+ * const body = createBody();
  * ```
  */
 const createBody = (
   ...statements: ESTree.Program["body"][number][]
 ): ESTree.Program["body"] => statements;
-
-/**
- * Writes a barrel file to the given path.
- * @param filePath Path for the barrel file.
- * @example
- * ```typescript
- * writeBarrel("/tmp/index.ts");
- * ```
- */
-const writeBarrel = (filePath: string): void => {
-  fs.writeFileSync(filePath, "export * from './feature';", "utf8");
-};
-
-/**
- * Writes a feature file to the given path.
- * @param filePath Path for the feature file.
- * @example
- * ```typescript
- * writeFeature("/tmp/feature.ts");
- * ```
- */
-const writeFeature = (filePath: string): void => {
-  fs.writeFileSync(filePath, "export const feature = 1;", "utf8");
-};
 
 export {
   createBody,
@@ -317,6 +295,4 @@ export {
   createImportSpecifier,
   createProgram,
   createRepoDirectory,
-  writeBarrel,
-  writeFeature,
 };

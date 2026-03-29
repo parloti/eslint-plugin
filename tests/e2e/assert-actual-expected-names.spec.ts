@@ -1,14 +1,12 @@
+import { describe, expect, it } from "vitest";
+
 import { assertActualExpectedNamesRule } from "../../src";
-import { createRuleTester } from "../support/rule-tester";
+import { runRuleCase } from "../support";
 
-/**
- *
- */
-const ruleTester = createRuleTester();
-
-ruleTester.run("assert-actual-expected-names", assertActualExpectedNamesRule, {
-  invalid: [
-    {
+describe("assert-actual-expected-names e2e", () => {
+  it("rejects names without actual and expected prefixes", () => {
+    // Arrange
+    const testCase = {
       code: [
         'it("uses clear assert names", () => {',
         "  // Arrange",
@@ -23,12 +21,23 @@ ruleTester.run("assert-actual-expected-names", assertActualExpectedNamesRule, {
         "  expect(result).toBe(value);",
         "});",
       ].join("\n"),
-      errors: [{ messageId: "missingPrefix" }, { messageId: "missingPrefix" }],
       filename: "example.spec.ts",
-    },
-  ],
-  valid: [
-    {
+    };
+
+    // Act
+    const result = runRuleCase(
+      "assert-actual-expected-names",
+      assertActualExpectedNamesRule,
+      testCase,
+    );
+
+    // Assert
+    expect(result.messageIds).toStrictEqual(["missingPrefix", "missingPrefix"]);
+  });
+
+  it("accepts actualResult and expectedValue names", () => {
+    // Arrange
+    const testCase = {
       code: [
         'it("uses actual and expected prefixes", () => {',
         "  // Arrange",
@@ -44,8 +53,22 @@ ruleTester.run("assert-actual-expected-names", assertActualExpectedNamesRule, {
         "});",
       ].join("\n"),
       filename: "example.spec.ts",
-    },
-    {
+    };
+
+    // Act
+    const result = runRuleCase(
+      "assert-actual-expected-names",
+      assertActualExpectedNamesRule,
+      testCase,
+    );
+
+    // Assert
+    expect(result.messageIds).toStrictEqual([]);
+  });
+
+  it("accepts short actual and expected names", () => {
+    // Arrange
+    const testCase = {
       code: [
         'it("uses actual and expected prefixes", () => {',
         "  // Arrange",
@@ -61,8 +84,22 @@ ruleTester.run("assert-actual-expected-names", assertActualExpectedNamesRule, {
         "});",
       ].join("\n"),
       filename: "example.spec.ts",
-    },
-    {
+    };
+
+    // Act
+    const result = runRuleCase(
+      "assert-actual-expected-names",
+      assertActualExpectedNamesRule,
+      testCase,
+    );
+
+    // Assert
+    expect(result.messageIds).toStrictEqual([]);
+  });
+
+  it("accepts direct actual names created in Act", () => {
+    // Arrange
+    const testCase = {
       code: [
         'it("uses actual and expected prefixes", () => {',
         "  // Arrange",
@@ -77,6 +114,16 @@ ruleTester.run("assert-actual-expected-names", assertActualExpectedNamesRule, {
         "});",
       ].join("\n"),
       filename: "example.spec.ts",
-    },
-  ],
+    };
+
+    // Act
+    const result = runRuleCase(
+      "assert-actual-expected-names",
+      assertActualExpectedNamesRule,
+      testCase,
+    );
+
+    // Assert
+    expect(result.messageIds).toStrictEqual([]);
+  });
 });

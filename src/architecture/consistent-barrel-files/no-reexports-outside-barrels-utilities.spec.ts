@@ -1,6 +1,7 @@
 import type { AST } from "eslint";
 
 import path from "node:path";
+import { cwd } from "node:process";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -11,12 +12,20 @@ import {
   shouldLintFile,
 } from "./no-reexports-outside-barrels-utilities";
 
+/** Stores the collected import names and re-export result for a test case. */
+interface ImportExportResult {
+  /** Whether the export statement re-exports an imported name. */
+  hasReexportedImport: boolean;
+  /** Imported names collected from the test program body. */
+  importedNames: Set<string>;
+}
+
 describe("no-reexports utilities", () => {
-  it("normalizes options and checks barrels", () => {
+  it("normalizes options and checks barrels", (): void => {
     // Arrange
     const state = getOptions([{ allowedBarrelNames: ["index"] }]);
-    const barrel = `${process.cwd()}/src/index.ts`;
-    const featurePath = `${process.cwd()}/src/feature.ts`;
+    const barrel = `${cwd()}/src/index.ts`;
+    const featurePath = `${cwd()}/src/feature.ts`;
 
     // Act
     const result = {
@@ -29,7 +38,7 @@ describe("no-reexports utilities", () => {
     expect(result.featureShouldLint).toBe(true);
   });
 
-  it("collects imports and detects export usage", () => {
+  it("collects imports and detects export usage", (): void => {
     // Arrange
     const body = [
       {
@@ -46,7 +55,7 @@ describe("no-reexports utilities", () => {
     const [, exportStatement] = body;
 
     // Act
-    const result = (() => {
+    const result = ((): ImportExportResult => {
       const importedNames = collectImportedNames(body);
 
       return {
@@ -60,10 +69,10 @@ describe("no-reexports utilities", () => {
     expect(result.hasReexportedImport).toBe(true);
   });
 
-  it("skips non-lintable paths", () => {
+  it("skips non-lintable paths", (): void => {
     // Arrange
     const state = getOptions([{ allowedBarrelNames: ["index"] }]);
-    const outside = path.resolve(process.cwd(), "..", "outside.ts");
+    const outside = path.resolve(cwd(), "..", "outside.ts");
 
     // Act
     const result = {
@@ -76,17 +85,14 @@ describe("no-reexports utilities", () => {
     expect(result.outsideShouldLint).toBe(false);
   });
 
-  it("supports custom barrel stems", () => {
+  it("supports custom barrel stems", (): void => {
     // Arrange
     const state = getOptions([{ allowedBarrelNames: ["mod"] }]);
 
     // Act
     const result = {
-      barrelDetected: isBarrelFile(`${process.cwd()}/src/mod.ts`, state),
-      featureShouldLint: shouldLintFile(
-        `${process.cwd()}/src/feature.ts`,
-        state,
-      ),
+      barrelDetected: isBarrelFile(`${cwd()}/src/mod.ts`, state),
+      featureShouldLint: shouldLintFile(`${cwd()}/src/feature.ts`, state),
     };
 
     // Assert
@@ -94,16 +100,16 @@ describe("no-reexports utilities", () => {
     expect(result.featureShouldLint).toBe(true);
   });
 
-  describe.runIf(path.sep === "\\")("windows paths", () => {
-    it("skips files on another root", () => {
+  describe.runIf(path.sep === "\\")("windows paths", (): void => {
+    it("skips files on another root", (): void => {
       // Arrange
-      const { root } = path.parse(process.cwd());
+      const { root } = path.parse(cwd());
       const driveLetter = root[0]?.toUpperCase() ?? "C";
       const otherDrive = driveLetter === "C" ? "Z" : "C";
       const state = getOptions([{ allowedBarrelNames: ["index"] }]);
 
       // Act
-      const shouldLint = (() => {
+      const shouldLint = ((): boolean => {
         const foreignPath = path.win32.join(`${otherDrive}:`, "outside.ts");
 
         return shouldLintFile(foreignPath, state);

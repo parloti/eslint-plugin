@@ -80,8 +80,8 @@ const getMemberName = (
 ):
   | undefined
   | {
-      /** BaseName field value. */
-      baseName: string;
+      /** Basename field value. */
+      basename: string;
 
       /** MemberPath field value. */
       memberPath: string;
@@ -92,10 +92,10 @@ const getMemberName = (
     return void 0;
   }
 
-  const baseName = normalized.slice(0, dotIndex);
+  const basename = normalized.slice(0, dotIndex);
   const memberPath = normalized.slice(dotIndex + 1).trim();
 
-  return memberPath.length > 0 ? { baseName, memberPath } : void 0;
+  return memberPath.length > 0 ? { basename, memberPath } : void 0;
 };
 
 /**
@@ -124,7 +124,7 @@ const parseParameterTagLine = (
   }
 
   return {
-    baseName: member.baseName,
+    basename: member.basename,
     fullName: normalized,
     line,
   };

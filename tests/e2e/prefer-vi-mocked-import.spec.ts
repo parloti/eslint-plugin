@@ -1,13 +1,10 @@
+import { describe, expect, it } from "vitest";
+
 import { preferViMockedImportRule } from "../../src";
-import { createRuleTester } from "../support/rule-tester";
+import { runRuleCase } from "../support";
 
-/**
- *
- */
-const ruleTester = createRuleTester();
-
-ruleTester.run("prefer-vi-mocked-import", preferViMockedImportRule, {
-  invalid: [
+describe("prefer-vi-mocked-import e2e", () => {
+  it.each([
     {
       code: [
         "const installDevelopmentDependencies = vi.fn();",
@@ -55,9 +52,26 @@ ruleTester.run("prefer-vi-mocked-import", preferViMockedImportRule, {
         "",
       ].join("\n"),
     },
-  ],
-  valid: [
-    {
+  ])("rewrites direct mocks to vi.mocked imports %#", (testCase) => {
+    // Arrange
+
+    // Act
+    const result = runRuleCase(
+      "prefer-vi-mocked-import",
+      preferViMockedImportRule,
+      testCase,
+    );
+
+    // Assert
+    expect(result.messageIds).toStrictEqual(
+      testCase.errors.map((error) => error.messageId),
+    );
+    expect(result.output).toBe(testCase.output);
+  });
+
+  it("accepts reused mock bindings", () => {
+    // Arrange
+    const testCase = {
       code: [
         "const installDevelopmentDependencies = vi.fn();",
         "console.log(installDevelopmentDependencies);",
@@ -66,6 +80,16 @@ ruleTester.run("prefer-vi-mocked-import", preferViMockedImportRule, {
         "",
       ].join("\n"),
       filename: "example.spec.ts",
-    },
-  ],
+    };
+
+    // Act
+    const result = runRuleCase(
+      "prefer-vi-mocked-import",
+      preferViMockedImportRule,
+      testCase,
+    );
+
+    // Assert
+    expect(result.messageIds).toStrictEqual([]);
+  });
 });

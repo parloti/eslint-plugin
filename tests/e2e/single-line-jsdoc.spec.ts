@@ -1,20 +1,32 @@
+import { describe, expect, it } from "vitest";
+
 import { singleLineJsdocRule } from "../../src";
-import { createRuleTester } from "../support/rule-tester";
+import { runRuleCase } from "../support";
 
-/**
- *
- */
-const ruleTester = createRuleTester();
-
-ruleTester.run("single-line-jsdoc", singleLineJsdocRule, {
-  invalid: [
-    {
+describe("single-line-jsdoc e2e", () => {
+  it("collapses simple JSDoc blocks onto one line", () => {
+    // Arrange
+    const testCase = {
       code: ["/**", " * doc", " */", "const value = 1;"].join("\n"),
       errors: [{ messageId: "singleLine" }],
       output: ["/** doc */", "const value = 1;"].join("\n"),
-    },
-  ],
-  valid: [
+    };
+
+    // Act
+    const result = runRuleCase(
+      "single-line-jsdoc",
+      singleLineJsdocRule,
+      testCase,
+    );
+
+    // Assert
+    expect(result.messageIds).toStrictEqual(
+      testCase.errors.map((error) => error.messageId),
+    );
+    expect(result.output).toBe(testCase.output);
+  });
+
+  it.each([
     {
       code: ["/** doc */", "const value = 1;"].join("\n"),
     },
@@ -28,5 +40,17 @@ ruleTester.run("single-line-jsdoc", singleLineJsdocRule, {
         "}",
       ].join("\n"),
     },
-  ],
+  ])("accepts already-compliant JSDoc forms %#", (testCase) => {
+    // Arrange
+
+    // Act
+    const result = runRuleCase(
+      "single-line-jsdoc",
+      singleLineJsdocRule,
+      testCase,
+    );
+
+    // Assert
+    expect(result.messageIds).toStrictEqual([]);
+  });
 });

@@ -153,14 +153,14 @@ function buildMissingLanguageFix(original: string): string | undefined {
  */
 function createFixer(
   context: FixerContext,
-): (fixer: Rule.RuleFixer) => null | Rule.Fix {
+): (fixer: Rule.RuleFixer) => Rule.Fix | undefined {
   const { absoluteEnd, absoluteStart } = context;
 
-  return (fixer: Rule.RuleFixer): null | Rule.Fix => {
+  return (fixer: Rule.RuleFixer): Rule.Fix | undefined => {
     const updated = getUpdatedExampleText(context);
 
     if (updated === void 0) {
-      return null;
+      return void 0;
     }
 
     return fixer.replaceTextRange([absoluteStart, absoluteEnd], updated);

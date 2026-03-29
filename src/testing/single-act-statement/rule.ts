@@ -3,9 +3,7 @@ import type { Rule } from "eslint";
 import { createRuleDocumentation } from "../../custom-rule-documentation";
 import { analyzeTestBlock, countActStatements } from "../aaa";
 
-/**
- *
- */
+/** Requires the Act phase to contain a single top-level statement. */
 const singleActStatementRule: Rule.RuleModule = {
   create(context: Rule.RuleContext): Rule.RuleListener {
     return {

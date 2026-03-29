@@ -1,6 +1,6 @@
 import type { Rule } from "eslint";
 
-import fs from "node:fs";
+import { existsSync } from "node:fs";
 import path from "node:path";
 
 import type { RequireTestCompanionState } from "./require-test-companion-options";
@@ -14,11 +14,11 @@ import {
 
 /** Type definition for rule data. */
 interface MissingSourceListenerOptions {
-  /** Basename field value. */
-  basename: string;
-
   /** Directory field value. */
   directory: string;
+
+  /** Basename field value. */
+  fileBasename: string;
 
   /** Suffix field value. */
   suffix: string;
@@ -26,11 +26,11 @@ interface MissingSourceListenerOptions {
 
 /** Type definition for rule data. */
 interface MissingTestListenerOptions {
-  /** Basename field value. */
-  basename: string;
-
   /** Directory field value. */
   directory: string;
+
+  /** Basename field value. */
+  fileBasename: string;
 
   /** TestSuffixes field value. */
   testSuffixes: string[];
@@ -38,7 +38,7 @@ interface MissingTestListenerOptions {
 
 /**
  * Gets the test suffix for a file name when present.
- * @param basename Input basename value.
+ * @param fileBasename Input basename value.
  * @param testSuffixes Input testSuffixes value.
  * @returns Matched test suffix when present.
  * @example
@@ -47,11 +47,11 @@ interface MissingTestListenerOptions {
  * ```
  */
 const getTestSuffix = (
-  basename: string,
+  fileBasename: string,
   testSuffixes: string[],
 ): string | undefined =>
   testSuffixes.find((suffix) =>
-    basename.endsWith(`.${suffix}${TYPESCRIPT_EXTENSION}`),
+    fileBasename.endsWith(`.${suffix}${TYPESCRIPT_EXTENSION}`),
   );
 
 /**
@@ -71,7 +71,7 @@ const hasAnyTestCompanion = (
   testSuffixes: string[],
 ): boolean =>
   testSuffixes.some((suffix) =>
-    fs.existsSync(path.join(directory, `${baseStem}.${suffix}.ts`)),
+    existsSync(path.join(directory, `${baseStem}.${suffix}.ts`)),
   );
 
 /**
@@ -88,8 +88,8 @@ const buildMissingTestListener = (
   context: Rule.RuleContext,
   options: MissingTestListenerOptions,
 ): Rule.RuleListener => {
-  const { basename, directory, testSuffixes } = options;
-  const baseStem = basename.slice(0, -TYPESCRIPT_EXTENSION.length);
+  const { directory, fileBasename, testSuffixes } = options;
+  const baseStem = fileBasename.slice(0, -TYPESCRIPT_EXTENSION.length);
 
   if (baseStem.length === 0) {
     return {};
@@ -128,8 +128,8 @@ const buildMissingSourceListener = (
   context: Rule.RuleContext,
   options: MissingSourceListenerOptions,
 ): Rule.RuleListener => {
-  const { basename, directory, suffix } = options;
-  const sourceBasename = basename.slice(
+  const { directory, fileBasename, suffix } = options;
+  const sourceBasename = fileBasename.slice(
     0,
     -`.${suffix}${TYPESCRIPT_EXTENSION}`.length,
   );
@@ -140,7 +140,7 @@ const buildMissingSourceListener = (
 
   const sourceFile = `${sourceBasename}${TYPESCRIPT_EXTENSION}`;
 
-  if (fs.existsSync(path.join(directory, sourceFile))) {
+  if (existsSync(path.join(directory, sourceFile))) {
     return {};
   }
 
@@ -206,22 +206,22 @@ const buildListenerForFilename = (
     return {};
   }
 
-  const basename = path.basename(filename);
+  const fileBasename = path.basename(filename);
   const directory = path.dirname(filename);
   const { testSuffixes } = options;
-  const testSuffix = getTestSuffix(basename, testSuffixes);
+  const testSuffix = getTestSuffix(fileBasename, testSuffixes);
 
   if (testSuffix !== void 0) {
     return buildMissingSourceListener(context, {
-      basename,
       directory,
+      fileBasename,
       suffix: testSuffix,
     });
   }
 
   return buildMissingTestListener(context, {
-    basename,
     directory,
+    fileBasename,
     testSuffixes,
   });
 };

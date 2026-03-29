@@ -54,7 +54,7 @@ const isMatchingMemberTag = (
     return false;
   }
 
-  const parameterType = parameterTypes.get(tag.baseName);
+  const parameterType = parameterTypes.get(tag.basename);
 
   return isNamedTypeReference(parameterType);
 };

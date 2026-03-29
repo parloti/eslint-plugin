@@ -1,89 +1,55 @@
-import { afterAll } from "vitest";
+import { afterAll, describe, expect, it } from "vitest";
 
 import { barrelFilesExportsOnlyRule } from "../../src";
-import { createRuleTester } from "../support/rule-tester";
-import { createTemporaryFixtureManager } from "../support/temporary-fixtures";
+import { createTemporaryFixtureManager, runRuleCase } from "../support";
 
-/**
- *
- */
-const ruleTester = createRuleTester();
+describe("barrel-files-exports-only e2e", () => {
+  const { cleanupTemporaryDirectories, createFixtureSet } =
+    createTemporaryFixtureManager();
 
-/**
- *
- */
-const { cleanupTemporaryDirectories, createFixtureSet } =
-  createTemporaryFixtureManager();
+  afterAll(cleanupTemporaryDirectories);
 
-afterAll(cleanupTemporaryDirectories);
+  const emptyBarrel = createFixtureSet({ "index.ts": "" });
+  const validBarrel = createFixtureSet({
+    "index.ts": [
+      'export * from "./feature";',
+      'export { feature } from "./feature";',
+    ].join("\n"),
+  });
+  const typeOnlyBarrel = createFixtureSet({
+    "index.ts": [
+      "export interface Feature {",
+      "  readonly name: string;",
+      "}",
+      "export type FeatureName = string;",
+    ].join("\n"),
+  });
+  const invalidBarrel = createFixtureSet({
+    "index.ts": [
+      'import { feature } from "./feature";',
+      "export { feature };",
+    ].join("\n"),
+  });
+  const customBarrel = createFixtureSet({
+    "mod.ts": [
+      'import { feature } from "./feature";',
+      "export { feature };",
+    ].join("\n"),
+  });
+  const nonBarrel = createFixtureSet({
+    "feature.ts": 'import { feature } from "./dependency";',
+  });
 
-/**
- *
- */
-const emptyBarrel = createFixtureSet({ "index.ts": "" });
-
-/**
- *
- */
-const validBarrel = createFixtureSet({
-  "index.ts": [
-    'export * from "./feature";',
-    'export { feature } from "./feature";',
-  ].join("\n"),
-});
-
-/**
- *
- */
-const typeOnlyBarrel = createFixtureSet({
-  "index.ts": [
-    "export interface Feature {",
-    "  readonly name: string;",
-    "}",
-    "export type FeatureName = string;",
-  ].join("\n"),
-});
-
-/**
- *
- */
-const invalidBarrel = createFixtureSet({
-  "index.ts": [
-    'import { feature } from "./feature";',
-    "export { feature };",
-  ].join("\n"),
-});
-
-/**
- *
- */
-const customBarrel = createFixtureSet({
-  "mod.ts": [
-    'import { feature } from "./feature";',
-    "export { feature };",
-  ].join("\n"),
-});
-
-/**
- *
- */
-const nonBarrel = createFixtureSet({
-  "feature.ts": 'import { feature } from "./dependency";',
-});
-
-ruleTester.run("barrel-files-exports-only", barrelFilesExportsOnlyRule, {
-  invalid: [
+  it.each([
     {
       code: [
         'import { feature } from "./feature";',
         "export { feature };",
       ].join("\n"),
-      errors: [{ messageId: "invalidBarrelContent" }],
       filename: invalidBarrel.getFilePath("index.ts"),
     },
     {
       code: ["export const value = 1;", 'console.log("loaded");'].join("\n"),
-      errors: [{ messageId: "invalidBarrelContent" }],
       filename: invalidBarrel.getFilePath("index.ts"),
     },
     {
@@ -91,12 +57,24 @@ ruleTester.run("barrel-files-exports-only", barrelFilesExportsOnlyRule, {
         'import { feature } from "./feature";',
         "export { feature };",
       ].join("\n"),
-      errors: [{ messageId: "invalidBarrelContent" }],
       filename: customBarrel.getFilePath("mod.ts"),
       options: [{ allowedBarrelNames: ["mod"] }],
     },
-  ],
-  valid: [
+  ])("rejects invalid barrel content %#", (testCase) => {
+    // Arrange
+
+    // Act
+    const result = runRuleCase(
+      "barrel-files-exports-only",
+      barrelFilesExportsOnlyRule,
+      testCase,
+    );
+
+    // Assert
+    expect(result.messageIds).toStrictEqual(["invalidBarrelContent"]);
+  });
+
+  it.each([
     {
       code: "",
       filename: emptyBarrel.getFilePath("index.ts"),
@@ -131,5 +109,17 @@ ruleTester.run("barrel-files-exports-only", barrelFilesExportsOnlyRule, {
       filename: customBarrel.getFilePath("mod.ts"),
       options: [{ allowedBarrelNames: ["mod"] }],
     },
-  ],
+  ])("accepts valid barrel content %#", (testCase) => {
+    // Arrange
+
+    // Act
+    const result = runRuleCase(
+      "barrel-files-exports-only",
+      barrelFilesExportsOnlyRule,
+      testCase,
+    );
+
+    // Assert
+    expect(result.messageIds).toStrictEqual([]);
+  });
 });

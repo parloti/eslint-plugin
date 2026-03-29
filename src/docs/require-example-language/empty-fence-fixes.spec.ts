@@ -57,7 +57,7 @@ describe("empty fence fixes", () => {
       .mockImplementation(function execSpyImplementation(
         this: RegExp,
         value: string,
-      ) {
+      ): null | RegExpExecArray {
         if (
           this.source ===
             "^(?<leading>\\s*\\*?\\s*)```(?<lang>[^\\s`]+)?[ \\t]*$" &&
@@ -73,13 +73,13 @@ describe("empty fence fixes", () => {
       });
 
     // Act
-    const parsedFence = (() => {
-      try {
-        return parseFenceLine(" * ```typescript");
-      } finally {
-        execSpy.mockRestore();
-      }
-    })();
+    let parsedFence: ReturnType<typeof parseFenceLine>;
+
+    try {
+      parsedFence = parseFenceLine(" * ```typescript");
+    } finally {
+      execSpy.mockRestore();
+    }
 
     // Assert
     expect(parsedFence).toStrictEqual({

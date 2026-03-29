@@ -1,5 +1,6 @@
-import fs from "node:fs";
+import { rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
+import { cwd } from "node:process";
 import { afterEach, describe, expect, it } from "vitest";
 
 import {
@@ -8,14 +9,15 @@ import {
   isLintableModuleFile,
   normalizeAllowedBarrelNames,
 } from "./barrel-file-utilities";
-import { createRepoDirectory, writeFeature } from "./test-helpers";
+import { createRepoDirectory } from "./test-helpers";
+import { writeFeature } from "./test-helpers.file-writers";
 
 describe("barrel file utilities", () => {
   const temporaryDirectories: string[] = [];
 
   afterEach(() => {
     for (const directory of temporaryDirectories.splice(0)) {
-      fs.rmSync(directory, { force: true, recursive: true });
+      rmSync(directory, { force: true, recursive: true });
     }
   });
 
@@ -31,7 +33,7 @@ describe("barrel file utilities", () => {
 
   it("does not treat declaration files as lintable module files", () => {
     // Arrange
-    const declarationFile = path.join(process.cwd(), "src", "index.d.ts");
+    const declarationFile = path.join(cwd(), "src", "index.d.ts");
 
     // Act
     const result = {
@@ -51,11 +53,7 @@ describe("barrel file utilities", () => {
     const featurePath = path.join(directory, "feature.ts");
     const declarationBarrelPath = path.join(directory, "index.d.ts");
     writeFeature(featurePath);
-    fs.writeFileSync(
-      declarationBarrelPath,
-      "export interface Feature {}",
-      "utf8",
-    );
+    writeFileSync(declarationBarrelPath, "export interface Feature {}", "utf8");
 
     // Act
     const state = getDirectoryBarrelState(directory, new Set(["index"]));
@@ -66,5 +64,50 @@ describe("barrel file utilities", () => {
       hasNonBarrelModuleFile: true,
       primaryNonBarrelModuleFile: "feature.ts",
     });
+  });
+
+  it("treats plain modules as non-barrels and tolerates missing directories", () => {
+    // Arrange
+    const featureFile = path.join(cwd(), "src", "feature.ts");
+    const missingDirectory = path.join(cwd(), "missing-directory");
+
+    // Act
+    const actual = {
+      missingDirectoryState: getDirectoryBarrelState(
+        missingDirectory,
+        new Set(["index"]),
+      ),
+      plainModuleIsBarrel: isBarrelFile(featureFile, new Set(["index"])),
+    };
+
+    // Assert
+    expect(actual.plainModuleIsBarrel).toBe(false);
+    expect(actual.missingDirectoryState).toStrictEqual({
+      hasAllowedBarrelFile: false,
+      hasNonBarrelModuleFile: false,
+      primaryNonBarrelModuleFile: void 0,
+    });
+  });
+
+  it("recognizes ordinary TypeScript modules inside the repo", () => {
+    // Arrange
+    const featureFile = path.join(cwd(), "src", "feature.ts");
+
+    // Act
+    const actual = isLintableModuleFile(featureFile);
+
+    // Assert
+    expect(actual).toBe(true);
+  });
+
+  it("treats unsupported file extensions as non-lintable module files", () => {
+    // Arrange
+    const markdownFile = path.join(cwd(), "README.md");
+
+    // Act
+    const actual = isLintableModuleFile(markdownFile);
+
+    // Assert
+    expect(actual).toBe(false);
   });
 });

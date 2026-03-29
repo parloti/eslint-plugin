@@ -1,14 +1,12 @@
+import { describe, expect, it } from "vitest";
+
 import { noMultipleDeclaratorsRule } from "../../src";
-import { createRuleTester } from "../support/rule-tester";
+import { runRuleCase } from "../support";
 
-/**
- *
- */
-const ruleTester = createRuleTester();
-
-ruleTester.run("no-multiple-declarators", noMultipleDeclaratorsRule, {
-  invalid: [
-    {
+describe("no-multiple-declarators e2e", () => {
+  it("fixes multiple declarators in one statement", () => {
+    // Arrange
+    const testCase = {
       code: [
         "const availableRules = new Set(Object.keys(rules ?? {})),",
         "  customError = buildCustomErrorRules(availableRules);",
@@ -18,7 +16,23 @@ ruleTester.run("no-multiple-declarators", noMultipleDeclaratorsRule, {
         "const availableRules = new Set(Object.keys(rules ?? {}));",
         "const customError = buildCustomErrorRules(availableRules);",
       ].join("\n"),
-    },
+    };
+
+    // Act
+    const result = runRuleCase(
+      "no-multiple-declarators",
+      noMultipleDeclaratorsRule,
+      testCase,
+    );
+
+    // Assert
+    expect(result.messageIds).toStrictEqual(
+      testCase.errors.map((error) => error.messageId),
+    );
+    expect(result.output).toBe(testCase.output);
+  });
+
+  it.each([
     {
       code: [
         "export const availableRules = new Set(Object.keys(rules ?? {})),",
@@ -33,13 +47,39 @@ ruleTester.run("no-multiple-declarators", noMultipleDeclaratorsRule, {
       ].join("\n"),
       errors: [{ messageId: "singleDeclarator" }],
     },
-  ],
-  valid: [
-    {
+  ])("rejects multiple declarators %#", (testCase) => {
+    // Arrange
+
+    // Act
+    const result = runRuleCase(
+      "no-multiple-declarators",
+      noMultipleDeclaratorsRule,
+      testCase,
+    );
+
+    // Assert
+    expect(result.messageIds).toStrictEqual(
+      testCase.errors.map((error) => error.messageId),
+    );
+  });
+
+  it("accepts a single declarator per statement", () => {
+    // Arrange
+    const testCase = {
       code: [
         "const availableRules = new Set(Object.keys(rules ?? {}));",
         "const customError = buildCustomErrorRules(availableRules);",
       ].join("\n"),
-    },
-  ],
+    };
+
+    // Act
+    const result = runRuleCase(
+      "no-multiple-declarators",
+      noMultipleDeclaratorsRule,
+      testCase,
+    );
+
+    // Assert
+    expect(result.messageIds).toStrictEqual([]);
+  });
 });

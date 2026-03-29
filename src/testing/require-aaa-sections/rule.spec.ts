@@ -5,10 +5,16 @@ import { describe, expect, it } from "vitest";
 import { requireAaaSectionsRule } from "./rule";
 
 /**
- * @param code
+ * Runs the rule with autofix enabled for a single source snippet.
+ * @param code Source text passed to the linter.
+ * @returns ESLint verify-and-fix result for the snippet.
  * @example
+ * ```typescript
+ * const result = runFix('it("works", () => {});');
+ * void result;
+ * ```
  */
-function runFix(code: string) {
+function runFix(code: string): ReturnType<Linter["verifyAndFix"]> {
   const linter = new Linter({ configType: "flat" });
 
   return linter.verifyAndFix(

@@ -1,62 +1,34 @@
-import { afterAll } from "vitest";
+import { afterAll, describe, expect, it } from "vitest";
 
 import { noReexportsOutsideBarrelsRule } from "../../src";
-import { createRuleTester } from "../support/rule-tester";
-import { createTemporaryFixtureManager } from "../support/temporary-fixtures";
+import { createTemporaryFixtureManager, runRuleCase } from "../support";
 
-/**
- *
- */
-const ruleTester = createRuleTester();
+describe("no-reexports-outside-barrels e2e", () => {
+  const { cleanupTemporaryDirectories, createFixtureSet } =
+    createTemporaryFixtureManager();
 
-/**
- *
- */
-const { cleanupTemporaryDirectories, createFixtureSet } =
-  createTemporaryFixtureManager();
+  afterAll(cleanupTemporaryDirectories);
 
-afterAll(cleanupTemporaryDirectories);
+  const barrelFile = createFixtureSet({
+    "index.ts": 'export * from "./feature";',
+  });
+  const exportFromFile = createFixtureSet({
+    "feature.ts": 'export * from "./dependency";',
+  });
+  const importedExportFile = createFixtureSet({
+    "feature.ts": [
+      'import { feature } from "./dependency";',
+      "export { feature };",
+    ].join("\n"),
+  });
+  const localExportFile = createFixtureSet({
+    "feature.ts": "export const feature = 1;",
+  });
+  const customBarrelFile = createFixtureSet({
+    "mod.ts": 'export * from "./feature";',
+  });
 
-/**
- *
- */
-const barrelFile = createFixtureSet({
-  "index.ts": 'export * from "./feature";',
-});
-
-/**
- *
- */
-const exportFromFile = createFixtureSet({
-  "feature.ts": 'export * from "./dependency";',
-});
-
-/**
- *
- */
-const importedExportFile = createFixtureSet({
-  "feature.ts": [
-    'import { feature } from "./dependency";',
-    "export { feature };",
-  ].join("\n"),
-});
-
-/**
- *
- */
-const localExportFile = createFixtureSet({
-  "feature.ts": "export const feature = 1;",
-});
-
-/**
- *
- */
-const customBarrelFile = createFixtureSet({
-  "mod.ts": 'export * from "./feature";',
-});
-
-ruleTester.run("no-reexports-outside-barrels", noReexportsOutsideBarrelsRule, {
-  invalid: [
+  it.each([
     {
       code: 'export * from "./dependency";',
       errors: [{ messageId: "reexportNotAllowed" }],
@@ -70,8 +42,23 @@ ruleTester.run("no-reexports-outside-barrels", noReexportsOutsideBarrelsRule, {
       errors: [{ messageId: "reexportedImport" }],
       filename: importedExportFile.getFilePath("feature.ts"),
     },
-  ],
-  valid: [
+  ])("rejects re-exports outside barrels %#", (testCase) => {
+    // Arrange
+
+    // Act
+    const result = runRuleCase(
+      "no-reexports-outside-barrels",
+      noReexportsOutsideBarrelsRule,
+      testCase,
+    );
+
+    // Assert
+    expect(result.messageIds).toStrictEqual(
+      testCase.errors.map((error) => error.messageId),
+    );
+  });
+
+  it.each([
     {
       code: 'export * from "./feature";',
       filename: barrelFile.getFilePath("index.ts"),
@@ -85,5 +72,17 @@ ruleTester.run("no-reexports-outside-barrels", noReexportsOutsideBarrelsRule, {
       code: "export const feature = 1;",
       filename: localExportFile.getFilePath("feature.ts"),
     },
-  ],
+  ])("accepts local exports and barrels %#", (testCase) => {
+    // Arrange
+
+    // Act
+    const result = runRuleCase(
+      "no-reexports-outside-barrels",
+      noReexportsOutsideBarrelsRule,
+      testCase,
+    );
+
+    // Assert
+    expect(result.messageIds).toStrictEqual([]);
+  });
 });

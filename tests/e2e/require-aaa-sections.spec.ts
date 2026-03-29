@@ -1,13 +1,10 @@
+import { describe, expect, it } from "vitest";
+
 import { requireAaaSectionsRule } from "../../src";
-import { createRuleTester } from "../support/rule-tester";
+import { runRuleCase } from "../support";
 
-/**
- *
- */
-const ruleTester = createRuleTester();
-
-ruleTester.run("require-aaa-sections", requireAaaSectionsRule, {
-  invalid: [
+describe("require-aaa-sections e2e", () => {
+  it.each([
     {
       code: [
         'it("captures the result", () => {',
@@ -60,7 +57,26 @@ ruleTester.run("require-aaa-sections", requireAaaSectionsRule, {
         "});",
       ].join("\n"),
     },
-    {
+  ])("fixes incomplete AAA section layouts %#", (testCase) => {
+    // Arrange
+
+    // Act
+    const result = runRuleCase(
+      "require-aaa-sections",
+      requireAaaSectionsRule,
+      testCase,
+    );
+
+    // Assert
+    expect(result.messageIds).toStrictEqual(
+      testCase.errors.map((error) => error.messageId),
+    );
+    expect(result.output).toBe(testCase.output);
+  });
+
+  it("rejects code that appears before Arrange", () => {
+    // Arrange
+    const testCase = {
       code: [
         'it("starts with arrange", () => {',
         "  const input = 1;",
@@ -76,9 +92,22 @@ ruleTester.run("require-aaa-sections", requireAaaSectionsRule, {
       ].join("\n"),
       errors: [{ messageId: "codeBeforeArrange" }],
       filename: "example.spec.ts",
-    },
-  ],
-  valid: [
+    };
+
+    // Act
+    const result = runRuleCase(
+      "require-aaa-sections",
+      requireAaaSectionsRule,
+      testCase,
+    );
+
+    // Assert
+    expect(result.messageIds).toStrictEqual(
+      testCase.errors.map((error) => error.messageId),
+    );
+  });
+
+  it.each([
     {
       code: [
         'test("uses AAA comments", () => {',
@@ -104,5 +133,17 @@ ruleTester.run("require-aaa-sections", requireAaaSectionsRule, {
       ].join("\n"),
       filename: "example.spec.ts",
     },
-  ],
+  ])("accepts complete AAA section layouts %#", (testCase) => {
+    // Arrange
+
+    // Act
+    const result = runRuleCase(
+      "require-aaa-sections",
+      requireAaaSectionsRule,
+      testCase,
+    );
+
+    // Assert
+    expect(result.messageIds).toStrictEqual([]);
+  });
 });

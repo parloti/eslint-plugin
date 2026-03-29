@@ -1,3 +1,4 @@
+import { cwd } from "node:process";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -39,7 +40,7 @@ describe("require-test-companion options", () => {
 
   it("checks path patterns", () => {
     // Arrange
-    const filename = `${process.cwd()}/src/index.ts`;
+    const filename = `${cwd()}/src/index.ts`;
 
     // Act
     const result = {

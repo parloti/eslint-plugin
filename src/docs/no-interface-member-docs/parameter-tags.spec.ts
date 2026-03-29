@@ -42,7 +42,7 @@ describe("parameter tag parsing", () => {
     const tag = parseParameterTagLine(line);
 
     // Assert
-    expect(tag?.baseName).toBe("context");
+    expect(tag?.basename).toBe("context");
     expect(tag?.fullName).toBe("context.member");
   });
 
@@ -54,7 +54,7 @@ describe("parameter tag parsing", () => {
     const tag = parseParameterTagLine(line);
 
     // Assert
-    expect(tag?.baseName).toBe("context");
+    expect(tag?.basename).toBe("context");
     expect(tag?.fullName).toBe("context.value");
   });
 
@@ -100,7 +100,7 @@ describe("parameter tag parsing", () => {
     const tag = parseParameterTagLine(line);
 
     // Assert
-    expect(tag?.baseName).toBe("context");
+    expect(tag?.basename).toBe("context");
     expect(tag?.fullName).toBe("context.member");
   });
 });

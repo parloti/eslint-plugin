@@ -1,7 +1,6 @@
 import type { ConsistentBarrelFilesOptions } from "./types";
 
 import {
-  DEFAULT_ALLOWED_BARREL_NAMES,
   isLintableModuleFile,
   normalizeAllowedBarrelNames,
 } from "./barrel-file-utilities";
@@ -22,9 +21,9 @@ interface ConsistentBarrelFilesState {
 }
 
 /**
- * Builds normalized rule options from raw input.
- * @param options Raw rule options array.
- * @returns Normalized rule options.
+ * Builds normalized rule options from raw rule input.
+ * @param options Raw rule options.
+ * @returns The normalized rule state.
  * @example
  * ```typescript
  * const state = getOptions([{}]);
@@ -47,27 +46,25 @@ const getOptions = (
 };
 
 /**
- * Checks isLintableFilename.
- * @param filename Input filename value.
- * @returns Return value output.
+ * Determines whether a filename is eligible for linting.
+ * @param filename Filename to inspect.
+ * @returns True when the filename is a lintable module file.
  * @example
  * ```typescript
- * isLintableFilename();
+ * const lintable = isLintableFilename(`${cwd()}/src/index.ts`);
  * ```
  */
 const isLintableFilename = (filename: string): boolean =>
   isLintableModuleFile(filename);
 
 /**
- * Determines whether a file should be checked.
- * @param filename Absolute filename.
- * @param folders Folder glob patterns.
- * @param names Allowed barrel names.
- * @param allowedNames
- * @returns True when the file should be linted.
+ * Determines whether the rule should lint a file.
+ * @param filename Filename to inspect.
+ * @param allowedNames Allowed barrel names for the rule run.
+ * @returns True when the file should be checked.
  * @example
  * ```typescript
- * const ok = shouldLintFile(filename, folders, names);
+ * const shouldLint = shouldLintFile(`${cwd()}/src/index.ts`, ["index"]);
  * ```
  */
 const shouldLintFile = (filename: string, allowedNames: string[]): boolean => {

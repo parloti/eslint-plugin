@@ -1,14 +1,12 @@
+import { describe, expect, it } from "vitest";
+
 import { singleActStatementRule } from "../../src";
-import { createRuleTester } from "../support/rule-tester";
+import { runRuleCase } from "../support";
 
-/**
- *
- */
-const ruleTester = createRuleTester();
-
-ruleTester.run("single-act-statement", singleActStatementRule, {
-  invalid: [
-    {
+describe("single-act-statement e2e", () => {
+  it("rejects multiple Act statements", () => {
+    // Arrange
+    const testCase = {
       code: [
         'it("keeps one act statement", () => {',
         "  // Arrange",
@@ -24,10 +22,24 @@ ruleTester.run("single-act-statement", singleActStatementRule, {
       ].join("\n"),
       errors: [{ messageId: "multipleActStatements" }],
       filename: "example.spec.ts",
-    },
-  ],
-  valid: [
-    {
+    };
+
+    // Act
+    const result = runRuleCase(
+      "single-act-statement",
+      singleActStatementRule,
+      testCase,
+    );
+
+    // Assert
+    expect(result.messageIds).toStrictEqual(
+      testCase.errors.map((error) => error.messageId),
+    );
+  });
+
+  it("accepts one Act declaration", () => {
+    // Arrange
+    const testCase = {
       code: [
         'it("allows one act declaration", () => {',
         "  // Arrange",
@@ -41,6 +53,16 @@ ruleTester.run("single-act-statement", singleActStatementRule, {
         "});",
       ].join("\n"),
       filename: "example.spec.ts",
-    },
-  ],
+    };
+
+    // Act
+    const result = runRuleCase(
+      "single-act-statement",
+      singleActStatementRule,
+      testCase,
+    );
+
+    // Assert
+    expect(result.messageIds).toStrictEqual([]);
+  });
 });

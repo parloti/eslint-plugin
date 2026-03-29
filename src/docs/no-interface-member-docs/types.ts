@@ -22,8 +22,8 @@ interface CommentLine {
 
 /** Type definition for rule data. */
 interface ParameterMemberTag {
-  /** BaseName field value. */
-  baseName: string;
+  /** Basename field value. */
+  basename: string;
 
   /** FullName field value. */
   fullName: string;

@@ -1,19 +1,12 @@
-import fs from "node:fs";
+import { readdirSync } from "node:fs";
 import path from "node:path";
+import { cwd } from "node:process";
 
-/**
- *
- */
+/** Default barrel basenames used when no options are supplied. */
 const DEFAULT_ALLOWED_BARREL_NAMES = ["index"];
-
-/**
- *
- */
+/** Declaration-only suffixes that should be ignored during module checks. */
 const DECLARATION_FILE_SUFFIXES = [".d.cts", ".d.mts", ".d.ts"];
-
-/**
- *
- */
+/** Module suffixes that participate in barrel-file evaluation. */
 const MODULE_FILE_SUFFIXES = [
   ".cjs",
   ".cts",
@@ -25,44 +18,32 @@ const MODULE_FILE_SUFFIXES = [
   ".tsx",
 ];
 
-/**
- *
- */
+/** Captures whether a directory contains barrel and non-barrel modules. */
 interface DirectoryBarrelState {
-  /**
-   *
-   */
+  /** Whether the directory includes an allowed barrel file. */
   hasAllowedBarrelFile: boolean;
-
-  /**
-   *
-   */
+  /** Whether the directory includes any non-barrel module file. */
   hasNonBarrelModuleFile: boolean;
-
-  /**
-   *
-   */
+  /** The first non-barrel module file discovered in the directory. */
   primaryNonBarrelModuleFile: string | undefined;
 }
 
-/**
- *
- */
+/** Stores the module filename and derived stem for a directory entry. */
 interface DirectoryModuleFile {
-  /**
-   *
-   */
+  /** The original filename of the module entry. */
   name: string;
-
-  /**
-   *
-   */
+  /** The filename stem after stripping the module suffix. */
   stem: string;
 }
 
 /**
- * @param value
+ * Normalizes allowed barrel names from raw rule input.
+ * @param value Raw allowed barrel names input.
+ * @returns The normalized barrel names.
  * @example
+ * ```typescript
+ * const names = normalizeAllowedBarrelNames(["index", "barrel"]);
+ * ```
  */
 const normalizeAllowedBarrelNames = (value: unknown): string[] => {
   if (!Array.isArray(value)) {
@@ -78,15 +59,20 @@ const normalizeAllowedBarrelNames = (value: unknown): string[] => {
 };
 
 /**
- * @param filename
+ * Converts an absolute filename into a repo-relative path.
+ * @param filename Absolute filename to convert.
+ * @returns The repo-relative path when the file is inside the repo.
  * @example
+ * ```typescript
+ * const relativePath = getRepoRelativePath(`${cwd()}/src/index.ts`);
+ * ```
  */
 const getRepoRelativePath = (filename: string): string | undefined => {
   if (filename.length === 0 || !path.isAbsolute(filename)) {
     return void 0;
   }
 
-  const relativePath = path.relative(process.cwd(), filename);
+  const relativePath = path.relative(cwd(), filename);
 
   if (relativePath.startsWith("..") || path.isAbsolute(relativePath)) {
     return void 0;
@@ -96,8 +82,13 @@ const getRepoRelativePath = (filename: string): string | undefined => {
 };
 
 /**
- * @param filename
+ * Derives the module stem for a supported source file.
+ * @param filename Filename to inspect.
+ * @returns The module stem when the filename is lintable.
  * @example
+ * ```typescript
+ * const stem = getModuleFileStem("index.ts");
+ * ```
  */
 const getModuleFileStem = (filename: string): string | undefined => {
   const basename = path.basename(filename);
@@ -116,8 +107,13 @@ const getModuleFileStem = (filename: string): string | undefined => {
 };
 
 /**
- * @param filename
+ * Determines whether a filename is a lintable module file.
+ * @param filename Filename to inspect.
+ * @returns True when the filename belongs to a supported module inside the repo.
  * @example
+ * ```typescript
+ * const lintable = isLintableModuleFile(`${cwd()}/src/index.ts`);
+ * ```
  */
 const isLintableModuleFile = (filename: string): boolean => {
   return (
@@ -127,9 +123,14 @@ const isLintableModuleFile = (filename: string): boolean => {
 };
 
 /**
- * @param filename
- * @param allowedBarrelNames
+ * Determines whether a filename matches an allowed barrel name.
+ * @param filename Filename to inspect.
+ * @param allowedBarrelNames Allowed barrel names for the rule run.
+ * @returns True when the filename is a barrel file.
  * @example
+ * ```typescript
+ * const barrel = isBarrelFile(`${cwd()}/src/index.ts`, new Set(["index"]));
+ * ```
  */
 const isBarrelFile = (
   filename: string,
@@ -141,13 +142,17 @@ const isBarrelFile = (
 };
 
 /**
- * @param directory
+ * Lists module files in a directory with their derived stems.
+ * @param directory Directory to inspect.
+ * @returns The sorted module files for the directory.
  * @example
+ * ```typescript
+ * const files = getDirectoryModuleFiles(`${cwd()}/src`);
+ * ```
  */
 const getDirectoryModuleFiles = (directory: string): DirectoryModuleFile[] => {
   try {
-    return fs
-      .readdirSync(directory, { withFileTypes: true })
+    return readdirSync(directory, { withFileTypes: true })
       .filter((entry) => entry.isFile())
       .map((entry) => {
         const stem = getModuleFileStem(entry.name);
@@ -162,9 +167,14 @@ const getDirectoryModuleFiles = (directory: string): DirectoryModuleFile[] => {
 };
 
 /**
- * @param directory
- * @param allowedBarrelNames
+ * Builds barrel-related state for a directory.
+ * @param directory Directory to inspect.
+ * @param allowedBarrelNames Allowed barrel names for the rule run.
+ * @returns The derived barrel state for the directory.
  * @example
+ * ```typescript
+ * const state = getDirectoryBarrelState(`${cwd()}/src`, new Set(["index"]));
+ * ```
  */
 const getDirectoryBarrelState = (
   directory: string,

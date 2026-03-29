@@ -21,14 +21,10 @@ describe("docs test helpers", () => {
     const fixer = createFixer();
 
     // Act
-    const result = (() => {
-      const fix = fixer.insertTextAfterRange([0, 0], "ok");
-
-      return {
-        fixText: getFixText([fix]),
-        missingFixText: getFixText(),
-      };
-    })();
+    const result = {
+      fixText: getFixText([fixer.insertTextAfterRange([0, 0], "ok")]),
+      missingFixText: getFixText(),
+    };
 
     // Assert
     expect(result.missingFixText).toBeUndefined();
@@ -60,7 +56,7 @@ describe("docs test helpers", () => {
     ]);
 
     // Act
-    const firstFix = fixes[0];
+    const [firstFix] = fixes;
 
     // Assert
     expect(fixes).toHaveLength(1);

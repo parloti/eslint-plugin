@@ -3,16 +3,17 @@ import { parser } from "typescript-eslint";
 import { describe, expect, it } from "vitest";
 
 import { enforceAaaPhasePurityRule } from "../../src";
-import { createRuleTester } from "../support/rule-tester";
+import { runRuleCase } from "../support";
 
 /**
- *
- */
-const ruleTester = createRuleTester();
-
-/**
- * @param code
+ * Runs the rule against inline source text and returns emitted message ids.
+ * @param code Source code to lint.
+ * @returns Emitted message ids for the supplied source.
  * @example
+ * ```typescript
+ * const messageIds = runRule('it("demo", () => {});');
+ * void messageIds;
+ * ```
  */
 function runRule(code: string): (string | undefined)[] {
   const linter = new Linter({ configType: "flat" });
@@ -45,8 +46,8 @@ function runRule(code: string): (string | undefined)[] {
     .map((message) => message.messageId);
 }
 
-ruleTester.run("enforce-aaa-phase-purity", enforceAaaPhasePurityRule, {
-  invalid: [
+describe("enforce-aaa-phase-purity e2e", () => {
+  it.each([
     {
       code: [
         'it("keeps async work out of arrange", async () => {',
@@ -89,8 +90,23 @@ ruleTester.run("enforce-aaa-phase-purity", enforceAaaPhasePurityRule, {
       errors: [{ messageId: "assertionOutsideAssert" }],
       filename: "example.spec.ts",
     },
-  ],
-  valid: [
+  ])("rejects impure AAA phases %#", (testCase) => {
+    // Arrange
+
+    // Act
+    const result = runRuleCase(
+      "enforce-aaa-phase-purity",
+      enforceAaaPhasePurityRule,
+      testCase,
+    );
+
+    // Assert
+    expect(result.messageIds).toStrictEqual(
+      testCase.errors.map((error) => error.messageId),
+    );
+  });
+
+  it.each([
     {
       code: [
         'it("keeps phases pure", async () => {',
@@ -120,7 +136,19 @@ ruleTester.run("enforce-aaa-phase-purity", enforceAaaPhasePurityRule, {
       ].join("\n"),
       filename: "example.spec.ts",
     },
-  ],
+  ])("accepts pure AAA phases %#", (testCase) => {
+    // Arrange
+
+    // Act
+    const result = runRuleCase(
+      "enforce-aaa-phase-purity",
+      enforceAaaPhasePurityRule,
+      testCase,
+    );
+
+    // Assert
+    expect(result.messageIds).toStrictEqual([]);
+  });
 });
 
 describe("enforce-aaa-phase-purity future expectations", () => {
@@ -158,7 +186,7 @@ describe("enforce-aaa-phase-purity future expectations", () => {
           "  const state = getOptions([]);",
           "",
           "  // Act",
-          "  const filename = `${process.cwd()}/src/index.ts`;",
+          ["  const filename = `", "${", "cwd()}/src/index.ts", "`;"].join(""),
           "",
           "  // Assert",
           "  expect(shouldLintFile(filename, state.folders, state.names)).toBe(true);",

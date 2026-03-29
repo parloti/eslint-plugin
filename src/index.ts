@@ -1,10 +1,14 @@
-export {
-  codeperfectPlugin,
-  codeperfectPlugin as default,
-} from "./codeperfect-plugin";
+export { codeperfectPlugin } from "./codeperfect-plugin";
 export { customRules } from "./custom-rules";
 export type { CustomRuleEntry } from "./custom-rules";
-export { aaa, all, architecture, core, docs, testing } from "./presets";
+export {
+  aaa,
+  all,
+  architecture,
+  core,
+  documentation,
+  testing,
+} from "./presets";
 export type { CodeperfectPreset } from "./presets";
 export {
   assertActualExpectedNamesRule,

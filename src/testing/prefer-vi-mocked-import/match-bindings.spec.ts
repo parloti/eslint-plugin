@@ -59,7 +59,7 @@ describe("prefer-vi-mocked-import match-bindings", () => {
       ],
       type: "ObjectExpression",
     } as never;
-    const declarations = new Map();
+    const declarations = new Map<string, Declaration>();
 
     // Act
     const result = collectBindings(bindings, declarations);

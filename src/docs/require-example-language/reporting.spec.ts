@@ -185,4 +185,37 @@ describe("require example language reporting", () => {
     expect(reportCalls).toBe(1);
     expect(reportDescriptor).toMatchObject({ messageId: "missingFence" });
   });
+
+  it("returns an empty fix iterable when the fixer has no edit to apply", () => {
+    // Arrange
+    const sourceText = "/*```typescript\nok\n```*/";
+    const sourceCode = new SourceCode(sourceText, createProgramAst(sourceText));
+    const descriptor = buildReportDescriptor({
+      comment: {
+        loc: { end: { column: 0, line: 1 }, start: { column: 0, line: 1 } },
+        range: [0, sourceText.length],
+        type: "Block",
+        value: "*",
+      } as Comment,
+      example: {
+        content: "```typescript\nok\n```",
+        endIndex: 0,
+        endOffset: sourceText.length - 4,
+        lineIndex: 0,
+        prefix: "",
+        startOffset: 0,
+      } as Example,
+      hasOtherExamples: false,
+      problem: "missingLanguage",
+      sourceCode,
+    });
+
+    // Act
+    const fixResult = descriptor.fix?.({
+      replaceTextRange: () => ({ range: [0, 0], text: "unused" }),
+    } as unknown as Rule.RuleFixer);
+
+    // Assert
+    expect(fixResult).toStrictEqual([]);
+  });
 });

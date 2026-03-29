@@ -1,3 +1,4 @@
+import { cwd } from "node:process";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -20,7 +21,7 @@ describe("consistent-barrel-files options", () => {
 
   it("checks lintable filenames", () => {
     // Arrange
-    const filename = `${process.cwd()}/src/index.ts`;
+    const filename = `${cwd()}/src/index.ts`;
 
     // Act
     const result = {
@@ -36,7 +37,7 @@ describe("consistent-barrel-files options", () => {
   it("verifies repo file matching for linting", () => {
     // Arrange
     const rawOptions: [] = [];
-    const filename = `${process.cwd()}/src/index.ts`;
+    const filename = `${cwd()}/src/index.ts`;
 
     // Act
     const state = getOptions(rawOptions);

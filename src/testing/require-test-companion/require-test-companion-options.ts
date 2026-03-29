@@ -1,5 +1,6 @@
 import { minimatch } from "minimatch";
 import path from "node:path";
+import { cwd } from "node:process";
 
 import type { RequireTestCompanionOptions } from "./types";
 
@@ -115,7 +116,7 @@ const getOptions = (options: readonly unknown[]): RequireTestCompanionState => {
  * ```
  */
 const normalizeRelativePath = (filename: string): string =>
-  path.relative(process.cwd(), filename).split(path.sep).join("/");
+  path.relative(cwd(), filename).split(path.sep).join("/");
 
 /**
  * Normalizes normalizePattern.

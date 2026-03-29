@@ -9,24 +9,28 @@ import {
   normalizeAllowedBarrelNames,
 } from "./barrel-file-utilities";
 
-/**
- *
- */
+/** Stores normalized rule options for the exports-only rule. */
 interface BarrelFilesExportsOnlyState {
-  /**
-   *
-   */
+  /** Allowed barrel basenames for the current rule run. */
   allowedBarrelNames: string[];
-
-  /**
-   *
-   */
+  /** Allowed barrel basenames in set form for quick lookups. */
   allowedBarrelNamesSet: Set<string>;
 }
 
+/** Describes a declaration-like value that may expose a `type` field. */
+interface TypeOnlyDeclarationCandidate {
+  /** Candidate declaration type. */
+  type?: unknown;
+}
+
 /**
- * @param options
+ * Builds normalized rule options from raw input.
+ * @param options Raw rule options.
+ * @returns The normalized exports-only rule state.
  * @example
+ * ```typescript
+ * const state = getOptions([{}]);
+ * ```
  */
 const getOptions = (
   options: readonly unknown[],
@@ -43,22 +47,20 @@ const getOptions = (
 };
 
 /**
- * @param value
+ * Determines whether a declaration is type-only.
+ * @param value Declaration candidate to inspect.
+ * @returns True when the declaration is type-only.
  * @example
+ * ```typescript
+ * const ok = isTypeOnlyDeclaration({ type: "TSInterfaceDeclaration" });
+ * ```
  */
 const isTypeOnlyDeclaration = (value: unknown): boolean => {
   if (value === null || typeof value !== "object") {
     return false;
   }
 
-  const declarationType = (
-    value as {
-      /**
-       *
-       */
-      type?: unknown;
-    }
-  ).type;
+  const declarationType = (value as TypeOnlyDeclarationCandidate).type;
 
   return (
     declarationType === "TSInterfaceDeclaration" ||
@@ -121,6 +123,14 @@ const buildListenerForFile = (
   }
 
   return {
+    /**
+     * Reports the first invalid barrel statement in the program.
+     * @param node Program node to inspect.
+     * @example
+     * ```typescript
+     * listener.Program(programNode);
+     * ```
+     */
     Program(node: AST.Program): void {
       for (const statement of node.body) {
         if (!isAllowedBarrelStatement(statement)) {
@@ -143,6 +153,15 @@ const buildListenerForFile = (
  * ```
  */
 const barrelFilesExportsOnlyRule: Rule.RuleModule = {
+  /**
+   * Creates listeners for the current lint context.
+   * @param context ESLint rule context.
+   * @returns The listeners for the context.
+   * @example
+   * ```typescript
+   * const listeners = barrelFilesExportsOnlyRule.create(context);
+   * ```
+   */
   create(context: Rule.RuleContext): Rule.RuleListener {
     return buildListenerForFile(
       context,

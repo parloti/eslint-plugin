@@ -1,14 +1,12 @@
+import { describe, expect, it } from "vitest";
+
 import { preferInterfaceTypesRule } from "../../src";
-import { createRuleTester } from "../support/rule-tester";
+import { runRuleCase } from "../support";
 
-/**
- *
- */
-const ruleTester = createRuleTester();
-
-ruleTester.run("prefer-interface-types", preferInterfaceTypesRule, {
-  invalid: [
-    {
+describe("prefer-interface-types e2e", () => {
+  it("rejects inline object types in parameters and returns", () => {
+    // Arrange
+    const testCase = {
       code: [
         "function demo(input: { value: string }): { value: string } {",
         "  return input;",
@@ -18,9 +16,22 @@ ruleTester.run("prefer-interface-types", preferInterfaceTypesRule, {
         { messageId: "preferNamedObject" },
         { messageId: "preferNamedObject" },
       ],
-    },
-  ],
-  valid: [
+    };
+
+    // Act
+    const result = runRuleCase(
+      "prefer-interface-types",
+      preferInterfaceTypesRule,
+      testCase,
+    );
+
+    // Assert
+    expect(result.messageIds).toStrictEqual(
+      testCase.errors.map((error) => error.messageId),
+    );
+  });
+
+  it.each([
     {
       code: [
         "interface DemoInput {",
@@ -39,5 +50,17 @@ ruleTester.run("prefer-interface-types", preferInterfaceTypesRule, {
         "const demo = (...values: DemoInput[]): DemoInput => values[0]!;",
       ].join("\n"),
     },
-  ],
+  ])("accepts named reusable object types %#", (testCase) => {
+    // Arrange
+
+    // Act
+    const result = runRuleCase(
+      "prefer-interface-types",
+      preferInterfaceTypesRule,
+      testCase,
+    );
+
+    // Assert
+    expect(result.messageIds).toStrictEqual([]);
+  });
 });

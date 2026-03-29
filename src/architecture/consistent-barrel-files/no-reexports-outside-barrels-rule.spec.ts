@@ -1,5 +1,6 @@
-import fs from "node:fs";
+import { rmSync } from "node:fs";
 import path from "node:path";
+import { cwd } from "node:process";
 import { afterEach, describe, expect, it } from "vitest";
 
 import type { NoReexportsOutsideBarrelsOptions } from "./types";
@@ -29,7 +30,7 @@ describe("no reexports outside barrels rule (enforced)", () => {
 
   afterEach(() => {
     for (const directory of temporaryDirectories.splice(0)) {
-      fs.rmSync(directory, { force: true, recursive: true });
+      rmSync(directory, { force: true, recursive: true });
     }
   });
 
@@ -115,12 +116,11 @@ describe("no reexports outside barrels rule (enforced)", () => {
 describe("no reexports outside barrels rule (skips)", () => {
   const temporaryDirectories: string[] = [];
   const defaultOptions: NoReexportsOutsideBarrelsOptions = {};
-  const { runTemporaryFeature, runTemporaryIndex } =
-    createTemporaryRunner(temporaryDirectories);
+  const { runTemporaryIndex } = createTemporaryRunner(temporaryDirectories);
 
   afterEach(() => {
     for (const directory of temporaryDirectories.splice(0)) {
-      fs.rmSync(directory, { force: true, recursive: true });
+      rmSync(directory, { force: true, recursive: true });
     }
   });
 
@@ -152,7 +152,7 @@ describe("no reexports outside barrels rule (skips)", () => {
 
   it("skips when file is outside the repo", () => {
     // Arrange
-    const filePath = path.resolve(process.cwd(), "..", "outside", "feature.ts");
+    const filePath = path.resolve(cwd(), "..", "outside", "feature.ts");
     const body = createBody(createExportAll());
 
     // Act
