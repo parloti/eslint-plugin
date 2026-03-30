@@ -22,6 +22,7 @@ const requireAaaSectionsRule: Rule.RuleModule = {
         }
 
         reportMissingSections(context, analysis);
+        reportEmptySections(context, analysis);
         reportCodeBeforeArrange(context, analysis);
         reportBlankLineSeparators(context, analysis);
       },
@@ -38,6 +39,8 @@ const requireAaaSectionsRule: Rule.RuleModule = {
         "Insert a blank line before the // {{section}} section comment.",
       codeBeforeArrange:
         "Move setup statements below the first // Arrange section comment.",
+      emptySection:
+        "The // {{section}} section must contain code; comments alone do not count.",
       missingSections: "Add the missing AAA section comments: {{sections}}.",
     },
     schema: [],
@@ -110,6 +113,42 @@ function reportCodeBeforeArrange(
     messageId: "codeBeforeArrange",
     node: statementBeforeArrange.node,
   });
+}
+
+/**
+ * Reports Arrange sections that contain only comments or whitespace.
+ * @param context ESLint rule context.
+ * @param analysis Parsed test-block analysis.
+ * @example
+ * ```typescript
+ * reportEmptySections({ report() {} } as never, { sectionComments: [], statements: [] } as never);
+ * ```
+ */
+function reportEmptySections(
+  context: Rule.RuleContext,
+  analysis: TestBlockAnalysis,
+): void {
+  for (const [index, sectionComment] of analysis.sectionComments.entries()) {
+    const nextSectionLine =
+      analysis.sectionComments[index + 1]?.comment.loc.start.line;
+    const hasArrangePhase = sectionComment.phases.includes("Arrange");
+    const hasCodeInSection = analysis.statements.some((statement) => {
+      const statementLine = statement.node.loc.start.line;
+
+      return (
+        statementLine > sectionComment.comment.loc.start.line &&
+        (nextSectionLine === void 0 || statementLine < nextSectionLine)
+      );
+    });
+
+    if (hasArrangePhase && !hasCodeInSection) {
+      context.report({
+        data: { section: sectionComment.phases.join(" & ") },
+        messageId: "emptySection",
+        node: sectionComment.comment,
+      });
+    }
+  }
 }
 
 /**

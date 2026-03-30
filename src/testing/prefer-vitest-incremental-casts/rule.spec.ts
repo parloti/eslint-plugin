@@ -1,9 +1,9 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { afterAll, describe, expect, it } from "vitest";
 
 import { cleanupTemporaryDirectories, runFix } from "./rule-test-helpers";
 
 describe("prefer-vitest-incremental-casts rule", () => {
-  afterEach(cleanupTemporaryDirectories);
+  afterAll(cleanupTemporaryDirectories);
 
   it("casts only the mismatching properties inside a simple vi.doMock factory", async () => {
     // Arrange

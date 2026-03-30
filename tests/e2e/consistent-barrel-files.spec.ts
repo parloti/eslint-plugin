@@ -10,44 +10,44 @@ describe("consistent-barrel-files e2e", () => {
   afterAll(cleanupTemporaryDirectories);
 
   const validFeature = createFixtureSet({
-    "feature.ts": "export const feature = 1;",
-    "index.ts": 'export * from "./feature";',
+    "src/feature.ts": "export const feature = 1;",
+    "src/index.ts": 'export * from "./feature";',
   });
   const missingBarrel = createFixtureSet({
-    "feature.ts": "export const feature = 1;",
+    "src/feature.ts": "export const feature = 1;",
   });
   const forbiddenBarrel = createFixtureSet({
-    "feature.ts": "export const feature = 1;",
-    "index.ts": 'export * from "./feature";',
+    "src/feature.ts": "export const feature = 1;",
+    "src/index.ts": 'export * from "./feature";',
   });
   const customNamedBarrel = createFixtureSet({
-    "feature.ts": "export const feature = 1;",
-    "mod.ts": 'export * from "./feature";',
+    "src/feature.ts": "export const feature = 1;",
+    "src/mod.ts": 'export * from "./feature";',
   });
   const declarationNamedBarrel = createFixtureSet({
-    "feature.ts": "export const feature = 1;",
-    "index.d.ts": "export interface FeatureDeclaration {}",
+    "src/feature.ts": "export const feature = 1;",
+    "src/index.d.ts": "export interface FeatureDeclaration {}",
   });
   const barrelOnlyFolder = createFixtureSet({
-    "index.ts": 'export * from "./feature";',
+    "src/index.ts": 'export * from "./feature";',
   });
 
   it.each([
     {
       code: "export const feature = 1;",
       errors: [{ messageId: "missingBarrel" }],
-      filename: missingBarrel.getFilePath("feature.ts"),
+      filename: missingBarrel.getFilePath("src/feature.ts"),
     },
     {
       code: 'export * from "./feature";',
       errors: [{ messageId: "forbiddenBarrel" }],
-      filename: forbiddenBarrel.getFilePath("index.ts"),
+      filename: forbiddenBarrel.getFilePath("src/index.ts"),
       options: [{ enforce: false }],
     },
     {
       code: "export const feature = 1;",
       errors: [{ messageId: "missingBarrel" }],
-      filename: declarationNamedBarrel.getFilePath("feature.ts"),
+      filename: declarationNamedBarrel.getFilePath("src/feature.ts"),
     },
   ])("rejects missing or forbidden barrels %#", (testCase) => {
     // Arrange
@@ -68,16 +68,16 @@ describe("consistent-barrel-files e2e", () => {
   it.each([
     {
       code: "export const feature = 1;",
-      filename: validFeature.getFilePath("feature.ts"),
+      filename: validFeature.getFilePath("src/feature.ts"),
     },
     {
       code: "export const feature = 1;",
-      filename: customNamedBarrel.getFilePath("feature.ts"),
+      filename: customNamedBarrel.getFilePath("src/feature.ts"),
       options: [{ allowedNames: ["mod"] }],
     },
     {
       code: 'export * from "./feature";',
-      filename: barrelOnlyFolder.getFilePath("index.ts"),
+      filename: barrelOnlyFolder.getFilePath("src/index.ts"),
       options: [{ enforce: false }],
     },
   ])("accepts configured barrel layouts %#", (testCase) => {
@@ -92,5 +92,50 @@ describe("consistent-barrel-files e2e", () => {
 
     // Assert
     expect(result.messageIds).toStrictEqual([]);
+  });
+});
+
+describe("consistent-barrel-files future expectations", () => {
+  const { cleanupTemporaryDirectories, createFixtureSet } =
+    createTemporaryFixtureManager();
+
+  afterAll(cleanupTemporaryDirectories);
+
+  it("ignores non-src files by default while still checking src files", () => {
+    // Arrange
+    const nonSourceFixture = createFixtureSet({
+      "feature.ts": "export const feature = 1;",
+    });
+    const sourceFixture = createFixtureSet({
+      "src/feature.ts": "export const feature = 1;",
+    });
+
+    const nonSourceCase = {
+      code: "export const feature = 1;",
+      filename: nonSourceFixture.getFilePath("feature.ts"),
+    };
+    const sourceCase = {
+      code: "export const feature = 1;",
+      errors: [{ messageId: "missingBarrel" }],
+      filename: sourceFixture.getFilePath("src/feature.ts"),
+    };
+
+    // Act
+    const nonSourceResult = runRuleCase(
+      "consistent-barrel-files",
+      consistentBarrelFilesRule,
+      nonSourceCase,
+    );
+    const sourceResult = runRuleCase(
+      "consistent-barrel-files",
+      consistentBarrelFilesRule,
+      sourceCase,
+    );
+
+    // Assert
+    expect(nonSourceResult.messageIds).toStrictEqual([]);
+    expect(sourceResult.messageIds).toStrictEqual(
+      sourceCase.errors.map((error) => error.messageId),
+    );
   });
 });

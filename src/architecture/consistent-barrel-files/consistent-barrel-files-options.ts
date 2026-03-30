@@ -1,3 +1,5 @@
+import path from "node:path";
+
 import type { ConsistentBarrelFilesOptions } from "./types";
 
 import {
@@ -58,6 +60,22 @@ const isLintableFilename = (filename: string): boolean =>
   isLintableModuleFile(filename);
 
 /**
+ * Checks whether a path is nested inside a src directory.
+ * @param filename Filename to inspect.
+ * @returns True when the file path contains a src path segment.
+ * @example
+ * ```typescript
+ * const inSrc = isInSourceDirectory(`${cwd()}/src/index.ts`);
+ * ```
+ */
+const isInSourceDirectory = (filename: string): boolean => {
+  const normalizedPath = path.normalize(filename);
+  const pathSegments = normalizedPath.split(path.sep).filter(Boolean);
+
+  return pathSegments.includes("src");
+};
+
+/**
  * Determines whether the rule should lint a file.
  * @param filename Filename to inspect.
  * @param allowedNames Allowed barrel names for the rule run.
@@ -68,7 +86,11 @@ const isLintableFilename = (filename: string): boolean =>
  * ```
  */
 const shouldLintFile = (filename: string, allowedNames: string[]): boolean => {
-  return isLintableFilename(filename) && allowedNames.length > 0;
+  return (
+    isLintableFilename(filename) &&
+    isInSourceDirectory(filename) &&
+    allowedNames.length > 0
+  );
 };
 
 export { getOptions, isLintableFilename, shouldLintFile };

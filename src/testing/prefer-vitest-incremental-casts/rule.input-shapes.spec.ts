@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { afterAll, describe, expect, it } from "vitest";
 
 import { cleanupTemporaryDirectories, runFix } from "./rule-test-helpers";
 import { ruleInputShapesSuiteName } from "./rule.input-shapes";
@@ -6,7 +6,7 @@ import { ruleInputShapesSuiteName } from "./rule.input-shapes";
 describe(
   ruleInputShapesSuiteName,
   () => {
-    afterEach(cleanupTemporaryDirectories);
+    afterAll(cleanupTemporaryDirectories);
 
     it("does not report direct non-string module specifiers", async () => {
       // Arrange

@@ -125,6 +125,9 @@ describe("aaa analyzer statement classification", () => {
     const assertionStatement = getFirstFunctionBodyStatement(
       "expect(result).toBe(expectedValue);",
     );
+    const evaluatedAssertionStatement = getFirstFunctionBodyStatement(
+      "expect(run(input)).toBe(expectedValue);",
+    );
     const setupStatement = getFirstFunctionBodyStatement(
       "const fixture = createFixture();",
     );
@@ -137,6 +140,9 @@ describe("aaa analyzer statement classification", () => {
     const actual = {
       actionStatement: isMeaningfulActStatement(actionStatement),
       assertionStatement: isMeaningfulActStatement(assertionStatement),
+      evaluatedAssertionStatement: isValidAssertStatement(
+        evaluatedAssertionStatement,
+      ),
       setupStatement: isSetupLikeStatement(setupStatement),
       uninitializedActual: isValidAssertStatement(uninitializedActual),
       uninitializedSetupStatement: isSetupLikeStatement(
@@ -150,11 +156,45 @@ describe("aaa analyzer statement classification", () => {
     expect(actual).toStrictEqual({
       actionStatement: true,
       assertionStatement: false,
+      evaluatedAssertionStatement: false,
       setupStatement: true,
       uninitializedActual: true,
       uninitializedSetupStatement: true,
       validActionAssertion: false,
       validAssertion: true,
+    });
+  });
+
+  it("classifies wrapped and declared assertion variants", () => {
+    // Arrange
+    const declaredAssertionStatement = getFirstFunctionBodyStatement(
+      "const assertionResult = expect(result).toBe(expectedValue);",
+    );
+    const evaluatedAssertStatement = getFirstFunctionBodyStatement(
+      "assert.equal(run(input), expectedValue);",
+    );
+    const wrappedAssertionStatement = getFirstFunctionBodyStatement(
+      "void expect(result).toBe(expectedValue);",
+    );
+
+    // Act
+    const actual = {
+      declaredAssertionStatement: isValidAssertStatement(
+        declaredAssertionStatement,
+      ),
+      evaluatedAssertStatement: isValidAssertStatement(
+        evaluatedAssertStatement,
+      ),
+      wrappedAssertionStatement: isValidAssertStatement(
+        wrappedAssertionStatement,
+      ),
+    };
+
+    // Assert
+    expect(actual).toStrictEqual({
+      declaredAssertionStatement: true,
+      evaluatedAssertStatement: false,
+      wrappedAssertionStatement: true,
     });
   });
 

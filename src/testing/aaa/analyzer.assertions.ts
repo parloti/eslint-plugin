@@ -1,4 +1,4 @@
-/* eslint max-lines: ["error", 340] -- Mandatory multiline JSDoc for internal helpers pushes this split file over the default limit. */
+/* eslint max-lines: ["error", 380] -- Mandatory multiline JSDoc for internal helpers pushes this split file over the default limit. */
 
 import type * as ESTree from "estree";
 
@@ -51,6 +51,28 @@ function getAssertDeclaredIdentifiers(
     }
   }
   return declaredIdentifiers;
+}
+
+/**
+ * Gets the outer assertion call expression for one statement when present.
+ * @param statement Statement to inspect.
+ * @returns Assertion call expression when the statement is expression-based.
+ * @example
+ * ```typescript
+ * const expression = getAssertionExpression(statement);
+ * void expression;
+ * ```
+ */
+function getAssertionExpression(
+  statement: ESTree.Statement,
+): ESTree.CallExpression | undefined {
+  if (statement.type !== "ExpressionStatement") {
+    return void 0;
+  }
+
+  const expression = unwrapExpression(statement.expression);
+
+  return expression?.type === "CallExpression" ? expression : void 0;
 }
 
 /**
@@ -213,6 +235,25 @@ function hasAssertion(statement: ESTree.Statement): boolean {
 }
 
 /**
+ * Checks whether an assertion evaluates the actual operand inline.
+ * @param expression Assertion call expression to inspect.
+ * @returns True when the assertion actual operand performs action-like work.
+ * @example
+ * ```typescript
+ * const actual = hasEvaluatedAssertionActual(expression);
+ * void actual;
+ * ```
+ */
+function hasEvaluatedAssertionActual(
+  expression: ESTree.CallExpression,
+): boolean {
+  const operands =
+    getExpectOperands(expression) ?? getAssertOperands(expression);
+
+  return operands !== void 0 && isActionExpression(operands.actual);
+}
+
+/**
  * Checks for action expressions.
  * @param expression Input expression value.
  * @returns Return value output.
@@ -271,7 +312,12 @@ function isAssertionCall(node: ESTree.CallExpression): boolean {
  */
 function isValidAssertStatement(statement: ESTree.Statement): boolean {
   if (hasAssertion(statement)) {
-    return true;
+    const assertionExpression = getAssertionExpression(statement);
+
+    return (
+      assertionExpression === void 0 ||
+      !hasEvaluatedAssertionActual(assertionExpression)
+    );
   }
   if (statement.type !== "VariableDeclaration") {
     return false;

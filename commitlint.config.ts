@@ -1,5 +1,3 @@
-/* eslint-disable codeperfect/consistent-barrel-files -- Root tool config files are intentionally not barrel files. */
-
 import type { ParserPreset, UserConfig } from "@commitlint/types";
 
 import _default from "@commitlint/config-conventional";

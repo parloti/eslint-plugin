@@ -1,5 +1,5 @@
 import { ESLint } from "eslint";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterAll, describe, expect, it } from "vitest";
 
 import { preferVitestIncrementalCastsRule } from "./rule";
 import { cleanupTemporaryDirectories, runFix } from "./rule-test-helpers";
@@ -8,7 +8,7 @@ import { ruleGuardrailsSuiteName } from "./rule.guardrails";
 describe(
   ruleGuardrailsSuiteName,
   () => {
-    afterEach(cleanupTemporaryDirectories);
+    afterAll(cleanupTemporaryDirectories);
 
     it("ignores non-vitest calls", async () => {
       // Arrange

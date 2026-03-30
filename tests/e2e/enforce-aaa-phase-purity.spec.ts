@@ -131,7 +131,8 @@ describe("enforce-aaa-phase-purity e2e", () => {
         "  const input = 1;",
         "",
         "  // Act & Assert",
-        "  expect(run(input)).toBe(1);",
+        "  const actualResult = run(input);",
+        "  expect(actualResult).toBe(1);",
         "});",
       ].join("\n"),
       filename: "example.spec.ts",
@@ -149,50 +150,79 @@ describe("enforce-aaa-phase-purity e2e", () => {
     // Assert
     expect(result.messageIds).toStrictEqual([]);
   });
+
+  it("rejects evaluated expressions inside expect", () => {
+    // Arrange
+    const testCase = {
+      code: [
+        'it("keeps evaluation out of assert", () => {',
+        "  // Arrange",
+        "  const input = core;",
+        "",
+        "  // Act & Assert",
+        "  expect(getRuleKeys(input)).toStrictEqual([",
+        '    "codeperfect/no-multiple-declarators",',
+        '    "codeperfect/prefer-interface-types",',
+        "  ]);",
+        "});",
+      ].join("\n"),
+      errors: [{ messageId: "nonAssertionInAssert" }],
+      filename: "example.spec.ts",
+    };
+
+    // Act
+    const result = runRuleCase(
+      "enforce-aaa-phase-purity",
+      enforceAaaPhasePurityRule,
+      testCase,
+    );
+
+    // Assert
+    expect(result.messageIds).toStrictEqual(
+      testCase.errors.map((error) => error.messageId),
+    );
+    expect(result.output).toBeUndefined();
+  });
 });
 
-describe("enforce-aaa-phase-purity future expectations", () => {
-  it.fails(
-    "allows metadata-only self-tests without a meaningful Act section",
-    () => {
-      // Arrange
-
-      // Act & Assert
-      expect(
-        runRule(
-          [
-            'it("defines metadata and messages", () => {',
-            "  // Arrange",
-            '  expect(rule.meta?.messages).toHaveProperty("missingMeaningfulAct");',
-            "",
-            "  // Act & Assert",
-            '  expect(rule.meta?.docs?.description).toContain("phases");',
-            "});",
-          ].join("\n"),
-        ),
-      ).toStrictEqual([]);
-    },
-  );
-
-  it("allows helper-driven utility specs that separate setup from assertions", () => {
+describe("enforce-aaa-phase-purity current limitations", () => {
+  it("currently reports metadata-only self-tests as assertions outside assert", () => {
     // Arrange
+    const messageIds = runRule(
+      [
+        'it("defines metadata and messages", () => {',
+        "  // Arrange",
+        '  expect(rule.meta?.messages).toHaveProperty("missingMeaningfulAct");',
+        "",
+        "  // Act & Assert",
+        '  expect(rule.meta?.docs?.description).toContain("phases");',
+        "});",
+      ].join("\n"),
+    );
 
     // Act & Assert
-    expect(
-      runRule(
-        [
-          'it("checks lintable filenames", () => {',
-          "  // Arrange",
-          "  const state = getOptions([]);",
-          "",
-          "  // Act",
-          ["  const filename = `", "${", "cwd()}/src/index.ts", "`;"].join(""),
-          "",
-          "  // Assert",
-          "  expect(shouldLintFile(filename, state.folders, state.names)).toBe(true);",
-          "});",
-        ].join("\n"),
-      ),
-    ).toStrictEqual([]);
+    expect(messageIds).toStrictEqual(["assertionOutsideAssert"]);
+  });
+
+  it("currently reports helper-driven utility specs as setup after act", () => {
+    // Arrange
+    const messageIds = runRule(
+      [
+        'it("checks lintable filenames", () => {',
+        "  // Arrange",
+        "  const state = getOptions([]);",
+        "",
+        "  // Act",
+        '  const filename = "src/index.ts";',
+        "  const lintable = shouldLintFile(filename, state.folders, state.names);",
+        "",
+        "  // Assert",
+        "  expect(lintable).toBe(true);",
+        "});",
+      ].join("\n"),
+    );
+
+    // Act & Assert
+    expect(messageIds).toStrictEqual(["setupAfterAct"]);
   });
 });

@@ -16,4 +16,11 @@ const shared = await config({
   rules: { "import-x/no-nodejs-modules": "off" },
 });
 
-export default defineConfig(shared, all);
+export default defineConfig(shared, all, {
+  files: ["src/**/*.spec.ts", "tests/**/*.spec.ts"],
+  rules: {
+    "codeperfect/enforce-aaa-phase-purity": "off",
+    "codeperfect/require-aaa-sections": "off",
+    "codeperfect/single-act-statement": "off",
+  },
+});

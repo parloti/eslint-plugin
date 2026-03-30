@@ -95,7 +95,7 @@ describe("consistent-barrel-files rule repeat runs", (): void => {
 
   it("re-evaluates the filesystem between runs", (): void => {
     // Arrange
-    const directory = createRepoDirectory("tmp");
+    const directory = createRepoDirectory("src");
     temporaryDirectories.push(directory);
     const barrelPath = path.join(directory, "index.ts");
     const filePath = path.join(directory, "feature.ts");
@@ -118,7 +118,7 @@ describe("consistent-barrel-files rule repeat runs", (): void => {
 
   it("does not suppress repeated missing-barrel reports across runs", (): void => {
     // Arrange
-    const directory = createRepoDirectory("tmp");
+    const directory = createRepoDirectory("src");
     temporaryDirectories.push(directory);
     const filePath = path.join(directory, "feature.ts");
     writeFeature(filePath);

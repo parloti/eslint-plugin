@@ -1,5 +1,3 @@
-/* eslint-disable codeperfect/consistent-barrel-files -- Script entrypoints are intentionally not barrel files. */
-
 import chalk from "chalk";
 import { execSync } from "node:child_process";
 

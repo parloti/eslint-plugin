@@ -35,7 +35,7 @@ interface ProgramListenerState {
 function createPrimaryModuleState(
   temporaryDirectories: string[],
 ): ProgramListenerState {
-  const directory = createRepoDirectory("tmp");
+  const directory = createRepoDirectory("src");
   temporaryDirectories.push(directory);
   const filename = path.join(directory, "feature.ts");
   const reports: Rule.ReportDescriptor[] = [];
@@ -143,7 +143,7 @@ describe("consistent-barrel-files listeners", (): void => {
 
   it("returns no-op for non-primary module files in the same directory", (): void => {
     // Arrange
-    const directory = createRepoDirectory("tmp");
+    const directory = createRepoDirectory("src");
     temporaryDirectories.push(directory);
     const primaryFilename = path.join(directory, "alpha.ts");
     const secondaryFilename = path.join(directory, "beta.ts");

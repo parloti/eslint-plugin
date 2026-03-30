@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { afterAll, describe, expect, it } from "vitest";
 
 import { cleanupTemporaryDirectories, runFix } from "./rule-test-helpers";
 import { ruleSignatureFallbackSuiteName } from "./rule.signature-fallback";
@@ -6,7 +6,7 @@ import { ruleSignatureFallbackSuiteName } from "./rule.signature-fallback";
 describe(
   ruleSignatureFallbackSuiteName,
   () => {
-    afterEach(cleanupTemporaryDirectories);
+    afterAll(cleanupTemporaryDirectories);
 
     it("uses the call-signature fallback when contextual typing is unavailable", async () => {
       // Arrange

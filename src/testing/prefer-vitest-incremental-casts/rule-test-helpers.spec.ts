@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterAll, describe, expect, it, vi } from "vitest";
 
 import { cleanupTemporaryDirectories, runFix } from "./rule-test-helpers";
 
@@ -43,11 +43,13 @@ const captureRunFixError = async (): Promise<Error> => {
     return error instanceof Error
       ? error
       : new Error("Expected ESLint to return a lint result.");
+  } finally {
+    await helpers.cleanupTemporaryDirectories();
   }
 };
 
 describe("prefer-vitest-incremental-casts rule-test-helpers", () => {
-  afterEach(cleanupTemporaryDirectories);
+  afterAll(cleanupTemporaryDirectories);
 
   it("exports the typed fixture helpers", () => {
     // Arrange
@@ -83,6 +85,47 @@ describe("prefer-vitest-incremental-casts rule-test-helpers", () => {
     expect(result.output).toContain(
       'configs: { disableTypeChecked } as typeof import("fixture-module")["configs"]',
     );
+  }, 30_000);
+
+  it("isolates concurrent typed fixture runs", async () => {
+    // Arrange
+    const broadCastInput = [
+      "const disableTypeChecked = { rules: [] as string[] };",
+      'const parser = { parseForESLint: (_code: string) => ({ ast: "ok" }) };',
+      'const plugin = { meta: { name: "fixture" } };',
+      "",
+      'vi.doMock(import("fixture-module"), () => ({',
+      "  configs: { disableTypeChecked },",
+      "  parser,",
+      "  plugin,",
+      "}));",
+      "",
+    ].join("\n");
+    const incrementalInput = [
+      "const disableTypeChecked = { rules: [] as string[] };",
+      'const parser = { parseForESLint: (_code: string) => ({ ast: "ok" }) };',
+      'const plugin = { meta: { name: "fixture" } };',
+      "",
+      'vi.doMock(import("fixture-module"), () => ({',
+      '  configs: { disableTypeChecked } as typeof import("fixture-module")["configs"],',
+      "  parser,",
+      "  plugin,",
+      "}));",
+      "",
+    ].join("\n");
+
+    // Act
+    const [broadCastResult, incrementalResult] = await Promise.all([
+      runFix(broadCastInput),
+      runFix(incrementalInput),
+    ]);
+
+    // Assert
+    expect(broadCastResult.output).toContain(
+      'configs: { disableTypeChecked } as typeof import("fixture-module")["configs"]',
+    );
+    expect(incrementalResult.messages).toStrictEqual([]);
+    expect(incrementalResult.output).toBe(incrementalInput);
   }, 15_000);
 
   it("throws when ESLint does not return a lint result", async () => {

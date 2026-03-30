@@ -1,3 +1,5 @@
+/* eslint max-lines: ["error", 310] -- Mocked reporting helpers in this focused spec companion require verbose typed fixtures and examples. */
+
 import type { Rule } from "eslint";
 
 import type { TestBlockAnalysis } from "../aaa";
@@ -26,6 +28,7 @@ interface MissingSectionFixesModule {
 type RequireAaaSectionsMessageId =
   | "blankLineBeforeSection"
   | "codeBeforeArrange"
+  | "emptySection"
   | "missingSections";
 
 /** Typed namespace for the lazily imported rule module. */
@@ -129,6 +132,12 @@ function createMockAnalysis(): TestBlockAnalysis {
       {
         node: {
           loc: { end: { line: 1 }, start: { line: 1 } },
+          type: "ExpressionStatement",
+        },
+      },
+      {
+        node: {
+          loc: { end: { line: 3 }, start: { line: 3 } },
           type: "ExpressionStatement",
         },
       },
@@ -267,6 +276,7 @@ function isRequireAaaSectionsMessageId(
   return (
     value === "blankLineBeforeSection" ||
     value === "codeBeforeArrange" ||
+    value === "emptySection" ||
     value === "missingSections"
   );
 }

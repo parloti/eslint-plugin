@@ -1,7 +1,10 @@
 import type { Linter } from "eslint";
 
 import { ESLint } from "eslint";
+import { writeFile } from "node:fs/promises";
 import { parser } from "typescript-eslint";
+
+import type { FixtureSet } from "./temporary-fixtures";
 
 import { preferVitestIncrementalCastsRule } from "../../src";
 import { createTemporaryFixtureManager } from "./temporary-fixtures";
@@ -15,8 +18,32 @@ interface FixRunResult {
   output: string;
 }
 
+/** Mutable state used while one queued lint run is in flight. */
+interface QueuedRunState {
+  /** Resolver that releases the next queued run once the current run completes. */
+  releaseCurrentRun: (() => void) | undefined;
+}
+
+/** Cached typed fixture project state reused across helper runs. */
+interface TypedFixtureProject {
+  /** ESLint instance configured for the fixture project. */
+  eslint: ESLint;
+
+  /** Fixture metadata for the temporary project. */
+  filePath: string;
+
+  /** Fixture metadata for the temporary project. */
+  fixtureSet: FixtureSet;
+
+  /** Promise used to serialize runs that share one cached ESLint project. */
+  pendingRun: Promise<void>;
+}
+
 /** Temporary fixture manager reused across helper runs. */
 const temporaryFixtureManager = createTemporaryFixtureManager();
+
+/** Typed fixture projects cached by their declaration text. */
+const fixtureProjectsByDeclaration = new Map<string, TypedFixtureProject>();
 
 /** Ambient declarations used by the temporary typed fixture project. */
 const defaultDeclarationText = [
@@ -118,7 +145,79 @@ const createTypedRuleEslint = (
  * ```
  */
 function cleanupTemporaryDirectories(): void {
+  fixtureProjectsByDeclaration.clear();
   temporaryFixtureManager.cleanupTemporaryDirectories();
+}
+
+/**
+ * Gets or creates the cached typed fixture project for one declaration shape.
+ * @param declarationText Ambient declarations used by the fixture project.
+ * @returns Cached typed fixture project state.
+ * @example
+ * ```typescript
+ * const fixtureProject = getFixtureProject(defaultDeclarationText);
+ * void fixtureProject;
+ * ```
+ */
+function getFixtureProject(declarationText: string): TypedFixtureProject {
+  const cachedFixtureProject =
+    fixtureProjectsByDeclaration.get(declarationText);
+
+  if (cachedFixtureProject !== void 0) {
+    return cachedFixtureProject;
+  }
+
+  const fixtureSet = temporaryFixtureManager.createFixtureSet({
+    "example.spec.ts": "",
+    "globals.d.ts": declarationText,
+    "tsconfig.json": createTsconfigText(),
+  });
+  const filePath = fixtureSet.getFilePath("example.spec.ts");
+  const tsconfigPath = fixtureSet.getFilePath("tsconfig.json");
+  const fixtureProject = {
+    eslint: createTypedRuleEslint(fixtureSet.directory, tsconfigPath),
+    filePath,
+    fixtureSet,
+    pendingRun: Promise.resolve(),
+  };
+
+  fixtureProjectsByDeclaration.set(declarationText, fixtureProject);
+
+  return fixtureProject;
+}
+
+/**
+ * Runs one lint callback exclusively for a cached fixture project.
+ * @template Result Callback result type.
+ * @param fixtureProject Cached fixture project state.
+ * @param callback Async work executed once prior runs complete.
+ * @returns Callback result.
+ * @example
+ * ```typescript
+ * const result = await runExclusive(fixtureProject, async () => "done");
+ * void result;
+ * ```
+ */
+async function runExclusive<Result>(
+  fixtureProject: TypedFixtureProject,
+  callback: () => Promise<Result>,
+): Promise<Result> {
+  const previousRun = fixtureProject.pendingRun;
+  const runState: QueuedRunState = {
+    releaseCurrentRun: void 0,
+  };
+
+  fixtureProject.pendingRun = new Promise<void>((resolve) => {
+    runState.releaseCurrentRun = resolve;
+  });
+
+  await previousRun;
+
+  try {
+    return await callback();
+  } finally {
+    runState.releaseCurrentRun?.();
+  }
 }
 
 /**
@@ -136,24 +235,23 @@ async function runFix(
   code: string,
   declarationText = defaultDeclarationText,
 ): Promise<FixRunResult> {
-  const fixtureSet = temporaryFixtureManager.createFixtureSet({
-    "example.spec.ts": code,
-    "globals.d.ts": declarationText,
-    "tsconfig.json": createTsconfigText(),
+  const fixtureProject = getFixtureProject(declarationText);
+
+  return runExclusive(fixtureProject, async () => {
+    const { eslint, filePath } = fixtureProject;
+
+    await writeFile(filePath, code, "utf8");
+    const [result] = await eslint.lintText(code, { filePath });
+
+    if (result === void 0) {
+      throw new Error("Expected ESLint to return a lint result.");
+    }
+
+    return {
+      messages: result.messages,
+      output: result.output ?? code,
+    };
   });
-  const filePath = fixtureSet.getFilePath("example.spec.ts");
-  const tsconfigPath = fixtureSet.getFilePath("tsconfig.json");
-  const eslint = createTypedRuleEslint(fixtureSet.directory, tsconfigPath);
-  const [result] = await eslint.lintText(code, { filePath });
-
-  if (result === void 0) {
-    throw new Error("Expected ESLint to return a lint result.");
-  }
-
-  return {
-    messages: result.messages,
-    output: result.output ?? code,
-  };
 }
 
 export { cleanupTemporaryDirectories, runFix };

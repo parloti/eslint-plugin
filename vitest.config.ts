@@ -8,7 +8,7 @@ const unitProject = defineProject({
 
 /** End-to-end Vitest project definition. */
 const endToEndProject = defineProject({
-  test: { environment: "node", include: ["tests/**/*.test.ts"], name: "e2e" },
+  test: { environment: "node", include: ["tests/**/*.spec.ts"], name: "e2e" },
 });
 
 export default defineConfig({

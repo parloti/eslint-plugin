@@ -38,11 +38,22 @@ describe("consistent-barrel-files options", () => {
     // Arrange
     const rawOptions: [] = [];
     const filename = `${cwd()}/src/index.ts`;
+    const nestedFilename = `${cwd()}/packages/plugin/src/index.ts`;
+    const nonSourceFilename = `${cwd()}/tmp/index.ts`;
 
     // Act
     const state = getOptions(rawOptions);
+    const result = {
+      nestedSource: shouldLintFile(nestedFilename, state.allowedNames),
+      nonSource: shouldLintFile(nonSourceFilename, state.allowedNames),
+      source: shouldLintFile(filename, state.allowedNames),
+    };
 
     // Assert
-    expect(shouldLintFile(filename, state.allowedNames)).toBe(true);
+    expect(result).toStrictEqual({
+      nestedSource: true,
+      nonSource: false,
+      source: true,
+    });
   });
 });

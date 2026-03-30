@@ -108,20 +108,35 @@ describe("enforce-aaa-phase-purity rule", () => {
     expect(messageIds).toStrictEqual(["mutationAfterAct"]);
   });
 
-  it("accepts a clean AAA flow", () => {
+  it.each([
+    [
+      [
+        'it("stays clean", async () => {',
+        "  // Arrange",
+        "  const input = 1;",
+        "",
+        "  // Act",
+        "  const actualResult = await run(input);",
+        "",
+        "  // Assert",
+        "  expect(actualResult).toBe(1);",
+        "});",
+      ].join("\n"),
+    ],
+    [
+      [
+        'it("stays clean in combined phases", () => {',
+        "  // Arrange",
+        "  const input = 1;",
+        "",
+        "  // Act & Assert",
+        "  const actualResult = run(input);",
+        "  expect(actualResult).toBe(1);",
+        "});",
+      ].join("\n"),
+    ],
+  ])("accepts clean AAA flows %#", (code) => {
     // Arrange
-    const code = [
-      'it("stays clean", async () => {',
-      "  // Arrange",
-      "  const input = 1;",
-      "",
-      "  // Act",
-      "  const actualResult = await run(input);",
-      "",
-      "  // Assert",
-      "  expect(actualResult).toBe(1);",
-      "});",
-    ].join("\n");
 
     // Act
     const messages = runRule(code);

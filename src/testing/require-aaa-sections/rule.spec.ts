@@ -53,7 +53,33 @@ describe("require-aaa-sections rule", () => {
 
     // Assert
     expect(fixable).toBe("code");
+    expect(messages).toHaveProperty("emptySection");
     expect(messages).toHaveProperty("missingSections");
+  });
+
+  it("reports comment-only Arrange sections without autofixing them", () => {
+    // Arrange
+    const code = [
+      'it("rejects comment-only arrange", () => {',
+      "  // Arrange",
+      "  // no setup required",
+      "",
+      "  // Act",
+      "  const actualResult = run();",
+      "",
+      "  // Assert",
+      "  expect(actualResult).toBe(1);",
+      "});",
+    ].join("\n");
+
+    // Act
+    const result = runFix(code);
+
+    // Assert
+    expect(result.fixed).toBe(false);
+    expect(result.messages.map((message) => message.messageId)).toContain(
+      "emptySection",
+    );
   });
 
   it("does not crash when a multi-line empty test body cannot place section comments", () => {
@@ -99,5 +125,29 @@ describe("require-aaa-sections rule", () => {
     // Assert
     expect(result.fixed).toBe(false);
     expect(result.messages[0]?.messageId).toBe("missingSections");
+  });
+
+  it("reports whitespace-only Arrange sections", () => {
+    // Arrange
+    const code = [
+      'it("rejects whitespace-only arrange", () => {',
+      "  // Arrange",
+      "",
+      "",
+      "  // Act",
+      "  const actualResult = run();",
+      "",
+      "  // Assert",
+      "  expect(actualResult).toBe(1);",
+      "});",
+    ].join("\n");
+
+    // Act
+    const result = runFix(code);
+
+    // Assert
+    expect(result.messages.map((message) => message.messageId)).toContain(
+      "emptySection",
+    );
   });
 });

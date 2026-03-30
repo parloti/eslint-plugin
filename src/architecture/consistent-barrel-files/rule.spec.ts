@@ -80,7 +80,7 @@ describe("consistent-barrel-files rule", () => {
   describe("enforcement", (): void => {
     it("reports when enforcing and barrel is missing", (): void => {
       // Arrange
-      const directory = createRepoDirectory("tmp");
+      const directory = createRepoDirectory("src");
       temporaryDirectories.push(directory);
       const filePath = path.join(directory, "feature.ts");
       writeFeature(filePath);
@@ -95,7 +95,7 @@ describe("consistent-barrel-files rule", () => {
 
     it("does not report when enforcing and barrel exists", (): void => {
       // Arrange
-      const directory = createRepoDirectory("tmp");
+      const directory = createRepoDirectory("src");
       temporaryDirectories.push(directory);
       const barrelPath = path.join(directory, "index.ts");
       const filePath = path.join(directory, "feature.ts");
@@ -111,7 +111,7 @@ describe("consistent-barrel-files rule", () => {
 
     it("does not treat declaration barrels as satisfying the requirement", (): void => {
       // Arrange
-      const directory = createRepoDirectory("tmp");
+      const directory = createRepoDirectory("src");
       temporaryDirectories.push(directory);
       const declarationBarrelPath = path.join(directory, "index.d.ts");
       const filePath = path.join(directory, "feature.ts");
@@ -134,7 +134,7 @@ describe("consistent-barrel-files rule", () => {
   describe("options", (): void => {
     it("reports when barrel files are forbidden", (): void => {
       // Arrange
-      const directory = createRepoDirectory("tmp");
+      const directory = createRepoDirectory("src");
       temporaryDirectories.push(directory);
       const barrelPath = path.join(directory, "index.ts");
       const filePath = path.join(directory, "feature.ts");
@@ -151,7 +151,7 @@ describe("consistent-barrel-files rule", () => {
 
     it("respects custom barrel names", (): void => {
       // Arrange
-      const directory = createRepoDirectory("tmp");
+      const directory = createRepoDirectory("src");
       temporaryDirectories.push(directory);
       const barrelPath = path.join(directory, "barrel.ts");
       const filePath = path.join(directory, "feature.ts");
@@ -167,7 +167,7 @@ describe("consistent-barrel-files rule", () => {
 
     it("falls back to the default barrel name when allowedNames is empty", (): void => {
       // Arrange
-      const directory = createRepoDirectory("tmp");
+      const directory = createRepoDirectory("src");
       temporaryDirectories.push(directory);
       const barrelPath = path.join(directory, "index.ts");
       const filePath = path.join(directory, "feature.ts");
@@ -194,7 +194,7 @@ describe("consistent-barrel-files rule", () => {
 
     it("does not report forbidden barrels when the folder has no module files besides the barrel", (): void => {
       // Arrange
-      const directory = createRepoDirectory("tmp");
+      const directory = createRepoDirectory("src");
       temporaryDirectories.push(directory);
       const barrelPath = path.join(directory, "index.ts");
       writeBarrel(barrelPath);
@@ -208,7 +208,7 @@ describe("consistent-barrel-files rule", () => {
 
     it("skips forbidden check for non-barrel files", (): void => {
       // Arrange
-      const directory = createRepoDirectory("tmp");
+      const directory = createRepoDirectory("src");
       temporaryDirectories.push(directory);
       const filePath = path.join(directory, "feature.ts");
       writeFeature(filePath);
@@ -222,9 +222,9 @@ describe("consistent-barrel-files rule", () => {
   });
 
   describe("scope", (): void => {
-    it("defaults to all repo folders", (): void => {
+    it("defaults to src repo folders", (): void => {
       // Arrange
-      const directory = createRepoDirectory("tmp");
+      const directory = createRepoDirectory("src");
       temporaryDirectories.push(directory);
       const filePath = path.join(directory, "feature.ts");
       writeFeature(filePath);
@@ -235,6 +235,20 @@ describe("consistent-barrel-files rule", () => {
       // Assert
       expect(reports).toHaveLength(1);
       expect(reports[0]?.messageId).toBe("missingBarrel");
+    });
+
+    it("skips repo files outside src by default", (): void => {
+      // Arrange
+      const directory = createRepoDirectory("tmp");
+      temporaryDirectories.push(directory);
+      const filePath = path.join(directory, "feature.ts");
+      writeFeature(filePath);
+
+      // Act
+      const reports = runRule(filePath);
+
+      // Assert
+      expect(reports).toStrictEqual([]);
     });
 
     it("skips when file is outside repo", (): void => {
