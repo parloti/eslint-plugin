@@ -119,9 +119,10 @@ Run `npm run docs` to refresh the generated API reference before publishing or d
 
 ## Internal layout
 
-- `src/rules/` is the shared entrypoint for exported rule modules.
-- `src/architecture/`, `src/core/`, `src/docs/`, and `src/testing/` own the concrete rule implementations.
-- `src/custom-rules.ts` is the registry used by tests and benchmarks.
+- `src/index.ts` is the public package entrypoint.
+- `src/domain/` contains the concrete rule implementations and domain-only support code.
+- `src/application/` contains package-level rule catalogs and registries.
+- `src/infrastructure/` contains ESLint-facing adapters such as the plugin object and ready-to-use presets.
 
 Additional design and release notes live in `docs/design/architecture.md` and `docs/design/release.md`.
 

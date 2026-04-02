@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { getCustomRuleDocumentationUrl } from "./custom-rule-documentation";
+import { getCustomRuleDocumentationUrl } from "../domain";
 import { customRules } from "./custom-rules";
 
 /** Summary of the enforced custom rule contract. */

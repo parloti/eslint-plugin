@@ -16,16 +16,6 @@ export {
   requireTestCompanionRule,
   singleActStatementRule,
   singleLineJsdocRule,
-} from "./application";
-export type { CustomRuleEntry } from "./application";
-export {
-  aaa,
-  all,
-  architecture,
-  codeperfectPlugin,
-  core,
-  customRules,
-  documentation,
-  testing,
-} from "./infrastructure";
-export type { CodeperfectPreset } from "./infrastructure";
+} from "../domain";
+export { customRules } from "./custom-rules";
+export type { CustomRuleEntry } from "./custom-rules";

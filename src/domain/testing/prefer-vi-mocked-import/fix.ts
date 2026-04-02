@@ -1,8 +1,10 @@
 import type { Rule } from "eslint";
 
+import type { Range } from "./match-helpers";
 import type { RuleMatch } from "./types";
-/** Type definition for rule data. */
-type Range = [number, number];
+
+import { buildImportFixes } from "./fix-import-statements";
+import { buildCombinedImportFixes } from "./fix-imports";
 
 /**
  * Builds fixes that inline declaration initializers into factory properties.
@@ -50,133 +52,27 @@ function buildBindingFixes(
  */
 function buildFix(match: RuleMatch, fixer: Rule.RuleFixer): Rule.Fix[] {
   return [
-    ...buildBindingFixes(match, fixer),
-    ...buildMemberRewriteFixes(match, fixer),
-    ...buildMockSpecifierFixes(match, fixer),
     ...buildImportFixes(match, fixer),
-    ...buildRemovalFixes(match, fixer),
+    ...buildNonImportFixes(match, fixer),
   ];
 }
 
 /**
- * Builds fixes for adding or updating imports.
- * @param match Autofix context produced by the matcher.
+ * Builds all autofix operations for every match in a file.
+ * @param matches Autofix contexts produced by the matcher.
  * @param fixer ESLint fixer.
- * @returns A fix list that keeps import declarations consistent.
+ * @returns Combined fix list.
  * @example
  * ```typescript
- * const fixes = buildImportFixes({} as never, {} as never);
+ * const fixes = buildFixes([], {} as never);
  * void fixes;
  * ```
  */
-function buildImportFixes(match: RuleMatch, fixer: Rule.RuleFixer): Rule.Fix[] {
-  const { names } = match.importPlan;
-  if (names.length === 0) {
-    return [];
-  }
-
-  const sortedNames = [...names].toSorted();
-  const updateFix = buildImportUpdateFix(match, sortedNames, fixer);
-  return updateFix === void 0
-    ? buildImportInsertFixes(match, sortedNames, fixer)
-    : [updateFix];
-}
-
-/**
- * Builds import insertion fixes when no compatible import exists.
- * @param match Autofix context produced by the matcher.
- * @param sortedNames Sorted names that must be imported.
- * @param fixer ESLint fixer.
- * @returns Fixes that insert a new import declaration.
- * @example
- * ```typescript
- * const fixes = buildImportInsertFixes({ importPlan: { moduleSpecifier: "./x", names: [] }, newline: "\n" } as never, [], {} as never);
- * void fixes;
- * ```
- */
-function buildImportInsertFixes(
-  match: RuleMatch,
-  sortedNames: string[],
-  fixer: Rule.RuleFixer,
-): Rule.Fix[] {
-  const statementText = buildImportStatement(
-    match.importPlan.moduleSpecifier,
-    void 0,
-    sortedNames,
-  );
-  const { afterRange } = match.importPlan.insert ?? {};
-
-  return afterRange === void 0
-    ? [
-        fixer.insertTextBeforeRange(
-          [0, 0],
-          `${statementText}${match.newline}${match.newline}`,
-        ),
-      ]
-    : [
-        fixer.insertTextAfterRange(
-          afterRange,
-          `${match.newline}${statementText}`,
-        ),
-      ];
-}
-
-/**
- * Creates an import statement string from import parts.
- * @param moduleSpecifier Module path used in the generated statement.
- * @param defaultImportName Existing default-import local identifier, when present.
- * @param names Named imports to include in braces.
- * @returns Fully formatted import statement text.
- * @example
- * ```typescript
- * const text = buildImportStatement("./x", void 0, ["a"]);
- * void text;
- * ```
- */
-function buildImportStatement(
-  moduleSpecifier: string,
-  defaultImportName: string | undefined,
-  names: readonly string[],
-): string {
-  const moduleText = JSON.stringify(moduleSpecifier);
-  const namedText = `{ ${names.join(", ")} }`;
-  return defaultImportName === void 0
-    ? `import ${namedText} from ${moduleText};`
-    : `import ${defaultImportName}, ${namedText} from ${moduleText};`;
-}
-
-/**
- * Builds an import update fix when an existing import is compatible.
- * @param match Autofix context produced by the matcher.
- * @param sortedNames Sorted names that must be imported.
- * @param fixer ESLint fixer.
- * @returns A single replacement fix when an import can be updated.
- * @example
- * ```typescript
- * const fix = buildImportUpdateFix({ importPlan: { moduleSpecifier: "./x", names: [] } } as never, [], {} as never);
- * void fix;
- * ```
- */
-function buildImportUpdateFix(
-  match: RuleMatch,
-  sortedNames: string[],
-  fixer: Rule.RuleFixer,
-): Rule.Fix | undefined {
-  const { update } = match.importPlan;
-  if (update === void 0) {
-    return void 0;
-  }
-
-  const { moduleSpecifier } = match.importPlan;
-  const mergedNames = [
-    ...new Set([...sortedNames, ...update.existingNamedImports]),
-  ].toSorted();
-  const statementText = buildImportStatement(
-    moduleSpecifier,
-    update.defaultImportName,
-    mergedNames,
-  );
-  return fixer.replaceTextRange(update.range, statementText);
+function buildFixes(matches: RuleMatch[], fixer: Rule.RuleFixer): Rule.Fix[] {
+  return [
+    ...buildCombinedImportFixes(matches, fixer),
+    ...matches.flatMap((match) => buildNonImportFixes(match, fixer)),
+  ];
 }
 
 /**
@@ -224,6 +120,29 @@ function buildMockSpecifierFixes(
   const moduleText = JSON.stringify(match.moduleSpecifier);
   return [
     fixer.replaceTextRange(match.mockSpecifierRange, `import(${moduleText})`),
+  ];
+}
+
+/**
+ * Builds all non-import autofix operations for a single match.
+ * @param match Autofix context produced by the matcher.
+ * @param fixer ESLint fixer.
+ * @returns Combined non-import fix list.
+ * @example
+ * ```typescript
+ * const fixes = buildNonImportFixes({} as never, {} as never);
+ * void fixes;
+ * ```
+ */
+function buildNonImportFixes(
+  match: RuleMatch,
+  fixer: Rule.RuleFixer,
+): Rule.Fix[] {
+  return [
+    ...buildBindingFixes(match, fixer),
+    ...buildMemberRewriteFixes(match, fixer),
+    ...buildMockSpecifierFixes(match, fixer),
+    ...buildRemovalFixes(match, fixer),
   ];
 }
 
@@ -297,4 +216,4 @@ function getUniqueStatementRanges(match: RuleMatch): Range[] {
   return [...rangeMap.values()];
 }
 
-export { buildFix };
+export { buildFix, buildFixes };

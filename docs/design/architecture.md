@@ -5,18 +5,19 @@
 `@codeperfect/eslint-plugin` publishes a narrow public surface:
 
 - the default plugin export and named `codeperfectPlugin`
-- first-party presets exported from `src/presets.ts`
-- the `customRules` registry used by tests and benchmarks
-- direct named exports for each package-owned rule module
+- first-party presets implemented in `src/infrastructure/presets.ts`
+- the `customRules` registry implemented in `src/application/custom-rules.ts`
+- direct named exports for each package-owned rule module via `src/application/index.ts`
 
 The package does not own a shared-config composition layer. Local repository lint configuration stays in `eslint.config.ts`.
 
 ## Source Layout
 
 - `src/index.ts` is the public entrypoint used for package exports and API documentation generation.
-- `src/rules/` re-exports every package-owned rule module.
-- `src/architecture/`, `src/core/`, `src/docs/`, and `src/testing/` contain the concrete rule implementations by domain.
-- `src/custom-rules.ts` is the source-of-truth registry for package-owned rules.
+- `src/domain/` contains the concrete rule implementations and domain-only support code.
+- `src/application/` contains package-level orchestration such as rule catalogs and registries.
+- `src/infrastructure/` contains ESLint-facing adapters such as the plugin object and ready-to-use presets.
+- `eslint.config.ts` owns the repository-specific architecture overlay, including the `boundaries` layer rules.
 - `docs/rules/` contains curated rule reference pages.
 
 ## Documentation Layout

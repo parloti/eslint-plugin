@@ -1,25 +1,31 @@
 import type { Rule } from "eslint";
 
 import { createRuleDocumentation } from "../../custom-rule-documentation";
-import { buildFix } from "./fix";
-import { collectMatch } from "./match";
+import { buildFixes } from "./fix";
+import { collectMatches } from "./match";
 
 /** Enforce inline `vi.fn()` mocks inside `vi.mock`/`vi.doMock` factories. */
 const preferViMockedImportRule: Rule.RuleModule = {
   create(context: Rule.RuleContext): Rule.RuleListener {
     return {
       Program: (): void => {
-        const match = collectMatch(context);
+        const matches = collectMatches(context);
 
-        if (match === void 0) {
+        if (matches.length === 0) {
           return;
         }
 
-        context.report({
-          fix: (fixer: Rule.RuleFixer): Rule.Fix[] => buildFix(match, fixer),
-          messageId: "preferViMockedImport",
-          node: match.node,
-        });
+        for (const [index, match] of matches.entries()) {
+          context.report({
+            fix:
+              index === 0
+                ? (fixer: Rule.RuleFixer): Rule.Fix[] =>
+                    buildFixes(matches, fixer)
+                : void 0,
+            messageId: "preferViMockedImport",
+            node: match.node,
+          });
+        }
       },
     } satisfies Rule.RuleListener;
   },

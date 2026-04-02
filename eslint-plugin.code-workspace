@@ -5,6 +5,22 @@
     },
   ],
   "settings": {
-    "workbench.colorCustomizations": {},
+    "workbench.colorCustomizations": {
+      "activityBar.background": "#6e488410",
+      "sideBar.border": "#6e4884",
+      "sideBarActivityBarTop.border": "#6e4884",
+      "sideBarSectionHeader.background": "#6e488460",
+      "sideBarSectionHeader.border": "#6e4884",
+      "sideBarTitle.background": "#6e488460",
+      "sideBarTitle.border": "#6e4884",
+      "statusBar.background": "#6e488450",
+      "tab.activeBackground": "#6e488430",
+      "tab.activeBorder": "#6e4884",
+      "tab.border": "#6e488450",
+      "tab.unfocusedActiveBackground": "#6e488420",
+      "tab.unfocusedActiveBorder": "#6e488475",
+      "titleBar.activeBackground": "#6e488420",
+      "titleBar.border": "#6e4884",
+    },
   },
 }

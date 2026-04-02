@@ -18,7 +18,7 @@ import {
   requireTestCompanionRule,
   singleActStatementRule,
   singleLineJsdocRule,
-} from "./rules";
+} from "../domain";
 
 /** Internal registry entry for a package-owned custom rule. */
 interface CustomRuleEntry {

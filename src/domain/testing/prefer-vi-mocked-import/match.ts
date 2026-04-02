@@ -100,38 +100,63 @@ function buildMatch(
  * ```
  */
 function collectMatch(context: Rule.RuleContext): RuleMatch | undefined {
-  const program = context.sourceCode.ast as ESTree.Program;
-  const seed = collectSeed(program);
-  return seed === void 0 ? void 0 : buildMatch(context, program, seed);
+  return collectMatches(context)[0];
 }
 
 /**
- * Collects seed data needed to build a full match.
- * @param program Program node.
- * @returns Match seed.
+ * Collects every applicable rule match from the file.
+ * @param context Rule context.
+ * @returns Collected matches when patterns are found.
  * @example
  * ```typescript
- * const seed = collectSeed({ body: [], sourceType: "module", type: "Program" } as never);
- * void seed;
+ * const matches = collectMatches({ sourceCode: { ast: { body: [], sourceType: "module", type: "Program" }, text: "" } } as never);
+ * void matches;
  * ```
  */
-function collectSeed(program: ESTree.Program): MatchSeed | undefined {
-  const mockStatement = findMockStatement(program);
-  if (mockStatement === void 0) {
-    return void 0;
+function collectMatches(context: Rule.RuleContext): RuleMatch[] {
+  const program = context.sourceCode.ast as ESTree.Program;
+
+  return collectSeeds(program)
+    .map((seed) => buildMatch(context, program, seed))
+    .filter((match): match is RuleMatch => match !== void 0);
+}
+
+/**
+ * Collects seed data for every supported mock statement in the file.
+ * @param program Program node.
+ * @returns Match seeds.
+ * @example
+ * ```typescript
+ * const seeds = collectSeeds({ body: [], sourceType: "module", type: "Program" } as never);
+ * void seeds;
+ * ```
+ */
+function collectSeeds(program: ESTree.Program): MatchSeed[] {
+  if (!Array.isArray(program.body)) {
+    return [];
   }
 
-  const { expression } = mockStatement;
-  if (expression.type !== "CallExpression") {
-    return void 0;
-  }
+  return program.body.flatMap((statement) => {
+    const expression = getMockCallExpression(statement);
 
-  const callArguments = getMockCallArguments(expression);
-  if (callArguments === void 0) {
-    return void 0;
-  }
+    if (expression === void 0) {
+      return [];
+    }
 
-  return createSeed(mockStatement, callArguments[0], callArguments[1]);
+    const callArguments = getMockCallArguments(expression);
+
+    if (callArguments === void 0) {
+      return [];
+    }
+
+    const seed = createSeed(
+      statement as ESTree.ExpressionStatement,
+      callArguments[0],
+      callArguments[1],
+    );
+
+    return seed === void 0 ? [] : [seed];
+  });
 }
 
 /**
@@ -160,25 +185,6 @@ function createSeed(
   return moduleSpecifier === void 0 || factoryObject === void 0
     ? void 0
     : { factoryObject, mockStatement, moduleSpecifier, specifierExpression };
-}
-
-/**
- * Returns the first top-level `vi.mock` or `vi.doMock` statement.
- * @param program Program node.
- * @returns Matching expression statement.
- * @example
- * ```typescript
- * const statement = findMockStatement({ body: [], sourceType: "module", type: "Program" } as never);
- * void statement;
- * ```
- */
-function findMockStatement(
-  program: ESTree.Program,
-): ESTree.ExpressionStatement | undefined {
-  return program.body.find(
-    (statement): statement is ESTree.ExpressionStatement =>
-      isMockExpressionStatement(statement),
-  );
 }
 
 /**
@@ -225,20 +231,20 @@ function getMockCallArguments(
 }
 
 /**
- * Checks whether a statement is a supported mock expression statement.
+ * Returns the call expression for a supported mock statement.
  * @param statement Candidate statement.
- * @returns True when statement is a supported mock call.
+ * @returns Supported mock call expression when present.
  * @example
  * ```typescript
- * const ok = isMockExpressionStatement({ type: "EmptyStatement" } as never);
- * void ok;
+ * const expression = getMockCallExpression({ type: "EmptyStatement" } as never);
+ * void expression;
  * ```
  */
-function isMockExpressionStatement(
+function getMockCallExpression(
   statement: ESTree.Program["body"][number],
-): boolean {
+): ESTree.CallExpression | undefined {
   if (statement.type !== "ExpressionStatement") {
-    return false;
+    return void 0;
   }
 
   const { expression } = statement;
@@ -246,16 +252,16 @@ function isMockExpressionStatement(
     expression.type !== "CallExpression" ||
     expression.callee.type !== "MemberExpression"
   ) {
-    return false;
+    return void 0;
   }
 
   const { object, property } = expression.callee;
-  return (
-    object.type === "Identifier" &&
+  return object.type === "Identifier" &&
     object.name === "vi" &&
     property.type === "Identifier" &&
     (property.name === "mock" || property.name === "doMock")
-  );
+    ? expression
+    : void 0;
 }
 
 /**
@@ -276,4 +282,4 @@ function toLocalMap(bindings: RuleMatch["bindings"]): Map<string, string> {
   );
 }
 
-export { collectMatch };
+export { collectMatch, collectMatches };

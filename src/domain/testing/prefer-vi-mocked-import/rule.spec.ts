@@ -128,6 +128,35 @@ describe("prefer-vi-mocked-import rule (core)", () => {
     );
   });
 
+  it("fixes every supported mock statement in one file", () => {
+    // Arrange
+    const input = [
+      "const a = vi.fn();",
+      "const b = vi.fn();",
+      'vi.mock(import("./mod"), () => ({ a }));',
+      "a.mockResolvedValue(true);",
+      'vi.doMock("./mod", () => ({ b }));',
+      "b.mockReturnValue(123);",
+      "",
+    ].join("\n");
+
+    // Act
+    const { output } = runFix(input);
+
+    // Assert
+    expect(output).toBe(
+      [
+        'import { a, b } from "./mod";',
+        "",
+        'vi.mock(import("./mod"), () => ({ a: vi.fn() }));',
+        "vi.mocked(a).mockResolvedValue(true);",
+        'vi.doMock(import("./mod"), () => ({ b: vi.fn() }));',
+        "vi.mocked(b).mockReturnValue(123);",
+        "",
+      ].join("\n"),
+    );
+  });
+
   it("does not report when the local mock is used outside of supported sites", () => {
     // Arrange
     const input = [
