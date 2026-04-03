@@ -22,12 +22,6 @@ interface FixtureProject {
   /** Temporary fixture directory path. */
   directory: string;
 
-  /** ESLint instance configured for this fixture project. */
-  eslint: ESLint;
-
-  /** Rule input file path inside the temporary fixture. */
-  filePath: string;
-
   /** Promise used to serialize runs that share one cached ESLint project. */
   pendingRun: Promise<void>;
 
@@ -43,6 +37,9 @@ interface QueuedRunState {
 
 /** Typed fixture projects cached by their declaration text. */
 const fixtureProjectsByDeclaration = new Map<string, FixtureProject>();
+
+/** Monotonic counter used to create isolated per-run scratch files. */
+let fixtureRunCounter = 0;
 
 /** Ambient declarations used by the typed fixture project. */
 const defaultDeclarationText = [
@@ -153,25 +150,30 @@ const createFixtureProject = async (
   declarationText: string,
 ): Promise<FixtureProject> => {
   const directory = await mkdtemp(path.join(tmpdir(), "codeperfect-rule-"));
-  const filePath = path.join(directory, "example.spec.ts");
   const globalsPath = path.join(directory, "globals.d.ts");
   const tsconfigPath = path.join(directory, "tsconfig.json");
 
   temporaryDirectories.push(directory);
-
   await Promise.all([
-    writeFile(filePath, "", "utf8"),
     writeFile(globalsPath, declarationText, "utf8"),
     writeFile(tsconfigPath, createTsconfigText(), "utf8"),
   ]);
 
-  return {
-    directory,
-    eslint: createTypedRuleEslint(directory, tsconfigPath),
-    filePath,
-    pendingRun: Promise.resolve(),
-    tsconfigPath,
-  };
+  return { directory, pendingRun: Promise.resolve(), tsconfigPath };
+};
+
+/**
+ * Creates a unique file path for one isolated lint run.
+ * @param directory Temporary fixture directory.
+ * @returns Unique file path for the current run.
+ * @example
+ * ```typescript
+ * createRunFilePath("/tmp/project");
+ * ```
+ */
+const createRunFilePath = (directory: string): string => {
+  fixtureRunCounter += 1;
+  return path.join(directory, `example-${fixtureRunCounter}.spec.ts`);
 };
 
 /**
@@ -191,9 +193,7 @@ const runExclusive = async <Result>(
   callback: () => Promise<Result>,
 ): Promise<Result> => {
   const previousRun = fixtureProject.pendingRun;
-  const runState: QueuedRunState = {
-    releaseCurrentRun: void 0,
-  };
+  const runState: QueuedRunState = { releaseCurrentRun: void 0 };
 
   fixtureProject.pendingRun = new Promise<void>((resolve) => {
     runState.releaseCurrentRun = resolve;
@@ -244,7 +244,6 @@ const getFixtureProject = async (
  */
 const cleanupTemporaryDirectories = async (): Promise<void> => {
   fixtureProjectsByDeclaration.clear();
-
   await Promise.all(
     temporaryDirectories
       .splice(0)
@@ -273,19 +272,27 @@ const runFix = async (
   const fixtureProject = await getFixtureProject(declarationText);
 
   return runExclusive(fixtureProject, async () => {
-    await writeFile(fixtureProject.filePath, code, "utf8");
-    const [result] = await fixtureProject.eslint.lintText(code, {
-      filePath: fixtureProject.filePath,
-    });
+    const filePath = createRunFilePath(fixtureProject.directory);
+    const eslint = createTypedRuleEslint(
+      fixtureProject.directory,
+      fixtureProject.tsconfigPath,
+    );
 
-    if (result === void 0) {
-      throw new Error("Expected ESLint to return a lint result.");
+    await writeFile(filePath, code, "utf8");
+    try {
+      const [result] = await eslint.lintText(code, { filePath });
+
+      if (result === void 0) {
+        throw new Error("Expected ESLint to return a lint result.");
+      }
+
+      return {
+        messages: result.messages,
+        output: result.output ?? code,
+      };
+    } finally {
+      await rm(filePath, { force: true });
     }
-
-    return {
-      messages: result.messages,
-      output: result.output ?? code,
-    };
   });
 };
 

@@ -1,7 +1,8 @@
 import type { Linter } from "eslint";
 
 import { ESLint } from "eslint";
-import { writeFile } from "node:fs/promises";
+import { rm, writeFile } from "node:fs/promises";
+import path from "node:path";
 import { parser } from "typescript-eslint";
 
 import type { FixtureSet } from "./temporary-fixtures";
@@ -26,17 +27,14 @@ interface QueuedRunState {
 
 /** Cached typed fixture project state reused across helper runs. */
 interface TypedFixtureProject {
-  /** ESLint instance configured for the fixture project. */
-  eslint: ESLint;
-
-  /** Fixture metadata for the temporary project. */
-  filePath: string;
-
   /** Fixture metadata for the temporary project. */
   fixtureSet: FixtureSet;
 
   /** Promise used to serialize runs that share one cached ESLint project. */
   pendingRun: Promise<void>;
+
+  /** Fixture tsconfig path used by typed ESLint. */
+  tsconfigPath: string;
 }
 
 /** Temporary fixture manager reused across helper runs. */
@@ -44,6 +42,9 @@ const temporaryFixtureManager = createTemporaryFixtureManager();
 
 /** Typed fixture projects cached by their declaration text. */
 const fixtureProjectsByDeclaration = new Map<string, TypedFixtureProject>();
+
+/** Monotonic counter used to create isolated per-run scratch files. */
+let fixtureRunCounter = 0;
 
 /** Ambient declarations used by the temporary typed fixture project. */
 const defaultDeclarationText = [
@@ -150,6 +151,21 @@ function cleanupTemporaryDirectories(): void {
 }
 
 /**
+ * Creates a unique file path for one isolated lint run.
+ * @param directory Temporary fixture directory.
+ * @returns Unique file path for the current run.
+ * @example
+ * ```typescript
+ * const filePath = createRunFilePath("tmp/project");
+ * void filePath;
+ * ```
+ */
+function createRunFilePath(directory: string): string {
+  fixtureRunCounter += 1;
+  return path.join(directory, `example-${fixtureRunCounter}.spec.ts`);
+}
+
+/**
  * Gets or creates the cached typed fixture project for one declaration shape.
  * @param declarationText Ambient declarations used by the fixture project.
  * @returns Cached typed fixture project state.
@@ -168,17 +184,14 @@ function getFixtureProject(declarationText: string): TypedFixtureProject {
   }
 
   const fixtureSet = temporaryFixtureManager.createFixtureSet({
-    "example.spec.ts": "",
     "globals.d.ts": declarationText,
     "tsconfig.json": createTsconfigText(),
   });
-  const filePath = fixtureSet.getFilePath("example.spec.ts");
   const tsconfigPath = fixtureSet.getFilePath("tsconfig.json");
   const fixtureProject = {
-    eslint: createTypedRuleEslint(fixtureSet.directory, tsconfigPath),
-    filePath,
     fixtureSet,
     pendingRun: Promise.resolve(),
+    tsconfigPath,
   };
 
   fixtureProjectsByDeclaration.set(declarationText, fixtureProject);
@@ -238,19 +251,28 @@ async function runFix(
   const fixtureProject = getFixtureProject(declarationText);
 
   return runExclusive(fixtureProject, async () => {
-    const { eslint, filePath } = fixtureProject;
+    const filePath = createRunFilePath(fixtureProject.fixtureSet.directory);
+    const eslint = createTypedRuleEslint(
+      fixtureProject.fixtureSet.directory,
+      fixtureProject.tsconfigPath,
+    );
 
     await writeFile(filePath, code, "utf8");
-    const [result] = await eslint.lintText(code, { filePath });
 
-    if (result === void 0) {
-      throw new Error("Expected ESLint to return a lint result.");
+    try {
+      const [result] = await eslint.lintText(code, { filePath });
+
+      if (result === void 0) {
+        throw new Error("Expected ESLint to return a lint result.");
+      }
+
+      return {
+        messages: result.messages,
+        output: result.output ?? code,
+      };
+    } finally {
+      await rm(filePath, { force: true });
     }
-
-    return {
-      messages: result.messages,
-      output: result.output ?? code,
-    };
   });
 }
 
