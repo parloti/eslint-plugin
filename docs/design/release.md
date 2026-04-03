@@ -18,6 +18,8 @@ Pushes to `main` and `master` are release branches. GitHub Actions validates the
 3. Semantic Release analyzes commit messages, creates a version tag, publishes the package to npm, and creates the GitHub release.
 4. `docs.yml` publishes the `docs/` directory to GitHub Pages when a version tag is pushed.
 
+The release workflow also repairs the legacy initial-release tag shape if the repository still has `v<major>` for a published `major.0.0` release. In that one case it creates the matching `v<major>.0.0` tag on the same commit before running Semantic Release.
+
 ## Local Verification
 
 Use this sequence before merging release-impacting changes:
