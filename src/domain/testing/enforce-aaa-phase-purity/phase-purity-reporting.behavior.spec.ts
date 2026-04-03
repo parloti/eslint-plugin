@@ -223,12 +223,13 @@ describe("enforce-aaa-phase-purity reporting behavior", () => {
 
   it("exports the companion marker", () => {
     // Arrange
+    const expected = true;
 
     // Act
     const actual = phasePurityReportingBehaviorCompanion;
 
     // Assert
-    expect(actual).toBe(true);
+    expect(actual).toBe(expected);
   });
 
   it("skips analysis when AAA sections are incomplete", async () => {

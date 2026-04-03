@@ -58,9 +58,13 @@ function createMockDeclarationProgram(
 describe("prefer-vi-mocked-import match-declarations", () => {
   it("exports collectDeclarations", () => {
     // Arrange
+    const expectedType = "function";
 
-    // Act & Assert
-    expect(collectDeclarations).toBeTypeOf("function");
+    // Act
+    const actualType = typeof collectDeclarations;
+
+    // Assert
+    expect(actualType).toBe(expectedType);
   });
 
   it("ignores malformed variable declarations without a declarator", () => {

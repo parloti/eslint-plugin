@@ -5,8 +5,12 @@ import { walkNode } from "./match-walk";
 describe("prefer-vi-mocked-import match-walk", () => {
   it("exports walkNode", () => {
     // Arrange
+    const expectedType = "function";
 
-    // Act & Assert
-    expect(walkNode).toBeTypeOf("function");
+    // Act
+    const actualType = typeof walkNode;
+
+    // Assert
+    expect(actualType).toBe(expectedType);
   });
 });

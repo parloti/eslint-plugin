@@ -26,15 +26,16 @@ describe("no-reexports test utilities", () => {
     const temporaryDirectories: string[] = [];
     const runner = createTemporaryRunner(temporaryDirectories);
     const body = createBody();
+    const expectedReports: ReturnType<typeof runRule> = [];
 
     // Act
-    const reports = ((): ReturnType<typeof runRule>[] => {
+    const actualReports = ((): ReturnType<typeof runRule> => {
       try {
         return [
           runner.runDefaultFeature(body),
           runner.runTemporaryFeature(body),
           runner.runTemporaryIndex(body),
-        ];
+        ].flat();
       } finally {
         for (const directory of temporaryDirectories.splice(0)) {
           rmSync(directory, { force: true, recursive: true });
@@ -43,6 +44,6 @@ describe("no-reexports test utilities", () => {
     })();
 
     // Assert
-    expect(reports.flat()).toStrictEqual([]);
+    expect(actualReports).toStrictEqual(expectedReports);
   });
 });

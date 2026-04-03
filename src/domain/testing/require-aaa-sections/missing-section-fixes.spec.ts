@@ -7,12 +7,13 @@ import { buildMissingSectionFixes } from "./missing-section-fixes";
 describe("require-aaa-sections missing-section-fixes", () => {
   it("exports buildMissingSectionFixes", () => {
     // Arrange
+    const expectedType = "function";
 
     // Act
     const actual = typeof buildMissingSectionFixes;
 
     // Assert
-    expect(actual).toBe("function");
+    expect(actual).toBe(expectedType);
   });
 
   it("groups missing phases by insertion point and preserves blank lines", () => {

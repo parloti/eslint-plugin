@@ -90,7 +90,6 @@ function isOptionalSymbol(propertySymbol: ts.Symbol): boolean {
       : ((propertySymbol as SymbolWithOptionalFlags).flags ?? 0);
 
   if (hasSymbolFlag(flags, SymbolFlags.Optional)) {
-    /* v8 ignore next -- covered by test; false-positive in v8 instrumentation */
     return true;
   }
 

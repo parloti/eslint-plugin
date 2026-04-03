@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { codeperfectPlugin, codeperfectRules } from "./codeperfect-plugin";
+import { codeperfectPlugin } from "./codeperfect-plugin";
 import {
   aaa,
   all,
@@ -52,52 +52,80 @@ describe("ready-to-use presets", () => {
 
   it("enables every package-owned rule in the all preset", () => {
     // Arrange
+    const expectedRuleKeys = [
+      "codeperfect/assert-actual-expected-names",
+      "codeperfect/barrel-files-exports-only",
+      "codeperfect/consistent-barrel-files",
+      "codeperfect/enforce-aaa-phase-purity",
+      "codeperfect/enforce-aaa-structure",
+      "codeperfect/no-interface-member-docs",
+      "codeperfect/no-multiple-declarators",
+      "codeperfect/no-reexports-outside-barrels",
+      "codeperfect/prefer-interface-types",
+      "codeperfect/prefer-vi-mocked-import",
+      "codeperfect/prefer-vitest-incremental-casts",
+      "codeperfect/require-aaa-sections",
+      "codeperfect/require-act-result-capture",
+      "codeperfect/require-example-language",
+      "codeperfect/require-test-companion",
+      "codeperfect/single-act-statement",
+      "codeperfect/single-line-jsdoc",
+    ];
 
-    // Act & Assert
-    expect(getRuleKeys(all)).toStrictEqual(
-      Object.keys(codeperfectRules)
-        .map((ruleName) => `codeperfect/${ruleName}`)
-        .toSorted(),
-    );
+    // Act
+    const actualRuleKeys = getRuleKeys(all);
+
+    // Assert
+    expect(actualRuleKeys).toStrictEqual(expectedRuleKeys);
   });
 
   it("groups the architecture rules", () => {
     // Arrange
-
-    // Act & Assert
-    expect(getRuleKeys(architecture)).toStrictEqual([
+    const expectedRuleKeys = [
       "codeperfect/barrel-files-exports-only",
       "codeperfect/consistent-barrel-files",
       "codeperfect/no-reexports-outside-barrels",
-    ]);
+    ];
+
+    // Act
+    const actualRuleKeys = getRuleKeys(architecture);
+
+    // Assert
+    expect(actualRuleKeys).toStrictEqual(expectedRuleKeys);
   });
 
   it("groups the core rules", () => {
     // Arrange
-
-    // Act & Assert
-    expect(getRuleKeys(core)).toStrictEqual([
+    const expectedRuleKeys = [
       "codeperfect/no-multiple-declarators",
       "codeperfect/prefer-interface-types",
-    ]);
+    ];
+
+    // Act
+    const actualRuleKeys = getRuleKeys(core);
+
+    // Assert
+    expect(actualRuleKeys).toStrictEqual(expectedRuleKeys);
   });
 
   it("groups the docs rules", () => {
     // Arrange
-
-    // Act & Assert
-    expect(getRuleKeys(documentation)).toStrictEqual([
+    const expectedRuleKeys = [
       "codeperfect/no-interface-member-docs",
       "codeperfect/require-example-language",
       "codeperfect/single-line-jsdoc",
-    ]);
+    ];
+
+    // Act
+    const actualRuleKeys = getRuleKeys(documentation);
+
+    // Assert
+    expect(actualRuleKeys).toStrictEqual(expectedRuleKeys);
   });
 
   it("groups the testing rules", () => {
     // Arrange
-
-    // Act & Assert
-    expect(getRuleKeys(testing)).toStrictEqual([
+    const expectedRuleKeys = [
       "codeperfect/assert-actual-expected-names",
       "codeperfect/enforce-aaa-phase-purity",
       "codeperfect/enforce-aaa-structure",
@@ -107,17 +135,27 @@ describe("ready-to-use presets", () => {
       "codeperfect/require-act-result-capture",
       "codeperfect/require-test-companion",
       "codeperfect/single-act-statement",
-    ]);
+    ];
+
+    // Act
+    const actualRuleKeys = getRuleKeys(testing);
+
+    // Assert
+    expect(actualRuleKeys).toStrictEqual(expectedRuleKeys);
   });
 
   it("groups the AAA rules", () => {
     // Arrange
-
-    // Act & Assert
-    expect(getRuleKeys(aaa)).toStrictEqual([
+    const expectedRuleKeys = [
       "codeperfect/enforce-aaa-phase-purity",
       "codeperfect/enforce-aaa-structure",
       "codeperfect/require-aaa-sections",
-    ]);
+    ];
+
+    // Act
+    const actualRuleKeys = getRuleKeys(aaa);
+
+    // Assert
+    expect(actualRuleKeys).toStrictEqual(expectedRuleKeys);
   });
 });

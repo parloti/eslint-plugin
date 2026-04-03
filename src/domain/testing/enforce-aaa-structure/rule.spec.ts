@@ -159,29 +159,33 @@ describe("enforce-aaa-structure rule", () => {
 
   it("defines metadata and messages", async () => {
     // Arrange
+    const expectedDescriptionFragment = "Arrange, Act, Assert";
 
     // Act
-    const actual = await loadRule(void 0, []);
+    const result = await loadRule(void 0, []).then((actual) => ({
+      actual,
+      descriptionIncludesFragment:
+        actual.enforceAaaStructureRule.meta?.docs?.description?.includes(
+          expectedDescriptionFragment,
+        ) ?? false,
+    }));
 
     // Assert
-    expect(actual.enforceAaaStructureRule.meta?.messages).toHaveProperty(
+    expect(result.actual.enforceAaaStructureRule.meta?.messages).toHaveProperty(
       "duplicateSection",
     );
-    expect(
-      actual.enforceAaaStructureRule.meta?.docs?.description?.includes(
-        "Arrange, Act, Assert",
-      ),
-    ).toBe(true);
+    expect(result.descriptionIncludesFragment).toBe(true);
   });
 
   it("skips unsupported test blocks", async () => {
     // Arrange
+    const expected: [] = [];
 
     // Act
     const actual = await runRule(void 0, []);
 
     // Assert
-    expect(actual).toStrictEqual([]);
+    expect(actual).toStrictEqual(expected);
   });
 
   it("reports duplicate and out-of-order sections", async () => {

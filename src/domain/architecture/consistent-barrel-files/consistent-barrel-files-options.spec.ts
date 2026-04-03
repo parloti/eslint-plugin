@@ -37,16 +37,16 @@ describe("consistent-barrel-files options", () => {
   it("verifies repo file matching for linting", () => {
     // Arrange
     const rawOptions: [] = [];
+    const { allowedNames } = getOptions(rawOptions);
     const filename = `${cwd()}/src/index.ts`;
     const nestedFilename = `${cwd()}/packages/plugin/src/index.ts`;
     const nonSourceFilename = `${cwd()}/tmp/index.ts`;
 
     // Act
-    const state = getOptions(rawOptions);
     const result = {
-      nestedSource: shouldLintFile(nestedFilename, state.allowedNames),
-      nonSource: shouldLintFile(nonSourceFilename, state.allowedNames),
-      source: shouldLintFile(filename, state.allowedNames),
+      nestedSource: shouldLintFile(nestedFilename, allowedNames),
+      nonSource: shouldLintFile(nonSourceFilename, allowedNames),
+      source: shouldLintFile(filename, allowedNames),
     };
 
     // Assert

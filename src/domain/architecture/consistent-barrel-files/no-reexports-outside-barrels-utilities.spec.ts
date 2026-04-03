@@ -14,6 +14,8 @@ import {
 
 /** Stores the collected import names and re-export result for a test case. */
 interface ImportExportResult {
+  /** Whether the collected imports contain the feature binding. */
+  hasFeatureImport: boolean;
   /** Whether the export statement re-exports an imported name. */
   hasReexportedImport: boolean;
   /** Imported names collected from the test program body. */
@@ -59,13 +61,14 @@ describe("no-reexports utilities", () => {
       const importedNames = collectImportedNames(body);
 
       return {
+        hasFeatureImport: importedNames.has("feature"),
         hasReexportedImport: hasImportedExport(exportStatement, importedNames),
         importedNames,
       };
     })();
 
     // Assert
-    expect(result.importedNames.has("feature")).toBe(true);
+    expect(result.hasFeatureImport).toBe(true);
     expect(result.hasReexportedImport).toBe(true);
   });
 

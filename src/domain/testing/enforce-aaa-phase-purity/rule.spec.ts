@@ -6,15 +6,14 @@ import { runRule, runRuleWithMockedAnalysis } from "./rule-test-helpers";
 describe("enforce-aaa-phase-purity rule", () => {
   it("defines metadata and messages", () => {
     // Arrange
-    const messages = enforceAaaPhasePurityRule.meta?.messages;
+    const expectedDescriptionFragment = "phases";
 
     // Act
-    const descriptionIncludesPhases =
-      enforceAaaPhasePurityRule.meta?.docs?.description?.includes("phases");
+    const metadata = enforceAaaPhasePurityRule.meta;
 
     // Assert
-    expect(messages).toHaveProperty("missingMeaningfulAct");
-    expect(descriptionIncludesPhases).toBe(true);
+    expect(metadata?.messages).toHaveProperty("missingMeaningfulAct");
+    expect(metadata?.docs?.description).toContain(expectedDescriptionFragment);
   });
 
   it("reports arrange assertions, assert awaits, and non-assertion assert code", () => {
@@ -34,10 +33,10 @@ describe("enforce-aaa-phase-purity rule", () => {
     ].join("\n");
 
     // Act
-    const messages = runRule(code);
+    const messageIds = runRule(code).map((message) => message.messageId);
 
     // Assert
-    expect(messages.map((message) => message.messageId)).toStrictEqual([
+    expect(messageIds).toStrictEqual([
       "assertionOutsideAssert",
       "awaitOutsideAct",
       "nonAssertionInAssert",
@@ -161,10 +160,10 @@ describe("enforce-aaa-phase-purity rule", () => {
     ].join("\n");
 
     // Act
-    const messages = runRule(code);
+    const messageIds = runRule(code).map((message) => message.messageId);
 
     // Assert
-    expect(messages.map((message) => message.messageId)).toStrictEqual([
+    expect(messageIds).toStrictEqual([
       "awaitOutsideAct",
       "asyncInArrange",
       "actionInArrange",

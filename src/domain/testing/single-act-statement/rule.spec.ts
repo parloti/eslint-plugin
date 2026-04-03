@@ -135,29 +135,33 @@ describe("single-act-statement rule", () => {
 
   it("defines metadata and messages", async () => {
     // Arrange
+    const expectedDescriptionFragment = "single top-level statement";
 
     // Act
-    const actual = await loadRule(void 0, 0);
+    const result = await loadRule(void 0, 0).then((actual) => ({
+      actual,
+      descriptionIncludesFragment:
+        actual.singleActStatementRule.meta?.docs?.description?.includes(
+          expectedDescriptionFragment,
+        ) ?? false,
+    }));
 
     // Assert
-    expect(actual.singleActStatementRule.meta?.messages).toHaveProperty(
+    expect(result.actual.singleActStatementRule.meta?.messages).toHaveProperty(
       "multipleActStatements",
     );
-    expect(
-      actual.singleActStatementRule.meta?.docs?.description?.includes(
-        "single top-level statement",
-      ),
-    ).toBe(true);
+    expect(result.descriptionIncludesFragment).toBe(true);
   });
 
   it("skips unsupported test blocks", async () => {
     // Arrange
+    const expected: [] = [];
 
     // Act
     const actual = await runRule(void 0, 0);
 
     // Assert
-    expect(actual).toStrictEqual([]);
+    expect(actual).toStrictEqual(expected);
   });
 
   it("reports when the Act phase contains multiple statements", async () => {

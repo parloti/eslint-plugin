@@ -88,9 +88,13 @@ describe("consistent-barrel-files rule repeat runs", (): void => {
 
   it("exports the repeat-runs companion value", (): void => {
     // Arrange
+    const expectedCompanion = "rule.repeat-runs";
 
-    // Act & Assert
-    expect(ruleRepeatRunsCompanion).toBe("rule.repeat-runs");
+    // Act
+    const actualCompanion = ruleRepeatRunsCompanion;
+
+    // Assert
+    expect(actualCompanion).toBe(expectedCompanion);
   });
 
   it("re-evaluates the filesystem between runs", (): void => {

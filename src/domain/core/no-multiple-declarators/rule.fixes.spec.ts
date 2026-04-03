@@ -9,6 +9,14 @@ import {
 } from "./rule-test-helpers";
 import { applyFixes, getFixes, ruleFixesSuiteName } from "./rule.fixes";
 
+/** Fix collection result used by helper coverage assertions. */
+interface FixCollectionResult {
+  /** Flattened fixes returned by the helper. */
+  fixes: Rule.Fix[];
+  /** Source text after the fixes are applied. */
+  output: string;
+}
+
 /** Report shape used by the unusable-fix coverage test. */
 interface ReportWithOptionalFix {
   /** Optional fix callback captured from a rule report. */
@@ -35,19 +43,22 @@ describe(ruleFixesSuiteName, () => {
       statementText,
     });
     const { context, reports } = createContext(sourceText);
+    const expectedOutput = [
+      "if (ready) {",
+      "  const availableRules = new Set(Object.keys(rules ?? {}));",
+      "  const customError = buildCustomErrorRules(availableRules);",
+      "}",
+    ].join("\n");
 
     // Act
-    runRule(context, declaration);
+    const output = ((): string => {
+      runRule(context, declaration);
+
+      return applyFixes(sourceText, getFixes(reports));
+    })();
 
     // Assert
-    expect(applyFixes(sourceText, getFixes(reports))).toBe(
-      [
-        "if (ready) {",
-        "  const availableRules = new Set(Object.keys(rules ?? {}));",
-        "  const customError = buildCustomErrorRules(availableRules);",
-        "}",
-      ].join("\n"),
-    );
+    expect(output).toBe(expectedOutput);
   });
 
   it("fixes destructuring declarators when they are otherwise safe", () => {
@@ -64,17 +75,20 @@ describe(ruleFixesSuiteName, () => {
       statementText: sourceText,
     });
     const { context, reports } = createContext(sourceText);
+    const expectedOutput = [
+      "const { availableRules } = source;",
+      "const customError = buildError(availableRules);",
+    ].join("\n");
 
     // Act
-    runRule(context, declaration);
+    const output = ((): string => {
+      runRule(context, declaration);
+
+      return applyFixes(sourceText, getFixes(reports));
+    })();
 
     // Assert
-    expect(applyFixes(sourceText, getFixes(reports))).toBe(
-      [
-        "const { availableRules } = source;",
-        "const customError = buildError(availableRules);",
-      ].join("\n"),
-    );
+    expect(output).toBe(expectedOutput);
   });
 
   it("fixes let declarations without initializers", () => {
@@ -87,14 +101,20 @@ describe(ruleFixesSuiteName, () => {
       statementText: sourceText,
     });
     const { context, reports } = createContext(sourceText);
+    const expectedOutput = [
+      "let availableRules;",
+      "let customError = buildError();",
+    ].join("\n");
 
     // Act
-    runRule(context, declaration);
+    const output = ((): string => {
+      runRule(context, declaration);
+
+      return applyFixes(sourceText, getFixes(reports));
+    })();
 
     // Assert
-    expect(applyFixes(sourceText, getFixes(reports))).toBe(
-      ["let availableRules;", "let customError = buildError();"].join("\n"),
-    );
+    expect(output).toBe(expectedOutput);
   });
 
   it("falls back to sourceCode.getText() when the text property is unavailable", () => {
@@ -108,17 +128,20 @@ describe(ruleFixesSuiteName, () => {
       statementText: sourceText,
     });
     const { context, reports } = createContext(sourceText, { omitText: true });
+    const expectedOutput = [
+      "const availableRules = rules;",
+      "const customError = buildError();",
+    ].join("\n");
 
     // Act
-    runRule(context, declaration);
+    const output = ((): string => {
+      runRule(context, declaration);
+
+      return applyFixes(sourceText, getFixes(reports));
+    })();
 
     // Assert
-    expect(applyFixes(sourceText, getFixes(reports))).toBe(
-      [
-        "const availableRules = rules;",
-        "const customError = buildError();",
-      ].join("\n"),
-    );
+    expect(output).toBe(expectedOutput);
   });
 
   it("collects iterable fixes from every fixer helper", () => {
@@ -138,13 +161,18 @@ describe(ruleFixesSuiteName, () => {
         ],
       },
     ];
+    const expectedFragment = "range-replace";
 
     // Act
-    const fixes = getFixes(reports);
+    const result = ((): FixCollectionResult => {
+      const fixes = getFixes(reports);
+
+      return { fixes, output: applyFixes(sourceText, fixes) };
+    })();
 
     // Assert
-    expect(fixes).toHaveLength(8);
-    expect(applyFixes(sourceText, fixes)).toContain("range-replace");
+    expect(result.fixes).toHaveLength(8);
+    expect(result.output).toContain(expectedFragment);
   });
 
   it("ignores reports without usable fix results", () => {

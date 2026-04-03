@@ -229,7 +229,14 @@ describe("aAA analyzer block analysis", () => {
     ].join("\n");
 
     // Act
-    const result = analyzeSource(sourceText);
+    const [result, actStatementCount] = ((): readonly [
+      ReturnType<typeof analyzeSource>,
+      number,
+    ] => {
+      const analysis = analyzeSource(sourceText);
+
+      return [analysis, countActStatements(analysis)] as const;
+    })();
 
     // Assert
     expect(result.statements[0]?.phases).toStrictEqual([
@@ -237,7 +244,7 @@ describe("aAA analyzer block analysis", () => {
       "Act",
       "Assert",
     ]);
-    expect(countActStatements(result)).toBe(1);
+    expect(actStatementCount).toBe(1);
   });
 
   it("analyzes supported test blocks and counts Act statements", () => {
@@ -256,12 +263,19 @@ describe("aAA analyzer block analysis", () => {
     ].join("\n");
 
     // Act
-    const result = analyzeSource(sourceText);
+    const [result, actStatementCount] = ((): readonly [
+      ReturnType<typeof analyzeSource>,
+      number,
+    ] => {
+      const analysis = analyzeSource(sourceText);
+
+      return [analysis, countActStatements(analysis)] as const;
+    })();
 
     // Assert
     expect(result.newline).toBe("\n");
     expect(result.sectionComments).toHaveLength(3);
-    expect(countActStatements(result)).toBe(1);
+    expect(actStatementCount).toBe(1);
   });
 
   it("detects CRLF newlines and tolerates statements without location metadata", () => {

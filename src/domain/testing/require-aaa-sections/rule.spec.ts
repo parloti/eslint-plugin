@@ -77,8 +77,10 @@ describe("require-aaa-sections rule", () => {
 
     // Assert
     expect(result.fixed).toBe(false);
-    expect(result.messages.map((message) => message.messageId)).toContain(
-      "emptySection",
+    expect(result.messages).toStrictEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ messageId: "emptySection" }),
+      ]),
     );
   });
 
@@ -146,8 +148,10 @@ describe("require-aaa-sections rule", () => {
     const result = runFix(code);
 
     // Assert
-    expect(result.messages.map((message) => message.messageId)).toContain(
-      "emptySection",
+    expect(result.messages).toStrictEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ messageId: "emptySection" }),
+      ]),
     );
   });
 });

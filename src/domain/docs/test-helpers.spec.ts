@@ -10,10 +10,10 @@ describe("docs test helpers", () => {
     const fixer = createFixer();
 
     // Act
-    const fix = fixer.replaceTextRange([0, 0], "ok");
+    const fixText = getFixText(fixer.replaceTextRange([0, 0], "ok"));
 
     // Assert
-    expect(getFixText(fix)).toBe("ok");
+    expect(fixText).toBe("ok");
   });
 
   it("handles iterable and missing fix text", () => {

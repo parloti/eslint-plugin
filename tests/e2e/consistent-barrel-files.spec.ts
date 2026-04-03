@@ -119,23 +119,24 @@ describe("consistent-barrel-files future expectations", () => {
       errors: [{ messageId: "missingBarrel" }],
       filename: sourceFixture.getFilePath("src/feature.ts"),
     };
+    const expectedSourceMessageIds = ["missingBarrel"];
 
     // Act
-    const nonSourceResult = runRuleCase(
-      "consistent-barrel-files",
-      consistentBarrelFilesRule,
-      nonSourceCase,
-    );
-    const sourceResult = runRuleCase(
-      "consistent-barrel-files",
-      consistentBarrelFilesRule,
-      sourceCase,
-    );
+    const result = {
+      nonSource: runRuleCase(
+        "consistent-barrel-files",
+        consistentBarrelFilesRule,
+        nonSourceCase,
+      ),
+      source: runRuleCase(
+        "consistent-barrel-files",
+        consistentBarrelFilesRule,
+        sourceCase,
+      ),
+    };
 
     // Assert
-    expect(nonSourceResult.messageIds).toStrictEqual([]);
-    expect(sourceResult.messageIds).toStrictEqual(
-      sourceCase.errors.map((error) => error.messageId),
-    );
+    expect(result.nonSource.messageIds).toStrictEqual([]);
+    expect(result.source.messageIds).toStrictEqual(expectedSourceMessageIds);
   });
 });

@@ -124,12 +124,13 @@ describe("single-line-jsdoc rule edge cases", () => {
 
   it("exports the edge-case companion module", () => {
     // Arrange
+    const expected = singleLineJsdocRule;
 
     // Act
     const actual = singleLineJsdocRuleEdgeCases;
 
     // Assert
-    expect(actual).toBe(singleLineJsdocRule);
+    expect(actual).toBe(expected);
   });
 
   it("falls back to default when max line length is non-positive", () => {

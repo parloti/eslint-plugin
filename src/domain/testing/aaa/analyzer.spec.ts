@@ -87,6 +87,7 @@ const getFirstFunctionBodyStatement = (code: string): ESTree.Statement => {
 describe("aAA analyzer helpers", () => {
   it("parses strict AAA section comments and combined markers", () => {
     // Arrange
+    const expectedEmpty: [] = [];
 
     // Act
     const phases = {
@@ -98,7 +99,7 @@ describe("aAA analyzer helpers", () => {
     };
 
     // Assert
-    expect(phases.empty).toStrictEqual([]);
+    expect(phases.empty).toStrictEqual(expectedEmpty);
     expect(phases.arrange).toStrictEqual(["Arrange"]);
     expect(phases.arrangeAct).toStrictEqual(["Arrange", "Act"]);
     expect(phases.lowercaseArrange).toStrictEqual([]);
@@ -107,12 +108,13 @@ describe("aAA analyzer helpers", () => {
 
   it("tracks the canonical AAA order", () => {
     // Arrange
+    const expectedOrdering = { Act: 1, Arrange: 0, Assert: 2 };
 
     // Act
     const ordering = aaaPhaseOrder;
 
     // Assert
-    expect(ordering).toStrictEqual({ Act: 1, Arrange: 0, Assert: 2 });
+    expect(ordering).toStrictEqual(expectedOrdering);
   });
 
   it("detects blank lines before section comments", () => {
@@ -125,22 +127,24 @@ describe("aAA analyzer helpers", () => {
       "});",
     ].join("\n");
 
-    // Act & Assert
-    expect(
-      hasBlankLineBeforeComment(sourceText, {
-        loc: {
-          end: { column: 9, line: 4 },
-          start: { column: 2, line: 4 },
-        },
-        range: [31, 37],
-        type: "Line",
-        value: " Act",
-      }),
-    ).toBe(true);
+    // Act
+    const actual = hasBlankLineBeforeComment(sourceText, {
+      loc: {
+        end: { column: 9, line: 4 },
+        start: { column: 2, line: 4 },
+      },
+      range: [31, 37],
+      type: "Line",
+      value: " Act",
+    });
+
+    // Assert
+    expect(actual).toBe(true);
   });
 
   it("treats comments without location data as already separated", () => {
     // Arrange
+    const expected = true;
 
     // Act
     const result = hasBlankLineBeforeComment("// Arrange", {
@@ -149,7 +153,7 @@ describe("aAA analyzer helpers", () => {
     } as never);
 
     // Assert
-    expect(result).toBe(true);
+    expect(result).toBe(expected);
   });
 
   it("covers line helpers and unsupported assertion operand shapes", () => {
@@ -157,22 +161,27 @@ describe("aAA analyzer helpers", () => {
     const lineStartRange = getLineStartRange("line", 4);
 
     // Act
-    const indentation = getIndentationAtOffset("value", 3);
-
-    // Assert
-    expect(lineStartRange).toStrictEqual([4, 4]);
-    expect(indentation).toBe("");
-    expect(
-      getAssertionIdentifiers(
+    const result = {
+      assertionIdentifiers: getAssertionIdentifiers(
         getFirstFunctionBodyStatement(
           "assert(actualValue).equal(expectedValue);",
         ),
       ),
-    ).toStrictEqual({ actual: void 0, expected: void 0 });
+      indentation: getIndentationAtOffset("value", 3),
+    };
+
+    // Assert
+    expect(lineStartRange).toStrictEqual([4, 4]);
+    expect(result.indentation).toBe("");
+    expect(result.assertionIdentifiers).toStrictEqual({
+      actual: void 0,
+      expected: void 0,
+    });
   });
 
   it("checks actual and expected prefixes", () => {
     // Arrange
+    const expectedMissing = false;
 
     // Act
     const prefixes = {
@@ -184,6 +193,6 @@ describe("aAA analyzer helpers", () => {
     // Assert
     expect(prefixes.actual).toBe(true);
     expect(prefixes.expected).toBe(true);
-    expect(prefixes.missing).toBe(false);
+    expect(prefixes.missing).toBe(expectedMissing);
   });
 });

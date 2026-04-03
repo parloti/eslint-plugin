@@ -24,47 +24,60 @@ describe("comment utilities jsdoc lookup", () => {
     // Arrange
     const { comment, node, sourceCode } = createSingleJsdocContext();
 
-    // Act & Assert
-    expect(getJsdocComment(sourceCode, node)).toBe(comment);
+    // Act
+    const actual = getJsdocComment(sourceCode, node);
+
+    // Assert
+    expect(actual).toBe(comment);
   });
 
   it("skips when no comments exist", () => {
     // Arrange
     const sourceText = "function demo() {}";
     const sourceCode = createSourceCode(sourceText, []);
-
-    // Act
     const node = {
       range: [0, sourceText.length],
       type: "FunctionDeclaration",
     } as Rule.Node;
 
+    // Act
+    const actual = getJsdocComment(sourceCode, node);
+
     // Assert
-    expect(getJsdocComment(sourceCode, node)).toBeUndefined();
+    expect(actual).toBeUndefined();
   });
 
   it("prefers the closest JSDoc comment", () => {
     // Arrange
     const { node, second, sourceCode } = createDualJsdocContext();
 
-    // Act & Assert
-    expect(getJsdocComment(sourceCode, node)).toBe(second);
+    // Act
+    const actual = getJsdocComment(sourceCode, node);
+
+    // Assert
+    expect(actual).toBe(second);
   });
 
   it("ignores non-jsdoc comments", () => {
     // Arrange
     const { node, sourceCode } = createNonJsdocContext();
 
-    // Act & Assert
-    expect(getJsdocComment(sourceCode, node)).toBeUndefined();
+    // Act
+    const actual = getJsdocComment(sourceCode, node);
+
+    // Assert
+    expect(actual).toBeUndefined();
   });
 
   it("skips comments without ranges", () => {
     // Arrange
     const { node, sourceCode } = createRangeMissingContext();
 
-    // Act & Assert
-    expect(getJsdocComment(sourceCode, node)).toBeUndefined();
+    // Act
+    const actual = getJsdocComment(sourceCode, node);
+
+    // Assert
+    expect(actual).toBeUndefined();
   });
 });
 
@@ -203,11 +216,12 @@ describe("comment utilities text", () => {
       type: "Block",
       value: "*\n * ok\n ",
     } as Comment;
-
-    // Act
     const sourceCode = createSourceCode(sourceText, [comment]);
 
+    // Act
+    const actual = getCommentText(sourceCode, comment);
+
     // Assert
-    expect(getCommentText(sourceCode, comment)).toBe("");
+    expect(actual).toBe("");
   });
 });

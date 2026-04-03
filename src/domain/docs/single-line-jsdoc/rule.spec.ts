@@ -120,15 +120,14 @@ describe("single-line-jsdoc rule", () => {
     const { context, reports } = createContext([comment]);
 
     // Act
-    const fixText = ((): string | undefined => {
-      singleLineJsdocRule.create(context);
-      return getFixText(reports[0]?.fix?.(createFixer()) ?? void 0);
-    })();
+    const fixText = (singleLineJsdocRule.create(context), String(
+      getFixText(reports[0]?.fix?.(createFixer()) ?? void 0),
+    ));
 
     // Assert
     expect(reports).toHaveLength(1);
     expect(reports[0]?.messageId).toBe("singleLine");
-    expect(String(fixText)).toBe("/** doc */");
+    expect(fixText).toBe("/** doc */");
   });
 
   it.each([

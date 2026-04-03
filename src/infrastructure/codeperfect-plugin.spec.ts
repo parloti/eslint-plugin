@@ -5,9 +5,7 @@ import { codeperfectPlugin } from "./codeperfect-plugin";
 describe("codeperfect plugin", () => {
   it("exposes the package-owned rule registry", () => {
     // Arrange
-
-    // Act & Assert
-    expect(Object.keys(codeperfectPlugin.rules).toSorted()).toStrictEqual([
+    const expectedRuleNames = [
       "assert-actual-expected-names",
       "barrel-files-exports-only",
       "consistent-barrel-files",
@@ -25,6 +23,12 @@ describe("codeperfect plugin", () => {
       "require-test-companion",
       "single-act-statement",
       "single-line-jsdoc",
-    ]);
+    ];
+
+    // Act
+    const actualRuleNames = Object.keys(codeperfectPlugin.rules).toSorted();
+
+    // Assert
+    expect(actualRuleNames).toStrictEqual(expectedRuleNames);
   });
 });

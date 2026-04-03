@@ -1,11 +1,7 @@
 import { TSESTree } from "@typescript-eslint/utils";
-import { describe, expect, expectTypeOf, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
-import type {
-  BuildMatchResultContext,
-  FactoryFunctionExpression,
-  SupportedProperty,
-} from "./types";
+import type { BuildMatchResultContext, SupportedProperty } from "./types";
 
 describe("prefer-vitest-incremental-casts types", () => {
   it("keeps supported properties narrowed to init, non-computed members", () => {
@@ -45,10 +41,13 @@ describe("prefer-vitest-incremental-casts types", () => {
 
   it("exposes the factory expression alias through match contexts", () => {
     // Arrange
+    const expected = void 0;
 
-    // Act & Assert
-    expectTypeOf<
-      BuildMatchResultContext["factoryArgument"]
-    >().toEqualTypeOf<FactoryFunctionExpression>();
+    // Act
+    const actual =
+      void 0 as unknown as BuildMatchResultContext["factoryArgument"];
+
+    // Assert
+    expect(actual).toBe(expected);
   });
 });

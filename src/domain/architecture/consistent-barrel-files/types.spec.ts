@@ -5,8 +5,12 @@ import * as types from "./types";
 describe("consistent barrel files types", () => {
   it("loads the module", () => {
     // Arrange
+    const moduleNamespace = types;
 
-    // Act & Assert
-    expect(types).toBeDefined();
+    // Act
+    const actual = moduleNamespace;
+
+    // Assert
+    expect(actual).toBeDefined();
   });
 });

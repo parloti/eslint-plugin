@@ -127,12 +127,13 @@ describe("no-multiple-declarators rule mocked types", () => {
 
   it("exports the companion marker", () => {
     // Arrange
+    const expected = true;
 
     // Act
     const actual = noMultipleDeclaratorsRuleMockedTypes;
 
     // Assert
-    expect(actual).toBe(true);
+    expect(actual).toBe(expected);
   });
 
   it("skips fixes when fix data is unavailable", async () => {

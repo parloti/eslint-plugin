@@ -176,9 +176,13 @@ function replaceTextRange(range: [number, number], text: string): Rule.Fix {
 describe("prefer-vi-mocked-import fix", () => {
   it("exports buildFix", () => {
     // Arrange
+    const expectedType = "function";
 
-    // Act & Assert
-    expect(buildFix).toBeTypeOf("function");
+    // Act
+    const actualType = typeof buildFix;
+
+    // Assert
+    expect(actualType).toBe(expectedType);
   });
 
   it("skips binding replacement when declaration is missing", () => {

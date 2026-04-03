@@ -5,6 +5,8 @@ import { createBody, createExportAll } from "./test-helpers";
 describe("test helpers", () => {
   it("builds basic AST shapes", () => {
     // Arrange
+    const expectedBody: [] = [];
+    const expectedExportAllType = "ExportAllDeclaration";
 
     // Act
     const result = {
@@ -13,7 +15,7 @@ describe("test helpers", () => {
     };
 
     // Assert
-    expect(result.body).toStrictEqual([]);
-    expect(result.exportAllType).toBe("ExportAllDeclaration");
+    expect(result.body).toStrictEqual(expectedBody);
+    expect(result.exportAllType).toBe(expectedExportAllType);
   });
 });

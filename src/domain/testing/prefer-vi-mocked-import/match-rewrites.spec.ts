@@ -5,9 +5,13 @@ import { buildAllowedRanges, collectMemberRewrites } from "./match-rewrites";
 describe("prefer-vi-mocked-import match-rewrites", () => {
   it("exports collectMemberRewrites", () => {
     // Arrange
+    const expectedType = "function";
 
-    // Act & Assert
-    expect(collectMemberRewrites).toBeTypeOf("function");
+    // Act
+    const actualType = typeof collectMemberRewrites;
+
+    // Assert
+    expect(actualType).toBe(expectedType);
   });
 
   it("includes declaration id ranges when declaration exists", () => {
@@ -36,8 +40,11 @@ describe("prefer-vi-mocked-import match-rewrites", () => {
       [],
     );
 
-    // Act & Assert
-    expect(allowed.has("10:11")).toBe(true);
+    // Act
+    const hasDeclarationIdRange = allowed.has("10:11");
+
+    // Assert
+    expect(hasDeclarationIdRange).toBe(true);
   });
 
   it("skips declaration id range when declaration is absent", () => {
@@ -56,7 +63,10 @@ describe("prefer-vi-mocked-import match-rewrites", () => {
       [],
     );
 
-    // Act & Assert
-    expect(allowed.has("10:11")).toBe(false);
+    // Act
+    const hasDeclarationIdRange = allowed.has("10:11");
+
+    // Assert
+    expect(hasDeclarationIdRange).toBe(false);
   });
 });

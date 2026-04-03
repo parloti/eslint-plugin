@@ -2,20 +2,18 @@ import type { Rule } from "eslint";
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-/** Expression-statement shape used by the synthetic fixtures. */
+/** Minimal expression-statement node used by synthetic fixtures. */
 interface ExpressionStatementNode {
   /** Wrapped expression node. */
   expression: Record<string, unknown>;
-
   /** ESTree node type. */
   type: "ExpressionStatement";
 }
 
-/** Minimal identifier node used by the synthetic ESTree fixtures. */
+/** Minimal identifier node used by synthetic fixtures. */
 interface IdentifierNode {
   /** Identifier name. */
   name: string;
-
   /** ESTree node type. */
   type: string;
 }
@@ -182,29 +180,33 @@ describe("require-act-result-capture rule", () => {
 
   it("defines metadata and messages", async () => {
     // Arrange
+    const expectedDescriptionFragment = "Act expressions";
 
     // Act
-    const actual = await loadRule(void 0, new Set());
+    const result = await loadRule(void 0, new Set()).then((actual) => ({
+      actual,
+      descriptionIncludesFragment:
+        actual.requireActResultCaptureRule.meta?.docs?.description?.includes(
+          expectedDescriptionFragment,
+        ) ?? false,
+    }));
 
     // Assert
-    expect(actual.requireActResultCaptureRule.meta?.messages).toHaveProperty(
-      "captureActResult",
-    );
     expect(
-      actual.requireActResultCaptureRule.meta?.docs?.description?.includes(
-        "Act expressions",
-      ),
-    ).toBe(true);
+      result.actual.requireActResultCaptureRule.meta?.messages,
+    ).toHaveProperty("captureActResult");
+    expect(result.descriptionIncludesFragment).toBe(true);
   });
 
   it("skips unsupported test blocks", async () => {
     // Arrange
+    const expected: [] = [];
 
     // Act
     const actual = await runRule(void 0, new Set());
 
     // Assert
-    expect(actual).toStrictEqual([]);
+    expect(actual).toStrictEqual(expected);
   });
 
   it("reports only capturable Act statements that are not helper-driven", async () => {

@@ -9,24 +9,31 @@ import {
 describe(getCustomRuleDocumentationUrl, () => {
   it("builds the canonical rule URL", () => {
     // Arrange
+    const ruleName = "prefer-interface-types";
+    const expectedUrl = `${customRuleDocumentationBaseUrl}/prefer-interface-types.md`;
 
-    // Act & Assert
-    expect(getCustomRuleDocumentationUrl("prefer-interface-types")).toBe(
-      `${customRuleDocumentationBaseUrl}/prefer-interface-types.md`,
-    );
+    // Act
+    const actualUrl = getCustomRuleDocumentationUrl(ruleName);
+
+    // Assert
+    expect(actualUrl).toBe(expectedUrl);
   });
 });
 
 describe(createRuleDocumentation, () => {
   it("returns the shared custom rule docs shape", () => {
     // Arrange
-
-    // Act & Assert
-    expect(
-      createRuleDocumentation("prefer-interface-types", "Rule description"),
-    ).toStrictEqual({
-      description: "Rule description",
+    const ruleName = "prefer-interface-types";
+    const description = "Rule description";
+    const expectedDocumentation = {
+      description,
       url: `${customRuleDocumentationBaseUrl}/prefer-interface-types.md`,
-    });
+    };
+
+    // Act
+    const actualDocumentation = createRuleDocumentation(ruleName, description);
+
+    // Assert
+    expect(actualDocumentation).toStrictEqual(expectedDocumentation);
   });
 });

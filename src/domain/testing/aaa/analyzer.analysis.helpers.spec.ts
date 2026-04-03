@@ -12,22 +12,26 @@ import { analyzerAnalysisHelpersCompanion } from "./analyzer.analysis.helpers";
 describe("aAA analyzer analysis helpers", () => {
   it("exports the companion marker", () => {
     // Arrange
+    const expected = true;
 
     // Act
     const actual = analyzerAnalysisHelpersCompanion;
 
     // Assert
-    expect(actual).toBe(true);
+    expect(actual).toBe(expected);
   });
 
   it("parses only valid AAA section comments", () => {
     // Arrange
+    const blankComment = "   ";
+    const invalidComment = "Arrange & Cleanup";
+    const validComment = "Arrange & Assert";
 
     // Act
     const actual = {
-      blank: getSectionPhases("   "),
-      invalid: getSectionPhases("Arrange & Cleanup"),
-      valid: getSectionPhases("Arrange & Assert"),
+      blank: getSectionPhases(blankComment),
+      invalid: getSectionPhases(invalidComment),
+      valid: getSectionPhases(validComment),
     };
 
     // Assert

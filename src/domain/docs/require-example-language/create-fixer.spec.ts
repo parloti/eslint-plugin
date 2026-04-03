@@ -33,9 +33,13 @@ const createRuleTextEditor = (): Rule.RuleFixer => {
 describe("require-example-language createFixer", () => {
   it("exports the createFixer companion module", () => {
     // Arrange
+    const expected = createFixer;
 
-    // Act & Assert
-    expect(createFixerCompanion).toBe(createFixer);
+    // Act
+    const actual = createFixerCompanion;
+
+    // Assert
+    expect(actual).toBe(expected);
   });
 
   it("returns undefined when a missing-language fix is unnecessary", () => {
@@ -186,17 +190,17 @@ describe("require-example-language createFixer", () => {
       '* @example Demonstrates log info with representative values.\n * logInfo("message");\n ';
 
     // Act
-    const fixResult = createFixer({
+    const text = createFixer({
       absoluteEnd: sourceText.length,
       absoluteStart: 0,
       example,
       hasOtherExamples: false,
       problem: "missingFence",
       sourceText,
-    })(createRuleTextEditor());
+    })(createRuleTextEditor())?.text;
 
     // Assert
-    expect(fixResult?.text.endsWith("\n ")).toBe(true);
+    expect(text).toMatch(/\n $/u);
   });
 
   it("does not append trailing whitespace when none exists", () => {
@@ -221,10 +225,10 @@ describe("require-example-language createFixer", () => {
     });
 
     // Act
-    const fixResult = fixer(createRuleTextEditor());
+    const text = fixer(createRuleTextEditor())?.text;
 
     // Assert
-    expect(fixResult?.text.endsWith("\n ")).toBe(false);
-    expect(fixResult?.text).toContain("```typescript");
+    expect(text).not.toMatch(/\n $/u);
+    expect(text).toContain("```typescript");
   });
 });

@@ -1,4 +1,4 @@
-import { describe, expect, expectTypeOf, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import {
   applyTextReplacements,
@@ -29,8 +29,12 @@ describe("prefer-vitest-incremental-casts replacement helpers", () => {
 
   it("exports the property replacement builder", () => {
     // Arrange
+    const expectedType = "function";
 
-    // Act & Assert
-    expectTypeOf(buildPropertyReplacement).toBeFunction();
+    // Act
+    const actualType = typeof buildPropertyReplacement;
+
+    // Assert
+    expect(actualType).toBe(expectedType);
   });
 });

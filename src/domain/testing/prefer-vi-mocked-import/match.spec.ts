@@ -1,4 +1,4 @@
-import { describe, expect, expectTypeOf, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import { collectMatch } from "./match";
 
@@ -36,9 +36,13 @@ function createContext(ast: unknown): TestContext {
 describe("prefer-vi-mocked-import match", () => {
   it("exports collectMatch", () => {
     // Arrange
+    const expectedType = "function";
 
-    // Act & Assert
-    expectTypeOf(collectMatch).toBeFunction();
+    // Act
+    const actualType = typeof collectMatch;
+
+    // Assert
+    expect(actualType).toBe(expectedType);
   });
 
   it("returns undefined when no top-level mock call exists", () => {

@@ -14,8 +14,11 @@ describe("single-line-jsdoc content", () => {
       value: "*\n * ok\n ",
     } as Comment;
 
-    // Act & Assert
-    expect(getCollapsedContent(comment)).toBe("ok");
+    // Act
+    const actual = getCollapsedContent(comment);
+
+    // Assert
+    expect(actual).toBe("ok");
   });
 
   it("skips tagged content", () => {
@@ -27,8 +30,11 @@ describe("single-line-jsdoc content", () => {
       value: "*\n * @param foo bar\n ",
     } as Comment;
 
-    // Act & Assert
-    expect(getCollapsedContent(comment)).toBeUndefined();
+    // Act
+    const actual = getCollapsedContent(comment);
+
+    // Assert
+    expect(actual).toBeUndefined();
   });
 
   it("skips multiple content lines", () => {
@@ -40,7 +46,10 @@ describe("single-line-jsdoc content", () => {
       value: "*\n * line one\n * line two\n ",
     } as Comment;
 
-    // Act & Assert
-    expect(getCollapsedContent(comment)).toBeUndefined();
+    // Act
+    const actual = getCollapsedContent(comment);
+
+    // Assert
+    expect(actual).toBeUndefined();
   });
 });

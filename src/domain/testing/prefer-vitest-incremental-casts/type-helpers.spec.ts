@@ -1,5 +1,5 @@
 import { SignatureKind } from "typescript";
-import { describe, expect, expectTypeOf, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import { isOuterCastRequired, resolveFactoryTargetType } from "./type-helpers";
 
@@ -65,9 +65,13 @@ describe("prefer-vitest-incremental-casts type helpers", () => {
 
   it("exports the factory target-type resolver", () => {
     // Arrange
+    const expectedType = "function";
 
-    // Act & Assert
-    expectTypeOf(resolveFactoryTargetType).toBeFunction();
+    // Act
+    const actualType = typeof resolveFactoryTargetType;
+
+    // Assert
+    expect(actualType).toBe(expectedType);
   });
 
   it("prefers contextual target types when TypeScript provides one", () => {

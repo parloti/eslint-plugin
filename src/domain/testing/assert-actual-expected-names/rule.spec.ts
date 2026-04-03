@@ -170,17 +170,19 @@ describe("assert-actual-expected-names rule", () => {
     } satisfies LoadRuleInput;
 
     // Act
-    const actual = await loadRule(input);
+    const result = await loadRule(input).then((actual) => ({
+      actual,
+      descriptionIncludesAssertPhase:
+        actual.assertActualExpectedNamesRule.meta?.docs?.description?.includes(
+          "Assert-phase",
+        ) ?? false,
+    }));
 
     // Assert
-    expect(actual.assertActualExpectedNamesRule.meta?.messages).toHaveProperty(
-      "missingPrefix",
-    );
     expect(
-      actual.assertActualExpectedNamesRule.meta?.docs?.description?.includes(
-        "Assert-phase",
-      ),
-    ).toBe(true);
+      result.actual.assertActualExpectedNamesRule.meta?.messages,
+    ).toHaveProperty("missingPrefix");
+    expect(result.descriptionIncludesAssertPhase).toBe(true);
   });
 
   it("skips unsupported test blocks", async () => {

@@ -26,9 +26,10 @@ describe("exports-only rule test utilities", () => {
     const temporaryDirectories: string[] = [];
     const runner = createTemporaryRunner(temporaryDirectories);
     const body = createBody();
+    const expectedReports: ReturnType<typeof runRule> = [];
 
     // Act
-    const reports = ((): ReturnType<typeof runRule>[] => {
+    const actualReports = ((): ReturnType<typeof runRule> => {
       try {
         return [
           runner.runDefaultIndex(body),
@@ -37,7 +38,7 @@ describe("exports-only rule test utilities", () => {
           ]),
           runner.runTemporaryIndex(body),
           runner.runTemporaryFeature(body),
-        ];
+        ].flat();
       } finally {
         for (const directory of temporaryDirectories.splice(0)) {
           rmSync(directory, { force: true, recursive: true });
@@ -46,6 +47,6 @@ describe("exports-only rule test utilities", () => {
     })();
 
     // Assert
-    expect(reports.flat()).toStrictEqual([]);
+    expect(actualReports).toStrictEqual(expectedReports);
   });
 });

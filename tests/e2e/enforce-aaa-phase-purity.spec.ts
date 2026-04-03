@@ -188,41 +188,43 @@ describe("enforce-aaa-phase-purity e2e", () => {
 describe("enforce-aaa-phase-purity current limitations", () => {
   it("currently reports metadata-only self-tests as assertions outside assert", () => {
     // Arrange
-    const messageIds = runRule(
-      [
-        'it("defines metadata and messages", () => {',
-        "  // Arrange",
-        '  expect(rule.meta?.messages).toHaveProperty("missingMeaningfulAct");',
-        "",
-        "  // Act & Assert",
-        '  expect(rule.meta?.docs?.description).toContain("phases");',
-        "});",
-      ].join("\n"),
-    );
+    const code = [
+      'it("defines metadata and messages", () => {',
+      "  // Arrange",
+      '  expect(rule.meta?.messages).toHaveProperty("missingMeaningfulAct");',
+      "",
+      "  // Act & Assert",
+      '  expect(rule.meta?.docs?.description).toContain("phases");',
+      "});",
+    ].join("\n");
 
-    // Act & Assert
+    // Act
+    const messageIds = runRule(code);
+
+    // Assert
     expect(messageIds).toStrictEqual(["assertionOutsideAssert"]);
   });
 
   it("currently reports helper-driven utility specs as setup after act", () => {
     // Arrange
-    const messageIds = runRule(
-      [
-        'it("checks lintable filenames", () => {',
-        "  // Arrange",
-        "  const state = getOptions([]);",
-        "",
-        "  // Act",
-        '  const filename = "src/index.ts";',
-        "  const lintable = shouldLintFile(filename, state.folders, state.names);",
-        "",
-        "  // Assert",
-        "  expect(lintable).toBe(true);",
-        "});",
-      ].join("\n"),
-    );
+    const code = [
+      'it("checks lintable filenames", () => {',
+      "  // Arrange",
+      "  const state = getOptions([]);",
+      "",
+      "  // Act",
+      '  const filename = "src/index.ts";',
+      "  const lintable = shouldLintFile(filename, state.folders, state.names);",
+      "",
+      "  // Assert",
+      "  expect(lintable).toBe(true);",
+      "});",
+    ].join("\n");
 
-    // Act & Assert
+    // Act
+    const messageIds = runRule(code);
+
+    // Assert
     expect(messageIds).toStrictEqual(["setupAfterAct"]);
   });
 });

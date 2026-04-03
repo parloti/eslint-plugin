@@ -23,12 +23,13 @@ describe("barrel file utilities", () => {
 
   it("normalizes default barrel names", () => {
     // Arrange
+    const expectedNames = ["index"];
 
     // Act
     const names = normalizeAllowedBarrelNames(void 0);
 
     // Assert
-    expect(names).toStrictEqual(["index"]);
+    expect(names).toStrictEqual(expectedNames);
   });
 
   it("does not treat declaration files as lintable module files", () => {
