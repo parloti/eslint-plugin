@@ -113,6 +113,36 @@ describe("require-act-result-capture e2e", () => {
       ].join("\n"),
       filename: "example.spec.ts",
     },
+    {
+      code: [
+        'it("allows void method calls", () => {',
+        "  // Arrange",
+        "  const scheduler = getTestScheduler();",
+        "",
+        "  // Act",
+        "  scheduler.flush();",
+        "",
+        "  // Assert",
+        "  expect(scheduler.isFlushed).toBe(true);",
+        "});",
+      ].join("\n"),
+      filename: "example.spec.ts",
+    },
+    {
+      code: [
+        'it("allows chained void method calls", () => {',
+        "  // Arrange",
+        "  const obj = { getScheduler: () => ({ flush: () => {} }) };",
+        "",
+        "  // Act",
+        "  obj.getScheduler().flush();",
+        "",
+        "  // Assert",
+        "  expect(true).toBe(true);",
+        "});",
+      ].join("\n"),
+      filename: "example.spec.ts",
+    },
   ])("accepts allowed Act patterns %#", (testCase) => {
     // Arrange
 

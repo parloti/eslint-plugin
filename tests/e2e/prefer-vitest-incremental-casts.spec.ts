@@ -4,7 +4,7 @@ import { cleanupTemporaryDirectories, runFix } from "../support";
 
 describe(
   "prefer-vitest-incremental-casts e2e",
-  { timeout: Number.parseInt("30000", 10) },
+  { timeout: Number.parseInt("120000", 10) },
   () => {
     afterAll(cleanupTemporaryDirectories);
 

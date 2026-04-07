@@ -47,6 +47,7 @@ const voidLikeMethodNames = new Set([
   "debug",
   "dispatch",
   "emit",
+  "flush",
   "info",
   "log",
   "print",
@@ -59,7 +60,7 @@ const voidLikeMethodNames = new Set([
 
 /** Name pattern used for void-like method detection. */
 const voidLikeNamePattern =
-  /^(?:clear|debug|dispatch|emit|info|log|print|publish|reset|set|trigger|warn)/u;
+  /^(?:clear|debug|dispatch|emit|flush|info|log|print|publish|reset|set|trigger|warn)/u;
 
 /** Object shape used for ESTree node narrowing. */
 interface NodeLikeValue {

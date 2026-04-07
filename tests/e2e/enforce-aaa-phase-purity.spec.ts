@@ -6,6 +6,24 @@ import { enforceAaaPhasePurityRule } from "../../src";
 import { runRuleCase } from "../support";
 
 /**
+ * Provides deterministic ordering for optional message identifiers.
+ * @param left First message id.
+ * @param right Second message id.
+ * @returns Comparison result suitable for Array#toSorted.
+ * @example
+ * ```typescript
+ * const result = compareMessageIds("a", "b");
+ * void result;
+ * ```
+ */
+function compareMessageIds(
+  left: string | undefined,
+  right: string | undefined,
+): number {
+  return (left ?? "").localeCompare(right ?? "");
+}
+
+/**
  * Runs the rule against inline source text and returns emitted message ids.
  * @param code Source code to lint.
  * @returns Emitted message ids for the supplied source.
@@ -101,8 +119,10 @@ describe("enforce-aaa-phase-purity e2e", () => {
     );
 
     // Assert
-    expect(result.messageIds).toStrictEqual(
-      testCase.errors.map((error) => error.messageId),
+    expect(result.messageIds.toSorted(compareMessageIds)).toStrictEqual(
+      testCase.errors
+        .map((error) => error.messageId)
+        .toSorted(compareMessageIds),
     );
   });
 

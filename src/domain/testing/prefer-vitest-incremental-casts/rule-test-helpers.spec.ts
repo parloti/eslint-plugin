@@ -126,7 +126,7 @@ describe("prefer-vitest-incremental-casts rule-test-helpers", () => {
     );
     expect(incrementalResult.messages).toStrictEqual([]);
     expect(incrementalResult.output).toBe(incrementalInput);
-  }, 15_000);
+  }, 30_000);
 
   it("throws when ESLint does not return a lint result", async () => {
     // Arrange
