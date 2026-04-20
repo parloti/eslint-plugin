@@ -1,6 +1,5 @@
 import type { Rule } from "eslint";
 
-import { createRuleDocumentation } from "../../custom-rule-documentation";
 import { buildFixes } from "./fix";
 import { collectMatches } from "./match";
 
@@ -30,10 +29,12 @@ const preferViMockedImportRule: Rule.RuleModule = {
     } satisfies Rule.RuleListener;
   },
   meta: {
-    docs: createRuleDocumentation(
-      "prefer-vi-mocked-import",
-      "Prefer inlining vi.fn mocks in vi.mock/vi.doMock factories and using vi.mocked(...).",
-    ),
+    docs: {
+      description:
+        "Prefer inlining vi.fn mocks in vi.mock/vi.doMock factories and using vi.mocked(...).",
+      recommended: false,
+      url: "https://github.com/parloti/eslint-plugin/blob/main/docs/rules/prefer-vi-mocked-import.md",
+    },
     fixable: "code",
     messages: {
       preferViMockedImport:

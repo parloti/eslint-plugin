@@ -1,6 +1,5 @@
 import type { Rule } from "eslint";
 
-import { createRuleDocumentation } from "../../custom-rule-documentation";
 import { aaaPhaseOrder, analyzeTestBlock, getFlattenedSections } from "../aaa";
 
 /** Composite input for reporting one AAA section issue. */
@@ -110,10 +109,12 @@ const enforceAaaStructureRule: Rule.RuleModule = {
     } satisfies Rule.RuleListener;
   },
   meta: {
-    docs: createRuleDocumentation(
-      "enforce-aaa-structure",
-      "Require AAA sections to appear once and in Arrange, Act, Assert order.",
-    ),
+    docs: {
+      description:
+        "Require AAA sections to appear once and in Arrange, Act, Assert order.",
+      recommended: false,
+      url: "https://github.com/parloti/eslint-plugin/blob/main/docs/rules/enforce-aaa-structure.md",
+    },
     messages: {
       duplicateSection:
         "Use the // {{section}} section comment only once per test.",

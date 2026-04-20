@@ -1,6 +1,5 @@
 import type { AST, Rule } from "eslint";
 
-import { createRuleDocumentation } from "../../custom-rule-documentation";
 import {
   collectImportedNames,
   getOptions,
@@ -82,10 +81,13 @@ const noReexportsOutsideBarrelsRule: Rule.RuleModule = {
     );
   },
   meta: {
-    docs: createRuleDocumentation(
-      "no-reexports-outside-barrels",
-      "Require non-barrel files to export only locally defined values.",
-    ),
+    defaultOptions: [{ allowedBarrelNames: ["index"] }],
+    docs: {
+      description:
+        "Require non-barrel files to export only locally defined values.",
+      recommended: false,
+      url: "https://github.com/parloti/eslint-plugin/blob/main/docs/rules/no-reexports-outside-barrels.md",
+    },
     messages: {
       reexportedImport:
         "Non-barrel files must not export identifiers imported from other modules.",
@@ -97,6 +99,8 @@ const noReexportsOutsideBarrelsRule: Rule.RuleModule = {
         additionalProperties: false,
         properties: {
           allowedBarrelNames: {
+            description:
+              "Allowed barrel basenames that should be exempt from the re-export restriction.",
             items: { type: "string" },
             minItems: 1,
             type: "array",

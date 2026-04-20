@@ -1,6 +1,5 @@
 import type { Rule } from "eslint";
 
-import { createRuleDocumentation } from "../../custom-rule-documentation";
 /** Type definition for rule data. */
 interface FunctionLikeNode {
   /** Params helper value. */
@@ -205,10 +204,12 @@ const preferInterfaceTypesRule: Rule.RuleModule = {
     };
   },
   meta: {
-    docs: createRuleDocumentation(
-      "prefer-interface-types",
-      "Require named interfaces or type aliases for object types in parameters and return types.",
-    ),
+    docs: {
+      description:
+        "Require named interfaces or type aliases for object types in parameters and return types.",
+      recommended: false,
+      url: "https://github.com/parloti/eslint-plugin/blob/main/docs/rules/prefer-interface-types.md",
+    },
     messages: {
       preferNamedObject:
         "Use a named interface or type alias instead of an inline object type.",

@@ -1,11 +1,7 @@
 import type { Rule } from "eslint";
 import type { Comment as EstreeComment, Node as EstreeNode } from "estree";
 
-import { createRuleDocumentation } from "../../custom-rule-documentation";
-import {
-  normalizeMaxLineLength,
-  reportIfSingleLine,
-} from "./single-line-jsdoc-utilities";
+import { normalizeMaxLineLength, reportIfSingleLine } from "./single-line-jsdoc-utilities";
 /** Type union for nodes that may be missing. */
 type MaybeNode = EstreeNode | NodeWithType | null | undefined;
 
@@ -33,7 +29,6 @@ interface NodeWithValue {
 interface SourceCodeAccess {
   /** Returns the node at a range index. */
   getNodeByRangeIndex: (index: number) => EstreeNode | null;
-
   /** Returns the first token after a comment. */
   getTokenAfter: (
     node: EstreeComment,
@@ -156,7 +151,6 @@ const isPropertyWithFunctionValue = (node: EstreeNode): boolean => {
   }
 
   const { value } = node as NodeWithValue;
-
   return isFunctionExpression(value);
 };
 
@@ -275,7 +269,12 @@ const singleLineJsdocRule: Rule.RuleModule = {
     return {};
   },
   meta: {
-    docs: createRuleDocumentation("single-line-jsdoc", "Require JSDoc comments to use a single line when they fit."),
+    defaultOptions: [{ maxLineLength: 80 }],
+    docs: {
+      description: "Require JSDoc comments to use a single line when they fit.",
+      recommended: false,
+      url: "https://github.com/parloti/eslint-plugin/blob/main/docs/rules/single-line-jsdoc.md",
+    },
     fixable: "code",
     messages: {
       singleLine: "Use a single-line JSDoc comment when it fits on one line.",
@@ -285,6 +284,8 @@ const singleLineJsdocRule: Rule.RuleModule = {
         additionalProperties: false,
         properties: {
           maxLineLength: {
+            description:
+              "Maximum line length that still allows a JSDoc block to be collapsed to a single line.",
             minimum: 1,
             type: "number",
           },

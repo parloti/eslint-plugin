@@ -2,17 +2,16 @@ import type { Rule } from "eslint";
 
 import type { Comment, ParameterMemberTag, TypeAnnotationNode } from "./types";
 
-import { createRuleDocumentation } from "../../custom-rule-documentation";
 import {
-  buildRemovalRange,
-  getCommentLines,
-  getCommentText,
-  getJsdocComment,
+    buildRemovalRange,
+    getCommentLines,
+    getCommentText,
+    getJsdocComment,
 } from "./comment-utilities";
 import { parseParameterTagLine } from "./parameter-tags";
 import {
-  getParameterTypeLookup,
-  isNamedTypeReference,
+    getParameterTypeLookup,
+    isNamedTypeReference,
 } from "./parameter-utilities";
 
 /** Type definition for rule data. */
@@ -258,10 +257,12 @@ const noInterfaceMemberDocumentationRule: Rule.RuleModule = {
     };
   },
   meta: {
-    docs: createRuleDocumentation(
-      "no-interface-member-docs",
-      "Disallow documenting interface members in @param tags; document them on the interface instead.",
-    ),
+    docs: {
+      description:
+        "Disallow documenting interface members in @param tags; document them on the interface instead.",
+      recommended: false,
+      url: "https://github.com/parloti/eslint-plugin/blob/main/docs/rules/no-interface-member-docs.md",
+    },
     fixable: "code",
     messages: {
       interfaceMemberDoc:

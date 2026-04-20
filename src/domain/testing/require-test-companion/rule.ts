@@ -1,6 +1,5 @@
 import type { Rule } from "eslint";
 
-import { createRuleDocumentation } from "../../custom-rule-documentation";
 import { buildListenerForFilename } from "./require-test-companion-listeners";
 import { getOptions } from "./require-test-companion-options";
 
@@ -14,10 +13,19 @@ const requireTestCompanionRule: Rule.RuleModule = {
     );
   },
   meta: {
-    docs: createRuleDocumentation(
-      "require-test-companion",
-      "Require a matching test file for each TypeScript file and vice versa.",
-    ),
+    defaultOptions: [
+      {
+        enforceIn: ["src/**"],
+        ignorePatterns: ["/*.d.ts", "/index.ts"],
+        testSuffixes: ["spec", "test"],
+      },
+    ],
+    docs: {
+      description:
+        "Require a matching test file for each TypeScript file and vice versa.",
+      recommended: false,
+      url: "https://github.com/parloti/eslint-plugin/blob/main/docs/rules/require-test-companion.md",
+    },
     messages: {
       missingSource:
         "Test file requires a matching source file '{{sourceFile}}' in the same folder.",
@@ -29,9 +37,15 @@ const requireTestCompanionRule: Rule.RuleModule = {
         additionalProperties: false,
         properties: {
           enforceIn: {
+            description:
+              "Glob patterns that define where source files must have matching test companions.",
             oneOf: [
-              { type: "string" },
               {
+                description: "A single glob pattern.",
+                type: "string",
+              },
+              {
+                description: "A list of glob patterns.",
                 items: { type: "string" },
                 minItems: 1,
                 type: "array",
@@ -39,9 +53,15 @@ const requireTestCompanionRule: Rule.RuleModule = {
             ],
           },
           ignorePatterns: {
+            description:
+              "Glob patterns that should be excluded from the companion-file requirement.",
             oneOf: [
-              { type: "string" },
               {
+                description: "A single ignore glob pattern.",
+                type: "string",
+              },
+              {
+                description: "A list of ignore glob patterns.",
                 items: { type: "string" },
                 minItems: 1,
                 type: "array",
@@ -49,9 +69,15 @@ const requireTestCompanionRule: Rule.RuleModule = {
             ],
           },
           testSuffixes: {
+            description:
+              "Filename suffixes that are recognized as valid test companions.",
             oneOf: [
-              { type: "string" },
               {
+                description: "A single test filename suffix.",
+                type: "string",
+              },
+              {
+                description: "A list of test filename suffixes.",
                 items: { type: "string" },
                 minItems: 1,
                 type: "array",

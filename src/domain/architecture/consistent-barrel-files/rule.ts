@@ -1,6 +1,5 @@
 import type { Rule } from "eslint";
 
-import { createRuleDocumentation } from "../../custom-rule-documentation";
 import { buildListenerForFile } from "./consistent-barrel-files-listeners";
 import {
   getOptions,
@@ -25,10 +24,13 @@ const consistentBarrelFilesRule: Rule.RuleModule = {
     return buildListenerForFile(context, filename, getOptions(options));
   },
   meta: {
-    docs: createRuleDocumentation(
-      "consistent-barrel-files",
-      "Enforce or forbid barrel files with consistent, allowed names.",
-    ),
+    defaultOptions: [{ allowedNames: ["index"], enforce: true }],
+    docs: {
+      description:
+        "Enforce or forbid barrel files with consistent, allowed names.",
+      recommended: false,
+      url: "https://github.com/parloti/eslint-plugin/blob/main/docs/rules/consistent-barrel-files.md",
+    },
     messages: {
       forbiddenBarrel:
         "Barrel files are forbidden. Remove the barrel file '{{name}}'.",
@@ -40,11 +42,17 @@ const consistentBarrelFilesRule: Rule.RuleModule = {
         additionalProperties: false,
         properties: {
           allowedNames: {
+            description:
+              "Allowed barrel basenames that the rule recognizes in each folder.",
             items: { type: "string" },
             minItems: 1,
             type: "array",
           },
-          enforce: { type: "boolean" },
+          enforce: {
+            description:
+              "Whether each eligible folder must contain one of the allowed barrel filenames.",
+            type: "boolean",
+          },
         },
         type: "object",
       },

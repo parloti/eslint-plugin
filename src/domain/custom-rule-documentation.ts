@@ -3,6 +3,9 @@ interface CustomRuleDocumentation {
   /** Human-readable rule description. */
   description: string;
 
+  /** Whether the rule is part of a recommended preset. */
+  recommended: boolean;
+
   /** Canonical documentation URL for the rule. */
   url: string;
 }
@@ -30,6 +33,7 @@ function createRuleDocumentation(
 ): CustomRuleDocumentation {
   return {
     description,
+    recommended: false,
     url: getCustomRuleDocumentationUrl(ruleName),
   };
 }

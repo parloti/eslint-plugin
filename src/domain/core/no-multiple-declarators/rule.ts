@@ -10,12 +10,10 @@ import type {
   VariableDeclaratorNode,
 } from "./types";
 
-import { createRuleDocumentation } from "../../custom-rule-documentation";
 import { hasFixData, hasRange } from "./types";
 
 /** Matches comment syntax between declarators. */
 const commentPattern = /\/\/|\/\*/u;
-
 /** Loop parent types whose initializers cannot be safely split. */
 const loopParentTypes = new Set(["ForInStatement", "ForOfStatement"]);
 
@@ -283,10 +281,12 @@ const noMultipleDeclaratorsRule: Rule.RuleModule = {
     };
   },
   meta: {
-    docs: createRuleDocumentation(
-      "no-multiple-declarators",
-      "Require variable declarations to contain exactly one declarator per statement.",
-    ),
+    docs: {
+      description:
+        "Require variable declarations to contain exactly one declarator per statement.",
+      recommended: false,
+      url: "https://github.com/parloti/eslint-plugin/blob/main/docs/rules/no-multiple-declarators.md",
+    },
     fixable: "code",
     messages: {
       singleDeclarator:

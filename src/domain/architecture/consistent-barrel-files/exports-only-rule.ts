@@ -2,7 +2,6 @@ import type { AST, Rule } from "eslint";
 
 import type { BarrelFilesExportsOnlyOptions } from "./types";
 
-import { createRuleDocumentation } from "../../custom-rule-documentation";
 import {
   isBarrelFile,
   isLintableModuleFile,
@@ -170,10 +169,13 @@ const barrelFilesExportsOnlyRule: Rule.RuleModule = {
     );
   },
   meta: {
-    docs: createRuleDocumentation(
-      "barrel-files-exports-only",
-      "Require barrel files to only contain re-export statements or type-only declarations.",
-    ),
+    defaultOptions: [{ allowedBarrelNames: ["index"] }],
+    docs: {
+      description:
+        "Require barrel files to only contain re-export statements or type-only declarations.",
+      recommended: false,
+      url: "https://github.com/parloti/eslint-plugin/blob/main/docs/rules/barrel-files-exports-only.md",
+    },
     messages: {
       invalidBarrelContent:
         "Barrel files must only contain re-export statements or type-only declarations.",
@@ -183,6 +185,8 @@ const barrelFilesExportsOnlyRule: Rule.RuleModule = {
         additionalProperties: false,
         properties: {
           allowedBarrelNames: {
+            description:
+              "Allowed barrel basenames that should be treated as barrel files.",
             items: { type: "string" },
             minItems: 1,
             type: "array",

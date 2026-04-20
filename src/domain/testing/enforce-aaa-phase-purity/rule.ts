@@ -1,6 +1,5 @@
 import type { Rule } from "eslint";
 
-import { createRuleDocumentation } from "../../custom-rule-documentation";
 import { analyzeTestBlock } from "../aaa";
 import { reportPhasePurityViolations } from "./phase-purity-reporting";
 
@@ -18,10 +17,12 @@ const enforceAaaPhasePurityRule: Rule.RuleModule = {
     } satisfies Rule.RuleListener;
   },
   meta: {
-    docs: createRuleDocumentation(
-      "enforce-aaa-phase-purity",
-      "Keep setup, action, and assertions inside their intended AAA phases.",
-    ),
+    docs: {
+      description:
+        "Keep setup, action, and assertions inside their intended AAA phases.",
+      recommended: false,
+      url: "https://github.com/parloti/eslint-plugin/blob/main/docs/rules/enforce-aaa-phase-purity.md",
+    },
     messages: {
       actionInArrange:
         "Keep the function under test out of Arrange; reserve Arrange for setup only.",

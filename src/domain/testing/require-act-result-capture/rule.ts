@@ -1,7 +1,6 @@
 import type { Rule } from "eslint";
 import type * as ESTree from "estree";
 
-import { createRuleDocumentation } from "../../custom-rule-documentation";
 import { analyzeTestBlock, hasCapturableActResult } from "../aaa";
 
 /**
@@ -117,10 +116,12 @@ const requireActResultCaptureRule: Rule.RuleModule = {
     } satisfies Rule.RuleListener;
   },
   meta: {
-    docs: createRuleDocumentation(
-      "require-act-result-capture",
-      "Require non-void Act expressions to store the observed result before assertions.",
-    ),
+    docs: {
+      description:
+        "Require non-void Act expressions to store the observed result before assertions.",
+      recommended: false,
+      url: "https://github.com/parloti/eslint-plugin/blob/main/docs/rules/require-act-result-capture.md",
+    },
     messages: {
       captureActResult:
         "Capture the // Act result in a named variable before asserting on it.",

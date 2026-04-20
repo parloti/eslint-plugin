@@ -1,6 +1,5 @@
 import type { Rule } from "eslint";
 
-import { createRuleDocumentation } from "../../custom-rule-documentation";
 import { analyzeTestBlock, countActStatements } from "../aaa";
 
 /** Requires the Act phase to contain a single top-level statement. */
@@ -27,10 +26,12 @@ const singleActStatementRule: Rule.RuleModule = {
     } satisfies Rule.RuleListener;
   },
   meta: {
-    docs: createRuleDocumentation(
-      "single-act-statement",
-      "Require the // Act section to contain a single top-level statement or declaration.",
-    ),
+    docs: {
+      description:
+        "Require the // Act section to contain a single top-level statement or declaration.",
+      recommended: false,
+      url: "https://github.com/parloti/eslint-plugin/blob/main/docs/rules/single-act-statement.md",
+    },
     messages: {
       multipleActStatements:
         "Reduce the // Act section to a single top-level statement or variable declaration; found {{count}}.",

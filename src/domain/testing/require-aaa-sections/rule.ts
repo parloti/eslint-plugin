@@ -2,7 +2,6 @@ import type { Rule } from "eslint";
 
 import type { TestBlockAnalysis } from "../aaa";
 
-import { createRuleDocumentation } from "../../custom-rule-documentation";
 import {
   analyzeTestBlock,
   getLineStartRange,
@@ -29,10 +28,12 @@ const requireAaaSectionsRule: Rule.RuleModule = {
     } satisfies Rule.RuleListener;
   },
   meta: {
-    docs: createRuleDocumentation(
-      "require-aaa-sections",
-      "Require strict // Arrange, // Act, and // Assert markers in supported test blocks.",
-    ),
+    docs: {
+      description:
+        "Require strict // Arrange, // Act, and // Assert markers in supported test blocks.",
+      recommended: false,
+      url: "https://github.com/parloti/eslint-plugin/blob/main/docs/rules/require-aaa-sections.md",
+    },
     fixable: "code",
     messages: {
       blankLineBeforeSection:

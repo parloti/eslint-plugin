@@ -1,7 +1,6 @@
 import type { Rule } from "eslint";
 import type * as ESTree from "estree";
 
-import { createRuleDocumentation } from "../../custom-rule-documentation";
 import {
   analyzeTestBlock,
   getAssertDeclaredIdentifiers,
@@ -162,10 +161,12 @@ const assertActualExpectedNamesRule: Rule.RuleModule = {
     } satisfies Rule.RuleListener;
   },
   meta: {
-    docs: createRuleDocumentation(
-      "assert-actual-expected-names",
-      "Require Assert-phase comparison variables to use actual*/expected* prefixes.",
-    ),
+    docs: {
+      description:
+        "Require Assert-phase comparison variables to use actual*/expected* prefixes.",
+      recommended: false,
+      url: "https://github.com/parloti/eslint-plugin/blob/main/docs/rules/assert-actual-expected-names.md",
+    },
     messages: {
       missingPrefix:
         "Rename '{{name}}' to use the '{{prefix}}' prefix when comparing values inside // Assert.",

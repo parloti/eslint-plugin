@@ -27,6 +27,7 @@ describe(createRuleDocumentation, () => {
     const description = "Rule description";
     const expectedDocumentation = {
       description,
+      recommended: false,
       url: `${customRuleDocumentationBaseUrl}/prefer-interface-types.md`,
     };
 

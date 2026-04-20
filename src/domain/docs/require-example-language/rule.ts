@@ -1,6 +1,5 @@
 import type { Rule } from "eslint";
 
-import { createRuleDocumentation } from "../../custom-rule-documentation";
 import { getExamples } from "./examples";
 import { reportExample } from "./reporting";
 
@@ -26,10 +25,12 @@ const requireExampleLanguageRule: Rule.RuleModule = {
     return {};
   },
   meta: {
-    docs: createRuleDocumentation(
-      "require-example-language",
-      "Require @example tags to use fenced code blocks with a language.",
-    ),
+    docs: {
+      description:
+        "Require @example tags to use fenced code blocks with a language.",
+      recommended: false,
+      url: "https://github.com/parloti/eslint-plugin/blob/main/docs/rules/require-example-language.md",
+    },
     fixable: "code",
     messages: {
       emptyExample: "@example must include example content.",
