@@ -93,12 +93,11 @@ const createTypeAnnotation = (type: string): TypeAnnotationWrapper => ({
  * createParameter();
  * ```
  */
-const createParameter = (type: string): MockNode =>
-  ({
-    name: "value",
-    type: "Identifier",
-    typeAnnotation: createTypeAnnotation(type),
-  }) as MockNode;
+const createParameter = (type: string): MockNode => ({
+  name: "value",
+  type: "Identifier",
+  typeAnnotation: createTypeAnnotation(type),
+});
 
 /**
  * Creates createBareParameter.
@@ -108,11 +107,10 @@ const createParameter = (type: string): MockNode =>
  * createBareParameter();
  * ```
  */
-const createBareParameter = (): MockNode =>
-  ({
-    name: "value",
-    type: "Identifier",
-  }) as MockNode;
+const createBareParameter = (): MockNode => ({
+  name: "value",
+  type: "Identifier",
+});
 
 /**
  * Creates createParameterProperty.
@@ -123,11 +121,10 @@ const createBareParameter = (): MockNode =>
  * createParameterProperty();
  * ```
  */
-const createParameterProperty = (type: string): MockNode =>
-  ({
-    parameter: createParameter(type),
-    type: "TSParameterProperty",
-  }) as MockNode;
+const createParameterProperty = (type: string): MockNode => ({
+  parameter: createParameter(type),
+  type: "TSParameterProperty",
+});
 
 /**
  * Creates createRestParameter.
@@ -138,11 +135,10 @@ const createParameterProperty = (type: string): MockNode =>
  * createRestParameter();
  * ```
  */
-const createRestParameter = (type: string): MockNode =>
-  ({
-    argument: createParameter(type),
-    type: "RestElement",
-  }) as MockNode;
+const createRestParameter = (type: string): MockNode => ({
+  argument: createParameter(type),
+  type: "RestElement",
+});
 
 /**
  * Creates createFunctionNode.
@@ -153,12 +149,11 @@ const createRestParameter = (type: string): MockNode =>
  * createFunctionNode();
  * ```
  */
-const createFunctionNode = (overrides: Partial<MockNode>): MockNode =>
-  ({
-    params: [],
-    type: "FunctionDeclaration",
-    ...overrides,
-  }) as MockNode;
+const createFunctionNode = (overrides: Partial<MockNode>): MockNode => ({
+  params: [],
+  type: "FunctionDeclaration",
+  ...overrides,
+});
 
 /**
  * Runs the listener for the supplied node.

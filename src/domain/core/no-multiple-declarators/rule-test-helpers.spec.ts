@@ -53,7 +53,7 @@ describe("no-multiple-declarators rule test helpers", () => {
     });
 
     // Act
-    const actual: unknown = Reflect.get(context.sourceCode as object, "text");
+    const actual: unknown = Reflect.get(context.sourceCode, "text");
 
     // Assert
     expect(actual).toBeUndefined();

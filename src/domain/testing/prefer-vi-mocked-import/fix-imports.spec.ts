@@ -36,7 +36,7 @@ describe("prefer-vi-mocked-import fix-imports", () => {
     } as never;
 
     // Act
-    const fixes = buildCombinedImportFixes(matches as never, fixer);
+    const fixes = buildCombinedImportFixes(matches, fixer);
 
     // Assert
     expect(fixes).toStrictEqual([]);

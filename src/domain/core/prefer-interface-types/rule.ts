@@ -82,7 +82,7 @@ const getTypeAnnotationNode = (
     return directTypeAnnotation;
   }
 
-  return getNestedTypeAnnotation(node as ParameterContainer);
+  return getNestedTypeAnnotation(node);
 };
 
 /**

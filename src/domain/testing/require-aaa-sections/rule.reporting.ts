@@ -31,12 +31,6 @@ type RequireAaaSectionsMessageId =
   | "emptySection"
   | "missingSections";
 
-/** Typed namespace for the lazily imported rule module. */
-interface RuleModuleNamespace {
-  /** Rule module loaded after mocks have been applied. */
-  requireAaaSectionsRule: Rule.RuleModule;
-}
-
 /** Captured result from the mocked reporting scenario. */
 interface ScenarioResult {
   /** Fix emitted for the blank-line report. */
@@ -290,8 +284,8 @@ function isRequireAaaSectionsMessageId(
  * ```
  */
 async function loadRequireAaaSectionsRule(): Promise<Rule.RuleModule> {
-  return ((await import("./rule")) as RuleModuleNamespace)
-    .requireAaaSectionsRule;
+  const { requireAaaSectionsRule } = await import("./rule");
+  return requireAaaSectionsRule;
 }
 
 export {

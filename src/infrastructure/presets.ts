@@ -93,7 +93,7 @@ function createRules(
 ): CodeperfectRuleEntries {
   return Object.fromEntries(
     ruleNames.map((ruleName) => [`codeperfect/${ruleName}`, "error"]),
-  ) as CodeperfectRuleEntries;
+  );
 }
 
 /** Preset that enables every package-owned rule. */

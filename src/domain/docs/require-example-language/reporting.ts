@@ -128,7 +128,7 @@ function buildReportDescriptor(
   return {
     fix: reportFix,
     messageId: problem,
-    node: sourceCode.ast as Rule.Node,
+    node: sourceCode.ast,
   };
 }
 

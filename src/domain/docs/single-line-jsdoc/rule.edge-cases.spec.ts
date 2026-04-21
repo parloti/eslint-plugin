@@ -171,7 +171,7 @@ describe("single-line-jsdoc rule edge cases", () => {
       range: [0, 0],
       type: "Line",
       value: " doc",
-    } as Comment;
+    };
     const { context, reports } = createContext([comment]);
 
     // Act
@@ -188,7 +188,7 @@ describe("single-line-jsdoc rule edge cases", () => {
       range: [0, 0],
       type: "Block",
       value: "*\n * doc\n ",
-    } as Comment;
+    };
     const { context, reports } = createContext([comment]);
 
     // Act

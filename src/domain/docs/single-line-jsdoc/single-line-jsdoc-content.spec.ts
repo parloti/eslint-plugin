@@ -12,7 +12,7 @@ describe("single-line-jsdoc content", () => {
       range: [0, 0],
       type: "Block",
       value: "*\n * ok\n ",
-    } as Comment;
+    };
 
     // Act
     const actual = getCollapsedContent(comment);
@@ -28,7 +28,7 @@ describe("single-line-jsdoc content", () => {
       range: [0, 0],
       type: "Block",
       value: "*\n * @param foo bar\n ",
-    } as Comment;
+    };
 
     // Act
     const actual = getCollapsedContent(comment);
@@ -44,7 +44,7 @@ describe("single-line-jsdoc content", () => {
       range: [0, 0],
       type: "Block",
       value: "*\n * line one\n * line two\n ",
-    } as Comment;
+    };
 
     // Act
     const actual = getCollapsedContent(comment);

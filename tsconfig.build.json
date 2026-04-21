@@ -1,12 +1,12 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "moduleResolution": "bundler",
     "declaration": true,
     "declarationMap": true,
     "importHelpers": true,
     "inlineSourceMap": true,
     "inlineSources": true,
+    "rootDir": "./src",
     "noEmitOnError": true,
     "outDir": "./dist",
     "tsBuildInfoFile": "./dist/.tsbuildinfo"

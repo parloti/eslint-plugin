@@ -2,8 +2,6 @@ import type { Rule } from "eslint";
 
 import { describe, expect, it } from "vitest";
 
-import type { Comment } from "./single-line-jsdoc-content";
-
 import {
   normalizeMaxLineLength,
   reportIfSingleLine,
@@ -42,7 +40,7 @@ describe("single-line-jsdoc utilities", () => {
         range: [0, 10],
         type: "Block",
         value: "*\n * ok\n ",
-      } as Comment,
+      },
       80,
     );
 

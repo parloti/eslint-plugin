@@ -131,7 +131,7 @@ const createComment = (commentValue: string, sourceText: string): Comment => {
     range: [0, end],
     type: "Block",
     value: commentValue,
-  } as Comment;
+  };
 };
 
 /**

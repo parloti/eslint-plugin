@@ -53,7 +53,7 @@ const createComment = (value: string, range?: [number, number]): Comment =>
     range,
     type: "Block",
     value,
-  }) as Comment;
+  });
 
 /**
  * Creates a source code wrapper with comments.

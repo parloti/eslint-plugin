@@ -3,7 +3,7 @@ import type { AST, Rule } from "eslint";
 import { SourceCode } from "eslint";
 import { describe, expect, it } from "vitest";
 
-import type { Comment, Example } from "./types";
+import type { Comment } from "./types";
 
 import { buildReportDescriptor, reportExample } from "./reporting";
 
@@ -47,7 +47,7 @@ describe("require example language reporting", () => {
         lineIndex: 0,
         prefix: "",
         startOffset: 0,
-      } as Example,
+      },
       hasOtherExamples: false,
       problem: "missingFence" as const,
       sourceCode,
@@ -76,7 +76,7 @@ describe("require example language reporting", () => {
         lineIndex: 0,
         prefix: "",
         startOffset: 0,
-      } as Example,
+      },
       hasOtherExamples: false,
       problem: "missingFence" as const,
       sourceCode,
@@ -105,7 +105,7 @@ describe("require example language reporting", () => {
         lineIndex: 0,
         prefix: "",
         startOffset: 0,
-      } as Example,
+      },
       hasOtherExamples: false,
       problem: "missingFence" as const,
       sourceCode,
@@ -134,7 +134,7 @@ describe("require example language reporting", () => {
         range: [0, 2],
         type: "Block",
         value: "*\n * @example\n * ```typescript\n * ok\n * ```",
-      } as Comment,
+      },
       context: { report, sourceCode } as Rule.RuleContext,
       example: {
         content: "```typescript\nok\n```",
@@ -143,7 +143,7 @@ describe("require example language reporting", () => {
         lineIndex: 0,
         prefix: "",
         startOffset: 0,
-      } as Example,
+      },
       hasOtherExamples: false,
     });
 
@@ -168,7 +168,7 @@ describe("require example language reporting", () => {
         range: [0, 2],
         type: "Block",
         value: "*\n * @example ok()",
-      } as Comment,
+      },
       context: { report, sourceCode } as Rule.RuleContext,
       example: {
         content: "ok()",
@@ -177,7 +177,7 @@ describe("require example language reporting", () => {
         lineIndex: 0,
         prefix: "",
         startOffset: 0,
-      } as Example,
+      },
       hasOtherExamples: false,
     });
 
@@ -196,7 +196,7 @@ describe("require example language reporting", () => {
         range: [0, sourceText.length],
         type: "Block",
         value: "*",
-      } as Comment,
+      },
       example: {
         content: "```typescript\nok\n```",
         endIndex: 0,
@@ -204,7 +204,7 @@ describe("require example language reporting", () => {
         lineIndex: 0,
         prefix: "",
         startOffset: 0,
-      } as Example,
+      },
       hasOtherExamples: false,
       problem: "missingLanguage",
       sourceCode,

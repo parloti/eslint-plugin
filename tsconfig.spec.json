@@ -3,7 +3,6 @@
   "include": ["src/**/*.spec.ts", "src/**/*.d.ts", "e2e/**/*.ts"],
   "exclude": ["dist", "node_modules"],
   "compilerOptions": {
-    "baseUrl": ".",
     "composite": false,
     "incremental": false
   }

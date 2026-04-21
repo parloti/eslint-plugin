@@ -10,12 +10,6 @@ import type { TestBlockAnalysis } from "./types";
 
 import { analyzeTestBlock, countActStatements } from "./analyzer";
 
-/** Mutable statement helper used to remove location metadata. */
-type MutableStatement = ESTree.Statement & {
-  /** Optional location metadata. */
-  loc?: ESTree.Node["loc"];
-};
-
 /** Parser options used by the fixture adapter. */
 interface ParseForEslintOptions {
   /** Enables location metadata. */
@@ -200,9 +194,7 @@ const analyzeSourceWithoutFirstCallbackLocation = (
 ): TestBlockAnalysis => {
   const program = parseProgram(sourceText);
   const callExpression = getCallExpression(program);
-  const statement = getFirstCallbackStatement(
-    callExpression,
-  ) as MutableStatement;
+  const statement = getFirstCallbackStatement(callExpression);
 
   delete statement.loc;
 

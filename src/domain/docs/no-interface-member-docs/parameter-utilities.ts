@@ -122,7 +122,7 @@ const getParameterIdentifier = (
     return void 0;
   }
 
-  return { ...identifier, name } as NamedIdentifierNode;
+  return { ...identifier, name };
 };
 
 /**

@@ -114,7 +114,7 @@ function createMockedBody(): TestBlockAnalysis["body"] {
     },
     range: [0, 0],
     type: "BlockStatement",
-  } as TestBlockAnalysis["body"];
+  };
 }
 
 /**
@@ -136,7 +136,7 @@ function createMockedCallExpression(): TestBlockAnalysis["callExpression"] {
     optional: false,
     range: [0, 0],
     type: "CallExpression",
-  } as TestBlockAnalysis["callExpression"];
+  };
 }
 
 /**
