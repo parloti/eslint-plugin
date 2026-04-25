@@ -28,13 +28,13 @@ The rule applies to tests that use AAA comments:
 
 Each comment represents one or more phases:
 
-| Comment                      | Phases Covered        |
-|-----------------------------|----------------------|
-| `// Arrange`                | Arrange              |
-| `// Act`                    | Act                  |
-| `// Assert`                 | Assert               |
-| `// Arrange & Act`          | Arrange + Act        |
-| `// Act & Assert`           | Act + Assert         |
+| Comment                     | Phases Covered         |
+| --------------------------- | ---------------------- |
+| `// Arrange`                | Arrange                |
+| `// Act`                    | Act                    |
+| `// Assert`                 | Assert                 |
+| `// Arrange & Act`          | Arrange + Act          |
+| `// Act & Assert`           | Act + Assert           |
 | `// Arrange & Act & Assert` | Arrange + Act + Assert |
 
 ### Ordering
@@ -46,6 +46,7 @@ Each comment represents one or more phases:
   - splitting a combined phase incorrectly
 
 Examples:
+
 - `Arrange → Act → Assert` ✅
 - `Arrange & Act → Assert` ✅
 - `Arrange → Act & Assert` ✅
@@ -59,6 +60,7 @@ Examples:
 - A phase cannot be reintroduced after it has already appeared
 
 Invalid:
+
 - `Arrange → Arrange`
 - `Act → Act`
 - `Arrange → Act → Arrange`

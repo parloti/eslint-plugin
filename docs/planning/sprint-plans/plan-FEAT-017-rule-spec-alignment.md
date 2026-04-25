@@ -22,36 +22,36 @@ This work is already partially underway. The main remaining delivery risk is rep
 ## 🧱 Tasks
 
 1. [ ] Finalize barrel-rule contract changes
-	- Description: Complete and review the public contract changes for `barrel-files-exports-only`, `consistent-barrel-files`, and `no-reexports-outside-barrels`, including option names, allowed barrel naming model, and applicability rules.
-	- Related: US-017
+   - Description: Complete and review the public contract changes for `barrel-files-exports-only`, `consistent-barrel-files`, and `no-reexports-outside-barrels`, including option names, allowed barrel naming model, and applicability rules.
+   - Related: US-017
 
 2. [ ] Stabilize barrel-rule repo integration
-	- Description: Ensure the repo’s own ESLint configuration uses the new barrel rules intentionally, with explicit local overrides where root config, scripts, or tests should not participate in barrel enforcement.
-	- Related: US-017
+   - Description: Ensure the repo’s own ESLint configuration uses the new barrel rules intentionally, with explicit local overrides where root config, scripts, or tests should not participate in barrel enforcement.
+   - Related: US-017
 
 3. [ ] Reconcile remaining rule-spec mismatches outside barrel rules
-	- Description: Re-check the other 14 documented rules against their updated markdown specs and close any remaining gaps in behavior, metadata, schemas, or messages.
-	- Related: US-017
+   - Description: Re-check the other 14 documented rules against their updated markdown specs and close any remaining gaps in behavior, metadata, schemas, or messages.
+   - Related: US-017
 
 4. [ ] Refresh metadata and registry expectations
-	- Description: Update rule registry metadata, package-owned rule summaries, and any tests that assert descriptions, schemas, or exported rule identities.
-	- Related: US-017
+   - Description: Update rule registry metadata, package-owned rule summaries, and any tests that assert descriptions, schemas, or exported rule identities.
+   - Related: US-017
 
 5. [ ] Expand targeted tests for changed rule behavior
-	- Description: Add or adjust focused unit tests only for changed behaviors, especially new barrel detection semantics, removed retrocompatibility, and allowed type-only barrel declarations.
-	- Related: US-017
+   - Description: Add or adjust focused unit tests only for changed behaviors, especially new barrel detection semantics, removed retrocompatibility, and allowed type-only barrel declarations.
+   - Related: US-017
 
 6. [ ] Run focused validation for changed areas
-	- Description: Execute rule-folder test subsets and lint/typecheck checks for touched files until the changed areas are stable and deterministic.
-	- Related: US-017
+   - Description: Execute rule-folder test subsets and lint/typecheck checks for touched files until the changed areas are stable and deterministic.
+   - Related: US-017
 
 7. [ ] Resolve full validation blockers
-	- Description: Work through repo-wide validation failures that remain after the rule updates, separating true regressions introduced by this feature from pre-existing coverage debt.
-	- Related: US-017
+   - Description: Work through repo-wide validation failures that remain after the rule updates, separating true regressions introduced by this feature from pre-existing coverage debt.
+   - Related: US-017
 
 8. [ ] Close validation and release-readiness pass
-	- Description: Run `npm run validate` twice, confirm the rule docs still match implemented behavior, and verify the feature is ready for handoff.
-	- Related: US-017
+   - Description: Run `npm run validate` twice, confirm the rule docs still match implemented behavior, and verify the feature is ready for handoff.
+   - Related: US-017
 
 ---
 
@@ -67,6 +67,7 @@ This work is already partially underway. The main remaining delivery risk is rep
 8. Close validation and release-readiness pass
 
 Parallelizable work:
+
 - Tasks 3 and 4 can run in parallel once Task 1 is stable.
 - Task 5 can start as Task 1 and Task 3 finish.
 

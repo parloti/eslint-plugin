@@ -22,25 +22,24 @@ type Options = {
 };
 ```
 
-* `enforce: true`
+- `enforce: true`
+  - Folders must include a barrel file with an allowed name
 
-  * Folders must include a barrel file with an allowed name
-* `enforce: false`
+- `enforce: false`
+  - Barrel files with allowed names must not exist
 
-  * Barrel files with allowed names must not exist
-* `allowedNames`
-
-  * Defines which filenames are considered barrel files (e.g. `"index"`, `"mod"`, etc.)
+- `allowedNames`
+  - Defines which filenames are considered barrel files (e.g. `"index"`, `"mod"`, etc.)
 
 ## Rule Details
 
-* A "barrel file" is any file whose name matches one of the `allowedNames`
-* The rule applies to folders containing at least one non-barrel module file
-* All folders must follow the same strategy:
+- A "barrel file" is any file whose name matches one of the `allowedNames`
+- The rule applies to folders containing at least one non-barrel module file
+- All folders must follow the same strategy:
+  - either consistently include a barrel file (`enforce: true`)
+  - or consistently avoid them (`enforce: false`)
 
-  * either consistently include a barrel file (`enforce: true`)
-  * or consistently avoid them (`enforce: false`)
-* Mixed usage across folders is not allowed
+- Mixed usage across folders is not allowed
 
 ## Invalid
 

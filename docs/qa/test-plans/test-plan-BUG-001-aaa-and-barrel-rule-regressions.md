@@ -14,6 +14,7 @@
 Validate that the affected AAA rules reject invalid section usage and invalid assertion evaluation patterns, and that `codeperfect/consistent-barrel-files` defaults to checking only files inside `src` directories.
 
 For bug-fix validation:
+
 - Reproduction path: lint AAA-annotated tests and barrel-file fixtures matching the examples in BUG-001.
 - Expected behavior after the fix: empty commented `Arrange` sections are reported, evaluated expressions inside `expect(...)` are reported without autofix, valid `Act` then `Assert` patterns remain valid, and default barrel-file checking is limited to `**/src/**` unless explicitly configured otherwise.
 

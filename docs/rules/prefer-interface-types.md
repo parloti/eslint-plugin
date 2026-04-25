@@ -38,7 +38,9 @@ Inline object types are allowed when:
 - the type is trivial and unlikely to be reused
   ```typescript
   const point: { x: number } = { x: 1 };
-```
+  ```
+
+````
 
 * used in generic constraints
 
@@ -46,9 +48,9 @@ Inline object types are allowed when:
   function process<T extends { id: string }>(input: T): T {
     return input;
   }
-  ```
+````
 
-* used with utility or mapped types
+- used with utility or mapped types
 
   ```typescript
   type PartialUser = Partial<{ id: string; name: string }>;

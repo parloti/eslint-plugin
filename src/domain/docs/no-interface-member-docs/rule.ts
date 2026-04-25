@@ -3,15 +3,15 @@ import type { Rule } from "eslint";
 import type { Comment, ParameterMemberTag, TypeAnnotationNode } from "./types";
 
 import {
-    buildRemovalRange,
-    getCommentLines,
-    getCommentText,
-    getJsdocComment,
+  buildRemovalRange,
+  getCommentLines,
+  getCommentText,
+  getJsdocComment,
 } from "./comment-utilities";
 import { parseParameterTagLine } from "./parameter-tags";
 import {
-    getParameterTypeLookup,
-    isNamedTypeReference,
+  getParameterTypeLookup,
+  isNamedTypeReference,
 } from "./parameter-utilities";
 
 /** Type definition for rule data. */

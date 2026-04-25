@@ -7,7 +7,9 @@ import { singleLineJsdocRule } from "./rule";
 import { singleLineJsdocRuleEdgeCases } from "./rule.edge-cases";
 
 /** Type definition for rule data. */
-type Comment = ReturnType<Rule.RuleContext["sourceCode"]["getAllComments"]>[number];
+type Comment = ReturnType<
+  Rule.RuleContext["sourceCode"]["getAllComments"]
+>[number];
 
 /** Type definition for comment options. */
 interface CommentOptions {
@@ -135,7 +137,9 @@ describe("single-line-jsdoc rule edge cases", () => {
 
   it("falls back to default when max line length is non-positive", () => {
     // Arrange
-    const comment = createComment(documentCommentValue, sourceText, { endLine: 3 });
+    const comment = createComment(documentCommentValue, sourceText, {
+      endLine: 3,
+    });
     const { context, reports } = createContext([comment], {
       getAllComments: (): Comment[] => [comment],
     });
@@ -212,5 +216,4 @@ describe("single-line-jsdoc rule edge cases", () => {
     // Assert
     expect(reports).toHaveLength(0);
   });
-
 });

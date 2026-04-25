@@ -16,6 +16,7 @@ Source: docs/product/user-stories/us-001-align-repository-modules-to-clean-archi
 Align the repository structure and boundary enforcement to Robert C. Martin's Clean Architecture without intentionally changing package behavior.
 
 Expected outcome:
+
 - Repository modules have clear architectural ownership.
 - ESLint enforces the intended dependency direction.
 - Imports and package integration remain valid after the structural alignment.
@@ -62,6 +63,7 @@ Root-cause status: known
 6. Run architectural regression and full validation
 
 Parallelizable work:
+
 - Task 2 can begin once Task 1 establishes the layer map.
 - Task 3 can start in parallel with Task 2 for modules whose ownership is already clear.
 - Task 5 can begin incrementally as Tasks 3 and 4 complete.

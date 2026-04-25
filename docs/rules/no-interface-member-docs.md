@@ -97,8 +97,5 @@ function getLineMeta(context: { commentValue: string }): void {}
  * @param options Inline options.
  * @param options.retryCount Number of retries.
  */
-function run(
-  context: LineMetaContext,
-  options: { retryCount: number }
-): void {}
+function run(context: LineMetaContext, options: { retryCount: number }): void {}
 ```

@@ -57,16 +57,18 @@ installDevelopmentDependencies.mockResolvedValue(void 0); // ❌ not using vi.mo
 ```typescript
 import { installDevelopmentDependencies } from "./dependencies";
 
-vi.mock(import("./dependencies"), () => ({ installDevelopmentDependencies: vi.fn() }));
+vi.mock(import("./dependencies"), () => ({
+  installDevelopmentDependencies: vi.fn(),
+}));
 
 installDevelopmentDependencies.mockResolvedValue(void 0); // ❌ should use vi.mocked
 ```
 
 ## Autofix
 
-* Inlines mock factories inside `vi.mock`
-* Rewrites mock interactions to use `vi.mocked(...)`
-* Adds missing imports when required
+- Inlines mock factories inside `vi.mock`
+- Rewrites mock interactions to use `vi.mocked(...)`
+- Adds missing imports when required
 
 ### Before
 

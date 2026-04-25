@@ -6,8 +6,8 @@ Require values used in assertions to follow `actual*` and `expected*` naming con
 
 ## Enabled by
 
-* `testing`
-* internal `codeperfect` plugin registry
+- `testing`
+- internal `codeperfect` plugin registry
 
 ## Why this rule exists
 
@@ -15,15 +15,15 @@ Tests read more clearly when the compared values advertise their role directly. 
 
 ## Rule Details
 
-* Values passed to `expect()` should be named with:
+- Values passed to `expect()` should be named with:
+  - `actual*` (or `actual`)
 
-  * `actual*` (or `actual`)
-* Values passed as matcher arguments should be named with:
+- Values passed as matcher arguments should be named with:
+  - `expected*` (or `expected`)
 
-  * `expected*` (or `expected`)
-* Variables may be declared in either the Act or Assert phase
-* Neutral names (e.g. `computedResult`) are allowed before assertion, but must not be used directly in `expect`
-* The rule applies to all matcher types (e.g. `toBe`, `toEqual`, `toStrictEqual`, etc.)
+- Variables may be declared in either the Act or Assert phase
+- Neutral names (e.g. `computedResult`) are allowed before assertion, but must not be used directly in `expect`
+- The rule applies to all matcher types (e.g. `toBe`, `toEqual`, `toStrictEqual`, etc.)
 
 ## Invalid
 

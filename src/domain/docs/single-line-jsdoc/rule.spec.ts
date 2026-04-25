@@ -116,13 +116,15 @@ describe("single-line-jsdoc rule", () => {
 
   it("reports multi-line JSDoc that fits on one line", () => {
     // Arrange
-    const comment = createComment(documentCommentValue, sourceText, { endLine: 3 });
+    const comment = createComment(documentCommentValue, sourceText, {
+      endLine: 3,
+    });
     const { context, reports } = createContext([comment]);
 
     // Act
-    const fixText = (singleLineJsdocRule.create(context), String(
-      getFixText(reports[0]?.fix?.(createFixer()) ?? void 0),
-    ));
+    const fixText =
+      (singleLineJsdocRule.create(context),
+      String(getFixText(reports[0]?.fix?.(createFixer()) ?? void 0)));
 
     // Assert
     expect(reports).toHaveLength(1);
@@ -147,7 +149,9 @@ describe("single-line-jsdoc rule", () => {
 
   it("respects max line length", () => {
     // Arrange
-    const comment = createComment("*\n * short text\n ", sourceText, { endLine: 3 });
+    const comment = createComment("*\n * short text\n ", sourceText, {
+      endLine: 3,
+    });
     const { context, reports } = createContext([comment], {
       maxLineLength: 10,
     });

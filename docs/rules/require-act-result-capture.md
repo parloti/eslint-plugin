@@ -45,29 +45,29 @@ expect(run(input)).toBe(1);
 
 #### 2. Void or side-effect-only interactions
 
-* The call is clearly intended for side effects only
-* The return value is unused and not meaningful
+- The call is clearly intended for side effects only
+- The return value is unused and not meaningful
 
 Examples:
 
-* mutating inputs
-* pushing to arrays
-* calling listeners or callbacks
+- mutating inputs
+- pushing to arrays
+- calling listeners or callbacks
 
 #### 3. Framework or listener setup patterns
 
-* Common testing or lint-rule patterns where return values are not relevant
+- Common testing or lint-rule patterns where return values are not relevant
 
 Examples:
 
-* rule listeners (`create(...)`)
-* event-style handlers
-* registration APIs
+- rule listeners (`create(...)`)
+- event-style handlers
+- registration APIs
 
 ### Disallowed patterns
 
-* calling a non-void function in Act without capturing its result
-* performing meaningful computation in Act that is only indirectly asserted
+- calling a non-void function in Act without capturing its result
+- performing meaningful computation in Act that is only indirectly asserted
 
 ## Invalid
 

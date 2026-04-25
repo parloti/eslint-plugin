@@ -31,11 +31,13 @@ Combined sections allow merging responsibilities, but only those explicitly list
 ### Arrange
 
 Allowed:
+
 - test data setup
 - variable declarations
 - mocks, stubs, and test configuration
 
 Disallowed:
+
 - assertions (`expect`)
 - mutations of values later used as expected results
 
@@ -44,11 +46,13 @@ Disallowed:
 ### Act
 
 Allowed:
+
 - exactly one logical interaction with the system under test (SUT)
 - `await` expressions
 - capturing the result of the SUT
 
 Disallowed:
+
 - setup or configuration logic
 - assertions (`expect`)
 - unrelated utility calls not part of the SUT interaction
@@ -58,10 +62,12 @@ Disallowed:
 ### Assert
 
 Allowed:
+
 - assertions (`expect`)
 - reading values produced during Act
 
 Disallowed:
+
 - mutating variables defined in Arrange or Act
 - re-running the SUT
 - setup or configuration logic
@@ -73,10 +79,12 @@ Disallowed:
 ### Arrange & Act
 
 Allowed:
+
 - all Arrange responsibilities
 - a single SUT interaction (Act)
 
 Disallowed:
+
 - assertions
 
 ---
@@ -84,10 +92,12 @@ Disallowed:
 ### Act & Assert
 
 Allowed:
+
 - a single SUT interaction
 - inline assertions (e.g. `expect(run()).toBe(...)`)
 
 Disallowed:
+
 - setup or configuration logic
 - mutations after assertion
 
@@ -96,11 +106,13 @@ Disallowed:
 ### Arrange & Act & Assert
 
 Allowed:
+
 - setup
 - a single SUT interaction
 - assertions
 
 Disallowed:
+
 - multiple SUT interactions
 - mutations after assertion
 - unrelated side effects

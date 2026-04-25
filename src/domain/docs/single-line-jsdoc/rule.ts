@@ -1,7 +1,11 @@
 import type { Rule } from "eslint";
 import type { Comment as EstreeComment, Node as EstreeNode } from "estree";
 
-import { normalizeMaxLineLength, reportIfSingleLine } from "./single-line-jsdoc-utilities";
+import {
+  normalizeMaxLineLength,
+  reportIfSingleLine,
+} from "./single-line-jsdoc-utilities";
+
 /** Type union for nodes that may be missing. */
 type MaybeNode = EstreeNode | NodeWithType | null | undefined;
 
@@ -79,11 +83,9 @@ const getTokenAfterRange = (
   const tokenAfter = sourceCode.getTokenAfter(comment, {
     includeComments: false,
   });
-
   if (tokenAfter?.range === void 0) {
     return void 0;
   }
-
   return { range: tokenAfter.range };
 };
 
@@ -110,7 +112,8 @@ const functionLikeTypes = new Set<string>([
  * ```
  */
 const isFunctionExpression = (node: MaybeNode): boolean =>
-  node?.type === "FunctionExpression" || node?.type === "ArrowFunctionExpression";
+  node?.type === "FunctionExpression" ||
+  node?.type === "ArrowFunctionExpression";
 
 /**
  * Checks if a node is a function declaration or TS declaration signature.
@@ -253,11 +256,10 @@ const shouldSkipForFunction = (
 };
 
 /** Rule module enforcing single-line JSDoc when it fits. */
-const singleLineJsdocRule: Rule.RuleModule = {
+export const singleLineJsdocRule: Rule.RuleModule = {
   create(context: Rule.RuleContext): Rule.RuleListener {
     const { options, sourceCode } = context;
     const maxLineLength = normalizeMaxLineLength(options);
-
     const comments = sourceCode.getAllComments();
 
     for (const comment of comments) {
@@ -296,5 +298,3 @@ const singleLineJsdocRule: Rule.RuleModule = {
     type: "layout",
   },
 };
-
-export { singleLineJsdocRule };

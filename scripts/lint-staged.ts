@@ -1,11 +1,11 @@
 import chalk from "chalk";
 import { execSync } from "node:child_process";
 
-/** Milliseconds in one second. */
+/** Milliseconds per second constant for time calculations. */
 const MS_PER_SEC = 1000;
 
 /**
- * Prints the lint-staged warning banner.
+ * Display a warning banner about not modifying files during lint-staged execution.
  * @example
  * ```typescript
  * logBanner();
@@ -25,11 +25,12 @@ const logBanner = (): void => {
 };
 
 /**
- * Logs the lint-staged success message with timing.
- * @param getTimeDiff Callback returning a formatted duration.
+ * Log successful completion of lint-staged with execution time.
+ * @param getTimeDiff Function that returns the elapsed time string.
  * @example
  * ```typescript
- * logSuccess(() => "1.2s");
+ * const getTimeDiff = (): string => "120ms";
+ * logSuccess(getTimeDiff);
  * ```
  */
 const logSuccess = (getTimeDiff: () => string): void => {
@@ -43,17 +44,18 @@ const logSuccess = (getTimeDiff: () => string): void => {
 };
 
 /**
- * Runs the lint-staged command and reports failures.
- * @param getTimeDiff Callback returning a formatted duration.
- * @throws {Error} Propagates the lint-staged execution error.
+ * Execute the lint-staged command with error handling.
+ * @param getTimeDiff Function that returns the elapsed time string.
+ * @throws {Error} Rethrows lint-staged failures for upstream handling.
  * @example
  * ```typescript
- * runLintStagedCommand(() => "1.2s");
+ * const getTimeDiff = (): string => "120ms";
+ * runLintStagedCommand(getTimeDiff);
  * ```
  */
 const runLintStagedCommand = (getTimeDiff: () => string): void => {
   try {
-    execSync("npx --yes lint-staged --config lint-staged.config.ts", {
+    execSync(`npx --yes lint-staged --config lint-staged.config.ts`, {
       stdio: "inherit",
     });
     logSuccess(getTimeDiff);
@@ -65,7 +67,7 @@ const runLintStagedCommand = (getTimeDiff: () => string): void => {
 };
 
 /**
- * Runs lint-staged with banner and timing output.
+ * Run lint-staged with timing and status reporting.
  * @example
  * ```typescript
  * runLintStaged();

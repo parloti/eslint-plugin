@@ -6,7 +6,9 @@ import { describe, expect, it } from "vitest";
 import { singleLineJsdocRuleNodeLookups } from "./rule.node-lookups";
 
 /** Type definition for rule data. */
-type Comment = ReturnType<Rule.RuleContext["sourceCode"]["getAllComments"]>[number];
+type Comment = ReturnType<
+  Rule.RuleContext["sourceCode"]["getAllComments"]
+>[number];
 
 /** Type definition for comment options. */
 interface CommentOptions {

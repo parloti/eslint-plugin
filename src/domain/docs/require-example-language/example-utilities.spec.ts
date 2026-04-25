@@ -42,15 +42,18 @@ describe("example utilities", () => {
   });
 
   it("computes line metadata", () => {
+    // Arrange
+    const context = {
+      commentValue: "* first\n* second",
+      full: "* second",
+      startOffset: 8,
+    };
 
-    // Arrange & Act & Assert
-    expect(
-      getLineMeta({
-        commentValue: "* first\n* second",
-        full: "* second",
-        startOffset: 8,
-      }),
-    ).toStrictEqual({ endIndex: 1, endOffset: 16, lineIndex: 1 });
+    // Act
+    const meta = getLineMeta(context);
+
+    // Assert
+    expect(meta).toStrictEqual({ endIndex: 1, endOffset: 16, lineIndex: 1 });
   });
 
   it("derives prefixes", () => {

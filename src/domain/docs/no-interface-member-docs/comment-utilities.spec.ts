@@ -203,7 +203,10 @@ describe("comment utilities text", () => {
     ]);
 
     // Act
-    const text = getCommentText(createSourceCode(sourceText, [comment]), comment);
+    const text = getCommentText(
+      createSourceCode(sourceText, [comment]),
+      comment,
+    );
 
     // Assert
     expect(text).toContain("ok");

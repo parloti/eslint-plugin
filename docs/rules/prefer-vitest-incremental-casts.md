@@ -67,11 +67,15 @@ const disableTypeChecked = { rules: [] as string[] };
 const parser = { parseForESLint: (_code: string) => ({ ast: "ok" }) };
 const plugin = { meta: { name: "fixture" } };
 
-vi.doMock(import("fixture"), () => ({
-  configs: { disableTypeChecked } as Record<string, unknown>,
-  parser: parser as unknown as typeof import("fixture")["parser"],
-  plugin,
-} as unknown as typeof import("fixture")));
+vi.doMock(
+  import("fixture"),
+  () =>
+    ({
+      configs: { disableTypeChecked } as Record<string, unknown>,
+      parser: parser as unknown as (typeof import("fixture"))["parser"],
+      plugin,
+    }) as unknown as typeof import("fixture"),
+);
 ```
 
 ### Redundant casting when a property is already assignable
@@ -79,18 +83,22 @@ vi.doMock(import("fixture"), () => ({
 ```typescript
 const parser = { parseForESLint: (_code: string) => ({ ast: "ok" }) };
 
-vi.mock(import("fixture"), () => ({
-  parser: parser as unknown as typeof import("fixture")["parser"],
-} as unknown as typeof import("fixture")));
+vi.mock(
+  import("fixture"),
+  () =>
+    ({
+      parser: parser as unknown as (typeof import("fixture"))["parser"],
+    }) as unknown as typeof import("fixture"),
+);
 ```
 
 ## Autofix
 
 The autofix rewrites the factory into incremental form by:
 
-* removing top-level casts
-* preserving only the minimal property-level casts required
-* leaving assignable properties unchanged
+- removing top-level casts
+- preserving only the minimal property-level casts required
+- leaving assignable properties unchanged
 
 ### Before
 
@@ -99,11 +107,15 @@ const disableTypeChecked = { rules: [] as string[] };
 const parser = { parseForESLint: (_code: string) => ({ ast: "ok" }) };
 const plugin = { meta: { name: "fixture" } };
 
-vi.doMock(import("fixture"), () => ({
-  configs: { disableTypeChecked } as Record<string, unknown>,
-  parser: parser as unknown as typeof import("fixture")["parser"],
-  plugin,
-} as unknown as typeof import("fixture")));
+vi.doMock(
+  import("fixture"),
+  () =>
+    ({
+      configs: { disableTypeChecked } as Record<string, unknown>,
+      parser: parser as unknown as (typeof import("fixture"))["parser"],
+      plugin,
+    }) as unknown as typeof import("fixture"),
+);
 ```
 
 ### After
@@ -114,7 +126,7 @@ const parser = { parseForESLint: (_code: string) => ({ ast: "ok" }) };
 const plugin = { meta: { name: "fixture" } };
 
 vi.doMock(import("fixture"), () => ({
-  configs: { disableTypeChecked } as typeof import("fixture")["configs"],
+  configs: { disableTypeChecked } as (typeof import("fixture"))["configs"],
   parser,
   plugin,
 }));
@@ -130,7 +142,7 @@ const parser = { parseForESLint: (_code: string) => ({ ast: "ok" }) };
 const plugin = { meta: { name: "fixture" } };
 
 vi.doMock(import("fixture"), () => ({
-  configs: { disableTypeChecked } as typeof import("fixture")["configs"],
+  configs: { disableTypeChecked } as (typeof import("fixture"))["configs"],
   parser,
   plugin,
 }));

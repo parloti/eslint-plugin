@@ -227,7 +227,9 @@ function getUpdatedExampleText(context: FixerContext): string | undefined {
  * const lines = normalizeContentLines({ content: "a\n * b", prefix: " * " });
  * ```
  */
-function normalizeContentLines(context: NormalizeContentLinesContext): string[] {
+function normalizeContentLines(
+  context: NormalizeContentLinesContext,
+): string[] {
   const { content, prefix } = context;
   const lines = content.length > 0 ? content.split(/\r?\n/u) : [];
 

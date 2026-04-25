@@ -277,7 +277,8 @@ describe("require example language rule", () => {
     );
 
     // Assert
-    const actualReportCalls = scenario.reportExample.mock.calls as readonly (readonly unknown[])[];
+    const actualReportCalls = scenario.reportExample.mock
+      .calls as readonly (readonly unknown[])[];
     const actualFirstReport = actualReportCalls[0]?.[0];
     const actualSecondReport = actualReportCalls[1]?.[0];
 

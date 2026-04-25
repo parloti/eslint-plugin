@@ -88,12 +88,13 @@ The rule auto-fixes only safe, standalone declarations.
 
 The following cases are reported but not auto-fixed:
 
-* declarations inside loop initializers
+- declarations inside loop initializers
 
   ```typescript
   for (let i = 0, j = 0; i < 10; i++) {}
   ```
-* declarations with inline comments between declarators
-* complex exported declarations where splitting may affect formatting or comments
+
+- declarations with inline comments between declarators
+- complex exported declarations where splitting may affect formatting or comments
 
 Manual refactoring is required in these cases to preserve intent and formatting.

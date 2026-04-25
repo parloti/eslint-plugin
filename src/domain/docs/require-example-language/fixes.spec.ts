@@ -2,10 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { Example } from "./types";
 
-import {
-  buildMissingFenceFix,
-  buildMissingLanguageFix,
-} from "./fixes";
+import { buildMissingFenceFix, buildMissingLanguageFix } from "./fixes";
 
 describe("require-example-language fixes", () => {
   it("builds missing fence fixes with blank lines", () => {
@@ -93,7 +90,8 @@ describe("require-example-language fixes", () => {
   it("normalizes inline and prefixed lines for missing fences", () => {
     // Arrange
     const example: Example = {
-      content: 'Demonstrates log info with representative values.\n * logInfo("message");',
+      content:
+        'Demonstrates log info with representative values.\n * logInfo("message");',
       endIndex: 0,
       endOffset: 0,
       lineIndex: 0,

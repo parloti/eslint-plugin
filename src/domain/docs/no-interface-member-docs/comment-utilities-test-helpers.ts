@@ -48,12 +48,11 @@ interface SingleJsdocContext {
  * const comment = createComment("*\n * ok\n ", [0, 10]);
  * ```
  */
-const createComment = (value: string, range?: [number, number]): Comment =>
-  ({
-    range,
-    type: "Block",
-    value,
-  });
+const createComment = (value: string, range?: [number, number]): Comment => ({
+  range,
+  type: "Block",
+  value,
+});
 
 /**
  * Creates a source code wrapper with comments.

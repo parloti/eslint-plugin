@@ -179,7 +179,8 @@ describe("require-example-language createFixer", () => {
   it("preserves trailing whitespace for comment closure placement", () => {
     // Arrange
     const example: Example = {
-      content: 'Demonstrates log info with representative values.\n * logInfo("message");',
+      content:
+        'Demonstrates log info with representative values.\n * logInfo("message");',
       endIndex: 0,
       endOffset: 0,
       lineIndex: 0,
@@ -206,7 +207,8 @@ describe("require-example-language createFixer", () => {
   it("does not append trailing whitespace when none exists", () => {
     // Arrange
     const example: Example = {
-      content: 'Demonstrates log info with representative values.\n * logInfo("message");',
+      content:
+        'Demonstrates log info with representative values.\n * logInfo("message");',
       endIndex: 0,
       endOffset: 0,
       lineIndex: 0,

@@ -47,126 +47,126 @@ Each `@example` must:
 
 ### Missing language in fence
 
-```typescript
- /**
-  * @example
-  * ```
-  * value();
-  * ```
-  */
-```
+````typescript
+/**
+ * @example
+ * ```
+ * value();
+ * ```
+ */
+````
 
 ### Inline example (not fenced)
 
 ```typescript
- /**
-  * @example const value = 1;
-  */
+/**
+ * @example const value = 1;
+ */
 export function demo(): void {}
 ```
 
 ### Mixed fenced and inline content
 
-```typescript
- /**
-  * @example
-  * const value = 1;
-  * ```typescript
-  * value();
-  * ```
-  */
-```
+````typescript
+/**
+ * @example
+ * const value = 1;
+ * ```typescript
+ * value();
+ * ```
+ */
+````
 
 ## Autofix
 
 The autofix:
 
-* wraps inline examples in a fenced block
-* adds a default language (`typescript`) when missing
-* preserves existing code content and indentation where possible
+- wraps inline examples in a fenced block
+- adds a default language (`typescript`) when missing
+- preserves existing code content and indentation where possible
 
 ### Before
 
 ```typescript
- /**
-  * @example const value = 1;
-  */
+/**
+ * @example const value = 1;
+ */
 export function demo(): void {}
 ```
 
 ### After
 
-```typescript
- /**
-  * @example
-  * ```typescript
-  * const value = 1;
-  * ```
-  */
+````typescript
+/**
+ * @example
+ * ```typescript
+ * const value = 1;
+ * ```
+ */
 export function demo(): void {}
-```
+````
 
 ### Before
 
-```typescript
- /**
-  * @example
-  * ```
-  * const value = 1;
-  * ```
-  */
+````typescript
+/**
+ * @example
+ * ```
+ * const value = 1;
+ * ```
+ */
 export function demo(): void {}
-```
+````
 
 ### After
 
-```typescript
- /**
-  * @example
-  * ```typescript
-  * const value = 1;
-  * ```
-  */
+````typescript
+/**
+ * @example
+ * ```typescript
+ * const value = 1;
+ * ```
+ */
 export function demo(): void {}
-```
+````
 
 ## Valid
 
 ### Proper fenced example with language
 
-```typescript
- /**
-  * @example
-  * ```typescript
-  * value();
-  * ```
-  */
-```
+````typescript
+/**
+ * @example
+ * ```typescript
+ * value();
+ * ```
+ */
+````
 
 ### Export with valid example
 
-```typescript
- /**
-  * @example
-  * ```typescript
-  * const value = 1;
-  * ```
-  */
+````typescript
+/**
+ * @example
+ * ```typescript
+ * const value = 1;
+ * ```
+ */
 export function demo(): void {}
-```
+````
 
 ### Multiple examples
 
-```typescript
- /**
-  * @example
-  * ```typescript
-  * value();
-  * ```
-  *
-  * @example
-  * ```typescript
-  * otherValue();
-  * ```
-  */
-```
+````typescript
+/**
+ * @example
+ * ```typescript
+ * value();
+ * ```
+ *
+ * @example
+ * ```typescript
+ * otherValue();
+ * ```
+ */
+````

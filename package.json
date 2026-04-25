@@ -34,6 +34,10 @@
     "dist"
   ],
   "scripts": {
+    "\n# --------------- CUSTOM --------------- #": "",
+    "release:dry-run": "semantic-release --dry-run",
+    "\n# --------------- GENERAL --------------- #": "",
+    "preinstall": "npm cache clean --force",
     "\n# --------------- SCM --------------- #": "",
     "commit": "npx --yes git-cz",
     "prepare": "husky",
@@ -41,11 +45,8 @@
     "build": "npm run clean && npm run compile && npm run resolve-paths",
     "clean": "npx --yes rimraf dist",
     "compile": "tsc --build --force ./tsconfig.build.json",
-    "resolve-paths": "tsc-alias --project ./tsconfig.build.json --resolve-full-paths",
-    "docs": "npm run docs:api",
-    "docs:api": "typedoc --options typedoc.json",
     "pack": "npm pack --pack-destination dist",
-    "release:dry-run": "semantic-release --dry-run",
+    "resolve-paths": "tsc-alias --project ./tsconfig.build.json --resolve-full-paths",
     "\n# --------------- LINTING --------------- #": "",
     "\t• --------------- checking --------------- •": "",
     "eslint": "npx --yes eslint --max-warnings=0",
@@ -59,16 +60,21 @@
     "prettier:write": "npm run prettier -- --write",
     "\n\t• --------------- helpers --------------- •": "",
     "check:rules": "npx --yes eslint-config-prettier eslint.config.ts",
-    "benchmark:rules": "npx --yes tsx src/benchmark-rules.ts",
     "eslint:inspect": "npx --yes @eslint/config-inspector",
     "\n# --------------- TESTING --------------- #": "",
     "typecheck": "tsc --noEmit",
-    "typecheck:spec": "tsc --project tsconfig.spec.json --noEmit",
-    "validate": "npm run lint && npm run typecheck && npm run typecheck:spec && npm run test && npm run build && npm run pack",
+    "typecheck:spec": "tsc -p tsconfig.spec.json --noEmit",
+    "validate": "npm ci --ignore-scripts && npm run lint && npm run typecheck && npm run typecheck:spec && npm run test && npm run build && npm run pack",
     "\n\t• --------------- unit --------------- •": "",
-    "tdd": "npx --yes vitest run --watch --silent=true --coverage.enabled=false",
+    "mutation": "npx --yes stryker run",
     "tdd:notify": "npm run tdd -- --notify",
-    "test": "npx --yes vitest run"
+    "tdd": "npx --yes vitest run --watch --silent=true --coverage.enabled=false",
+    "test": "npm run unit && npm run mutation",
+    "unit": "npx --yes vitest run",
+    "\n# --------------- DOCS --------------- #": "",
+    "docs:api": "npx --yes typedoc --options typedoc.json",
+    "docs:clean": "npx --yes rimraf docs/api",
+    "docs": "npm run docs:clean && npm run docs:api"
   },
   "dependencies": {
     "@codeperfect/eslint-config": "^1.4.0",
@@ -79,8 +85,8 @@
     "eslint": ">=10.2.1"
   },
   "devDependencies": {
+    "@codeperfect/commitlint-config-emoji": "^1.0.0",
     "@commitlint/cli": "^20.5.0",
-    "@commitlint/config-conventional": "^20.5.0",
     "@commitlint/cz-commitlint": "^20.5.1",
     "@eslint-community/eslint-plugin-eslint-comments": "^4.7.1",
     "@eslint/js": "^10.0.1",
@@ -95,7 +101,6 @@
     "@vitest/coverage-v8": "^4.1.5",
     "@vitest/eslint-plugin": "^1.6.16",
     "chalk": "^5.6.2",
-    "conventional-changelog-conventionalcommits": "^9.3.1",
     "eslint": "^10.2.1",
     "eslint-config-prettier": "^10.1.8",
     "eslint-import-resolver-typescript": "^4.4.4",
@@ -123,7 +128,9 @@
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.59.0",
     "vite-tsconfig-paths": "^6.1.1",
-    "vitest": "^4.1.5"
+    "vitest": "^4.1.5",
+    "@stryker-mutator/core": "^9.6.1",
+    "@stryker-mutator/vitest-runner": "^9.6.1"
   },
   "engines": {
     "node": ">=24.0.0"

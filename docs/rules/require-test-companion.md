@@ -33,10 +33,10 @@ A companion file:
 
 Examples:
 
-| Source file     | Test file          |
-|----------------|--------------------|
-| `feature.ts`   | `feature.test.ts`  |
-| `feature.ts`   | `feature.spec.ts`  |
+| Source file  | Test file         |
+| ------------ | ----------------- |
+| `feature.ts` | `feature.test.ts` |
+| `feature.ts` | `feature.spec.ts` |
 
 ### Supported patterns
 
@@ -145,8 +145,8 @@ is valid, and `.spec.ts` companions are not expected.
 
 ## Notes
 
-* This rule does not enforce:
+- This rule does not enforce:
+  - test content quality
+  - test coverage depth
 
-  * test content quality
-  * test coverage depth
-* This rule operates purely on file presence and naming conventions
+- This rule operates purely on file presence and naming conventions

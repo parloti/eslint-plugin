@@ -25,3 +25,5 @@ coverage/
 /tsconfig.tsbuildinfo
 /docs/api
 tmp
+.stryker-tmp/
+reports/

@@ -12,11 +12,13 @@ Source: docs/product/bugs/bug-001-aaa-and-barrel-rule-regressions.md
 Restore correct lint behavior for the affected AAA rules and constrain the default scope of `codeperfect/consistent-barrel-files` to `**/src/**` without changing explicit configuration behavior.
 
 Observed behavior:
+
 - Empty commented `Arrange` sections are accepted as valid.
 - Evaluated expressions inside `expect(...)` are accepted.
 - `codeperfect/consistent-barrel-files` checks files too broadly by default.
 
 Expected behavior:
+
 - `Arrange` is optional, but if present it must contain code.
 - Evaluation happens in `Act`, and `Assert` only checks previously computed values.
 - Default barrel-file checking is limited to `**/src/**`.
@@ -63,10 +65,12 @@ Root-cause status: known
 6. Run targeted regression and full validation
 
 Parallelizable work:
+
 - Tasks 2 and 3 can run in parallel after Task 1.
 - Tasks 4 and 5 can run in parallel once their failing tests are in place.
 
 Completion status:
+
 - All planned BUG-001 delivery tasks are complete.
 - Final review outcome is approved.
 - Full repo validation passed twice on the final workspace state.
@@ -106,7 +110,6 @@ Completion status:
 - [x] Review follow-up fixes completed
 - [x] `npm run validate` passed twice on final state
 - [x] Ready for QA / merge review
-
 
 ## 🔁 Handoff
 

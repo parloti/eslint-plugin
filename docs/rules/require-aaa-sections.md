@@ -69,6 +69,7 @@ The fixer applies the smallest safe transformation:
   - may collapse adjacent sections into a combined comment
 
 The fixer does not:
+
 - reorder code
 - infer intent beyond local structure
 
@@ -123,7 +124,7 @@ it("has empty act", () => {
 it("has empty assert", () => {
   // Act
   run();
-  
+
   // Assert // ❌ Empty section
 });
 ```
