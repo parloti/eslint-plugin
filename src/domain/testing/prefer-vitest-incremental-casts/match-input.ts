@@ -9,6 +9,7 @@ import type {
 import {
   getFactoryReturnExpression,
   getModuleSpecifier,
+  hasEscapeHatchCast,
   isVitestMockCall,
   unwrapExpression,
 } from "./ast-helpers";
@@ -35,14 +36,20 @@ function buildFactoryMatchInput(
 
   const objectExpression = unwrapExpression(returnExpression);
 
-  return objectExpression.type === TSESTree.AST_NODE_TYPES.ObjectExpression
-    ? {
-        factoryArgument,
-        moduleSpecifier,
-        objectExpression,
-        returnExpression,
-      }
-    : void 0;
+  if (
+    objectExpression.type !== TSESTree.AST_NODE_TYPES.ObjectExpression ||
+    (returnExpression !== objectExpression &&
+      !hasEscapeHatchCast(returnExpression))
+  ) {
+    return void 0;
+  }
+
+  return {
+    factoryArgument,
+    moduleSpecifier,
+    objectExpression,
+    returnExpression,
+  };
 }
 
 /**

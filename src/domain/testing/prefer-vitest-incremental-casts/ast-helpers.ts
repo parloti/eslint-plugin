@@ -108,6 +108,37 @@ function getPropertyName(
 }
 
 /**
+ * Checks whether an expression's cast chain contains an escape-hatch cast through unknown or any.
+ * @param expression Expression to inspect.
+ * @returns True when at least one cast in the chain uses unknown or any as the type annotation.
+ * @example
+ * ```typescript
+ * const isEscapeHatch = hasEscapeHatchCast(expression);
+ * ```
+ */
+function hasEscapeHatchCast(expression: TSESTree.Expression): boolean {
+  let current: TSESTree.Expression = expression;
+
+  while (
+    current.type === TSESTree.AST_NODE_TYPES.TSAsExpression ||
+    current.type === TSESTree.AST_NODE_TYPES.TSTypeAssertion ||
+    current.type === TSESTree.AST_NODE_TYPES.TSSatisfiesExpression
+  ) {
+    if (
+      current.typeAnnotation.type ===
+        TSESTree.AST_NODE_TYPES.TSUnknownKeyword ||
+      current.typeAnnotation.type === TSESTree.AST_NODE_TYPES.TSAnyKeyword
+    ) {
+      return true;
+    }
+
+    current = current.expression;
+  }
+
+  return false;
+}
+
+/**
  * Narrows object literal elements to the subset the fixer can rewrite safely.
  * @param property Object literal element to inspect.
  * @returns True when the property is supported by the fixer.
@@ -178,6 +209,7 @@ function shouldWrapImplicitObject(
 }
 
 /**
+ * Checks whether an expression's cast chain contains an escape-hatch cast through unknown or any.
  * Removes surrounding cast wrappers from an expression.
  * @param expression Expression to unwrap.
  * @returns The innermost non-cast expression.
@@ -207,6 +239,7 @@ export {
   getFactoryReturnExpression,
   getModuleSpecifier,
   getPropertyName,
+  hasEscapeHatchCast,
   isSupportedProperty,
   isVitestMockCall,
   shouldWrapImplicitObject,

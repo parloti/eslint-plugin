@@ -1,53 +1,19 @@
-/** Commit type emojis recognized by the release parser. */
-const commitTypeEmojis = [
-  "✨",
-  "🐛",
-  "📚",
-  "💎",
-  "📦",
-  "🚀",
-  "🚨",
-  "🛠",
-  "⚙️",
-  "♻️",
-  "🗑",
-];
+import type { Options } from "semantic-release";
 
-/** Regex fragment that matches any supported commit emoji. */
-const emojiRegexPart = commitTypeEmojis.map((emoji) => emoji.trim()).join("|");
+import config from "@codeperfect/commitlint-config-emoji";
 
-/** Literal semantic-release tag format used for published versions. */
-const versionTagFormat = ["v$", "{version}"].join("");
-
-/** Parser options shared by semantic-release conventional commit plugins. */
-const parserOptions = {
-  breakingHeaderPattern: new RegExp(
-    String.raw`^(?:${emojiRegexPart})\s+(\w*)(?:\((.*)\))?!:\s+(.*)$`,
-    "u",
-  ),
-  headerCorrespondence: ["type", "scope", "subject"],
-  headerPattern: new RegExp(
-    String.raw`^(?:${emojiRegexPart})\s+(\w*)(?:\((.*)\))?!?:\s+(.*)$`,
-    "u",
-  ),
-};
-
-/** Semantic-release configuration for publishing this package. */
+/**
+ * Semantic-release loads this file before build output exists, so the parser
+ * behavior is intentionally duplicated here instead of importing from src/.
+ */
 const releaseConfig = {
-  branches: ["master", "main"],
+  branches: ["main"],
   plugins: [
-    [
-      "@semantic-release/commit-analyzer",
-      { parserOpts: parserOptions, preset: "conventionalcommits" },
-    ],
-    [
-      "@semantic-release/release-notes-generator",
-      { parserOpts: parserOptions, preset: "conventionalcommits" },
-    ],
-    ["@semantic-release/npm", { npmPublish: true }],
+    ["@semantic-release/commit-analyzer", config.parserPreset],
+    ["@semantic-release/release-notes-generator", config.parserPreset],
+    "@semantic-release/npm",
     "@semantic-release/github",
   ],
-  tagFormat: versionTagFormat,
-};
+} satisfies Options;
 
 export default releaseConfig;

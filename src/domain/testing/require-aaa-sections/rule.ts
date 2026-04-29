@@ -62,8 +62,11 @@ function reportBlankLineSeparators(
   context: Rule.RuleContext,
   analysis: TestBlockAnalysis,
 ): void {
+  const firstSectionComment = analysis.sectionComments[0]?.comment;
+
   for (const sectionComment of getPhaseBoundaryComments(analysis)) {
     if (
+      sectionComment.comment !== firstSectionComment &&
       !hasBlankLineBeforeComment(analysis.sourceText, sectionComment.comment)
     ) {
       context.report({

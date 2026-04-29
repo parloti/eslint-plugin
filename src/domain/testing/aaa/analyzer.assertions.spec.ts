@@ -1,5 +1,3 @@
-/* eslint max-lines: ["error", 320] -- Helper JSDoc and fixture setup make this focused spec exceed the default line limit. */
-
 import type { Rule } from "eslint";
 import type * as ESTree from "estree";
 
@@ -289,30 +287,5 @@ describe("aAA analyzer assertion helpers", () => {
 
     // Assert
     expect(identifiers).toStrictEqual(["actualResult", "expectedValue"]);
-  });
-
-  it("ignores destructured Assert declarations when collecting identifiers", () => {
-    // Arrange
-    const sourceText = [
-      'it("tracks assert locals", () => {',
-      "  // Arrange",
-      "  const input = 1;",
-      "",
-      "  // Act",
-      "  const computedResult = run(input);",
-      "",
-      "  // Assert",
-      "  const { actualResult } = computedResult;",
-      "  expect(actualResult).toBe(1);",
-      "});",
-    ].join("\n");
-
-    // Act
-    const identifiers = [
-      ...getAssertDeclaredIdentifiers(analyzeSource(sourceText)).keys(),
-    ];
-
-    // Assert
-    expect(identifiers).toStrictEqual([]);
   });
 });

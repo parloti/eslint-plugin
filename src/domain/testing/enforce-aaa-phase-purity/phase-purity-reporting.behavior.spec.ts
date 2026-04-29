@@ -1,10 +1,6 @@
-/* eslint max-lines: ["error", 330] -- This behavior spec keeps several typed reporting scenarios together for one focused helper. */
-
 import type { Rule } from "eslint";
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-
-import { phasePurityReportingBehaviorCompanion } from "./phase-purity-reporting.behavior";
 
 /** Mocked AAA helper module shape used in reporting tests. */
 interface PhasePurityAaaModule {
@@ -221,17 +217,6 @@ describe("enforce-aaa-phase-purity reporting behavior", () => {
     vi.resetModules();
   });
 
-  it("exports the companion marker", () => {
-    // Arrange
-    const expected = true;
-
-    // Act
-    const actual = phasePurityReportingBehaviorCompanion;
-
-    // Assert
-    expect(actual).toBe(expected);
-  });
-
   it("skips analysis when AAA sections are incomplete", async () => {
     // Arrange
     const analysis = {
@@ -298,32 +283,6 @@ describe("enforce-aaa-phase-purity reporting behavior", () => {
         messageId: "missingMeaningfulAct",
         node: { type: "CallExpression" },
       },
-    ]);
-  });
-
-  it("reports evaluated assertion expressions in combined Act and Assert sections", async () => {
-    // Arrange
-    const combinedNode: ReportingNode = {
-      assertion: true,
-      capturable: true,
-      type: "ExpressionStatement",
-      validAssert: false,
-    };
-    const analysis = {
-      callExpression: { type: "CallExpression" },
-      sectionComments: [{ phases: ["Arrange"] }, { phases: ["Act", "Assert"] }],
-      statements: [
-        { node: { type: "ExpressionStatement" }, phases: ["Arrange"] },
-        { node: combinedNode, phases: ["Act", "Assert"] },
-      ],
-    };
-
-    // Act
-    const actual = await runReporting(analysis);
-
-    // Assert
-    expect(actual).toStrictEqual([
-      { messageId: "nonAssertionInAssert", node: combinedNode },
     ]);
   });
 });

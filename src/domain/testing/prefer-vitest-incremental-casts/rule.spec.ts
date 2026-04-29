@@ -224,4 +224,43 @@ describe("prefer-vitest-incremental-casts rule", () => {
       ].join("\n"),
     );
   });
+
+  it("uses the namespace alias when generating type expressions for a file that already imports the module as a namespace", async () => {
+    // Arrange
+    const input = [
+      'import type * as FixtureModule from "fixture-module";',
+      "",
+      "const disableTypeChecked = { rules: [] as string[] };",
+      'const parser = { parseForESLint: (_code: string) => ({ ast: "ok" }) };',
+      'const plugin = { meta: { name: "fixture" } };',
+      "",
+      'vi.doMock(import("fixture-module"), () => ({',
+      "  configs: { disableTypeChecked },",
+      "  parser,",
+      "  plugin,",
+      '} as unknown as typeof import("fixture-module")));',
+      "",
+    ].join("\n");
+
+    // Act
+    const { output } = await runFix(input);
+
+    // Assert
+    expect(output).toBe(
+      [
+        'import type * as FixtureModule from "fixture-module";',
+        "",
+        "const disableTypeChecked = { rules: [] as string[] };",
+        'const parser = { parseForESLint: (_code: string) => ({ ast: "ok" }) };',
+        'const plugin = { meta: { name: "fixture" } };',
+        "",
+        'vi.doMock(import("fixture-module"), () => (({',
+        '  configs: { disableTypeChecked } as typeof FixtureModule["configs"],',
+        "  parser,",
+        "  plugin,",
+        "}) as typeof FixtureModule));",
+        "",
+      ].join("\n"),
+    );
+  });
 }, 30_000);

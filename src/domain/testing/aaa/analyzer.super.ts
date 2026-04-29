@@ -1,8 +1,28 @@
-/* eslint max-lines: ["error", 320] -- Mandatory multiline JSDoc for these shared helper functions pushes this split file over the default limit. */
-
 import type * as ESTree from "estree";
 
 import type { LocatedComment, SourceComment } from "./types";
+
+import { visitNode as visitNodeImplementation } from "./analyzer.super.helpers";
+
+/**
+ * Creates a local forwarding function for an imported analyzer helper.
+ * @template TParameters Forwarded parameter tuple.
+ * @template TResult Forwarded return type.
+ * @param implementation Imported helper implementation.
+ * @returns Local function that forwards all arguments to the implementation.
+ * @example
+ * ```typescript
+ * const localHelper = forward(implementation);
+ * ```
+ */
+function forward<TParameters extends unknown[], TResult>(
+  implementation: (...parameters: TParameters) => TResult,
+): (...parameters: TParameters) => TResult {
+  return (...parameters) => implementation(...parameters);
+}
+
+/** Visits an ESTree node graph while ignoring cycles. */
+const visitNode = forward(visitNodeImplementation);
 
 /** Array mutator methods that imply observable state changes. */
 const arrayMutationMethods = new Set([
@@ -58,16 +78,6 @@ const voidLikeMethodNames = new Set([
   "warn",
 ]);
 
-/** Name pattern used for void-like method detection. */
-const voidLikeNamePattern =
-  /^(?:clear|debug|dispatch|emit|flush|info|log|print|publish|reset|set|trigger|warn)/u;
-
-/** Object shape used for ESTree node narrowing. */
-interface NodeLikeValue {
-  /** Potential ESTree node type field. */
-  type?: unknown;
-}
-
 /**
  * Gets an expression name when it can be resolved statically.
  * @param expression Input expression value.
@@ -114,6 +124,22 @@ function getInvokedName(
 }
 
 /**
+ * Splits an identifier into lowercase word tokens.
+ * @param identifier Input identifier value.
+ * @returns Return value output.
+ * @example
+ * ```typescript
+ * getNameWords("scheduleAndFlush");
+ * ```
+ */
+function getNameWords(identifier: string): string[] {
+  return identifier
+    .split(/(?=[A-Z])|[_-]/u)
+    .map((segment) => segment.toLowerCase())
+    .filter((segment) => segment.length > 0);
+}
+
+/**
  * Checks whether an expression is callable.
  * @param expression Input expression value.
  * @returns Return value output.
@@ -143,24 +169,6 @@ function isCallableExpression(
 function isLocatedComment(comment: SourceComment): comment is LocatedComment {
   return (
     comment.loc !== null && comment.loc !== void 0 && comment.range !== void 0
-  );
-}
-
-/**
- * Checks whether a value is an ESTree node.
- * @param value Input value value.
- * @returns Return value output.
- * @example
- * ```typescript
- * isNode(value);
- * ```
- */
-function isNode(value: unknown): value is ESTree.Node {
-  return (
-    typeof value === "object" &&
-    value !== null &&
-    "type" in value &&
-    typeof (value as NodeLikeValue).type === "string"
   );
 }
 
@@ -197,7 +205,8 @@ function isUtilityConstructor(
 ): boolean {
   return (
     expression.type === "NewExpression" &&
-    (calleeName === "Map" ||
+    (calleeName === "Error" ||
+      calleeName === "Map" ||
       calleeName === "Set" ||
       calleeName === "SourceCode" ||
       calleeName === "ESLint")
@@ -237,62 +246,16 @@ function isUtilityNamespaceCall(
 }
 
 /**
- * Visits an ESTree node graph while ignoring cycles.
- * @param node Input node value.
- * @param callback Input callback value.
- * @param seenNodes Input seenNodes value.
+ * Checks whether a call name is built from void-like verb tokens.
+ * @param calleeName Input calleeName value.
+ * @returns Return value output.
  * @example
  * ```typescript
- * visitNode(node, () => {});
+ * isVoidLikeMethodName("scheduleAndFlush");
  * ```
  */
-function visitNode(
-  node: ESTree.Node,
-  callback: (node: ESTree.Node) => void,
-  seenNodes = new WeakSet<object>(),
-): void {
-  if (seenNodes.has(node)) {
-    return;
-  }
-
-  seenNodes.add(node);
-  callback(node);
-
-  for (const [key, value] of Object.entries(node)) {
-    if (key !== "parent") {
-      visitValue(value, callback, seenNodes);
-    }
-  }
-}
-
-/**
- * Visits child values that may contain nested ESTree nodes.
- * @param value Input value value.
- * @param callback Input callback value.
- * @param seenNodes Input seenNodes value.
- * @example
- * ```typescript
- * visitValue(value, () => {}, new WeakSet<object>());
- * ```
- */
-function visitValue(
-  value: unknown,
-  callback: (node: ESTree.Node) => void,
-  seenNodes: WeakSet<object>,
-): void {
-  if (Array.isArray(value)) {
-    for (const item of value) {
-      if (isNode(item)) {
-        visitNode(item, callback, seenNodes);
-      }
-    }
-
-    return;
-  }
-
-  if (isNode(value)) {
-    visitNode(value, callback, seenNodes);
-  }
+function isVoidLikeMethodName(calleeName: string): boolean {
+  return getNameWords(calleeName).some((word) => voidLikeMethodNames.has(word));
 }
 
 export {
@@ -305,9 +268,9 @@ export {
   isUtilityConstructor,
   isUtilityNamedCall,
   isUtilityNamespaceCall,
+  isVoidLikeMethodName,
   setupLikeNames,
   utilityMethodNames,
   visitNode,
   voidLikeMethodNames,
-  voidLikeNamePattern,
 };

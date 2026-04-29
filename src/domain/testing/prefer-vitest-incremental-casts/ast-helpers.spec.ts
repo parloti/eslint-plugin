@@ -8,6 +8,7 @@ import {
   getFactoryReturnExpression,
   getModuleSpecifier,
   getPropertyName,
+  hasEscapeHatchCast,
   isSupportedProperty,
   isVitestMockCall,
   shouldWrapImplicitObject,
@@ -237,5 +238,63 @@ describe("prefer-vitest-incremental-casts ast helpers", () => {
     // Assert
     expect(actual.propertyName).toBeUndefined();
     expect(actual.wrapObject).toBe(false);
+  });
+
+  it("detects escape-hatch casts through unknown and any", () => {
+    // Arrange
+    const identifier = {
+      name: "x",
+      range: [0, 1],
+      type: TSESTree.AST_NODE_TYPES.Identifier,
+    } as never;
+    const unknownKeyword = {
+      type: TSESTree.AST_NODE_TYPES.TSUnknownKeyword,
+    } as never;
+    const anyKeyword = {
+      type: TSESTree.AST_NODE_TYPES.TSAnyKeyword,
+    } as never;
+    const typeReference = {
+      type: TSESTree.AST_NODE_TYPES.TSTypeReference,
+      typeName: { name: "T", type: TSESTree.AST_NODE_TYPES.Identifier },
+    } as never;
+    const directCast = {
+      expression: identifier,
+      type: TSESTree.AST_NODE_TYPES.TSAsExpression,
+      typeAnnotation: typeReference,
+    } as never;
+    const unknownEscapeHatch = {
+      expression: {
+        expression: identifier,
+        type: TSESTree.AST_NODE_TYPES.TSAsExpression,
+        typeAnnotation: unknownKeyword,
+      } as never,
+      type: TSESTree.AST_NODE_TYPES.TSAsExpression,
+      typeAnnotation: typeReference,
+    } as never;
+    const anyEscapeHatch = {
+      expression: {
+        expression: identifier,
+        type: TSESTree.AST_NODE_TYPES.TSAsExpression,
+        typeAnnotation: anyKeyword,
+      } as never,
+      type: TSESTree.AST_NODE_TYPES.TSAsExpression,
+      typeAnnotation: typeReference,
+    } as never;
+
+    // Act
+    const actual = {
+      anyEscapeHatch: hasEscapeHatchCast(anyEscapeHatch),
+      bareIdentifier: hasEscapeHatchCast(identifier),
+      directCast: hasEscapeHatchCast(directCast),
+      unknownEscapeHatch: hasEscapeHatchCast(unknownEscapeHatch),
+    };
+
+    // Assert
+    expect(actual).toStrictEqual({
+      anyEscapeHatch: true,
+      bareIdentifier: false,
+      directCast: false,
+      unknownEscapeHatch: true,
+    });
   });
 });

@@ -1,6 +1,6 @@
 import type { Rule } from "eslint";
 
-import { ESLintUtils } from "@typescript-eslint/utils";
+import { ESLintUtils, TSESTree } from "@typescript-eslint/utils";
 
 import type {
   MessageIds,
@@ -11,6 +11,39 @@ import type {
 
 import { createRuleDocumentation } from "../../custom-rule-documentation";
 import { collectMatch } from "./match";
+
+/**
+ * Builds a map of namespace import aliases for the current source file.
+ * @param sourceCode Source code object from the ESLint rule context.
+ * @returns Map of module specifier to namespace alias name.
+ * @example
+ * ```typescript
+ * const namespaceImports = getNamespaceImports(context.sourceCode);
+ * ```
+ */
+function getNamespaceImports(
+  sourceCode: TypedRuleContext["sourceCode"],
+): ReadonlyMap<string, string> {
+  const result = new Map<string, string>();
+
+  for (const node of sourceCode.ast.body) {
+    if (
+      node.type === TSESTree.AST_NODE_TYPES.ImportDeclaration &&
+      typeof node.source.value === "string"
+    ) {
+      for (const specifier of node.specifiers) {
+        if (
+          specifier.type === TSESTree.AST_NODE_TYPES.ImportNamespaceSpecifier
+        ) {
+          result.set(node.source.value, specifier.local.name);
+          break;
+        }
+      }
+    }
+  }
+
+  return result;
+}
 
 /**
  * Resolves TypeScript parser services when the rule runs on a typed file.
@@ -45,12 +78,14 @@ const preferVitestIncrementalCastsRule = ESLintUtils.RuleCreator.withoutDocs<
 
     const checker = services.program.getTypeChecker();
     const sourceText = context.sourceCode.text;
+    const namespaceImports = getNamespaceImports(context.sourceCode);
 
     return {
       CallExpression(node): void {
         const match = collectMatch({
           callExpression: node,
           checker,
+          namespaceImports,
           services,
           sourceText,
         });

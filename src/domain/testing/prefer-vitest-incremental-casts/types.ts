@@ -12,6 +12,9 @@ interface BuildMatchResultContext {
   /** Static module specifier used by the mock call. */
   moduleSpecifier: string;
 
+  /** Namespace alias for the module specifier, when a namespace import is present. */
+  namespaceAlias: string | undefined;
+
   /** Returned object literal from the mock factory. */
   objectExpression: TSESTree.ObjectExpression;
 
@@ -42,6 +45,9 @@ interface BuildPropertyReplacementContext {
   /** Static module specifier used by the mock call. */
   moduleSpecifier: string;
 
+  /** Namespace alias for the module specifier, when a namespace import is present. */
+  namespaceAlias: string | undefined;
+
   /** Supported property being rewritten. */
   property: SupportedProperty;
 
@@ -63,6 +69,9 @@ interface CollectMatchContext {
   /** TypeScript type checker used for assignability checks. */
   checker: ts.TypeChecker;
 
+  /** Namespace imports present in the current file, keyed by module specifier. */
+  namespaceImports: ReadonlyMap<string, string>;
+
   /** Parser services supplied by `@typescript-eslint`. */
   services: ParserServices;
 
@@ -77,6 +86,9 @@ interface CollectPropertyReplacementsContext {
 
   /** Static module specifier used by the mock call. */
   moduleSpecifier: string;
+
+  /** Namespace alias for the module specifier, when a namespace import is present. */
+  namespaceAlias: string | undefined;
 
   /** Returned object literal from the mock factory. */
   objectExpression: TSESTree.ObjectExpression;
@@ -109,24 +121,6 @@ interface FactoryMatchInput {
 
   /** Expression returned by the mock factory. */
   returnExpression: TSESTree.Expression;
-}
-
-/** Context used to inspect one callable signature for a mock factory. */
-interface MatchingSignatureReturnTypeContext {
-  /** TypeScript type checker used for assignability checks. */
-  checker: ts.TypeChecker;
-
-  /** First mock-call argument node. */
-  firstArgument: ts.Node;
-
-  /** Type resolved for the first mock-call argument. */
-  firstArgumentType: ts.Type;
-
-  /** Callable signature being inspected. */
-  signature: ts.Signature;
-
-  /** TypeScript node for the factory callback argument. */
-  tsFactoryArgument: ts.Node;
 }
 
 /** Text replacement emitted for a matching factory object. */
@@ -215,20 +209,6 @@ interface ShorthandContext {
   /** Supported property being rewritten. */
   property: SupportedProperty;
 }
-/** Normalized inputs used when matching callable Vitest signatures. */
-interface SignatureMatchInputs {
-  /** Type resolved for the mock callee expression. */
-  calleeType: ts.Type;
-
-  /** First mock-call argument node. */
-  firstArgument: ts.Node;
-
-  /** Type resolved for the first mock-call argument. */
-  firstArgumentType: ts.Type;
-
-  /** TypeScript node for the factory callback argument. */
-  tsFactoryArgument: ts.Node;
-}
 /** Object literal properties supported by the fixer. */
 type SupportedProperty = Extract<
   TSESTree.ObjectLiteralElement,
@@ -279,7 +259,6 @@ export type {
   CollectPropertyReplacementsContext,
   FactoryFunctionExpression,
   FactoryMatchInput,
-  MatchingSignatureReturnTypeContext,
   MatchResult,
   MessageIds,
   MockFactoryArguments,
@@ -290,7 +269,6 @@ export type {
   PropertyReplacementCollection,
   ResolveFactoryTargetTypeContext,
   ShorthandContext,
-  SignatureMatchInputs,
   SupportedProperty,
   TargetPropertyMap,
   TypedRuleContext,

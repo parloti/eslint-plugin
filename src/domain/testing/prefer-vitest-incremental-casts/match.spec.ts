@@ -42,6 +42,7 @@ describe("prefer-vitest-incremental-casts match", () => {
         type: TSESTree.AST_NODE_TYPES.CallExpression,
       } as never,
       checker: {} as never,
+      namespaceImports: new Map(),
       services: {} as never,
       sourceText: "",
     };
@@ -100,6 +101,7 @@ describe("prefer-vitest-incremental-casts match", () => {
       checker: {
         getPropertiesOfType: () => [{ getName: (): string => "parser" }],
       } as never,
+      namespaceImports: new Map(),
       services: {} as never,
       sourceText: "{ parser }",
     });
@@ -158,6 +160,7 @@ describe("prefer-vitest-incremental-casts match", () => {
       checker: {
         getPropertiesOfType: () => [{ getName: (): string => "parser" }],
       } as never,
+      namespaceImports: new Map(),
       services: {} as never,
       sourceText: "{ parser }",
     });

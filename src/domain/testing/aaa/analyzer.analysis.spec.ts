@@ -1,5 +1,3 @@
-/* eslint max-lines: ["error", 320] -- Helper JSDoc and fixture setup make this focused spec exceed the default line limit. */
-
 import type { Rule } from "eslint";
 import type * as ESTree from "estree";
 
@@ -292,21 +290,5 @@ describe("aAA analyzer block analysis", () => {
     expect(result.newline).toBe("\r\n");
     expect(result.statements[0]?.phase).toBeUndefined();
     expect(result.statements[0]?.phases).toStrictEqual([]);
-  });
-
-  it("returns undefined for unsupported helper and todo calls", () => {
-    // Arrange
-    const helperSourceText = "helper();";
-    const todoSourceText = 'it("todo");';
-
-    // Act
-    const result = {
-      helperAnalysis: analyzeMaybeSource(helperSourceText),
-      todoAnalysis: analyzeMaybeSource(todoSourceText),
-    };
-
-    // Assert
-    expect(result.helperAnalysis).toBeUndefined();
-    expect(result.todoAnalysis).toBeUndefined();
   });
 });

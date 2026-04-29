@@ -1,3 +1,4 @@
+/* eslint-disable max-statements -- TODO: False positive, *.spec.ts should be allowed to have more statements. */
 import { ESLint } from "eslint";
 import { afterAll, describe, expect, it } from "vitest";
 
@@ -36,6 +37,22 @@ describe(
     it("does not report non-function factory arguments", async () => {
       // Arrange
       const input = [
+        'vi.doMock(import("fixture-module"), undefined as never);',
+        "",
+      ].join("\n");
+
+      // Act
+      const actual = await runFix(input);
+
+      // Assert
+      expect(actual.messages).toStrictEqual([]);
+      expect(actual.output).toBe(input);
+    });
+
+    it("ignores regular named imports when collecting namespace aliases", async () => {
+      // Arrange
+      const input = [
+        'import { readFileSync } from "node:fs";',
         'vi.doMock(import("fixture-module"), undefined as never);',
         "",
       ].join("\n");
@@ -169,6 +186,29 @@ describe(
 
       // Assert
       expect(result?.messages).toStrictEqual([]);
+    });
+
+    it("does not report a factory return wrapped in a single direct cast without an escape hatch", async () => {
+      // Arrange
+      const input = [
+        "const disableTypeChecked = { rules: [] as string[] };",
+        'const parser = { parseForESLint: (_code: string) => ({ ast: "ok" }) };',
+        'const plugin = { meta: { name: "fixture" } };',
+        "",
+        'vi.doMock(import("fixture-module"), () => ({',
+        "  configs: { disableTypeChecked },",
+        "  parser,",
+        "  plugin,",
+        '} as typeof import("fixture-module")));',
+        "",
+      ].join("\n");
+
+      // Act
+      const actual = await runFix(input);
+
+      // Assert
+      expect(actual.messages).toStrictEqual([]);
+      expect(actual.output).toBe(input);
     });
   },
   30_000,

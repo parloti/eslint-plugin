@@ -71,7 +71,8 @@ function buildPropertyReplacement(
 function buildReplacementText(
   context: BuildPropertyReplacementContext,
 ): string {
-  const { keyName, moduleSpecifier, property, sourceText } = context;
+  const { keyName, moduleSpecifier, namespaceAlias, property, sourceText } =
+    context;
   const baseValue = unwrapExpression(property.value);
   const baseValueText = sourceText.slice(
     baseValue.range[0],
@@ -83,7 +84,7 @@ function buildReplacementText(
   );
   const needsCast = isPropertyCastRequired(context, baseValue);
   const valueText = needsCast
-    ? `${baseValueText} as ${getPropertyTypeText(moduleSpecifier, keyName)}`
+    ? `${baseValueText} as ${getPropertyTypeText(moduleSpecifier, keyName, namespaceAlias)}`
     : baseValueText;
 
   return canUseShorthand({ baseValue, keyName, needsCast, property })
@@ -95,14 +96,24 @@ function buildReplacementText(
  * Builds the imported property type expression used for a nested cast.
  * @param moduleSpecifier Static module specifier used by the mock.
  * @param keyName Property name being cast.
+ * @param namespaceAlias Namespace alias for the module, when present.
  * @returns Type expression for the imported property.
  * @example
  * ```typescript
  * const propertyType = getPropertyTypeText("fixture-module", "parser");
  * ```
  */
-function getPropertyTypeText(moduleSpecifier: string, keyName: string): string {
-  return `typeof import(${JSON.stringify(moduleSpecifier)})[${JSON.stringify(keyName)}]`;
+function getPropertyTypeText(
+  moduleSpecifier: string,
+  keyName: string,
+  namespaceAlias?: string,
+): string {
+  const moduleReference =
+    namespaceAlias === void 0
+      ? `import(${JSON.stringify(moduleSpecifier)})`
+      : namespaceAlias;
+
+  return `typeof ${moduleReference}[${JSON.stringify(keyName)}]`;
 }
 
 /**

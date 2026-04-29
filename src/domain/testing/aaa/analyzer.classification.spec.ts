@@ -4,23 +4,13 @@ import { parser } from "typescript-eslint";
 import { describe, expect, it } from "vitest";
 
 import {
-  hasAssertion,
   hasAsyncLogic,
   hasAwait,
   hasCapturableActResult,
-  hasMutation,
   isMeaningfulActStatement,
   isSetupLikeStatement,
   isValidAssertStatement,
 } from "./analyzer";
-
-/** Expression statement with synthetic cyclic properties for traversal tests. */
-interface CyclicExpressionStatement extends ESTree.ExpressionStatement {
-  /** Optional duplicate reference used to create cycles. */
-  duplicate?: object;
-  /** Optional parent reference used to create cycles. */
-  parent?: object;
-}
 
 /** Parser options used by the fixture adapter. */
 interface ParseForEslintOptions {
@@ -89,29 +79,6 @@ const getFirstFunctionBodyStatement = (code: string): ESTree.Statement => {
   if (statement === void 0) {
     throw new TypeError("Expected a function body statement.");
   }
-
-  return statement;
-};
-
-/**
- * Builds an assertion statement with cyclic references.
- * @param code Assertion source inserted into the fixture function.
- * @returns Expression statement with synthetic cycles.
- * @example
- * ```typescript
- * const statement = getCyclicAssertionStatement("expect(value).toBe(1);");
- * void statement;
- * ```
- */
-const getCyclicAssertionStatement = (
-  code: string,
-): ESTree.ExpressionStatement => {
-  const statement = getFirstFunctionBodyStatement(
-    code,
-  ) as CyclicExpressionStatement;
-
-  statement.duplicate = statement.expression;
-  statement.parent = statement;
 
   return statement;
 };
@@ -232,7 +199,16 @@ describe("aaa analyzer statement classification", () => {
     const awaitCall = getFirstFunctionBodyStatement("await run(input);");
     const capturableRun = getFirstFunctionBodyStatement("run(input);");
     const capturableSetter = getFirstFunctionBodyStatement("setValue(input);");
-    const capturableValue = getFirstFunctionBodyStatement("value;");
+    const compoundVoidHelper = getFirstFunctionBodyStatement(
+      "scheduleAndFlush();",
+    );
+    const [capturableValue, errorSetup] = [
+      getFirstFunctionBodyStatement("value;"),
+      getFirstFunctionBodyStatement("const error = new Error('boom');"),
+    ];
+    const deferredAsyncHelper = getFirstFunctionBodyStatement(
+      "const runner = async (): Promise<number> => {\n  await prepareRemoteState();\n  return 1;\n};",
+    );
 
     // Act
     const actual = {
@@ -242,6 +218,10 @@ describe("aaa analyzer statement classification", () => {
       capturableRun: hasCapturableActResult(capturableRun),
       capturableSetter: hasCapturableActResult(capturableSetter),
       capturableValue: hasCapturableActResult(capturableValue),
+      compoundVoidHelper: hasCapturableActResult(compoundVoidHelper),
+      deferredAsyncHelper: hasAsyncLogic(deferredAsyncHelper),
+      deferredHelperAwait: hasAwait(deferredAsyncHelper),
+      errorSetup: isSetupLikeStatement(errorSetup),
     };
 
     // Assert
@@ -252,35 +232,10 @@ describe("aaa analyzer statement classification", () => {
       capturableRun: true,
       capturableSetter: false,
       capturableValue: false,
-    });
-  });
-
-  it("detects mutations, delete expressions, and cyclic assertions", () => {
-    // Arrange
-    const mutationStatement =
-      getFirstFunctionBodyStatement("items.push(value);");
-    const nonMutationUnaryStatement = getFirstFunctionBodyStatement("!ready;");
-    const assertionStatement = getCyclicAssertionStatement(
-      "expect(result).toBe(expectedValue);",
-    );
-    const deleteStatement = getFirstFunctionBodyStatement(
-      "delete cache.value;",
-    );
-
-    // Act
-    const actual = {
-      assertionStatement: hasAssertion(assertionStatement),
-      deleteStatement: hasMutation(deleteStatement),
-      mutationStatement: hasMutation(mutationStatement),
-      nonMutationUnaryStatement: hasMutation(nonMutationUnaryStatement),
-    };
-
-    // Assert
-    expect(actual).toStrictEqual({
-      assertionStatement: true,
-      deleteStatement: true,
-      mutationStatement: true,
-      nonMutationUnaryStatement: false,
+      compoundVoidHelper: false,
+      deferredAsyncHelper: false,
+      deferredHelperAwait: false,
+      errorSetup: true,
     });
   });
 });

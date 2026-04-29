@@ -146,6 +146,9 @@ function collectMatch(context: CollectMatchContext): MatchResult | undefined {
   const collectedReplacements = collectPropertyReplacements({
     checker: context.checker,
     moduleSpecifier: factoryMatchInput.moduleSpecifier,
+    namespaceAlias: context.namespaceImports.get(
+      factoryMatchInput.moduleSpecifier,
+    ),
     objectExpression: factoryMatchInput.objectExpression,
     services: context.services,
     sourceText: context.sourceText,
@@ -158,6 +161,9 @@ function collectMatch(context: CollectMatchContext): MatchResult | undefined {
         checker: context.checker,
         factoryArgument: factoryMatchInput.factoryArgument,
         moduleSpecifier: factoryMatchInput.moduleSpecifier,
+        namespaceAlias: context.namespaceImports.get(
+          factoryMatchInput.moduleSpecifier,
+        ),
         objectExpression: factoryMatchInput.objectExpression,
         propertyNames: collectedReplacements.propertyNames,
         replacements: collectedReplacements.replacements,
@@ -214,6 +220,7 @@ function createPropertyReplacementContext(
         checker: context.checker,
         keyName,
         moduleSpecifier: context.moduleSpecifier,
+        namespaceAlias: context.namespaceAlias,
         property,
         services: context.services,
         sourceText: context.sourceText,
@@ -242,7 +249,12 @@ function createReplacementText(
       targetType: context.targetType,
     })
   ) {
-    return `(${objectText}) as typeof import(${JSON.stringify(context.moduleSpecifier)})`;
+    const moduleReference =
+      context.namespaceAlias === void 0
+        ? `import(${JSON.stringify(context.moduleSpecifier)})`
+        : context.namespaceAlias;
+
+    return `(${objectText}) as typeof ${moduleReference}`;
   }
 
   return shouldWrapImplicitObject(

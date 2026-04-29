@@ -8,6 +8,7 @@ import {
   enforceAaaPhasePurityRule,
   enforceAaaStructureRule,
   requireAaaSectionsRule,
+  requireActResultCaptureRule,
 } from "../../src";
 
 /** Aggregated AAA lint result for one end-to-end regression case. */
@@ -37,6 +38,7 @@ const aaaConfig: EslintLinterType.Config[] = [
           "enforce-aaa-phase-purity": enforceAaaPhasePurityRule,
           "enforce-aaa-structure": enforceAaaStructureRule,
           "require-aaa-sections": requireAaaSectionsRule,
+          "require-act-result-capture": requireActResultCaptureRule,
         },
       },
     },
@@ -44,6 +46,7 @@ const aaaConfig: EslintLinterType.Config[] = [
       "codeperfect/enforce-aaa-phase-purity": "error",
       "codeperfect/enforce-aaa-structure": "error",
       "codeperfect/require-aaa-sections": "error",
+      "codeperfect/require-act-result-capture": "error",
     },
   },
 ];
@@ -152,6 +155,102 @@ describe("aaa regressions e2e", () => {
       '    "codeperfect/no-multiple-declarators",',
       '    "codeperfect/prefer-interface-types",',
       "  ]);",
+      "});",
+    ].join("\n");
+
+    // Act
+    const result = runAaaRules(code);
+
+    // Assert
+    expect(result.messageIds).toStrictEqual([]);
+  });
+
+  it("accepts AAA sections when Arrange is the first line inside the test", () => {
+    // Arrange
+    const code = [
+      'it("allows the first AAA section without a leading blank line", () => {',
+      "  // Arrange",
+      "  const input = 1;",
+      "",
+      "  // Act",
+      "  const actualResult = run(input);",
+      "",
+      "  // Assert",
+      "  expect(actualResult).toBe(1);",
+      "});",
+    ].join("\n");
+
+    // Act
+    const result = runAaaRules(code);
+
+    // Assert
+    expect(result.messageIds).toStrictEqual([]);
+  });
+
+  it("accepts compound void-like helpers in Act", () => {
+    // Arrange
+    const code = [
+      'it("allows scheduleAndFlush helpers", () => {',
+      "  // Arrange",
+      "  let wasExecuted = false;",
+      "  const scheduleAndFlush = (): void => {",
+      "    wasExecuted = true;",
+      "  };",
+      "",
+      "  // Act",
+      "  scheduleAndFlush();",
+      "",
+      "  // Assert",
+      "  expect(wasExecuted).toBe(true);",
+      "});",
+    ].join("\n");
+
+    // Act
+    const result = runAaaRules(code);
+
+    // Assert
+    expect(result.messageIds).toStrictEqual([]);
+  });
+
+  it("accepts deferred async helpers declared in Arrange", () => {
+    // Arrange
+    const code = [
+      'it("allows deferred async helpers", async () => {',
+      "  // Arrange",
+      "  const runner = async (): Promise<number> => {",
+      "    await prepareRemoteState();",
+      "    return 1;",
+      "  };",
+      "",
+      "  // Act",
+      "  const actualResult = await runner();",
+      "",
+      "  // Assert",
+      "  expect(actualResult).toBe(1);",
+      "});",
+    ].join("\n");
+
+    // Act
+    const result = runAaaRules(code);
+
+    // Assert
+    expect(result.messageIds).toStrictEqual([]);
+  });
+
+  it("accepts error objects prepared during Arrange", () => {
+    // Arrange
+    const code = [
+      'it("allows error setup in Arrange", () => {',
+      "  // Arrange",
+      "  const diagram = '--#';",
+      "  const error = new Error('Test Error');",
+      "",
+      "  // Act",
+      "  const result$ = hot(diagram, void 0, error);",
+      "",
+      "  // Assert",
+      "  expect(result$.diagram).toBe(diagram);",
+      "  expect(result$.error).toBe(error);",
       "});",
     ].join("\n");
 

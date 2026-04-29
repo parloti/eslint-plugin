@@ -3,10 +3,8 @@ import type * as ts from "typescript";
 import { SignatureKind } from "typescript";
 
 import type {
-  MatchingSignatureReturnTypeContext,
   OuterCastContext,
   ResolveFactoryTargetTypeContext,
-  SignatureMatchInputs,
 } from "./types";
 
 import {
@@ -14,6 +12,39 @@ import {
   normalizeObjectLikeType,
   resolveFactoryReturnType,
 } from "./type-shape-helpers";
+
+/** Context used to inspect one callable signature for a mock factory. */
+interface MatchingSignatureReturnTypeContext {
+  /** TypeScript type checker used for assignability checks. */
+  checker: ts.TypeChecker;
+
+  /** First mock-call argument node. */
+  firstArgument: ts.Node;
+
+  /** Type resolved for the first mock-call argument. */
+  firstArgumentType: ts.Type;
+
+  /** Callable signature being inspected. */
+  signature: ts.Signature;
+
+  /** TypeScript node for the factory callback argument. */
+  tsFactoryArgument: ts.Node;
+}
+
+/** Normalized inputs used when matching callable Vitest signatures. */
+interface SignatureMatchInputs {
+  /** Type resolved for the mock callee expression. */
+  calleeType: ts.Type;
+
+  /** First mock-call argument node. */
+  firstArgument: ts.Node;
+
+  /** Type resolved for the first mock-call argument. */
+  firstArgumentType: ts.Type;
+
+  /** TypeScript node for the factory callback argument. */
+  tsFactoryArgument: ts.Node;
+}
 
 /**
  * Reads the contextual type assigned to the returned mock object literal.

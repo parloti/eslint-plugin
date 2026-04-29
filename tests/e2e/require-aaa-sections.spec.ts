@@ -125,6 +125,15 @@ describe("require-aaa-sections e2e", () => {
     },
     {
       code: [
+        'it("accepts a first combined AAA comment", () => {',
+        "  // Arrange & Act & Assert",
+        "  expect(run()).toBe(1);",
+        "});",
+      ].join("\n"),
+      filename: "example.spec.ts",
+    },
+    {
+      code: [
         'it("accepts combined AAA comments", () => {',
         "",
         "  // Arrange & Act & Assert",

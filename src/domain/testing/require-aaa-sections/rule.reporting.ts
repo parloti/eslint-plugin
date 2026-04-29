@@ -1,5 +1,3 @@
-/* eslint max-lines: ["error", 310] -- Mocked reporting helpers in this focused spec companion require verbose typed fixtures and examples. */
-
 import type { Rule } from "eslint";
 
 import type { TestBlockAnalysis } from "../aaa";
