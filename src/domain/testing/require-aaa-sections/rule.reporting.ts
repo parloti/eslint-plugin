@@ -1,9 +1,18 @@
 import type { Rule } from "eslint";
 
 import type { TestBlockAnalysis } from "../aaa";
+import type { RequireAaaSectionsMessageId } from "./rule.reporting-helpers";
+
+import {
+  getMockSectionComments,
+  getMockStatements,
+  isRequireAaaSectionsMessageId,
+} from "./rule.reporting-helpers";
 
 /** Mocked AAA helper exports consumed by the rule. */
 interface AaaModuleMock {
+  /** Mocked phase order constant. */
+  aaaPhaseOrder: Record<string, number>;
   /** Mocked analyzer entry point. */
   analyzeTestBlock: () => TestBlockAnalysis;
   /** Mocked line-start helper. */
@@ -21,13 +30,6 @@ interface MissingSectionFixesModule {
   /** Mocked fix builder. */
   buildMissingSectionFixes: () => Rule.Fix[];
 }
-
-/** Message identifiers emitted by the rule under test. */
-type RequireAaaSectionsMessageId =
-  | "blankLineBeforeSection"
-  | "codeBeforeArrange"
-  | "emptySection"
-  | "missingSections";
 
 /** Captured result from the mocked reporting scenario. */
 interface ScenarioResult {
@@ -63,6 +65,7 @@ function alwaysReturnFalse(): false {
  */
 function createAaaModuleMock(): AaaModuleMock {
   return {
+    aaaPhaseOrder: { Act: 1, Arrange: 0, Assert: 2 },
     analyzeTestBlock: createMockAnalysis,
     getLineStartRange: getMockLineStartRange,
     getPhaseBoundaryComments: getMockPhaseBoundaryComments,
@@ -86,7 +89,7 @@ function createMissingSectionFixesModule(
 }
 
 /**
- * Builds the synthetic analysis returned by the mocked AAA helpers.
+ * Creates minimal test-block analysis used by the regression scenario.
  * @returns Minimal test-block analysis used by the regression scenario.
  * @example
  * ```typescript
@@ -95,45 +98,13 @@ function createMissingSectionFixesModule(
  */
 function createMockAnalysis(): TestBlockAnalysis {
   return {
-    bodyLineCount: 4,
+    bodyLineCount: 5,
     callExpression: { type: "CallExpression" },
     newline: "\n",
-    sectionComments: [
-      {
-        comment: {
-          loc: { end: { line: 2 }, start: { line: 2 } },
-          type: "Line",
-        },
-        phases: ["Arrange"],
-      },
-      {
-        comment: {
-          loc: { end: { line: 4 }, start: { line: 4 } },
-          type: "Line",
-        },
-        phases: ["Act"],
-      },
-    ],
-    sourceText: [
-      "const setup = createSetup();",
-      "// Arrange",
-      "run();",
-      "// Act",
-    ].join("\n"),
-    statements: [
-      {
-        node: {
-          loc: { end: { line: 1 }, start: { line: 1 } },
-          type: "ExpressionStatement",
-        },
-      },
-      {
-        node: {
-          loc: { end: { line: 3 }, start: { line: 3 } },
-          type: "ExpressionStatement",
-        },
-      },
-    ],
+    sectionComments: getMockSectionComments(),
+    sourceText:
+      "const setup = createSetup();\n// Arrange\nrun();\n// Act\nconst result = act();",
+    statements: getMockStatements(),
   } as TestBlockAnalysis;
 }
 
@@ -236,8 +207,8 @@ function getMockPhaseBoundaryComments(
  * @returns Supported message identifier when present.
  * @example
  * ```typescript
- * const messageId = getReportMessageId({ messageId: "missingSections" } as Rule.ReportDescriptor);
- * void messageId;
+ * const id = getReportMessageId({ messageId: "missingSections" } as Rule.ReportDescriptor);
+ * void id;
  * ```
  */
 function getReportMessageId(
@@ -250,27 +221,6 @@ function getReportMessageId(
     return void 0;
   }
   return descriptor.messageId;
-}
-
-/**
- * Checks whether an unknown value is a valid rule message identifier.
- * @param value Value to validate.
- * @returns Whether the value is a supported message identifier.
- * @example
- * ```typescript
- * const actual = isRequireAaaSectionsMessageId("missingSections");
- * void actual;
- * ```
- */
-function isRequireAaaSectionsMessageId(
-  value: unknown,
-): value is RequireAaaSectionsMessageId {
-  return (
-    value === "blankLineBeforeSection" ||
-    value === "codeBeforeArrange" ||
-    value === "emptySection" ||
-    value === "missingSections"
-  );
 }
 
 /**

@@ -86,7 +86,6 @@ describe("aAA analyzer super helpers", () => {
       sourceType: "module",
       type: "Program",
     };
-    // eslint-disable-next-line codeperfect/enforce-aaa-phase-purity -- TODO: False positive
     const seenNodes = new WeakSet<object>([root]);
 
     // Act

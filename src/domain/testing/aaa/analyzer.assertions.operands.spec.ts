@@ -43,4 +43,22 @@ describe("aAA analyzer assertions operands", () => {
       },
     });
   });
+
+  it.each(["expectTypeOf", "assertType"])(
+    "treats %s() as an assertion call",
+    (calleeName) => {
+      // Arrange
+      const expression = {
+        arguments: [],
+        callee: { name: calleeName, type: "Identifier" },
+        type: "CallExpression",
+      } as unknown as ESTree.CallExpression;
+
+      // Act
+      const actual = isAssertionCall(expression);
+
+      // Assert
+      expect(actual).toBe(true);
+    },
+  );
 });

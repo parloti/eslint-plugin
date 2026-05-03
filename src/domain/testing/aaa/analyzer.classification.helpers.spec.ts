@@ -49,4 +49,53 @@ describe("aAA analyzer classification helpers", () => {
       capturableActResult: true,
     });
   });
+
+  it.each([
+    ["WeakSet", "new WeakSet()"],
+    ["WeakMap", "new WeakMap()"],
+  ])(
+    "treats new %s() as a non-capturable utility constructor in Arrange",
+    (_name) => {
+      // Arrange
+      const statement = {
+        declarations: [
+          {
+            id: { name: "seenNodes", type: "Identifier" },
+            init: {
+              arguments: [],
+              callee: { name: _name, type: "Identifier" },
+              type: "NewExpression",
+            },
+            type: "VariableDeclarator",
+          },
+        ],
+        kind: "const",
+        type: "VariableDeclaration",
+      } as unknown as ESTree.Statement;
+
+      // Act
+      const actual = hasCapturableActResult(statement);
+
+      // Assert
+      expect(actual).toBe(false);
+    },
+  );
+
+  it("treats calls with void-like name tokens as non-capturable", () => {
+    // Arrange
+    const statement = {
+      expression: {
+        arguments: [],
+        callee: { name: "scheduleAndFlush", type: "Identifier" },
+        type: "CallExpression",
+      },
+      type: "ExpressionStatement",
+    } as unknown as ESTree.Statement;
+
+    // Act
+    const actual = hasCapturableActResult(statement);
+
+    // Assert
+    expect(actual).toBe(false);
+  });
 });

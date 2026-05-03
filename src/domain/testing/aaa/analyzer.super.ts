@@ -209,7 +209,9 @@ function isUtilityConstructor(
       calleeName === "Map" ||
       calleeName === "Set" ||
       calleeName === "SourceCode" ||
-      calleeName === "ESLint")
+      calleeName === "ESLint" ||
+      calleeName === "WeakMap" ||
+      calleeName === "WeakSet")
   );
 }
 

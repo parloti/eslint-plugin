@@ -1,8 +1,9 @@
 import type { Rule } from "eslint";
 
-import type { TestBlockAnalysis } from "../aaa";
+import type { SectionComment, TestBlockAnalysis } from "../aaa";
 
 import {
+  aaaPhaseOrder,
   analyzeTestBlock,
   getLineStartRange,
   getPhaseBoundaryComments,
@@ -22,6 +23,7 @@ const requireAaaSectionsRule: Rule.RuleModule = {
 
         reportMissingSections(context, analysis);
         reportEmptySections(context, analysis);
+        reportOutOfOrderSections(context, analysis);
         reportCodeBeforeArrange(context, analysis);
         reportBlankLineSeparators(context, analysis);
       },
@@ -43,6 +45,8 @@ const requireAaaSectionsRule: Rule.RuleModule = {
       emptySection:
         "The // {{section}} section must contain code; comments alone do not count.",
       missingSections: "Add the missing AAA section comments: {{sections}}.",
+      outOfOrderSection:
+        "The // {{section}} section comment appears out of order.",
     },
     schema: [],
     type: "layout",
@@ -135,7 +139,6 @@ function reportEmptySections(
   for (const [index, sectionComment] of analysis.sectionComments.entries()) {
     const nextSectionLine =
       analysis.sectionComments[index + 1]?.comment.loc.start.line;
-    const hasArrangePhase = sectionComment.phases.includes("Arrange");
     const hasCodeInSection = analysis.statements.some((statement) => {
       const statementLine = statement.node.loc.start.line;
 
@@ -145,13 +148,44 @@ function reportEmptySections(
       );
     });
 
-    if (hasArrangePhase && !hasCodeInSection) {
+    if (!hasCodeInSection) {
       context.report({
         data: { section: sectionComment.phases.join(" & ") },
         messageId: "emptySection",
         node: sectionComment.comment,
       });
     }
+  }
+}
+
+/**
+ * Reports a single out-of-order section pair.
+ * @param context ESLint rule context.
+ * @param previous Previous section comment.
+ * @param current Current section comment.
+ * @example
+ * ```typescript
+ * reportIfOutOfOrder({ report() {} } as never, { comment: {} as never, phases: [] }, { comment: {} as never, phases: [] });
+ * ```
+ */
+function reportIfOutOfOrder(
+  context: Rule.RuleContext,
+  previous: SectionComment,
+  current: SectionComment,
+): void {
+  const maxPreviousOrder = Math.max(
+    ...previous.phases.map((phase) => aaaPhaseOrder[phase]),
+  );
+  const minCurrentOrder = Math.min(
+    ...current.phases.map((phase) => aaaPhaseOrder[phase]),
+  );
+
+  if (minCurrentOrder <= maxPreviousOrder) {
+    context.report({
+      data: { section: current.phases.join(" & ") },
+      messageId: "outOfOrderSection",
+      node: current.comment,
+    });
   }
 }
 
@@ -171,8 +205,13 @@ function reportMissingSections(
   const presentSections = new Set(
     analysis.sectionComments.flatMap((sectionComment) => sectionComment.phases),
   );
+  const hasPreSectionStatements = analysis.statements.some(
+    (statement) => statement.phases.length === 0,
+  );
   const missingSections = (["Arrange", "Act", "Assert"] as const).filter(
-    (phase) => !presentSections.has(phase),
+    (phase) =>
+      !presentSections.has(phase) &&
+      (phase !== "Arrange" || hasPreSectionStatements),
   );
 
   if (missingSections.length === 0) {
@@ -189,6 +228,32 @@ function reportMissingSections(
     messageId: "missingSections",
     node: analysis.callExpression,
   });
+}
+
+/**
+ * Reports section comments that appear out of canonical Arrange → Act → Assert order.
+ * @param context ESLint rule context.
+ * @param analysis Parsed test-block analysis.
+ * @example
+ * ```typescript
+ * reportOutOfOrderSections({ report() {} } as never, { sectionComments: [] } as never);
+ * ```
+ */
+function reportOutOfOrderSections(
+  context: Rule.RuleContext,
+  analysis: TestBlockAnalysis,
+): void {
+  const comments = analysis.sectionComments;
+  const lastIndex = comments.length - 1;
+
+  for (let index = 0; index < lastIndex; index += 1) {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- loop bounds guarantee both indices exist
+    const previous = comments[index]!;
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- loop bounds guarantee both indices exist
+    const current = comments[index + 1]!;
+
+    reportIfOutOfOrder(context, previous, current);
+  }
 }
 
 export { requireAaaSectionsRule };
