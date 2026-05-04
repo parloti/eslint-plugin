@@ -24,18 +24,6 @@ interface MissingSourceListenerOptions {
   suffix: string;
 }
 
-/** Type definition for rule data. */
-interface MissingTestListenerOptions {
-  /** Directory field value. */
-  directory: string;
-
-  /** Basename field value. */
-  fileBasename: string;
-
-  /** TestSuffixes field value. */
-  testSuffixes: string[];
-}
-
 /**
  * Gets the test suffix for a file name when present.
  * @param fileBasename Input basename value.
@@ -53,66 +41,6 @@ const getTestSuffix = (
   testSuffixes.find((suffix) =>
     fileBasename.endsWith(`.${suffix}${TYPESCRIPT_EXTENSION}`),
   );
-
-/**
- * Checks for any test companion file in the directory.
- * @param directory Input directory value.
- * @param baseStem Input baseStem value.
- * @param testSuffixes Input testSuffixes value.
- * @returns True when any test companion exists.
- * @example
- * ```typescript
- * const ok = hasAnyTestCompanion(dir, "feature", ["spec"]);
- * ```
- */
-const hasAnyTestCompanion = (
-  directory: string,
-  baseStem: string,
-  testSuffixes: string[],
-): boolean =>
-  testSuffixes.some((suffix) =>
-    existsSync(path.join(directory, `${baseStem}.${suffix}.ts`)),
-  );
-
-/**
- * Builds a listener that reports missing test companions.
- * @param context Input context value.
- * @param options Input options value.
- * @returns Rule listener for missing tests.
- * @example
- * ```typescript
- * const listener = buildMissingTestListener(context, options);
- * ```
- */
-const buildMissingTestListener = (
-  context: Rule.RuleContext,
-  options: MissingTestListenerOptions,
-): Rule.RuleListener => {
-  const { directory, fileBasename, testSuffixes } = options;
-  const baseStem = fileBasename.slice(0, -TYPESCRIPT_EXTENSION.length);
-
-  if (baseStem.length === 0) {
-    return {};
-  }
-
-  if (hasAnyTestCompanion(directory, baseStem, testSuffixes)) {
-    return {};
-  }
-
-  return {
-    Program(node): void {
-      const testFiles = testSuffixes
-        .map((suffix) => `${baseStem}.${suffix}${TYPESCRIPT_EXTENSION}`)
-        .join(", ");
-
-      context.report({
-        data: { testFiles },
-        messageId: "missingTest",
-        node,
-      });
-    },
-  };
-};
 
 /**
  * Builds a listener that reports missing source files.
@@ -211,18 +139,14 @@ const buildListenerForFilename = (
   const { testSuffixes } = options;
   const testSuffix = getTestSuffix(fileBasename, testSuffixes);
 
-  if (testSuffix !== void 0) {
-    return buildMissingSourceListener(context, {
-      directory,
-      fileBasename,
-      suffix: testSuffix,
-    });
+  if (testSuffix === void 0) {
+    return {};
   }
 
-  return buildMissingTestListener(context, {
+  return buildMissingSourceListener(context, {
     directory,
     fileBasename,
-    testSuffixes,
+    suffix: testSuffix,
   });
 };
 

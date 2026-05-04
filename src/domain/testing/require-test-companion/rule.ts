@@ -22,15 +22,13 @@ const requireTestCompanionRule: Rule.RuleModule = {
     ],
     docs: {
       description:
-        "Require a matching test file for each TypeScript file and vice versa.",
+        "Require each test file to have a matching TypeScript source file.",
       recommended: false,
       url: "https://github.com/parloti/eslint-plugin/blob/main/docs/rules/require-test-companion.md",
     },
     messages: {
       missingSource:
         "Test file requires a matching source file '{{sourceFile}}' in the same folder.",
-      missingTest:
-        "Source file requires a matching test file ({{testFiles}}) in the same folder.",
     },
     schema: [
       {
@@ -38,7 +36,7 @@ const requireTestCompanionRule: Rule.RuleModule = {
         properties: {
           enforceIn: {
             description:
-              "Glob patterns that define where source files must have matching test companions.",
+              "Glob patterns that define where test files must have matching source companions.",
             oneOf: [
               {
                 description: "A single glob pattern.",
@@ -54,7 +52,7 @@ const requireTestCompanionRule: Rule.RuleModule = {
           },
           ignorePatterns: {
             description:
-              "Glob patterns that should be excluded from the companion-file requirement.",
+              "Glob patterns that should be excluded from test-to-source companion checks.",
             oneOf: [
               {
                 description: "A single ignore glob pattern.",

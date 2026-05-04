@@ -20,6 +20,8 @@ type CodeperfectRuleName = keyof typeof codeperfectRules;
 const architectureRuleNames = [
   "barrel-files-exports-only",
   "consistent-barrel-files",
+  "no-import-export-aliases",
+  "no-import-export-extensions",
   "no-reexports-outside-barrels",
 ] as const satisfies readonly CodeperfectRuleName[];
 

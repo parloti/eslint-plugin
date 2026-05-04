@@ -1,6 +1,8 @@
 export {
   barrelFilesExportsOnlyRule,
   consistentBarrelFilesRule,
+  noImportExportAliasesRule,
+  noImportExportExtensionsRule,
   noReexportsOutsideBarrelsRule,
 } from "./architecture";
 export { noMultipleDeclaratorsRule, preferInterfaceTypesRule } from "./core";

@@ -14,7 +14,7 @@ import {
 describe("require-test-companion rule", () => {
   afterEach(cleanupTemporaryDirectories);
 
-  it("reports missing test companion", () => {
+  it("does not report source files without test companions", () => {
     // Arrange
     const filePath = createTemporaryFile("tmp", "feature.ts");
     const options = { enforceIn: ["**"] };
@@ -23,8 +23,7 @@ describe("require-test-companion rule", () => {
     const reports = runRule(filePath, options);
 
     // Assert
-    expect(reports).toHaveLength(1);
-    expect(reports[0]?.messageId).toBe("missingTest");
+    expect(reports).toStrictEqual([]);
   });
 
   it("does not report when test companion exists", () => {
@@ -206,7 +205,7 @@ describe("require-test-companion rule ignore patterns", () => {
     expect(reports).toStrictEqual([]);
   });
 
-  it("reports when ignore patterns are empty", () => {
+  it("does not report source files when ignore patterns are empty", () => {
     // Arrange
     const filePath = createTemporaryFile("tmp", "feature.ts");
     const options: RequireTestCompanionOptions = {
@@ -218,7 +217,6 @@ describe("require-test-companion rule ignore patterns", () => {
     const reports = runRule(filePath, options);
 
     // Assert
-    expect(reports).toHaveLength(1);
-    expect(reports[0]?.messageId).toBe("missingTest");
+    expect(reports).toStrictEqual([]);
   });
 });

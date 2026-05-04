@@ -11,6 +11,8 @@ describe("codeperfect plugin", () => {
       "consistent-barrel-files",
       "enforce-aaa-phase-purity",
       "enforce-aaa-structure",
+      "no-import-export-aliases",
+      "no-import-export-extensions",
       "no-interface-member-docs",
       "no-multiple-declarators",
       "no-reexports-outside-barrels",

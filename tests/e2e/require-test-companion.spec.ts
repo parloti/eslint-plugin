@@ -23,12 +23,6 @@ describe("require-test-companion e2e", () => {
   it.each([
     {
       code: "export const feature = 1;",
-      errors: [{ messageId: "missingTest" }],
-      filename: sourceWithoutTest.getFilePath("feature.ts"),
-      options: [{ enforceIn: sourceWithoutTest.folderGlobs }],
-    },
-    {
-      code: "export {};",
       errors: [{ messageId: "missingSource" }],
       filename: testWithoutSource.getFilePath("feature.test.ts"),
       options: [{ enforceIn: testWithoutSource.folderGlobs }],
@@ -54,6 +48,11 @@ describe("require-test-companion e2e", () => {
       code: "export const feature = 1;",
       filename: sourceWithTest.getFilePath("feature.ts"),
       options: [{ enforceIn: sourceWithTest.folderGlobs }],
+    },
+    {
+      code: "export const feature = 1;",
+      filename: sourceWithoutTest.getFilePath("feature.ts"),
+      options: [{ enforceIn: sourceWithoutTest.folderGlobs }],
     },
     {
       code: "export {};",

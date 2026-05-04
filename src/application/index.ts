@@ -4,6 +4,8 @@ export {
   consistentBarrelFilesRule,
   enforceAaaPhasePurityRule,
   enforceAaaStructureRule,
+  noImportExportAliasesRule,
+  noImportExportExtensionsRule,
   noInterfaceMemberDocumentationRule,
   noMultipleDeclaratorsRule,
   noReexportsOutsideBarrelsRule,

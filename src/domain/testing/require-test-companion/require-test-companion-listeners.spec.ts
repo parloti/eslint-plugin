@@ -22,7 +22,7 @@ describe("require-test-companion listeners", () => {
     expect(listener).toStrictEqual({});
   });
 
-  it("builds a source-file listener without crashing", () => {
+  it("does not build a listener for source files", () => {
     // Arrange
     const state = getOptions([{ enforceIn: ["src/**/*.ts"] }]);
 
@@ -30,6 +30,21 @@ describe("require-test-companion listeners", () => {
     const listener = buildListenerForFilename(
       {} as Rule.RuleContext,
       `${cwd()}/src/feature.ts`,
+      state,
+    );
+
+    // Assert
+    expect(listener).toStrictEqual({});
+  });
+
+  it("builds a listener for test files", () => {
+    // Arrange
+    const state = getOptions([{ enforceIn: ["src/**/*.ts"] }]);
+
+    // Act
+    const listener = buildListenerForFilename(
+      {} as Rule.RuleContext,
+      `${cwd()}/src/feature.spec.ts`,
       state,
     );
 

@@ -18,6 +18,9 @@ export default defineConfig(
   shared,
   all,
   {
+    rules: { "codeperfect/no-import-export-aliases": "off" },
+  },
+  {
     files: ["src/domain/**/*rule.ts"],
     ...plugin.configs["rules-recommended"],
   },

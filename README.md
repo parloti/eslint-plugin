@@ -98,6 +98,8 @@ void preferInterfaceTypesRule;
 - `codeperfect/consistent-barrel-files`
 - `codeperfect/enforce-aaa-phase-purity`
 - `codeperfect/enforce-aaa-structure`
+- `codeperfect/no-import-export-aliases`
+- `codeperfect/no-import-export-extensions`
 - `codeperfect/no-interface-member-docs`
 - `codeperfect/no-reexports-outside-barrels`
 - `codeperfect/prefer-interface-types`

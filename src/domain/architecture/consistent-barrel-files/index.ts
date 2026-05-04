@@ -1,4 +1,6 @@
 export { barrelFilesExportsOnlyRule } from "./exports-only-rule";
+export { noImportExportAliasesRule } from "./no-import-export-aliases-rule";
+export { noImportExportExtensionsRule } from "./no-import-export-extensions-rule";
 export { noReexportsOutsideBarrelsRule } from "./no-reexports-outside-barrels-rule";
 export { consistentBarrelFilesRule } from "./rule";
 export type {

@@ -6,6 +6,8 @@ import {
   consistentBarrelFilesRule,
   enforceAaaPhasePurityRule,
   enforceAaaStructureRule,
+  noImportExportAliasesRule,
+  noImportExportExtensionsRule,
   noInterfaceMemberDocumentationRule,
   noMultipleDeclaratorsRule,
   noReexportsOutsideBarrelsRule,
@@ -50,6 +52,14 @@ const customRules = [
   {
     rule: enforceAaaStructureRule,
     ruleName: "enforce-aaa-structure",
+  },
+  {
+    rule: noImportExportAliasesRule,
+    ruleName: "no-import-export-aliases",
+  },
+  {
+    rule: noImportExportExtensionsRule,
+    ruleName: "no-import-export-extensions",
   },
   {
     rule: noReexportsOutsideBarrelsRule,

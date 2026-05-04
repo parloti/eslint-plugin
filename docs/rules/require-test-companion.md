@@ -2,7 +2,7 @@
 
 ## Summary
 
-Require each TypeScript source file to have a matching test file, and each test file to have a matching source file.
+Require each test file to have a matching TypeScript source file.
 
 ## Enabled by
 
@@ -11,32 +11,29 @@ Require each TypeScript source file to have a matching test file, and each test 
 
 ## Why this rule exists
 
-Keeping source files and their tests paired:
+Keeping test files tied to concrete source files:
 
-- makes missing coverage immediately visible
-- encourages localized and maintainable tests
 - prevents orphaned or outdated test files
 
 ## Rule Details
 
 ### What the rule targets
 
-- TypeScript source files (`.ts`, optionally `.tsx`)
 - Test files matching configured patterns (e.g. `.test.ts`, `.spec.ts`)
 
 ### What counts as a companion
 
-A companion file:
+A matching source file:
 
 - shares the same base filename
-- differs only by the test suffix
+- uses the TypeScript `.ts` extension
 
-Examples:
+Example:
 
-| Source file  | Test file         |
-| ------------ | ----------------- |
-| `feature.ts` | `feature.test.ts` |
-| `feature.ts` | `feature.spec.ts` |
+| Test file         | Required source |
+| ----------------- | --------------- |
+| `feature.test.ts` | `feature.ts`    |
+| `feature.spec.ts` | `feature.ts`    |
 
 ### Supported patterns
 
@@ -47,28 +44,14 @@ The active pattern depends on project configuration.
 
 ### Required behavior
 
-- Every source file must have exactly one matching test file
 - Every test file must have a corresponding source file
 
 ### Disallowed patterns
 
-- source files without a test companion
 - test files without a source file
 - mismatched naming (different base names)
-- multiple competing companions for the same source (when only one pattern is configured)
 
 ## Invalid
-
-### Source file without test
-
-```tree
-feature.ts
-```
-
-```typescript
-// feature.ts
-export const feature = 1;
-```
 
 ### Test file without source
 
@@ -85,20 +68,12 @@ export {};
 
 ```tree
 feature.ts
-feature-utils.test.ts // ❌ does not match base name
-```
-
-### Conflicting companions (single-pattern config)
-
-```tree
-feature.ts
-feature.test.ts
-feature.spec.ts // ❌ extra companion when only one pattern is allowed
+feature-utils.test.ts // ❌ expects feature-utils.ts
 ```
 
 ## Valid
 
-### `.spec.ts` pairing
+### `.spec.ts` with matching source
 
 ```tree
 feature.ts
@@ -115,7 +90,7 @@ export const feature = 1;
 export {};
 ```
 
-### `.test.ts` pairing
+### `.test.ts` with matching source
 
 ```tree
 feature.ts
@@ -145,8 +120,6 @@ is valid, and `.spec.ts` companions are not expected.
 
 ## Notes
 
-- This rule does not enforce:
-  - test content quality
-  - test coverage depth
-
-- This rule operates purely on file presence and naming conventions
+- This rule does not require every source file to have tests.
+- This rule does not enforce test content quality or coverage depth.
+- This rule operates purely on file presence and naming conventions.
