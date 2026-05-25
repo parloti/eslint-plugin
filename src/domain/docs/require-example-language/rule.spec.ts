@@ -218,15 +218,8 @@ describe("require example language rule", () => {
     activeReportExample = vi.fn<(context: unknown) => void>((context) => {
       void context;
     });
-    vi.resetModules();
     vi.doMock(import("./examples"), createExamplesModule);
     vi.doMock(import("./reporting"), createReportingModule);
-  });
-
-  afterEach(() => {
-    vi.doUnmock("./examples");
-    vi.doUnmock("./reporting");
-    vi.resetModules();
   });
 
   it("exposes metadata", () => {

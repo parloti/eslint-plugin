@@ -1,6 +1,6 @@
 import type { Rule } from "eslint";
 
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 /** Mocked AAA helper module shape used in reporting tests. */
 interface PhasePurityAaaModule {
@@ -206,15 +206,8 @@ const runReporting = async (
 describe("enforce-aaa-phase-purity reporting behavior", () => {
   beforeEach(() => {
     activeAssertIdentifiers = new Set(["actualResult"]);
-    vi.resetModules();
     vi.doMock(import("../aaa"), createAaaModule);
     vi.doMock(import("./phase-purity-identifiers"), createIdentifierModule);
-  });
-
-  afterEach(() => {
-    vi.doUnmock("../aaa");
-    vi.doUnmock("./phase-purity-identifiers");
-    vi.resetModules();
   });
 
   it("skips analysis when AAA sections are incomplete", async () => {

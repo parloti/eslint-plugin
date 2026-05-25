@@ -1,5 +1,5 @@
 import { TSESTree } from "@typescript-eslint/utils";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { collectMatch } from "./match";
 
@@ -22,14 +22,6 @@ const loadCollectMatch = async (
 };
 
 describe("prefer-vitest-incremental-casts match", () => {
-  afterEach(() => {
-    vi.doUnmock("./ast-helpers");
-    vi.doUnmock("./match-input");
-    vi.doUnmock("./replacement-helpers");
-    vi.doUnmock("./type-helpers");
-    vi.resetModules();
-  });
-
   it("skips non-Vitest calls", () => {
     // Arrange
     const context = {
@@ -56,7 +48,6 @@ describe("prefer-vitest-incremental-casts match", () => {
 
   it("wraps implicit object returns when needed", async () => {
     // Arrange
-    vi.resetModules();
     vi.doMock(
       import("./ast-helpers"),
       (): never =>
@@ -90,8 +81,15 @@ describe("prefer-vitest-incremental-casts match", () => {
       import("./type-helpers"),
       (): never =>
         ({
-          isOuterCastRequired: (): boolean => false,
           resolveFactoryTargetType: (): unknown => ({ type: "target" }),
+        }) as never,
+    );
+
+    vi.doMock(
+      import("./type-shape-helpers"),
+      (): never =>
+        ({
+          isOuterCastRequired: (): boolean => false,
         }) as never,
     );
 
@@ -115,7 +113,6 @@ describe("prefer-vitest-incremental-casts match", () => {
 
   it("returns the plain object text when no extra wrapping is needed", async () => {
     // Arrange
-    vi.resetModules();
     vi.doMock(
       import("./ast-helpers"),
       (): never =>

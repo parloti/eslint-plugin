@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { MockNode } from "./rule-test-helpers";
 
@@ -116,13 +116,7 @@ describe("no-multiple-declarators rule mocked types", () => {
   beforeEach(() => {
     activeTypesPatch = cloneTypes;
     hasRangeCallCount = 0;
-    vi.resetModules();
     vi.doMock(import("./types"), createMockedTypesModule);
-  });
-
-  afterEach(() => {
-    vi.doUnmock("./types");
-    vi.resetModules();
   });
 
   it("exports the companion marker", () => {

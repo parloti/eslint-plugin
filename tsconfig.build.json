@@ -1,16 +1,26 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
+    // Modules
+
+    // Emit
     "declaration": true,
     "declarationMap": true,
-    "importHelpers": true,
     "inlineSourceMap": true,
     "inlineSources": true,
-    "rootDir": "./src",
-    "noEmitOnError": true,
-    "outDir": "./dist",
-    "tsBuildInfoFile": "./dist/.tsbuildinfo"
+    "outDir": "dist",
+    "rootDir": "src",
+
+    // Projects
+    "tsBuildInfoFile": "dist/.tsbuildinfo"
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts", "*.d.ts"],
-  "exclude": ["**/*.spec.ts", "dist", "node_modules"]
+  "exclude": [
+    "**/*.spec.ts",
+    "**/*.e2e.ts",
+    "**/*.test.ts",
+    "dist",
+    "coverage",
+    "node_modules"
+  ]
 }

@@ -154,7 +154,6 @@ async function loadMockedListener(
   analysis: MockedAnalysisInput,
   report: ReturnType<typeof vi.fn>,
 ): Promise<((node: ESTree.CallExpression) => void) | undefined> {
-  vi.resetModules();
   vi.doMock("../aaa", () =>
     createMockedAaaModule(createMockedAnalysis(analysis)),
   );
@@ -163,18 +162,6 @@ async function loadMockedListener(
 
   return ruleModule.enforceAaaPhasePurityRule.create({ report } as never)
     .CallExpression as ((node: ESTree.CallExpression) => void) | undefined;
-}
-
-/**
- * Resets the mocked AAA module state between test runs.
- * @example
- * ```typescript
- * resetMockedAaaModule();
- * ```
- */
-function resetMockedAaaModule(): void {
-  vi.doUnmock("../aaa");
-  vi.resetModules();
 }
 
 /**
@@ -236,7 +223,7 @@ async function runRuleWithMockedAnalysis(
     listener?.({ type: "CallExpression" } as ESTree.CallExpression);
     return report.mock.calls as unknown[][];
   } finally {
-    resetMockedAaaModule();
+    /* empty */
   }
 }
 

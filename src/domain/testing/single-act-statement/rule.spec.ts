@@ -1,6 +1,6 @@
 import type { Rule } from "eslint";
 
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 /** Captured rule context and emitted reports. */
 interface RuleContextState {
@@ -124,13 +124,7 @@ const runRule = async (
 describe("single-act-statement rule", () => {
   beforeEach(() => {
     activeAaaState = { analysis: void 0, count: 0 };
-    vi.resetModules();
     vi.doMock(import("../aaa"), (): never => createAaaModule() as never);
-  });
-
-  afterEach(() => {
-    vi.doUnmock("../aaa");
-    vi.resetModules();
   });
 
   it("defines metadata and messages", async () => {

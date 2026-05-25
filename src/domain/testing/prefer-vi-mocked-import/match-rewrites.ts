@@ -20,7 +20,7 @@ function addDeclarationIdRange(
   declaration: Declaration | undefined,
 ): void {
   if (declaration !== void 0) {
-    const rangeKey = `${declaration.declarationIdRange[0]}:${declaration.declarationIdRange[1]}`;
+    const rangeKey = `${declaration.declarationIdRange[0].toFixed(0)}:${declaration.declarationIdRange[1].toFixed(0)}`;
     allowedRanges.add(rangeKey);
   }
 }
@@ -52,7 +52,7 @@ function areLocalsSafeToInline(
       return;
     }
 
-    const key = `${currentNode.range[0]}:${currentNode.range[1]}`;
+    const key = `${currentNode.range[0].toFixed(0)}:${currentNode.range[1].toFixed(0)}`;
     if (localNames.has(currentNode.name) && !allowedIdentifierRanges.has(key)) {
       isSafe = false;
     }
@@ -81,16 +81,16 @@ function buildAllowedRanges(
   const allowedRanges = new Set<string>();
   for (const binding of bindings) {
     allowedRanges.add(
-      `${binding.propertyKeyRange[0]}:${binding.propertyKeyRange[1]}`,
+      `${binding.propertyKeyRange[0].toFixed(0)}:${binding.propertyKeyRange[1].toFixed(0)}`,
     );
     allowedRanges.add(
-      `${binding.propertyValueRange[0]}:${binding.propertyValueRange[1]}`,
+      `${binding.propertyValueRange[0].toFixed(0)}:${binding.propertyValueRange[1].toFixed(0)}`,
     );
     addDeclarationIdRange(allowedRanges, declarations.get(binding.localName));
   }
   for (const rewrite of rewrites) {
     allowedRanges.add(
-      `${rewrite.localObjectRange[0]}:${rewrite.localObjectRange[1]}`,
+      `${rewrite.localObjectRange[0].toFixed(0)}:${rewrite.localObjectRange[1].toFixed(0)}`,
     );
   }
 

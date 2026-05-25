@@ -208,7 +208,9 @@ function createInsertGroup(afterRange: Range | undefined): InsertGroup {
  * ```
  */
 function getInsertGroupKey(afterRange: Range | undefined): string {
-  return afterRange === void 0 ? "TOP" : `${afterRange[0]}:${afterRange[1]}`;
+  return afterRange === void 0
+    ? "TOP"
+    : `${afterRange[0].toFixed(0)}:${afterRange[1].toFixed(0)}`;
 }
 
 /**

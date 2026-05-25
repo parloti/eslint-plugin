@@ -3,7 +3,6 @@ name: 🚀 Release
 on:
   push:
     branches:
-      - master
       - main
 
 jobs:
@@ -78,4 +77,12 @@ jobs:
       - name: 🎉 Publish release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npx semantic-release
+
+      - name: 🚀 Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs
+          publish_branch: gh-pages

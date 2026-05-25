@@ -1,6 +1,7 @@
 **/.angular/**/*
-**/reports/**/*
+**/.stryker-tmp/**/*
+**/coverage/**/*
 **/dist/**/*
 **/docs/api/*
-**/coverage/**/*
-**/.stryker-tmp/**/*
+**/reports/**/*
+**/test-results/**/*

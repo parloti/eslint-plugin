@@ -1,6 +1,6 @@
 import type { Rule } from "eslint";
 
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 /** AAA phase-order mapping used by the mock. */
 interface AaaPhaseOrder {
@@ -148,13 +148,7 @@ const runRule = async (
 describe("enforce-aaa-structure rule", () => {
   beforeEach(() => {
     activeStructureState = { analysis: void 0, flattenedSections: [] };
-    vi.resetModules();
     vi.doMock(import("../aaa"), (): never => createAaaModule() as never);
-  });
-
-  afterEach(() => {
-    vi.doUnmock("../aaa");
-    vi.resetModules();
   });
 
   it("defines metadata and messages", async () => {

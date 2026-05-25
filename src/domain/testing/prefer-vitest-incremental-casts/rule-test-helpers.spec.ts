@@ -130,7 +130,6 @@ describe("prefer-vitest-incremental-casts rule-test-helpers", () => {
 
   it("throws when ESLint does not return a lint result", async () => {
     // Arrange
-    vi.resetModules();
     vi.doMock(
       import("eslint"),
       (): never =>

@@ -208,7 +208,7 @@ function getUniqueStatementRanges(match: RuleMatch): Range[] {
   for (const binding of match.bindings) {
     const declaration = match.declarations.get(binding.localName);
     if (declaration !== void 0) {
-      const key = `${declaration.statementRange[0]}:${declaration.statementRange[1]}`;
+      const key = `${declaration.statementRange[0].toFixed(0)}:${declaration.statementRange[1].toFixed(0)}`;
       rangeMap.set(key, declaration.statementRange);
     }
   }

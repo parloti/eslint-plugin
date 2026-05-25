@@ -25,7 +25,6 @@ describe("enforce-aaa-phase-purity reporting behavior combined sections", () => 
   beforeEach(() => {
     const activeAssertIdentifiers = new Set(["actualResult"]);
 
-    vi.resetModules();
     vi.doMock(import("../aaa"), () => ({
       hasAssertion: (node: ESTree.Statement): boolean =>
         (node as MockAssertionFlags).assertion === true,

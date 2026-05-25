@@ -1,6 +1,6 @@
 import type { Rule } from "eslint";
 
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 /** Mocked AAA module shape used by the assertion-name rule tests. */
 interface AssertActualExpectedNamesAaaModule {
@@ -151,13 +151,7 @@ describe("assert-actual-expected-names rule", () => {
       assertionNodes: new Set(),
       declaredIdentifiers: new Map(),
     };
-    vi.resetModules();
     vi.doMock(import("../aaa"), (): never => createAaaModule() as never);
-  });
-
-  afterEach(() => {
-    vi.doUnmock("../aaa");
-    vi.resetModules();
   });
 
   it("defines metadata and messages", async () => {

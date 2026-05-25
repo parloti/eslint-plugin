@@ -1,6 +1,6 @@
 import type { Rule } from "eslint";
 
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 /** Minimal expression-statement node used by synthetic fixtures. */
 interface ExpressionStatementNode {
@@ -169,13 +169,7 @@ const runRule = async (
 describe("require-act-result-capture rule", () => {
   beforeEach(() => {
     activeCaptureState = { analysis: void 0, capturableNodes: new Set() };
-    vi.resetModules();
     vi.doMock(import("../aaa"), (): never => createAaaModule() as never);
-  });
-
-  afterEach(() => {
-    vi.doUnmock("../aaa");
-    vi.resetModules();
   });
 
   it("defines metadata and messages", async () => {

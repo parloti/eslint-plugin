@@ -1,6 +1,6 @@
 import type { Rule } from "eslint";
 
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import type { ScenarioResult } from "./rule.reporting";
 
@@ -30,7 +30,6 @@ async function collectScenarioResult(
   const reports: Rule.ReportDescriptor[] = [];
   const insertedFixes: Rule.Fix[] = [];
 
-  vi.resetModules();
   vi.doMock(import("../aaa"), (): never => createAaaModuleMock() as never);
   vi.doMock(
     import("./missing-section-fixes"),
@@ -53,22 +52,7 @@ async function collectScenarioResult(
   };
 }
 
-/**
- * Resets module mocks used by the reporting scenario.
- * @example
- * ```typescript
- * resetScenarioMocks();
- * ```
- */
-function resetScenarioMocks(): void {
-  vi.doUnmock("../aaa");
-  vi.doUnmock("./missing-section-fixes");
-  vi.resetModules();
-}
-
 describe("require-aaa-sections rule reporting", () => {
-  afterEach(resetScenarioMocks);
-
   it("reports blank lines before Act sections and code before Arrange", async () => {
     // Arrange
     const buildMissingSectionFixes = vi.fn((): Rule.Fix[] => []);

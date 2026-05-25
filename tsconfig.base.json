@@ -1,6 +1,8 @@
 {
+  // Editor Support
   "compileOnSave": false,
   "compilerOptions": {
+    // Type Checking
     "exactOptionalPropertyTypes": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitOverride": true,
@@ -9,16 +11,40 @@
     "noUncheckedIndexedAccess": true,
     "noUnusedLocals": false,
     "noUnusedParameters": true,
-    "strict": true,
+
+    // Modules
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
-    "isolatedModules": true,
-    "esModuleInterop": true,
-    "verbatimModuleSyntax": false,
-    "experimentalDecorators": true,
-    "target": "ESNext",
     "types": ["node"],
+
+    // Emit
+
+    // JavaScript Support
+
+    // Editor Support
+    "isolatedModules": true,
+
+    // Interop Constraints
+    "verbatimModuleSyntax": true,
+
+    // Backwards Compatibility
+
+    // Language and Environment
+    "experimentalDecorators": true,
+
+    // Compiler Diagnostics
+
+    // Projects
+
+    // Output Formatting
     "noErrorTruncation": true,
+
+    // Completeness
     "skipLibCheck": true
+
+    // Command Line
+
+    // Watch Options
   },
   "exclude": ["dist", "coverage", "node_modules"]
 }

@@ -20,7 +20,8 @@ import {
   applyTextReplacements,
   buildPropertyReplacement,
 } from "./replacement-helpers";
-import { isOuterCastRequired, resolveFactoryTargetType } from "./type-helpers";
+import { resolveFactoryTargetType } from "./type-helpers";
+import { isOuterCastRequired } from "./type-shape-helpers";
 
 /**
  * Records one property replacement when the source text must change.

@@ -2,13 +2,9 @@ import type * as ts from "typescript";
 
 import { SignatureKind } from "typescript";
 
-import type {
-  OuterCastContext,
-  ResolveFactoryTargetTypeContext,
-} from "./types";
+import type { ResolveFactoryTargetTypeContext } from "./types";
 
 import {
-  isOuterCastRequired as isOuterCastRequiredImpl,
   normalizeObjectLikeType,
   resolveFactoryReturnType,
 } from "./type-shape-helpers";
@@ -178,19 +174,6 @@ function getSignatureMatchInputs(
 }
 
 /**
- * Determines whether the object literal still needs an outer cast.
- * @param context Data used to decide whether the full object needs casting.
- * @returns True when the full object still needs casting.
- * @example
- * ```typescript
- * const needsOuterCast = isOuterCastRequired(context);
- * ```
- */
-function isOuterCastRequired(context: OuterCastContext): boolean {
-  return isOuterCastRequiredImpl(context);
-}
-
-/**
  * Resolves the target type the factory object should satisfy.
  * @param context Type-resolution inputs for the current mock factory.
  * @returns Target type for the rewritten object literal.
@@ -208,4 +191,4 @@ function resolveFactoryTargetType(
   );
 }
 
-export { isOuterCastRequired, resolveFactoryTargetType };
+export { resolveFactoryTargetType };

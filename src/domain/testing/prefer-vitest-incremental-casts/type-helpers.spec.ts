@@ -1,7 +1,8 @@
 import { SignatureKind } from "typescript";
 import { describe, expect, it } from "vitest";
 
-import { isOuterCastRequired, resolveFactoryTargetType } from "./type-helpers";
+import { resolveFactoryTargetType } from "./type-helpers";
+import { isOuterCastRequired } from "./type-shape-helpers";
 
 /** Object-like fixture with optional properties. */
 interface PropertiesShape {
