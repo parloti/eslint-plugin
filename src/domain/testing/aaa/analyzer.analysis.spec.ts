@@ -105,6 +105,43 @@ const getCallExpression = (program: ESTree.Program): ESTree.CallExpression => {
 };
 
 /**
+ * Gets the first two call expressions from a fixture program.
+ * @param program Input program value.
+ * @returns Return value output.
+ * @throws {TypeError} Thrown when the fixture does not contain two call-expression statements.
+ * @example
+ * ```typescript
+ * getFirstTwoCallExpressions(program);
+ * ```
+ */
+const getFirstTwoCallExpressions = (
+  program: ESTree.Program,
+): [ESTree.CallExpression, ESTree.CallExpression] => {
+  const callExpressions = program.body
+    .map((statement) => {
+      if (
+        statement.type === "ExpressionStatement" &&
+        statement.expression.type === "CallExpression"
+      ) {
+        return statement.expression;
+      }
+
+      return void 0;
+    })
+    .filter(
+      (callExpression): callExpression is ESTree.CallExpression =>
+        callExpression !== void 0,
+    );
+
+  const [firstCallExpression, secondCallExpression] = callExpressions;
+  if (firstCallExpression === void 0 || secondCallExpression === void 0) {
+    throw new TypeError("Expected two call expressions.");
+  }
+
+  return [firstCallExpression, secondCallExpression];
+};
+
+/**
  * Gets the first callback statement from a supported test call.
  * @param callExpression Input callExpression value.
  * @returns Return value output.
@@ -290,5 +327,95 @@ describe("aAA analyzer block analysis", () => {
     expect(result.newline).toBe("\r\n");
     expect(result.statements[0]?.phase).toBeUndefined();
     expect(result.statements[0]?.phases).toStrictEqual([]);
+  });
+
+  it("ignores AAA section comments nested inside top-level statements", () => {
+    // Arrange
+    const sourceText = [
+      'it("ignores nested helper markers", () => {',
+      "  // Arrange",
+      "  const helper = () => {",
+      "    // Act",
+      "    return run();",
+      "  };",
+      "",
+      "  // Act",
+      "  const actual = helper();",
+      "",
+      "  // Assert",
+      "  expect(actual).toBe(1);",
+      "});",
+    ].join("\n");
+
+    // Act
+    const actual = (() => {
+      const actualAnalysis = analyzeSource(sourceText);
+
+      return {
+        actualAnalysis,
+        actualSectionPhases: actualAnalysis.sectionComments.map(
+          (section) => section.phases,
+        ),
+      };
+    })();
+
+    // Assert
+    expect(actual.actualAnalysis.sectionComments).toHaveLength(3);
+    expect(actual.actualSectionPhases).toStrictEqual([
+      ["Arrange"],
+      ["Act"],
+      ["Assert"],
+    ]);
+  });
+
+  it("reuses cached comments for repeated analysis in the same source", () => {
+    // Arrange
+    const sourceText = [
+      'it("first", () => {',
+      "  // Arrange",
+      "  const firstInput = 1;",
+      "});",
+      'it("second", () => {',
+      "  // Arrange",
+      "  const secondInput = 2;",
+      "});",
+    ].join("\n");
+
+    // Act
+    const actual = (() => {
+      const program = parseProgram(sourceText);
+      let actualGetAllCommentsCallCount = 0;
+      const context = {
+        sourceCode: {
+          ast: program,
+          getAllComments: () => {
+            actualGetAllCommentsCallCount += 1;
+            return program.comments ?? [];
+          },
+          text: sourceText,
+        },
+      } as Rule.RuleContext;
+      const [firstCallExpression, secondCallExpression] =
+        getFirstTwoCallExpressions(program);
+      const actualFirstAnalysis = analyzeTestBlock(
+        context,
+        firstCallExpression,
+      );
+      const actualSecondAnalysis = analyzeTestBlock(
+        context,
+        secondCallExpression,
+      );
+
+      return {
+        actualFirstAnalysis,
+        actualGetAllCommentsCallCount,
+        actualSecondAnalysis,
+      };
+    })();
+
+    // Assert
+    expect(actual.actualFirstAnalysis).toBeDefined();
+    expect(actual.actualSecondAnalysis).toBeDefined();
+    expect(actual.actualGetAllCommentsCallCount).toBe(1);
   });
 });

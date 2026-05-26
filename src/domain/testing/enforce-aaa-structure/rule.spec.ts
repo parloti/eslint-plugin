@@ -211,4 +211,68 @@ describe("enforce-aaa-structure rule", () => {
       },
     ]);
   });
+
+  it("accepts valid combined AAA phase coverage", async () => {
+    // Arrange
+    const arrangeCombinedComment = { type: "Line" } as unknown as Rule.Node;
+    const assertComment = { type: "Line" } as unknown as Rule.Node;
+    const sections = [
+      { comment: arrangeCombinedComment, phase: "Arrange" },
+      { comment: arrangeCombinedComment, phase: "Act" },
+      { comment: assertComment, phase: "Assert" },
+    ];
+
+    // Act
+    const actual = await runRule({}, sections);
+
+    // Assert
+    expect(actual).toStrictEqual([]);
+  });
+
+  it("reports duplicate phase introduced by combined and split comments", async () => {
+    // Arrange
+    const arrangeAndActComment = { type: "Line" } as unknown as Rule.Node;
+    const duplicateActComment = { type: "Line" } as unknown as Rule.Node;
+    const sections = [
+      { comment: arrangeAndActComment, phase: "Arrange" },
+      { comment: arrangeAndActComment, phase: "Act" },
+      { comment: duplicateActComment, phase: "Act" },
+      { comment: { type: "Line" } as unknown as Rule.Node, phase: "Assert" },
+    ];
+
+    // Act
+    const actual = await runRule({}, sections);
+
+    // Assert
+    expect(actual).toStrictEqual([
+      {
+        data: { section: "Act" },
+        messageId: "duplicateSection",
+        node: duplicateActComment,
+      },
+    ]);
+  });
+
+  it("reports out-of-order phase introduced after combined Act and Assert", async () => {
+    // Arrange
+    const actAndAssertComment = { type: "Line" } as unknown as Rule.Node;
+    const arrangeComment = { type: "Line" } as unknown as Rule.Node;
+    const sections = [
+      { comment: actAndAssertComment, phase: "Act" },
+      { comment: actAndAssertComment, phase: "Assert" },
+      { comment: arrangeComment, phase: "Arrange" },
+    ];
+
+    // Act
+    const actual = await runRule({}, sections);
+
+    // Assert
+    expect(actual).toStrictEqual([
+      {
+        data: { section: "Arrange" },
+        messageId: "invalidOrder",
+        node: arrangeComment,
+      },
+    ]);
+  });
 });

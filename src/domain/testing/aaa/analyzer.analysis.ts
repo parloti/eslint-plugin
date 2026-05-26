@@ -17,6 +17,20 @@ import {
 } from "./analyzer.analysis.helpers";
 import { isLocatedComment, isRangeWithin } from "./analyzer.super";
 
+/** Source comment shape returned by ESLint for one file. */
+type AnalyzerComment = ReturnType<
+  Rule.RuleContext["sourceCode"]["getAllComments"]
+>[number];
+
+/** ESLint source-code service reference used for comment caching. */
+type AnalyzerSourceCode = Rule.RuleContext["sourceCode"];
+
+/** Memoized comment arrays keyed by ESLint source-code instances. */
+const sourceCommentsCache = new WeakMap<
+  AnalyzerSourceCode,
+  readonly AnalyzerComment[]
+>();
+
 /**
  * Creates a local forwarding function for an imported analyzer helper.
  * @template TParameters Forwarded parameter tuple.
@@ -87,19 +101,20 @@ function analyzeTestBlock(
 
   const { callback, callExpression } = testCall;
   const { sourceCode } = context;
-  const sectionComments: TestBlockAnalysis["sectionComments"] = sourceCode
-    .getAllComments()
-    .filter(
-      (comment) =>
-        isLocatedComment(comment) &&
-        comment.type === "Line" &&
-        isRangeWithin(comment.range, callback.body.range) &&
-        getSectionPhases(comment.value).length > 0,
-    )
-    .map((comment) => ({
-      comment: comment as LocatedComment,
-      phases: getSectionPhases(comment.value),
-    }));
+  const sectionComments: TestBlockAnalysis["sectionComments"] =
+    getSourceComments(sourceCode)
+      .filter(
+        (comment) =>
+          isLocatedComment(comment) &&
+          comment.type === "Line" &&
+          isRangeWithin(comment.range, callback.body.range) &&
+          !isInsideTopLevelStatement(comment, callback.body.body) &&
+          getSectionPhases(comment.value).length > 0,
+      )
+      .map((comment) => ({
+        comment: comment as LocatedComment,
+        phases: getSectionPhases(comment.value),
+      }));
 
   return {
     body: callback.body,
@@ -118,6 +133,57 @@ function analyzeTestBlock(
       };
     }),
   };
+}
+
+/**
+ * Returns cached source comments for the active file.
+ * @param sourceCode Input sourceCode value.
+ * @returns Return value output.
+ * @example
+ * ```typescript
+ * getSourceComments(sourceCode);
+ * ```
+ */
+function getSourceComments(
+  sourceCode: AnalyzerSourceCode,
+): readonly AnalyzerComment[] {
+  const cachedComments = sourceCommentsCache.get(sourceCode);
+  if (cachedComments !== void 0) {
+    return cachedComments;
+  }
+
+  const loadedComments = sourceCode.getAllComments();
+  sourceCommentsCache.set(sourceCode, loadedComments);
+
+  return loadedComments;
+}
+
+/**
+ * Checks whether a comment is nested inside one top-level statement range.
+ * @param comment Input comment value.
+ * @param statements Input statements value.
+ * @returns Return value output.
+ * @example
+ * ```typescript
+ * isInsideTopLevelStatement(comment, statements);
+ * ```
+ */
+function isInsideTopLevelStatement(
+  comment: LocatedComment,
+  statements: readonly ESTree.Statement[],
+): boolean {
+  const commentLine = comment.loc.start.line;
+
+  return statements.some((statement) => {
+    const statementStartLine = statement.loc?.start.line;
+    const statementEndLine = statement.loc?.end.line;
+
+    if (statementStartLine === void 0 || statementEndLine === void 0) {
+      return false;
+    }
+
+    return commentLine >= statementStartLine && commentLine <= statementEndLine;
+  });
 }
 
 export {

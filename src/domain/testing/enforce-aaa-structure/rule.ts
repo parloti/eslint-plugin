@@ -2,6 +2,12 @@ import type { Rule } from "eslint";
 
 import { aaaPhaseOrder, analyzeTestBlock, getFlattenedSections } from "../aaa";
 
+/** Flattened section entry emitted by the AAA analyzer helper. */
+type FlattenedSection = ReturnType<typeof getFlattenedSections>[number];
+
+/** Union of valid AAA phase labels emitted for flattened sections. */
+type FlattenedSectionPhase = FlattenedSection["phase"];
+
 /** Composite input for reporting one AAA section issue. */
 interface ReportSectionIssueInput {
   /** Active ESLint rule context. */
@@ -11,7 +17,7 @@ interface ReportSectionIssueInput {
   messageId: "duplicateSection" | "invalidOrder";
 
   /** Section comment and phase metadata under inspection. */
-  section: ReturnType<typeof getFlattenedSections>[number];
+  section: FlattenedSection;
 }
 
 /** Composite input for advancing the AAA section ordering state. */
@@ -23,10 +29,10 @@ interface UpdateSectionOrderInput {
   lastPhaseOrder: number;
 
   /** Section comment and phase metadata under inspection. */
-  section: ReturnType<typeof getFlattenedSections>[number];
+  section: FlattenedSection;
 
   /** Set of phases already seen in the current test block. */
-  seenPhases: Set<string>;
+  seenPhases: Set<FlattenedSectionPhase>;
 }
 
 /**
@@ -94,7 +100,7 @@ const enforceAaaStructureRule: Rule.RuleModule = {
         }
 
         const flattenedSections = getFlattenedSections(analysis);
-        const seenPhases = new Set<string>();
+        const seenPhases = new Set<FlattenedSectionPhase>();
         let lastPhaseOrder = -1;
 
         for (const section of flattenedSections) {
