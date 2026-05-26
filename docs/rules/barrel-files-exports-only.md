@@ -17,7 +17,7 @@ Barrel files should remain simple aggregation points. Introducing imports or exe
 
 - Barrel files may contain:
   - `export` statements (e.g. `export * from`, `export { ... } from`)
-  - type-only declarations (e.g. `export type`, `export interface`)
+  - type-only declarations and specifier exports (e.g. `export type * from`, `export { type ... } from`, `export type { ... }`)
 - Barrel files must not contain:
   - `import` statements
   - variable declarations (`const`, `let`, `var`)

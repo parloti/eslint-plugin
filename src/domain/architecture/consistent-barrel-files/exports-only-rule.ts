@@ -22,6 +22,20 @@ interface TypeOnlyDeclarationCandidate {
   type?: unknown;
 }
 
+/** Describes an export declaration-like value with export metadata. */
+interface TypeOnlyExportCandidate {
+  /** Candidate declaration-level export kind. */
+  exportKind?: unknown;
+  /** Candidate export specifiers. */
+  specifiers?: unknown;
+}
+
+/** Describes an export specifier-like value that may expose `exportKind`. */
+interface TypeOnlyExportSpecifierCandidate {
+  /** Candidate export kind for a specifier. */
+  exportKind?: unknown;
+}
+
 /**
  * Builds normalized rule options from raw input.
  * @param options Raw rule options.
@@ -68,6 +82,42 @@ const isTypeOnlyDeclaration = (value: unknown): boolean => {
 };
 
 /**
+ * Determines whether an export declaration is type-only via specifiers.
+ * @param value Export declaration candidate to inspect.
+ * @returns True when the export declaration is type-only.
+ * @example
+ * ```typescript
+ * const ok = isTypeOnlyExport({ exportKind: "type", specifiers: [{ exportKind: "type" }] });
+ * ```
+ */
+const isTypeOnlyExport = (value: unknown): boolean => {
+  if (value === null || typeof value !== "object") {
+    return false;
+  }
+
+  const candidate = value as TypeOnlyExportCandidate;
+  const specifiers = candidate.specifiers;
+
+  if (!Array.isArray(specifiers) || specifiers.length === 0) {
+    return false;
+  }
+
+  if (candidate.exportKind === "type") {
+    return true;
+  }
+
+  return specifiers.every((specifier) => {
+    if (specifier === null || typeof specifier !== "object") {
+      return false;
+    }
+
+    return (
+      (specifier as TypeOnlyExportSpecifierCandidate).exportKind === "type"
+    );
+  });
+};
+
+/**
  * Checks whether a statement is allowed in a barrel file.
  * @param statement Program statement node.
  * @returns True when the statement is permitted.
@@ -95,7 +145,11 @@ const isAllowedBarrelStatement = (
 
   const source = statement.source ?? void 0;
 
-  return source !== void 0;
+  if (source === void 0) {
+    return isTypeOnlyExport(statement);
+  }
+
+  return true;
 };
 
 /**

@@ -34,10 +34,10 @@ describe("barrel files exports-only rule (enforced)", () => {
     const body = createBody();
 
     // Act
-    const reports = runTemporaryIndex(body);
+    const actualReports = runTemporaryIndex(body);
 
     // Assert
-    expect(reports).toStrictEqual([]);
+    expect(actualReports).toStrictEqual([]);
   });
 
   it("uses default options for barrel detection", () => {
@@ -45,11 +45,11 @@ describe("barrel files exports-only rule (enforced)", () => {
     const body = createBody(createImportDeclaration());
 
     // Act
-    const reports = runDefaultIndex(body);
+    const actualReports = runDefaultIndex(body);
 
     // Assert
-    expect(reports).toHaveLength(1);
-    expect(reports[0]?.messageId).toBe("invalidBarrelContent");
+    expect(actualReports).toHaveLength(1);
+    expect(actualReports[0]?.messageId).toBe("invalidBarrelContent");
   });
 
   it("allows exported type-only declarations", () => {
@@ -60,10 +60,56 @@ describe("barrel files exports-only rule (enforced)", () => {
     );
 
     // Act
-    const reports = runTemporaryIndex(body);
+    const actualReports = runTemporaryIndex(body);
 
     // Assert
-    expect(reports).toStrictEqual([]);
+    expect(actualReports).toStrictEqual([]);
+  });
+
+  it("allows local type-only export specifiers", () => {
+    // Arrange
+    const body = createBody({
+      exportKind: "type",
+      source: void 0,
+      specifiers: [
+        {
+          exported: { name: "Feature", type: "Identifier" },
+          exportKind: "type",
+          local: { name: "Feature", type: "Identifier" },
+          type: "ExportSpecifier",
+        },
+      ],
+      type: "ExportNamedDeclaration",
+    } as never);
+
+    // Act
+    const actualReports = runTemporaryIndex(body);
+
+    // Assert
+    expect(actualReports).toStrictEqual([]);
+  });
+
+  it("allows source-based type-only export specifiers", () => {
+    // Arrange
+    const body = createBody({
+      exportKind: "value",
+      source: { raw: "'./feature'", type: "Literal", value: "./feature" },
+      specifiers: [
+        {
+          exported: { name: "Feature", type: "Identifier" },
+          exportKind: "type",
+          local: { name: "Feature", type: "Identifier" },
+          type: "ExportSpecifier",
+        },
+      ],
+      type: "ExportNamedDeclaration",
+    } as never);
+
+    // Act
+    const actualReports = runTemporaryIndex(body);
+
+    // Assert
+    expect(actualReports).toStrictEqual([]);
   });
 
   it("allows re-export statements", () => {
@@ -71,10 +117,26 @@ describe("barrel files exports-only rule (enforced)", () => {
     const body = createBody(createExportAll(), createExportNamedFrom());
 
     // Act
-    const reports = runTemporaryIndex(body);
+    const actualReports = runTemporaryIndex(body);
 
     // Assert
-    expect(reports).toStrictEqual([]);
+    expect(actualReports).toStrictEqual([]);
+  });
+
+  it("allows type-only export-all statements", () => {
+    // Arrange
+    const body = createBody({
+      attributes: [],
+      exportKind: "type",
+      source: { raw: "'./feature'", type: "Literal", value: "./feature" },
+      type: "ExportAllDeclaration",
+    } as never);
+
+    // Act
+    const actualReports = runTemporaryIndex(body);
+
+    // Assert
+    expect(actualReports).toStrictEqual([]);
   });
 
   it("supports custom barrel names", () => {
@@ -82,12 +144,12 @@ describe("barrel files exports-only rule (enforced)", () => {
     const body = createBody(createExportNamedFrom());
 
     // Act
-    const reports = runTemporaryBarrel("mod.ts", body, [
+    const actualReports = runTemporaryBarrel("mod.ts", body, [
       { allowedBarrelNames: ["mod"] },
     ]);
 
     // Assert
-    expect(reports).toStrictEqual([]);
+    expect(actualReports).toStrictEqual([]);
   });
 
   it.each([
@@ -104,11 +166,40 @@ describe("barrel files exports-only rule (enforced)", () => {
     ["exports without sources", createBody(createExportWithoutSource())],
   ])("reports on %s", (_label, body) => {
     // Act
-    const reports = runTemporaryIndex(body);
+    const actualReports = runTemporaryIndex(body);
 
     // Assert
-    expect(reports).toHaveLength(1);
-    expect(reports[0]?.messageId).toBe("invalidBarrelContent");
+    expect(actualReports).toHaveLength(1);
+    expect(actualReports[0]?.messageId).toBe("invalidBarrelContent");
+  });
+
+  it("reports mixed local export specifiers with runtime bindings", () => {
+    // Arrange
+    const body = createBody({
+      source: void 0,
+      specifiers: [
+        {
+          exported: { name: "Feature", type: "Identifier" },
+          exportKind: "type",
+          local: { name: "Feature", type: "Identifier" },
+          type: "ExportSpecifier",
+        },
+        {
+          exported: { name: "runtimeValue", type: "Identifier" },
+          exportKind: "value",
+          local: { name: "runtimeValue", type: "Identifier" },
+          type: "ExportSpecifier",
+        },
+      ],
+      type: "ExportNamedDeclaration",
+    } as never);
+
+    // Act
+    const actualReports = runTemporaryIndex(body);
+
+    // Assert
+    expect(actualReports).toHaveLength(1);
+    expect(actualReports[0]?.messageId).toBe("invalidBarrelContent");
   });
 });
 
@@ -127,10 +218,10 @@ describe("barrel files exports-only rule (skips)", () => {
     const body = createBody(createImportDeclaration());
 
     // Act
-    const reports = runTemporaryFeature(body);
+    const actualReports = runTemporaryFeature(body);
 
     // Assert
-    expect(reports).toStrictEqual([]);
+    expect(actualReports).toStrictEqual([]);
   });
 
   it("skips when filename is not absolute", () => {
@@ -139,10 +230,10 @@ describe("barrel files exports-only rule (skips)", () => {
     const body = createBody(createImportDeclaration());
 
     // Act
-    const reports = runRule(filePath, body);
+    const actualReports = runRule(filePath, body);
 
     // Assert
-    expect(reports).toStrictEqual([]);
+    expect(actualReports).toStrictEqual([]);
   });
 
   it("skips when file is outside the repo", () => {
@@ -151,10 +242,10 @@ describe("barrel files exports-only rule (skips)", () => {
     const body = createBody(createImportDeclaration());
 
     // Act
-    const reports = runRule(filePath, body);
+    const actualReports = runRule(filePath, body);
 
     // Assert
-    expect(reports).toStrictEqual([]);
+    expect(actualReports).toStrictEqual([]);
   });
 
   it("reports export statements without a source or declaration", () => {
@@ -168,10 +259,10 @@ describe("barrel files exports-only rule (skips)", () => {
     } as never);
 
     // Act
-    const reports = runRule(filePath, body);
+    const actualReports = runRule(filePath, body);
 
     // Assert
-    expect(reports).toHaveLength(1);
-    expect(reports[0]?.messageId).toBe("invalidBarrelContent");
+    expect(actualReports).toHaveLength(1);
+    expect(actualReports[0]?.messageId).toBe("invalidBarrelContent");
   });
 });
