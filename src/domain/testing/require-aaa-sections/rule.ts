@@ -247,12 +247,10 @@ function reportOutOfOrderSections(
   const lastIndex = comments.length - 1;
 
   for (let index = 0; index < lastIndex; index += 1) {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- loop bounds guarantee both indices exist
-    const previous = comments[index]!;
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- loop bounds guarantee both indices exist
-    const current = comments[index + 1]!;
+    const previous = comments[index];
+    const current = comments[index + 1];
 
-    reportIfOutOfOrder(context, previous, current);
+    if (previous && current) reportIfOutOfOrder(context, previous, current);
   }
 }
 

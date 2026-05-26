@@ -206,4 +206,88 @@ describe("no-import-export-aliases rule", () => {
     // Assert
     expect(reports).toStrictEqual([]);
   });
+
+  it("allows aliased imports when the original name is already declared in a variable", () => {
+    // Arrange
+    const variableDeclaration = {
+      declarations: [
+        {
+          id: { name: "A", type: "Identifier" },
+          init: { raw: "1", type: "Literal", value: 1 },
+          type: "VariableDeclarator",
+        },
+      ],
+      kind: "const",
+      type: "VariableDeclaration",
+    } as unknown as ESTree.VariableDeclaration;
+
+    const body = createBody(
+      variableDeclaration,
+      createImportDeclaration([createImportSpecifier("B", "A")]),
+    );
+
+    // Act
+    const reports = runRule(body);
+
+    // Assert
+    expect(reports).toStrictEqual([]);
+  });
+
+  it("allows aliased exports when the original name is already declared by an exported variable", () => {
+    // Arrange
+    const body = createBody(
+      {
+        declaration: {
+          declarations: [
+            {
+              id: { name: "A", type: "Identifier" },
+              init: { raw: "1", type: "Literal", value: 1 },
+              type: "VariableDeclarator",
+            },
+          ],
+          kind: "const",
+          type: "VariableDeclaration",
+        },
+        specifiers: [],
+        type: "ExportNamedDeclaration",
+      } as unknown as ESTree.ExportNamedDeclaration,
+      createExportWithoutSource([createExportSpecifier("A", "B")]),
+    );
+
+    // Act
+    const reports = runRule(body);
+
+    // Assert
+    expect(reports).toStrictEqual([]);
+  });
+
+  it("still reports aliases when variable declarations use non-Identifier patterns", () => {
+    // Arrange
+    const variableDeclaration = {
+      declarations: [
+        {
+          id: {
+            properties: [],
+            type: "ObjectPattern",
+          },
+          init: { raw: "source", type: "Identifier" },
+          type: "VariableDeclarator",
+        },
+      ],
+      kind: "const",
+      type: "VariableDeclaration",
+    } as unknown as ESTree.VariableDeclaration;
+
+    const body = createBody(
+      variableDeclaration,
+      createImportDeclaration([createImportSpecifier("B", "A")]),
+    );
+
+    // Act
+    const reports = runRule(body);
+
+    // Assert
+    expect(reports).toHaveLength(1);
+    expect(reports[0]?.messageId).toBe("aliasNotAllowed");
+  });
 });

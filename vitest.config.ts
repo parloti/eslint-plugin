@@ -1,17 +1,11 @@
 import { defineConfig } from "vitest/config";
+
 export default defineConfig({
   test: {
     clearMocks: true,
     coverage: {
       enabled: true,
-      exclude: [
-        "**/index.ts",
-        "**/*.types.ts",
-        "**/types.ts",
-        "src/domain/architecture/consistent-barrel-files/no-import-export-aliases-rule.ts",
-        "src/domain/architecture/consistent-barrel-files/no-import-export-extensions-rule.ts",
-        "src/domain/testing/prefer-vi-mocked-import/fix-imports.ts",
-      ],
+      exclude: ["**/index.ts", "**/*.types.ts"],
       include: ["src/**/*.ts", "tests/support/**/*.ts"],
       thresholds: {
         "100": true,

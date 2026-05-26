@@ -118,4 +118,104 @@ describe("prefer-vi-mocked-import fix-imports", () => {
       },
     ]);
   });
+
+  it("sorts multiple import statements in the same insert group", () => {
+    // Arrange
+    const matches = [
+      {
+        importPlan: {
+          insert: { afterRange: [5, 10] },
+          moduleSpecifier: "./zeta",
+          names: ["zeta"],
+        },
+        moduleSpecifier: "./zeta",
+        newline: "\n",
+      },
+      {
+        importPlan: {
+          insert: { afterRange: [5, 10] },
+          moduleSpecifier: "./alpha",
+          names: ["alpha"],
+        },
+        moduleSpecifier: "./alpha",
+        newline: "\n",
+      },
+    ];
+    const fixer = {
+      insertTextAfterRange: (range: [number, number], text: string) => ({
+        range,
+        text,
+        type: "after",
+      }),
+      insertTextBeforeRange: (range: [number, number], text: string) => ({
+        range,
+        text,
+        type: "before",
+      }),
+      replaceTextRange: (range: [number, number], text: string) => ({
+        range,
+        text,
+        type: "replace",
+      }),
+    } as never;
+
+    // Act
+    const fixes = buildCombinedImportFixes(matches as never, fixer);
+
+    // Assert
+    expect(fixes).toStrictEqual([
+      {
+        range: [5, 10],
+        text: '\nimport { alpha } from "./alpha";\nimport { zeta } from "./zeta";',
+        type: "after",
+      },
+    ]);
+  });
+
+  it("preserves update plans when the first module match is already an update", () => {
+    // Arrange
+    const matches = [
+      {
+        importPlan: {
+          moduleSpecifier: "./delta",
+          names: ["eta"],
+          update: {
+            existingNamedImports: ["theta"],
+            range: [30, 40],
+          },
+        },
+        moduleSpecifier: "./delta",
+        newline: "\n",
+      },
+    ];
+    const fixer = {
+      insertTextAfterRange: (range: [number, number], text: string) => ({
+        range,
+        text,
+        type: "after",
+      }),
+      insertTextBeforeRange: (range: [number, number], text: string) => ({
+        range,
+        text,
+        type: "before",
+      }),
+      replaceTextRange: (range: [number, number], text: string) => ({
+        range,
+        text,
+        type: "replace",
+      }),
+    } as never;
+
+    // Act
+    const fixes = buildCombinedImportFixes(matches as never, fixer);
+
+    // Assert
+    expect(fixes).toStrictEqual([
+      {
+        range: [30, 40],
+        text: 'import { eta, theta } from "./delta";',
+        type: "replace",
+      },
+    ]);
+  });
 });

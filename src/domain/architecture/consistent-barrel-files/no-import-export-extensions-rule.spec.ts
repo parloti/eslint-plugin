@@ -151,6 +151,24 @@ describe("no-import-export-extensions rule", () => {
     expect(reports[0]?.messageId).toBe("unexpectedExtension");
   });
 
+  it.each(["./feature.ts?raw", "./feature.ts#fragment"])(
+    "reports source specifiers with extensions before suffix markers: %s",
+    (source) => {
+      // Arrange
+      const body = createBody({
+        ...createImportDeclaration(),
+        source: createLiteral(source),
+      });
+
+      // Act
+      const reports = runRule(body);
+
+      // Assert
+      expect(reports).toHaveLength(1);
+      expect(reports[0]?.messageId).toBe("unexpectedExtension");
+    },
+  );
+
   it.each(["./feature", "node:fs", "@scope/package", "@scope/package/index"])(
     "does not report sources without disallowed suffixes: %s",
     (source) => {
@@ -175,6 +193,41 @@ describe("no-import-export-extensions rule", () => {
       specifiers: [],
       type: "ExportNamedDeclaration",
     });
+
+    // Act
+    const reports = runRule(body);
+
+    // Assert
+    expect(reports).toStrictEqual([]);
+  });
+
+  it("does not report import declarations with non-string source literals", () => {
+    // Arrange
+    const body = createBody({
+      ...createImportDeclaration(),
+      source: { raw: "123", type: "Literal", value: 123 } as ESTree.Literal,
+    });
+
+    // Act
+    const reports = runRule(body);
+
+    // Assert
+    expect(reports).toStrictEqual([]);
+  });
+
+  it("ignores unsupported program statements", () => {
+    // Arrange
+    const body = createBody({
+      declarations: [
+        {
+          id: { name: "value", type: "Identifier" },
+          init: { raw: "1", type: "Literal", value: 1 },
+          type: "VariableDeclarator",
+        },
+      ],
+      kind: "const",
+      type: "VariableDeclaration",
+    } as unknown as ESTree.VariableDeclaration);
 
     // Act
     const reports = runRule(body);

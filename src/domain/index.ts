@@ -4,6 +4,7 @@ export {
   noImportExportAliasesRule,
   noImportExportExtensionsRule,
   noReexportsOutsideBarrelsRule,
+  noUnusedExportsRule,
 } from "./architecture";
 export { noMultipleDeclaratorsRule, preferInterfaceTypesRule } from "./core";
 export {

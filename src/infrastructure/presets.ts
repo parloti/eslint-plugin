@@ -22,6 +22,7 @@ const architectureRuleNames = [
   "consistent-barrel-files",
   "no-import-export-aliases",
   "no-import-export-extensions",
+  "no-unused-exports",
   "no-reexports-outside-barrels",
 ] as const satisfies readonly CodeperfectRuleName[];
 
@@ -59,7 +60,28 @@ const testingRuleNames = [
 ] as const satisfies readonly CodeperfectRuleName[];
 
 /** Rule names used by the all-rules preset. */
-const allRuleNames = Object.keys(codeperfectRules) as CodeperfectRuleName[];
+const allRuleNames = [
+  "assert-actual-expected-names",
+  "barrel-files-exports-only",
+  "consistent-barrel-files",
+  "enforce-aaa-phase-purity",
+  "enforce-aaa-structure",
+  "no-import-export-aliases",
+  "no-import-export-extensions",
+  "no-interface-member-docs",
+  "no-multiple-declarators",
+  "no-reexports-outside-barrels",
+  "no-unused-exports",
+  "prefer-interface-types",
+  "prefer-vi-mocked-import",
+  "prefer-vitest-incremental-casts",
+  "require-aaa-sections",
+  "require-act-result-capture",
+  "require-example-language",
+  "require-test-companion",
+  "single-act-statement",
+  "single-line-jsdoc",
+] as const satisfies readonly CodeperfectRuleName[];
 
 /**
  * Creates a preset for the provided rule names.

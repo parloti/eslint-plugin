@@ -1,9 +1,6 @@
-import config from "@codeperfect/commitlint-config-emoji";
+import type { Options } from "semantic-release";
 
-interface ReleaseConfig {
-  branches: string[];
-  plugins: ([string, unknown] | string)[];
-}
+import config from "@codeperfect/commitlint-config-emoji";
 
 /**
  * Semantic-release loads this file before build output exists, so the parser
@@ -17,6 +14,6 @@ const releaseConfig = {
     "@semantic-release/npm",
     "@semantic-release/github",
   ],
-} satisfies ReleaseConfig;
+} satisfies Options;
 
 export default releaseConfig;

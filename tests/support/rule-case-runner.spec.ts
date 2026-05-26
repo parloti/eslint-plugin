@@ -4,12 +4,15 @@ import { describe, expect, it } from "vitest";
 
 import { runRuleCase } from "./index";
 
-/**
- *
- */
+/** Demonstration rule used to validate the rule-case runner helper. */
 const demoRule: Rule.RuleModule = {
   create: (context) => {
-    const identifier = context.options[0]?.identifier ?? "bad";
+    const firstOption = context.options[0] as
+      | Record<string, unknown>
+      | undefined;
+    const identifierFromOption = firstOption?.["identifier"];
+    const identifier =
+      typeof identifierFromOption === "string" ? identifierFromOption : "bad";
 
     return {
       Identifier(node) {

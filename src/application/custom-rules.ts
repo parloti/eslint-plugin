@@ -11,6 +11,7 @@ import {
   noInterfaceMemberDocumentationRule,
   noMultipleDeclaratorsRule,
   noReexportsOutsideBarrelsRule,
+  noUnusedExportsRule,
   preferInterfaceTypesRule,
   preferViMockedImportRule,
   preferVitestIncrementalCastsRule,
@@ -60,6 +61,10 @@ const customRules = [
   {
     rule: noImportExportExtensionsRule,
     ruleName: "no-import-export-extensions",
+  },
+  {
+    rule: noUnusedExportsRule,
+    ruleName: "no-unused-exports",
   },
   {
     rule: noReexportsOutsideBarrelsRule,

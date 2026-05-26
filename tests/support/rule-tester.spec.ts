@@ -3,9 +3,7 @@ import type { Rule } from "eslint";
 import { RuleTester } from "@typescript-eslint/rule-tester";
 import { describe, expect, it, vi } from "vitest";
 
-/**
- *
- */
+/** Demo rule used by helper-level RuleTester assertions. */
 const demoRule: Rule.RuleModule = {
   create: () => ({}),
   meta: {
@@ -17,6 +15,53 @@ const demoRule: Rule.RuleModule = {
   },
 };
 
+/** Optional overrides used by the mocked `vitest` module factory. */
+interface VitestModuleMockOverrides {
+  /** Optional override for `afterAll`. */
+  afterAll?: ReturnType<typeof vi.fn>;
+
+  /** Optional override for `describe`. */
+  describe?: ReturnType<typeof vi.fn>;
+
+  /** Optional override for `it`. */
+  it?: ReturnType<typeof vi.fn>;
+
+  /** Optional override for `it.only`. */
+  itOnly?: ReturnType<typeof vi.fn>;
+}
+
+/**
+ * Builds a partial Vitest module mock with deterministic spy functions.
+ * @param overrides Spy overrides for selected Vitest exports.
+ * @returns Partially mocked Vitest module.
+ * @example
+ * ```typescript
+ * const mockedVitest = createVitestModuleMock({ it: vi.fn() });
+ * ```
+ */
+const createVitestModuleMock = (overrides: VitestModuleMockOverrides) => {
+  const afterAllMock = overrides.afterAll ?? vi.fn();
+  const describeMock = overrides.describe ?? vi.fn();
+  const itMock = overrides.it ?? vi.fn();
+  const itOnlyMock = overrides.itOnly ?? vi.fn();
+
+  return {
+    afterAll: afterAllMock,
+    describe: describeMock,
+    it: Object.assign(itMock, { only: itOnlyMock }),
+  } as unknown as Partial<typeof import("vitest")>;
+};
+
+/**
+ * Returns `undefined` and performs no work.
+ * @returns Always `undefined`.
+ * @example
+ * ```typescript
+ * const result = noOperation();
+ * ```
+ */
+const noOperation = (): undefined => undefined;
+
 describe("rule-tester helpers", () => {
   it("registers the shared wrapper functions without focusing the suite", async () => {
     // Arrange
@@ -25,57 +70,80 @@ describe("rule-tester helpers", () => {
     const itSpy = vi.fn();
     const itOnlySpy = vi.fn();
 
-    vi.doMock(
-      import("vitest"),
-      () =>
-        ({
-          afterAll: afterAllSpy,
-          describe: describeSpy,
-          it: Object.assign(itSpy, { only: itOnlySpy }),
-        }) as unknown as Partial<typeof import("vitest")>,
+    vi.doMock(import("vitest"), () =>
+      createVitestModuleMock({
+        afterAll: afterAllSpy,
+        describe: describeSpy,
+        it: itSpy,
+        itOnly: itOnlySpy,
+      }),
     );
 
-    await import("./rule-tester");
-
     // Act
-    RuleTester.afterAll(() => void 0);
-    RuleTester.describe("demo", () => void 0);
-    RuleTester.it("demo", () => void 0);
-    RuleTester.itOnly("demo", () => void 0);
+    const actual = await (async () => {
+      const importResult = await import("./rule-tester");
+      RuleTester.afterAll(noOperation);
+      RuleTester.describe("demo", noOperation);
+      RuleTester.itOnly("demo", noOperation);
+      RuleTester.it("demo", noOperation);
+
+      return {
+        importResult,
+        wrapperResults: {
+          afterAllResult: undefined,
+          describeResult: undefined,
+          itOnlyResult: undefined,
+          itResult: undefined,
+        },
+      };
+    })();
 
     // Assert
-    expect(afterAllSpy).toHaveBeenCalledTimes(1);
-    expect(describeSpy).toHaveBeenCalledTimes(1);
-    expect(itSpy).toHaveBeenCalledTimes(1);
-    expect(itOnlySpy).toHaveBeenCalledTimes(1);
+    expect(actual.wrapperResults).toStrictEqual({
+      afterAllResult: undefined,
+      describeResult: undefined,
+      itOnlyResult: undefined,
+      itResult: undefined,
+    });
+    expect(actual.importResult).toBeDefined();
+    expect({
+      afterAll: afterAllSpy.mock.calls.length,
+      describe: describeSpy.mock.calls.length,
+      it: itSpy.mock.calls.length,
+      itOnly: itOnlySpy.mock.calls.length,
+    }).toStrictEqual({
+      afterAll: 1,
+      describe: 1,
+      it: 1,
+      itOnly: 1,
+    });
   });
 
   it("creates a RuleTester with the project parser and delegates run calls", async () => {
     // Arrange
     const runSpy = vi
       .spyOn(RuleTester.prototype, "run")
-      .mockImplementation(() => void 0);
-    vi.doMock(
-      import("vitest"),
-      () =>
-        ({
-          afterAll: vi.fn(),
-          describe: vi.fn(),
-          it: Object.assign(vi.fn(), { only: vi.fn() }),
-        }) as unknown as Partial<typeof import("vitest")>,
-    );
+      .mockImplementation(() => {
+        noOperation();
+      });
+    vi.doMock(import("vitest"), () => createVitestModuleMock({}));
 
-    const { createRuleTester } = await import("./rule-tester");
-    const ruleTester = createRuleTester();
     const tests = {
       invalid: [],
       valid: [],
     };
 
     // Act
-    ruleTester.run("demo-rule", demoRule, tests);
+    const actual = await (async () => {
+      const createRuleTesterModule = await import("./rule-tester");
+      const ruleTester = createRuleTesterModule.createRuleTester();
+      ruleTester.run("demo-rule", demoRule, tests);
+
+      return {};
+    })();
 
     // Assert
+    expect(actual).toStrictEqual({});
     expect(runSpy).toHaveBeenCalledTimes(1);
     expect(runSpy).toHaveBeenCalledWith("demo-rule", demoRule, tests);
   });
@@ -84,44 +152,43 @@ describe("rule-tester helpers", () => {
     // Arrange
     const runSpy = vi
       .spyOn(RuleTester.prototype, "run")
-      .mockImplementation(() => void 0);
+      .mockImplementation(() => {
+        noOperation();
+      });
 
-    vi.doMock(
-      import("vitest"),
-      () =>
-        ({
-          afterAll: vi.fn(),
-          describe: vi.fn(),
-          it: Object.assign(vi.fn(), { only: vi.fn() }),
-        }) as unknown as Partial<typeof import("vitest")>,
-    );
-
-    const { defineRuleTesterSuite, defineTemporaryFixtureRuleTesterSuite } =
-      await import("./rule-tester");
+    vi.doMock(import("vitest"), () => createVitestModuleMock({}));
 
     // Act
-    defineRuleTesterSuite("demo-rule", demoRule, {
-      invalid: [],
-      valid: [],
-    });
-    defineTemporaryFixtureRuleTesterSuite(
-      "fixture-rule",
-      demoRule,
-      (fixtureManager) => {
-        const fixtureSet = fixtureManager.createFixtureSet({
-          "feature.ts": "export const feature = 1;",
-        });
+    const actual = await (async () => {
+      let generatedFixturePath = "";
+      const suites = await import("./rule-tester");
+      suites.defineRuleTesterSuite("demo-rule", demoRule, {
+        invalid: [],
+        valid: [],
+      });
+      suites.defineTemporaryFixtureRuleTesterSuite(
+        "fixture-rule",
+        demoRule,
+        (fixtureManager) => {
+          const fixtureSet = fixtureManager.createFixtureSet({
+            "feature.ts": "export const feature = 1;",
+          });
+          generatedFixturePath = fixtureSet.getFilePath("feature.ts");
 
-        expect(fixtureSet.getFilePath("feature.ts")).toContain("feature.ts");
+          return {
+            invalid: [],
+            valid: [],
+          };
+        },
+      );
 
-        return {
-          invalid: [],
-          valid: [],
-        };
-      },
-    );
+      return {
+        generatedFixturePath,
+      };
+    })();
 
     // Assert
+    expect(actual.generatedFixturePath).toContain("feature.ts");
     expect(runSpy).toHaveBeenCalledTimes(2);
   });
 });

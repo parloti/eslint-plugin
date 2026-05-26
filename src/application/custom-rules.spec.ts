@@ -56,7 +56,7 @@ const summarizeCustomRuleContract = (
 describe("custom rule registry", () => {
   it("covers every package-owned rule with metadata", () => {
     // Arrange
-    const expectedRuleCount = 19;
+    const expectedRuleCount = 20;
 
     // Act
     const actualRuleSummaries = customRules.map((ruleEntry) =>
@@ -135,6 +135,16 @@ describe("custom rule registry", () => {
         schemaIsArray: true,
         type: "problem",
         url: getCustomRuleDocumentationUrl("no-import-export-extensions"),
+      },
+      {
+        createType: "function",
+        description:
+          "Disallow exports that are unused or consumed only by test files.",
+        hasMessages: true,
+        ruleName: "no-unused-exports",
+        schemaIsArray: true,
+        type: "problem",
+        url: getCustomRuleDocumentationUrl("no-unused-exports"),
       },
       {
         createType: "function",
