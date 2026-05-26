@@ -17,9 +17,7 @@ Splitting declarations improves readability, produces cleaner diffs, and avoids 
 
 - Each `const`, `let`, or `var` declaration must declare exactly one variable
 - Multiple declarators in a single statement are disallowed, regardless of formatting
-- The rule applies to:
-  - standalone declarations
-  - exported declarations
+- The rule reports any declaration with multiple declarators, including standalone, exported, and loop initializer declarations.
 
 ### Examples of disallowed patterns
 
@@ -60,6 +58,11 @@ var value = compute();
 ```
 
 ```typescript
+const { availableRules } = source;
+const customError = buildError(availableRules);
+```
+
+```typescript
 export const availableRules = new Set(Object.keys(rules ?? {}));
 export const customError = buildCustomErrorRules(availableRules);
 ```
@@ -95,6 +98,8 @@ The following cases are reported but not auto-fixed:
   ```
 
 - declarations with inline comments between declarators
-- complex exported declarations where splitting may affect formatting or comments
+- exported declarations
+- TypeScript ambient declarations using the `declare` modifier
+- declaration kinds outside `const`, `let`, and `var`
 
 Manual refactoring is required in these cases to preserve intent and formatting.

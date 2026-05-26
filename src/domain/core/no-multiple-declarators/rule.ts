@@ -14,8 +14,14 @@ import { hasFixData, hasRange } from "./types";
 
 /** Matches comment syntax between declarators. */
 const commentPattern = /\/\/|\/\*/u;
+/** Declaration kinds that can be safely split into standalone statements. */
+const fixableDeclarationKinds = new Set(["const", "let", "var"]);
 /** Loop parent types whose initializers cannot be safely split. */
-const loopParentTypes = new Set(["ForInStatement", "ForOfStatement"]);
+const loopParentTypes = new Set([
+  "ForAwaitOfStatement",
+  "ForInStatement",
+  "ForOfStatement",
+]);
 
 /**
  * Gets the source access wrapper from the ESLint context.
@@ -40,6 +46,18 @@ const getSourceCode = (context: Rule.RuleContext): SourceCodeAccess =>
  */
 const getSourceText = (sourceCode: SourceCodeAccess): string =>
   typeof sourceCode.text === "string" ? sourceCode.text : sourceCode.getText();
+
+/**
+ * Gets the line separator style used by the current source file.
+ * @param sourceText Full source text.
+ * @returns File-native line separator sequence.
+ * @example
+ * ```typescript
+ * const lineSeparator = getLineSeparator("const a = 1;\r\nconst b = 2;");
+ * ```
+ */
+const getLineSeparator = (sourceText: string): string =>
+  sourceText.includes("\r\n") ? "\r\n" : "\n";
 
 /**
  * Determines whether a declaration is used as a loop initializer.
@@ -78,6 +96,31 @@ const isWrappedExport = (node: VariableDeclarationNode): boolean =>
   node.parent?.type === "ExportNamedDeclaration";
 
 /**
+ * Determines whether a declaration is ambient in TypeScript source.
+ * @param node Declaration node to inspect.
+ * @returns Whether the declaration is marked with `declare`.
+ * @example
+ * ```typescript
+ * const ambient = isTypeScriptAmbientDeclaration(node);
+ * ```
+ */
+const isTypeScriptAmbientDeclaration = (
+  node: VariableDeclarationNode,
+): boolean => node.declare === true;
+
+/**
+ * Determines whether a declaration kind is safe to rewrite.
+ * @param node Declaration node to inspect.
+ * @returns Whether the declaration kind supports conservative split fixes.
+ * @example
+ * ```typescript
+ * const safeKind = hasFixableDeclarationKind(node);
+ * ```
+ */
+const hasFixableDeclarationKind = (node: VariableDeclarationNode): boolean =>
+  hasFixData(node) && fixableDeclarationKinds.has(node.kind);
+
+/**
  * Gets the indentation for the line containing a declaration.
  * @param sourceText Full source text.
  * @param start Start offset of the declaration.
@@ -91,7 +134,7 @@ const getLineIndent = (sourceText: string, start: number): string => {
   const lineStart = sourceText.lastIndexOf("\n", start - 1) + 1;
   const linePrefix = sourceText.slice(lineStart, start);
 
-  return linePrefix.replace(/[^\t ].*$/u, "");
+  return /^([\t ]*)/u.exec(linePrefix)?.[1] ?? "";
 };
 
 /**
@@ -152,6 +195,13 @@ const canFix = (
     return false;
   }
 
+  if (
+    !hasFixableDeclarationKind(node) ||
+    isTypeScriptAmbientDeclaration(node)
+  ) {
+    return false;
+  }
+
   if (isLoopInitializer(node) || isWrappedExport(node)) {
     return false;
   }
@@ -177,10 +227,11 @@ const buildReplacement = (
 ): string => {
   const sourceText = getSourceText(sourceCode);
   const indent = getLineIndent(sourceText, node.range[0]);
+  const lineSeparator = getLineSeparator(sourceText);
 
   return declarations
     .map((declaration) => `${node.kind} ${sourceCode.getText(declaration)};`)
-    .join(`\n${indent}`);
+    .join(`${lineSeparator}${indent}`);
 };
 
 /**

@@ -26,6 +26,8 @@ interface CreateVariableDeclarationInput {
 interface MockNode {
   /** Variable declarators belonging to a declaration statement. */
   declarations?: MockNode[];
+  /** TypeScript ambient declaration modifier. */
+  declare?: boolean;
   /** Loop initializer reference used by `ForStatement` parents. */
   init?: MockNode | null;
   /** Declaration keyword such as `const` or `let`. */

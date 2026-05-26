@@ -8,10 +8,10 @@ describe("no-multiple-declarators types", () => {
     const node = { range: [0, 1] as [number, number], type: "Identifier" };
 
     // Act
-    const ranged = hasRange(node);
+    const actual = hasRange(node);
 
     // Assert
-    expect(ranged).toBe(true);
+    expect(actual).toBe(true);
   });
 
   it("recognizes declarations with fix data", () => {
@@ -23,10 +23,38 @@ describe("no-multiple-declarators types", () => {
     };
 
     // Act
-    const fixable = hasFixData(declaration);
+    const actual = hasFixData(declaration);
 
     // Assert
-    expect(fixable).toBe(true);
+    expect(actual).toBe(true);
+  });
+
+  it("rejects malformed ranges", () => {
+    // Arrange
+    const shortRangeNode = {
+      range: [0] as unknown as [number, number],
+      type: "Identifier",
+    };
+    const reversedRangeNode = {
+      range: [2, 1] as [number, number],
+      type: "Identifier",
+    };
+    const nonNumericRangeNode = {
+      range: ["0", 1] as unknown as [number, number],
+      type: "Identifier",
+    };
+
+    // Act
+    const actual = {
+      actualNonNumeric: hasRange(nonNumericRangeNode),
+      actualReversed: hasRange(reversedRangeNode),
+      actualShort: hasRange(shortRangeNode),
+    };
+
+    // Assert
+    expect(actual.actualShort).toBe(false);
+    expect(actual.actualReversed).toBe(false);
+    expect(actual.actualNonNumeric).toBe(false);
   });
 
   it("rejects declarations without a kind", () => {
@@ -37,9 +65,9 @@ describe("no-multiple-declarators types", () => {
     };
 
     // Act
-    const fixable = hasFixData(declaration);
+    const actual = hasFixData(declaration);
 
     // Assert
-    expect(fixable).toBe(false);
+    expect(actual).toBe(false);
   });
 });

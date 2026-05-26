@@ -55,6 +55,8 @@ interface SourceCodeAccess {
 interface VariableDeclarationNode extends BaseNode {
   /** Individual declarators contained in the declaration. */
   declarations?: VariableDeclaratorNode[];
+  /** TypeScript ambient declaration modifier. */
+  declare?: boolean;
   /** Declaration kind such as `const`, `let`, or `var`. */
   kind?: string;
 }
@@ -99,8 +101,13 @@ function hasRange(node: BaseNode | undefined): node is RangedNode {
  * const validRange = isRange([0, 1]);
  * ```
  */
-function isRange(value: BaseNode["range"]): value is Range {
-  return Array.isArray(value);
+function isRange(value: unknown): value is Range {
+  return (
+    Array.isArray(value) &&
+    value.length === 2 &&
+    value.every((part) => Number.isInteger(part) && part >= 0) &&
+    value[0] <= value[1]
+  );
 }
 
 export { hasFixData, hasRange };
