@@ -9,8 +9,6 @@ import {
   isAllowlistedFile,
   isLintableFilename,
   isTestFile,
-  matchesAnyPattern,
-  toRepoRelativePosixPath,
 } from "./no-unused-exports-options";
 
 describe("no-unused-exports options", () => {
@@ -19,10 +17,10 @@ describe("no-unused-exports options", () => {
     const rawOptions: [] = [];
 
     // Act
-    const state = getOptions(rawOptions);
+    const actualState = getOptions(rawOptions);
 
     // Assert
-    expect(state).toStrictEqual({
+    expect(actualState).toStrictEqual({
       allowInFiles: [...DEFAULT_ALLOW_IN_FILES],
       testFilePatterns: [...DEFAULT_TEST_FILE_PATTERNS],
     });
@@ -38,10 +36,10 @@ describe("no-unused-exports options", () => {
     ];
 
     // Act
-    const state = getOptions(rawOptions);
+    const actualState = getOptions(rawOptions);
 
     // Assert
-    expect(state).toStrictEqual({
+    expect(actualState).toStrictEqual({
       allowInFiles: ["src/index.ts"],
       testFilePatterns: ["tests/**/*.ts"],
     });
@@ -57,10 +55,10 @@ describe("no-unused-exports options", () => {
     ];
 
     // Act
-    const state = getOptions(rawOptions);
+    const actualState = getOptions(rawOptions);
 
     // Assert
-    expect(state).toStrictEqual({
+    expect(actualState).toStrictEqual({
       allowInFiles: [...DEFAULT_ALLOW_IN_FILES],
       testFilePatterns: [...DEFAULT_TEST_FILE_PATTERNS],
     });
@@ -71,29 +69,30 @@ describe("no-unused-exports options", () => {
     const absolutePath = path.join(cwd(), "src", "feature.ts");
 
     // Act
-    const result = {
+    const actualResult = {
       absolutePath: isLintableFilename(absolutePath),
       emptyPath: isLintableFilename(""),
       relativePath: isLintableFilename("src/feature.ts"),
     };
 
     // Assert
-    expect(result).toStrictEqual({
+    expect(actualResult).toStrictEqual({
       absolutePath: true,
       emptyPath: false,
       relativePath: false,
     });
   });
 
-  it("normalizes relative repo paths", () => {
+  it("matches allowlist using repo-relative normalization", () => {
     // Arrange
-    const sourcePath = path.join(cwd(), "src", "feature.ts");
+    const sourcePath = path.join(cwd(), "src", "index.ts");
+    const state = getOptions([]);
 
     // Act
-    const relativePath = toRepoRelativePosixPath(sourcePath);
+    const actualAllowlisted = isAllowlistedFile(sourcePath, state);
 
     // Assert
-    expect(relativePath).toBe("src/feature.ts");
+    expect(actualAllowlisted).toBe(true);
   });
 
   it("matches allowlisted and test globs", () => {
@@ -103,54 +102,74 @@ describe("no-unused-exports options", () => {
     const state = getOptions([]);
 
     // Act
-    const result = {
+    const actualResult = {
       allowlisted: isAllowlistedFile(sourceIndexPath, state),
       testFile: isTestFile(testPath, state),
     };
 
     // Assert
-    expect(result).toStrictEqual({
+    expect(actualResult).toStrictEqual({
       allowlisted: true,
       testFile: true,
     });
   });
 
-  it("returns false for non-matching patterns", () => {
+  it("returns false for non-matching allowlist and test patterns", () => {
     // Arrange
     const featurePath = path.join(cwd(), "src", "feature.ts");
+    const state = getOptions([
+      {
+        allowInFiles: ["tests/**/*.ts"],
+        testFilePatterns: ["tests/**/*.ts"],
+      },
+    ]);
 
     // Act
-    const result = {
-      emptyPatterns: matchesAnyPattern(featurePath, []),
-      noMatch: matchesAnyPattern(featurePath, ["tests/**/*.ts"]),
+    const actualResult = {
+      allowlisted: isAllowlistedFile(featurePath, state),
+      testFile: isTestFile(featurePath, state),
     };
 
     // Assert
-    expect(result).toStrictEqual({
-      emptyPatterns: false,
-      noMatch: false,
+    expect(actualResult).toStrictEqual({
+      allowlisted: false,
+      testFile: false,
     });
   });
 
-  it("returns undefined for paths outside the repository", () => {
+  it("returns false for paths outside the repository", () => {
     // Arrange
     const outsidePath = path.resolve(cwd(), "..", "outside", "feature.ts");
+    const state = getOptions([]);
 
     // Act
-    const relativePath = toRepoRelativePosixPath(outsidePath);
+    const actualResult = {
+      allowlisted: isAllowlistedFile(outsidePath, state),
+      testFile: isTestFile(outsidePath, state),
+    };
 
     // Assert
-    expect(relativePath).toBeUndefined();
+    expect(actualResult).toStrictEqual({
+      allowlisted: false,
+      testFile: false,
+    });
   });
 
   it("does not match non-lintable filenames", () => {
     // Arrange
     const nonLintablePath = "src/feature.ts";
+    const state = getOptions([]);
 
     // Act
-    const matched = matchesAnyPattern(nonLintablePath, ["src/**/*.ts"]);
+    const actualResult = {
+      allowlisted: isAllowlistedFile(nonLintablePath, state),
+      testFile: isTestFile(nonLintablePath, state),
+    };
 
     // Assert
-    expect(matched).toBe(false);
+    expect(actualResult).toStrictEqual({
+      allowlisted: false,
+      testFile: false,
+    });
   });
 });

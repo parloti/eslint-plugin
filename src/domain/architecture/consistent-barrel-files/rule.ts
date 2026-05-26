@@ -45,7 +45,6 @@ const consistentBarrelFilesRule: Rule.RuleModule = {
             description:
               "Allowed barrel basenames that the rule recognizes in each folder.",
             items: { type: "string" },
-            minItems: 1,
             type: "array",
           },
           enforce: {

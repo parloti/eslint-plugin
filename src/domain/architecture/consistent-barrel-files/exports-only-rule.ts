@@ -83,19 +83,14 @@ const isTypeOnlyDeclaration = (value: unknown): boolean => {
 
 /**
  * Determines whether an export declaration is type-only via specifiers.
- * @param value Export declaration candidate to inspect.
+ * @param candidate Export declaration candidate to inspect.
  * @returns True when the export declaration is type-only.
  * @example
  * ```typescript
  * const ok = isTypeOnlyExport({ exportKind: "type", specifiers: [{ exportKind: "type" }] });
  * ```
  */
-const isTypeOnlyExport = (value: unknown): boolean => {
-  if (value === null || typeof value !== "object") {
-    return false;
-  }
-
-  const candidate = value as TypeOnlyExportCandidate;
+const isTypeOnlyExport = (candidate: TypeOnlyExportCandidate): boolean => {
   const specifiers = candidate.specifiers;
 
   if (!Array.isArray(specifiers) || specifiers.length === 0) {

@@ -12,7 +12,11 @@ const DEFAULT_ALLOW_IN_FILES = [
 ] as const;
 
 /** Default glob patterns used to classify test files. */
-const DEFAULT_TEST_FILE_PATTERNS = ["**/*.{test,spec,e2e}.ts"] as const;
+const DEFAULT_TEST_FILE_PATTERNS = [
+  "**/*.{test,spec,e2e}.ts",
+  "test/**/*.ts",
+  "tests/**/*.ts",
+] as const;
 
 /**
  * Checks whether one file path is lintable.
@@ -156,6 +160,4 @@ export {
   isAllowlistedFile,
   isLintableFilename,
   isTestFile,
-  matchesAnyPattern,
-  toRepoRelativePosixPath,
 };

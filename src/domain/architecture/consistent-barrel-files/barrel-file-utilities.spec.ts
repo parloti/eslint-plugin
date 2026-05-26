@@ -26,10 +26,10 @@ describe("barrel file utilities", () => {
     const expectedNames = ["index"];
 
     // Act
-    const names = normalizeAllowedBarrelNames(void 0);
+    const actualNames = normalizeAllowedBarrelNames(void 0);
 
     // Assert
-    expect(names).toStrictEqual(expectedNames);
+    expect(actualNames).toStrictEqual(expectedNames);
   });
 
   it("does not treat declaration files as lintable module files", () => {
@@ -57,12 +57,13 @@ describe("barrel file utilities", () => {
     writeFileSync(declarationBarrelPath, "export interface Feature {}", "utf8");
 
     // Act
-    const state = getDirectoryBarrelState(directory, new Set(["index"]));
+    const actualState = getDirectoryBarrelState(directory, new Set(["index"]));
 
     // Assert
-    expect(state).toStrictEqual({
+    expect(actualState).toStrictEqual({
       hasAllowedBarrelFile: false,
       hasNonBarrelModuleFile: true,
+      primaryAllowedBarrelFile: void 0,
       primaryNonBarrelModuleFile: "feature.ts",
     });
   });
@@ -86,6 +87,7 @@ describe("barrel file utilities", () => {
     expect(actual.missingDirectoryState).toStrictEqual({
       hasAllowedBarrelFile: false,
       hasNonBarrelModuleFile: false,
+      primaryAllowedBarrelFile: void 0,
       primaryNonBarrelModuleFile: void 0,
     });
   });

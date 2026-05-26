@@ -25,7 +25,7 @@ interface RuleReport {
  * @returns The captured rule reports.
  * @example
  * ```typescript
- * const reports = runRule("index.ts");
+ * const actualReports = runRule("index.ts");
  * ```
  */
 const runRule = (
@@ -86,11 +86,11 @@ describe("consistent-barrel-files rule", () => {
       writeFeature(filePath);
 
       // Act
-      const reports = runRule(filePath, defaultOptions);
+      const actualReports = runRule(filePath, defaultOptions);
 
       // Assert
-      expect(reports).toHaveLength(1);
-      expect(reports[0]?.messageId).toBe("missingBarrel");
+      expect(actualReports).toHaveLength(1);
+      expect(actualReports[0]?.messageId).toBe("missingBarrel");
     });
 
     it("does not report when enforcing and barrel exists", (): void => {
@@ -103,10 +103,10 @@ describe("consistent-barrel-files rule", () => {
       writeFeature(filePath);
 
       // Act
-      const reports = runRule(filePath, defaultOptions);
+      const actualReports = runRule(filePath, defaultOptions);
 
       // Assert
-      expect(reports).toStrictEqual([]);
+      expect(actualReports).toStrictEqual([]);
     });
 
     it("does not treat declaration barrels as satisfying the requirement", (): void => {
@@ -123,11 +123,11 @@ describe("consistent-barrel-files rule", () => {
       writeFeature(filePath);
 
       // Act
-      const reports = runRule(filePath, defaultOptions);
+      const actualReports = runRule(filePath, defaultOptions);
 
       // Assert
-      expect(reports).toHaveLength(1);
-      expect(reports[0]?.messageId).toBe("missingBarrel");
+      expect(actualReports).toHaveLength(1);
+      expect(actualReports[0]?.messageId).toBe("missingBarrel");
     });
   });
 
@@ -142,11 +142,11 @@ describe("consistent-barrel-files rule", () => {
       writeFeature(filePath);
 
       // Act
-      const reports = runRule(barrelPath, { enforce: false });
+      const actualReports = runRule(barrelPath, { enforce: false });
 
       // Assert
-      expect(reports).toHaveLength(1);
-      expect(reports[0]?.messageId).toBe("forbiddenBarrel");
+      expect(actualReports).toHaveLength(1);
+      expect(actualReports[0]?.messageId).toBe("forbiddenBarrel");
     });
 
     it("respects custom barrel names", (): void => {
@@ -159,10 +159,10 @@ describe("consistent-barrel-files rule", () => {
       writeFeature(filePath);
 
       // Act
-      const reports = runRule(filePath, { allowedNames: ["barrel"] });
+      const actualReports = runRule(filePath, { allowedNames: ["barrel"] });
 
       // Assert
-      expect(reports).toStrictEqual([]);
+      expect(actualReports).toStrictEqual([]);
     });
 
     it("falls back to the default barrel name when allowedNames is empty", (): void => {
@@ -175,10 +175,10 @@ describe("consistent-barrel-files rule", () => {
       writeFeature(filePath);
 
       // Act
-      const reports = runRule(filePath, { allowedNames: [] });
+      const actualReports = runRule(filePath, { allowedNames: [] });
 
       // Assert
-      expect(reports).toStrictEqual([]);
+      expect(actualReports).toStrictEqual([]);
     });
 
     it("skips when filename is not absolute", (): void => {
@@ -186,10 +186,10 @@ describe("consistent-barrel-files rule", () => {
       const filePath = "relative.ts";
 
       // Act
-      const reports = runRule(filePath, defaultOptions);
+      const actualReports = runRule(filePath, defaultOptions);
 
       // Assert
-      expect(reports).toStrictEqual([]);
+      expect(actualReports).toStrictEqual([]);
     });
 
     it("does not report forbidden barrels when the folder has no module files besides the barrel", (): void => {
@@ -200,13 +200,13 @@ describe("consistent-barrel-files rule", () => {
       writeBarrel(barrelPath);
 
       // Act
-      const reports = runRule(barrelPath, { enforce: false });
+      const actualReports = runRule(barrelPath, { enforce: false });
 
       // Assert
-      expect(reports).toStrictEqual([]);
+      expect(actualReports).toStrictEqual([]);
     });
 
-    it("skips forbidden check for non-barrel files", (): void => {
+    it("does not report forbidden barrels when the folder has no allowed barrel file", (): void => {
       // Arrange
       const directory = createRepoDirectory("src");
       temporaryDirectories.push(directory);
@@ -214,10 +214,27 @@ describe("consistent-barrel-files rule", () => {
       writeFeature(filePath);
 
       // Act
-      const reports = runRule(filePath, { enforce: false });
+      const actualReports = runRule(filePath, { enforce: false });
 
       // Assert
-      expect(reports).toStrictEqual([]);
+      expect(actualReports).toStrictEqual([]);
+    });
+
+    it("reports forbidden barrels even when linting a non-barrel file", (): void => {
+      // Arrange
+      const directory = createRepoDirectory("src");
+      temporaryDirectories.push(directory);
+      const barrelPath = path.join(directory, "index.ts");
+      const filePath = path.join(directory, "feature.ts");
+      writeBarrel(barrelPath);
+      writeFeature(filePath);
+
+      // Act
+      const actualReports = runRule(filePath, { enforce: false });
+
+      // Assert
+      expect(actualReports).toHaveLength(1);
+      expect(actualReports[0]?.messageId).toBe("forbiddenBarrel");
     });
   });
 
@@ -230,11 +247,11 @@ describe("consistent-barrel-files rule", () => {
       writeFeature(filePath);
 
       // Act
-      const reports = runRule(filePath);
+      const actualReports = runRule(filePath);
 
       // Assert
-      expect(reports).toHaveLength(1);
-      expect(reports[0]?.messageId).toBe("missingBarrel");
+      expect(actualReports).toHaveLength(1);
+      expect(actualReports[0]?.messageId).toBe("missingBarrel");
     });
 
     it("skips repo files outside src by default", (): void => {
@@ -245,10 +262,10 @@ describe("consistent-barrel-files rule", () => {
       writeFeature(filePath);
 
       // Act
-      const reports = runRule(filePath);
+      const actualReports = runRule(filePath);
 
       // Assert
-      expect(reports).toStrictEqual([]);
+      expect(actualReports).toStrictEqual([]);
     });
 
     it("skips when file is outside repo", (): void => {
@@ -256,10 +273,10 @@ describe("consistent-barrel-files rule", () => {
       const filePath = path.resolve(cwd(), "..", "outside.ts");
 
       // Act
-      const reports = runRule(filePath, defaultOptions);
+      const actualReports = runRule(filePath, defaultOptions);
 
       // Assert
-      expect(reports).toStrictEqual([]);
+      expect(actualReports).toStrictEqual([]);
     });
   });
 });

@@ -24,6 +24,8 @@ interface DirectoryBarrelState {
   hasAllowedBarrelFile: boolean;
   /** Whether the directory includes any non-barrel module file. */
   hasNonBarrelModuleFile: boolean;
+  /** The first allowed barrel file discovered in the directory. */
+  primaryAllowedBarrelFile: string | undefined;
   /** The first non-barrel module file discovered in the directory. */
   primaryNonBarrelModuleFile: string | undefined;
 }
@@ -181,24 +183,24 @@ const getDirectoryBarrelState = (
   allowedBarrelNames: ReadonlySet<string>,
 ): DirectoryBarrelState => {
   const moduleFiles = getDirectoryModuleFiles(directory);
+  const primaryAllowedBarrelFile = moduleFiles.find((entry) =>
+    allowedBarrelNames.has(entry.stem),
+  )?.name;
   const primaryNonBarrelModuleFile = moduleFiles.find(
     (entry) => !allowedBarrelNames.has(entry.stem),
   )?.name;
 
   return {
-    hasAllowedBarrelFile: moduleFiles.some((entry) =>
-      allowedBarrelNames.has(entry.stem),
-    ),
+    hasAllowedBarrelFile: primaryAllowedBarrelFile !== void 0,
     hasNonBarrelModuleFile: primaryNonBarrelModuleFile !== void 0,
+    primaryAllowedBarrelFile,
     primaryNonBarrelModuleFile,
   };
 };
 
 export {
-  DEFAULT_ALLOWED_BARREL_NAMES,
   getDirectoryBarrelState,
   isBarrelFile,
   isLintableModuleFile,
   normalizeAllowedBarrelNames,
 };
-export type { DirectoryBarrelState };

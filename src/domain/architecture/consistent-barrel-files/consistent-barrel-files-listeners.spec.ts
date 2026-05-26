@@ -92,14 +92,14 @@ describe("consistent-barrel-files listeners", (): void => {
     const options = [{}];
 
     // Act
-    const listener = ((): Rule.RuleListener => {
+    const actualListener = ((): Rule.RuleListener => {
       const state = getOptions(options);
 
       return buildListenerForFile({} as Rule.RuleContext, "relative.ts", state);
     })();
 
     // Assert
-    expect(listener).toStrictEqual({});
+    expect(actualListener).toStrictEqual({});
   });
 
   it("returns no-op when another file owns the missing-barrel report", (): void => {
@@ -113,7 +113,7 @@ describe("consistent-barrel-files listeners", (): void => {
     const state = getOptions([{}]);
 
     // Act
-    const listener = buildListenerForFile(context, filename, {
+    const actualListener = buildListenerForFile(context, filename, {
       ...state,
       allowedNames: ["index"],
       allowedNamesSet: new Set(["index"]),
@@ -121,7 +121,7 @@ describe("consistent-barrel-files listeners", (): void => {
     });
 
     // Assert
-    expect(listener).toStrictEqual({});
+    expect(actualListener).toStrictEqual({});
   });
 
   it("reports missing barrels for the primary module file", (): void => {
@@ -141,7 +141,7 @@ describe("consistent-barrel-files listeners", (): void => {
     ]);
   });
 
-  it("returns no-op for non-primary module files in the same directory", (): void => {
+  it("reports missing barrels for non-primary module files in the same directory", (): void => {
     // Arrange
     const directory = createRepoDirectory("src");
     temporaryDirectories.push(directory);
@@ -149,20 +149,34 @@ describe("consistent-barrel-files listeners", (): void => {
     const secondaryFilename = path.join(directory, "beta.ts");
     writeFeature(primaryFilename);
     writeFeature(secondaryFilename);
+    const reports: Rule.ReportDescriptor[] = [];
+    const programNode = { type: "Program" } as never;
     const context = {
-      report: (): void => {
-        throw new Error("unexpected report");
+      report: (descriptor: Rule.ReportDescriptor): void => {
+        reports.push(descriptor);
       },
     } as unknown as Rule.RuleContext;
 
     // Act
-    const listener = buildListenerForFile(
-      context,
-      secondaryFilename,
-      getOptions([{}]),
-    );
+    const actualReports = ((): Rule.ReportDescriptor[] => {
+      const listener = buildListenerForFile(
+        context,
+        secondaryFilename,
+        getOptions([{}]),
+      );
+
+      listener.Program?.(programNode);
+
+      return reports;
+    })();
 
     // Assert
-    expect(listener).toStrictEqual({});
+    expect(actualReports).toStrictEqual([
+      {
+        data: { names: "index" },
+        messageId: "missingBarrel",
+        node: programNode,
+      },
+    ]);
   });
 });

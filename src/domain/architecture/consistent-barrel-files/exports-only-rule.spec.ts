@@ -201,6 +201,21 @@ describe("barrel files exports-only rule (enforced)", () => {
     expect(actualReports).toHaveLength(1);
     expect(actualReports[0]?.messageId).toBe("invalidBarrelContent");
   });
+
+  it("reports exports without source when specifiers include non-object entries", () => {
+    // Arrange
+    const body = createBody({
+      specifiers: [0 as never],
+      type: "ExportNamedDeclaration",
+    } as never);
+
+    // Act
+    const actualReports = runTemporaryIndex(body);
+
+    // Assert
+    expect(actualReports).toHaveLength(1);
+    expect(actualReports[0]?.messageId).toBe("invalidBarrelContent");
+  });
 });
 
 describe("barrel files exports-only rule (skips)", () => {

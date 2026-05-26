@@ -4,7 +4,7 @@ import path from "node:path";
 
 import type { ConsistentBarrelFilesState } from "./consistent-barrel-files-options";
 
-import { getDirectoryBarrelState, isBarrelFile } from "./barrel-file-utilities";
+import { getDirectoryBarrelState } from "./barrel-file-utilities";
 import { shouldLintFile } from "./consistent-barrel-files-options";
 
 /**
@@ -36,10 +36,6 @@ const buildListenerForDirectory = (
     return {};
   }
 
-  if (directoryState.primaryNonBarrelModuleFile !== path.basename(filename)) {
-    return {};
-  }
-
   return buildMissingListener(context, options.allowedNames);
 };
 
@@ -67,15 +63,35 @@ const buildForbiddenListener = (
 
   if (
     !directoryState.hasNonBarrelModuleFile ||
-    !isBarrelFile(filename, options.allowedNamesSet)
+    directoryState.primaryAllowedBarrelFile === void 0
   ) {
     return {};
   }
 
+  return buildForbiddenListenerFromName(
+    context,
+    directoryState.primaryAllowedBarrelFile,
+  );
+};
+
+/**
+ * Builds the listener that reports a forbidden barrel filename.
+ * @param context Rule execution context.
+ * @param forbiddenName Barrel filename to report.
+ * @returns The forbidden-barrel listener.
+ * @example
+ * ```typescript
+ * const listener = buildForbiddenListenerFromName(context, "index.ts");
+ * ```
+ */
+const buildForbiddenListenerFromName = (
+  context: Rule.RuleContext,
+  forbiddenName: string,
+): Rule.RuleListener => {
   return {
     Program(node): void {
       context.report({
-        data: { name: path.basename(filename) },
+        data: { name: forbiddenName },
         messageId: "forbiddenBarrel",
         node,
       });

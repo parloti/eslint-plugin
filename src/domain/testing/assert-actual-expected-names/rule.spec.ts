@@ -328,4 +328,44 @@ describe("assert-actual-expected-names rule", () => {
       },
     ]);
   });
+
+  it("ignores Act declarations that do not declare Identifier bindings", async () => {
+    // Arrange
+    const assertion = { type: "ExpressionStatement" } as Rule.Node;
+    const actDeclaration = {
+      declarations: [
+        {
+          id: {
+            properties: [],
+            type: "ObjectPattern",
+          },
+        },
+      ],
+      type: "VariableDeclaration",
+    } as Rule.Node;
+    const expectedNode = {
+      name: "expectedValue",
+      type: "Identifier",
+    } as Rule.Node;
+    const analysis = {
+      statements: [
+        { node: actDeclaration, phases: ["Act"] },
+        { node: assertion, phases: ["Assert"] },
+      ],
+    };
+    const input = {
+      analysis,
+      assertionIdentifiers: new Map([
+        [assertion, { actual: "result", expected: "expectedValue" }],
+      ]),
+      assertionNodes: new Set([assertion]),
+      declaredIdentifiers: new Map([["expectedValue", expectedNode]]),
+    } satisfies LoadRuleInput;
+
+    // Act
+    const actual = await runRule(input);
+
+    // Assert
+    expect(actual).toStrictEqual([]);
+  });
 });
