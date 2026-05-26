@@ -131,7 +131,18 @@ const runMockedRule = async (
     return {
       ...actual,
       classifyExportUsage: () => classification,
-      collectCrossFileUsages: () => [],
+      collectCrossFileUsages: (
+        _program: unknown,
+        _sourceFilename: unknown,
+        _state: unknown,
+        _repoRoot: unknown,
+      ) => {
+        void _program;
+        void _sourceFilename;
+        void _state;
+        void _repoRoot;
+        return [];
+      },
       collectExportedElements: () =>
         hasExportedElements
           ? [
@@ -142,7 +153,11 @@ const runMockedRule = async (
             ]
           : [],
       getTypeScriptProgram: () =>
-        hasTypeScriptProgram ? ({} as never) : void 0,
+        hasTypeScriptProgram
+          ? ({
+              getCurrentDirectory: () => "C:/repo",
+            } as never)
+          : void 0,
     };
   });
 
@@ -170,7 +185,7 @@ describe("no-unused-exports rule", () => {
     const metadata = noUnusedExportsRule.meta;
 
     // Act
-    const result = {
+    const actualResult = {
       description: metadata?.docs?.description,
       messages: Object.keys(metadata?.messages ?? {}).toSorted(),
       schemaIsArray: Array.isArray(metadata?.schema),
@@ -178,7 +193,7 @@ describe("no-unused-exports rule", () => {
     };
 
     // Assert
-    expect(result).toStrictEqual({
+    expect(actualResult).toStrictEqual({
       description:
         "Disallow exports that are unused or consumed only by test files.",
       messages: ["unusedExport", "usedOnlyInTests"],
@@ -194,14 +209,14 @@ describe("no-unused-exports rule", () => {
     };
 
     // Act
-    const result = runRuleCase(
+    const actualResult = runRuleCase(
       "no-unused-exports",
       noUnusedExportsRule,
       testCase.code,
     );
 
     // Assert
-    expect(result.messageIds).toStrictEqual([]);
+    expect(actualResult.messageIds).toStrictEqual([]);
   });
 
   it.each([

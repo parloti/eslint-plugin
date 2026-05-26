@@ -1,5 +1,7 @@
 import type { Rule } from "eslint";
 
+import path from "node:path";
+
 import {
   DEFAULT_ALLOW_IN_FILES,
   DEFAULT_TEST_FILE_PATTERNS,
@@ -20,13 +22,19 @@ const noUnusedExportsRule: Rule.RuleModule = {
     const state = getOptions(context.options);
     const filename = context.filename;
 
-    if (!isLintableFilename(filename) || isAllowlistedFile(filename, state)) {
+    if (!isLintableFilename(filename)) {
       return {};
     }
 
     const program = getTypeScriptProgram(context);
 
     if (program === void 0) {
+      return {};
+    }
+
+    const projectRoot = path.resolve(program.getCurrentDirectory());
+
+    if (isAllowlistedFile(filename, state, projectRoot)) {
       return {};
     }
 
@@ -38,7 +46,12 @@ const noUnusedExportsRule: Rule.RuleModule = {
           return;
         }
 
-        const usages = collectCrossFileUsages(program, filename, state);
+        const usages = collectCrossFileUsages(
+          program,
+          filename,
+          state,
+          projectRoot,
+        );
 
         for (const element of exportedElements) {
           const usageClassification = classifyExportUsage(

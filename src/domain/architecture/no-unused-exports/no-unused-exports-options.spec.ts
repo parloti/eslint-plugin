@@ -67,11 +67,13 @@ describe("no-unused-exports options", () => {
   it("checks lintable filenames", () => {
     // Arrange
     const absolutePath = path.join(cwd(), "src", "feature.ts");
+    const nonSourceAbsolutePath = path.join(cwd(), "tests", "feature.ts");
 
     // Act
     const actualResult = {
       absolutePath: isLintableFilename(absolutePath),
       emptyPath: isLintableFilename(""),
+      nonSourceAbsolutePath: isLintableFilename(nonSourceAbsolutePath),
       relativePath: isLintableFilename("src/feature.ts"),
     };
 
@@ -79,6 +81,7 @@ describe("no-unused-exports options", () => {
     expect(actualResult).toStrictEqual({
       absolutePath: true,
       emptyPath: false,
+      nonSourceAbsolutePath: false,
       relativePath: false,
     });
   });
@@ -89,7 +92,7 @@ describe("no-unused-exports options", () => {
     const state = getOptions([]);
 
     // Act
-    const actualAllowlisted = isAllowlistedFile(sourcePath, state);
+    const actualAllowlisted = isAllowlistedFile(sourcePath, state, cwd());
 
     // Assert
     expect(actualAllowlisted).toBe(true);
@@ -98,13 +101,13 @@ describe("no-unused-exports options", () => {
   it("matches allowlisted and test globs", () => {
     // Arrange
     const sourceIndexPath = path.join(cwd(), "src", "index.ts");
-    const testPath = path.join(cwd(), "tests", "e2e", "demo.ts");
+    const testPath = path.join(cwd(), "tests", "e2e", "demo.e2e.ts");
     const state = getOptions([]);
 
     // Act
     const actualResult = {
-      allowlisted: isAllowlistedFile(sourceIndexPath, state),
-      testFile: isTestFile(testPath, state),
+      allowlisted: isAllowlistedFile(sourceIndexPath, state, cwd()),
+      testFile: isTestFile(testPath, state, cwd()),
     };
 
     // Assert
@@ -126,8 +129,8 @@ describe("no-unused-exports options", () => {
 
     // Act
     const actualResult = {
-      allowlisted: isAllowlistedFile(featurePath, state),
-      testFile: isTestFile(featurePath, state),
+      allowlisted: isAllowlistedFile(featurePath, state, cwd()),
+      testFile: isTestFile(featurePath, state, cwd()),
     };
 
     // Assert
@@ -144,8 +147,8 @@ describe("no-unused-exports options", () => {
 
     // Act
     const actualResult = {
-      allowlisted: isAllowlistedFile(outsidePath, state),
-      testFile: isTestFile(outsidePath, state),
+      allowlisted: isAllowlistedFile(outsidePath, state, cwd()),
+      testFile: isTestFile(outsidePath, state, cwd()),
     };
 
     // Assert
@@ -162,14 +165,34 @@ describe("no-unused-exports options", () => {
 
     // Act
     const actualResult = {
-      allowlisted: isAllowlistedFile(nonLintablePath, state),
-      testFile: isTestFile(nonLintablePath, state),
+      allowlisted: isAllowlistedFile(nonLintablePath, state, cwd()),
+      testFile: isTestFile(nonLintablePath, state, cwd()),
     };
 
     // Assert
     expect(actualResult).toStrictEqual({
       allowlisted: false,
       testFile: false,
+    });
+  });
+
+  it("uses the provided repository root for pattern matching", () => {
+    // Arrange
+    const repositoryRoot = path.join(cwd(), "tmp-fixture-root");
+    const sourceIndexPath = path.join(repositoryRoot, "src", "index.ts");
+    const testPath = path.join(repositoryRoot, "tests", "feature.spec.ts");
+    const state = getOptions([]);
+
+    // Act
+    const actualResult = {
+      allowlisted: isAllowlistedFile(sourceIndexPath, state, repositoryRoot),
+      testFile: isTestFile(testPath, state, repositoryRoot),
+    };
+
+    // Assert
+    expect(actualResult).toStrictEqual({
+      allowlisted: true,
+      testFile: true,
     });
   });
 });

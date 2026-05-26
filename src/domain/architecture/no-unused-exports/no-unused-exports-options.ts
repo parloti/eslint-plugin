@@ -1,6 +1,5 @@
 import { minimatch } from "minimatch";
 import path from "node:path";
-import { cwd } from "node:process";
 
 import type { NoUnusedExportsOptions, NoUnusedExportsState } from "./types";
 
@@ -8,27 +7,47 @@ import type { NoUnusedExportsOptions, NoUnusedExportsState } from "./types";
 const DEFAULT_ALLOW_IN_FILES = [
   "**/src/index.ts",
   "**/test-util/**/*.ts",
-  "test/support/**/*.ts",
+  "tests/support/**/*.ts",
 ] as const;
 
 /** Default glob patterns used to classify test files. */
-const DEFAULT_TEST_FILE_PATTERNS = [
-  "**/*.{test,spec,e2e}.ts",
-  "test/**/*.ts",
-  "tests/**/*.ts",
-] as const;
+const DEFAULT_TEST_FILE_PATTERNS = ["**/*.{test,spec,e2e}.ts"] as const;
+
+/** Default file pattern used to scope analysis to source files. */
+const DEFAULT_LINTABLE_FILE_PATTERN = "**/src/**/*.ts";
+
+/**
+ * Checks whether one path is absolute and non-empty.
+ * @param filename Input filename.
+ * @returns True when the path is absolute and non-empty.
+ * @example
+ * ```typescript
+ * const ok = isAbsolutePath("/repo/src/feature.ts");
+ * ```
+ */
+const isAbsolutePath = (filename: string): boolean =>
+  filename.length > 0 && path.isAbsolute(filename);
 
 /**
  * Checks whether one file path is lintable.
  * @param filename Input filename.
- * @returns True when the path is absolute and non-empty.
+ * @returns True when the path is absolute and matches source-file scope.
  * @example
  * ```typescript
  * const ok = isLintableFilename("/repo/src/feature.ts");
  * ```
  */
-const isLintableFilename = (filename: string): boolean =>
-  filename.length > 0 && path.isAbsolute(filename);
+const isLintableFilename = (filename: string): boolean => {
+  if (!isAbsolutePath(filename)) {
+    return false;
+  }
+
+  const normalizedPath = filename.split(path.sep).join("/");
+
+  return minimatch(normalizedPath, DEFAULT_LINTABLE_FILE_PATTERN, {
+    dot: true,
+  });
+};
 
 /**
  * Normalizes one rule option value into a string list.
@@ -81,20 +100,24 @@ const getOptions = (options: readonly unknown[]): NoUnusedExportsState => {
 };
 
 /**
- * Converts an absolute filename into a cwd-relative POSIX path.
+ * Converts an absolute filename into a repo-root-relative POSIX path.
  * @param filename Absolute filename.
- * @returns Repo-relative POSIX path or undefined when outside cwd.
+ * @param repoRoot Absolute repository root.
+ * @returns Repo-relative POSIX path or undefined when outside repo root.
  * @example
  * ```typescript
- * const relativePath = toRepoRelativePosixPath("/repo/src/feature.ts");
+ * const relativePath = toRepoRelativePosixPath("/repo/src/feature.ts", "/repo");
  * ```
  */
-const toRepoRelativePosixPath = (filename: string): string | undefined => {
-  if (!isLintableFilename(filename)) {
+const toRepoRelativePosixPath = (
+  filename: string,
+  repoRoot: string,
+): string | undefined => {
+  if (!isAbsolutePath(filename) || !isAbsolutePath(repoRoot)) {
     return void 0;
   }
 
-  const relativePath = path.relative(cwd(), filename);
+  const relativePath = path.relative(repoRoot, filename);
 
   if (relativePath.startsWith("..") || path.isAbsolute(relativePath)) {
     return void 0;
@@ -107,14 +130,19 @@ const toRepoRelativePosixPath = (filename: string): string | undefined => {
  * Checks whether one filename matches any glob pattern.
  * @param filename Absolute filename.
  * @param patterns Glob patterns.
+ * @param repoRoot Absolute repository root.
  * @returns True when any pattern matches.
  * @example
  * ```typescript
- * const match = matchesAnyPattern("/repo/src/index.ts", ["src-pattern"]);
+ * const match = matchesAnyPattern("/repo/src/index.ts", ["src-pattern"], "/repo");
  * ```
  */
-const matchesAnyPattern = (filename: string, patterns: string[]): boolean => {
-  const relativePath = toRepoRelativePosixPath(filename);
+const matchesAnyPattern = (
+  filename: string,
+  patterns: string[],
+  repoRoot: string,
+): boolean => {
+  const relativePath = toRepoRelativePosixPath(filename, repoRoot);
 
   if (relativePath === void 0 || patterns.length === 0) {
     return false;
@@ -129,35 +157,42 @@ const matchesAnyPattern = (filename: string, patterns: string[]): boolean => {
  * Checks whether unused exports are allowed in the current file.
  * @param filename Absolute filename.
  * @param state Normalized options.
+ * @param repoRoot Absolute repository root.
  * @returns True when the file is allowlisted.
  * @example
  * ```typescript
- * const allowed = isAllowlistedFile("/repo/src/index.ts", state);
+ * const allowed = isAllowlistedFile("/repo/src/index.ts", state, "/repo");
  * ```
  */
 const isAllowlistedFile = (
   filename: string,
   state: NoUnusedExportsState,
-): boolean => matchesAnyPattern(filename, state.allowInFiles);
+  repoRoot: string,
+): boolean => matchesAnyPattern(filename, state.allowInFiles, repoRoot);
 
 /**
  * Checks whether one file should be treated as a test file.
  * @param filename Absolute filename.
  * @param state Normalized options.
+ * @param repoRoot Absolute repository root.
  * @returns True when the file path matches a test pattern.
  * @example
  * ```typescript
- * const testFile = isTestFile("/repo/tests/e2e/demo.ts", state);
+ * const testFile = isTestFile("/repo/tests/e2e/demo.ts", state, "/repo");
  * ```
  */
-const isTestFile = (filename: string, state: NoUnusedExportsState): boolean =>
-  matchesAnyPattern(filename, state.testFilePatterns);
+const isTestFile = (
+  filename: string,
+  state: NoUnusedExportsState,
+  repoRoot: string,
+): boolean => matchesAnyPattern(filename, state.testFilePatterns, repoRoot);
 
 export {
-  DEFAULT_ALLOW_IN_FILES,
-  DEFAULT_TEST_FILE_PATTERNS,
-  getOptions,
-  isAllowlistedFile,
-  isLintableFilename,
-  isTestFile,
+    DEFAULT_ALLOW_IN_FILES,
+    DEFAULT_TEST_FILE_PATTERNS,
+    getOptions,
+    isAllowlistedFile,
+    isLintableFilename,
+    isTestFile
 };
+

@@ -24,8 +24,8 @@ This rule complements `no-unused-vars` by checking cross-file usage and ensuring
 
 ```typescript
 type Options = {
-  allowInFiles?: string[]; // default: ["**/src/index.ts", "**/test-util/**/*.ts", "test/support/**/*.ts"]
-  testFilePatterns?: string[]; // default: ["**/*.{test,spec}.ts", "tests/e2e/**/*.ts"]
+  allowInFiles?: string[]; // default: ["**/src/index.ts", "**/test-util/**/*.ts", "tests/support/**/*.ts"]
+  testFilePatterns?: string[]; // default: ["**/*.{test,spec,e2e}.ts"]
 };
 ```
 
@@ -42,6 +42,15 @@ The rule checks these export kinds:
 - named type exports
 - default exports
 - re-export specifiers and wildcard re-exports
+
+By default, the rule analyzes files matching `**/src/**/*.ts`.
+
+The rule currently detects consumption from:
+
+- static `import` declarations
+- static `export ... from` re-exports
+
+Dynamic runtime loading patterns are not considered consumers.
 
 A reported export falls into one of two categories:
 

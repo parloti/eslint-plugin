@@ -94,7 +94,7 @@ const collectFixtureUsages = () => {
       },
     ]);
 
-    return collectCrossFileUsages(program, featureFile, state);
+    return collectCrossFileUsages(program, featureFile, state, temporaryRoot);
   } finally {
     rmSync(temporaryRoot, { force: true, recursive: true });
   }
@@ -185,12 +185,12 @@ describe("no-unused-exports utilities", () => {
     );
 
     // Act
-    const exportedNames = collectExportedElements(program.body).map(
+    const actualExportedNames = collectExportedElements(program.body).map(
       (element) => element.exportedName,
     );
 
     // Assert
-    expect(exportedNames).toStrictEqual([
+    expect(actualExportedNames).toStrictEqual([
       "value",
       "Alias",
       "Shape",
@@ -222,10 +222,10 @@ describe("no-unused-exports utilities", () => {
     const pattern = firstDeclarationRecord?.["id"];
 
     // Act
-    const names = collectPatternIdentifierNames(pattern);
+    const actualNames = collectPatternIdentifierNames(pattern);
 
     // Assert
-    expect(names).toStrictEqual(["alpha", "beta", "rest"]);
+    expect(actualNames).toStrictEqual(["alpha", "beta", "rest"]);
   });
 
   it("collects identifier names from array patterns with assignments and rest elements", () => {
@@ -249,18 +249,18 @@ describe("no-unused-exports utilities", () => {
     const pattern = firstDeclarationRecord?.["id"];
 
     // Act
-    const names = collectPatternIdentifierNames(pattern);
+    const actualNames = collectPatternIdentifierNames(pattern);
 
     // Assert
-    expect(names).toStrictEqual(["primary", "others"]);
+    expect(actualNames).toStrictEqual(["primary", "others"]);
   });
 
   it("returns an empty list for undefined patterns", () => {
     // Act
-    const names = collectPatternIdentifierNames(void 0);
+    const actualNames = collectPatternIdentifierNames(void 0);
 
     // Assert
-    expect(names).toStrictEqual([]);
+    expect(actualNames).toStrictEqual([]);
   });
 
   it("returns empty names for incomplete identifier, array, and object patterns", () => {
@@ -304,10 +304,10 @@ describe("no-unused-exports utilities", () => {
     ];
 
     // Act
-    const result = usageSamples;
+    const actualResult = usageSamples;
 
     // Assert
-    expect(result).toStrictEqual([true, true, true, false]);
+    expect(actualResult).toStrictEqual([true, true, true, false]);
   });
 
   it("classifies production, test-only, and unused exports", () => {
@@ -322,14 +322,14 @@ describe("no-unused-exports utilities", () => {
     ];
 
     // Act
-    const result = {
+    const actualResult = {
       production: classifyExportUsage("feature", productionUsage),
       testOnly: classifyExportUsage("feature", testOnlyUsage),
       unused: classifyExportUsage("feature", []),
     };
 
     // Assert
-    expect(result).toStrictEqual({
+    expect(actualResult).toStrictEqual({
       production: "production",
       testOnly: "test-only",
       unused: "unused",
@@ -338,15 +338,16 @@ describe("no-unused-exports utilities", () => {
 
   it("collects cross-file import and re-export usages", () => {
     // Act
-    const usages = collectFixtureUsages();
+    const actualUsages = collectFixtureUsages();
 
     // Assert
-    expect(usages).toStrictEqual(
+    expect(actualUsages).toStrictEqual(
       expect.arrayContaining([
         { importedName: "default", isTestFile: false },
         { importedName: "feature", isTestFile: false },
         { importedName: "feature", isTestFile: false },
         { importedName: "feature", isTestFile: false },
+        { importedName: "feature", isTestFile: true },
       ]),
     );
   });
@@ -367,7 +368,7 @@ describe("no-unused-exports utilities", () => {
     const [importStatement, exportStatement] = sourceFile.statements;
 
     // Act
-    const result = {
+    const actualResult = {
       exportNames: collectExportDeclarationNames(
         exportStatement as Parameters<typeof collectExportDeclarationNames>[0],
       ),
@@ -377,7 +378,7 @@ describe("no-unused-exports utilities", () => {
     };
 
     // Assert
-    expect(result).toStrictEqual({
+    expect(actualResult).toStrictEqual({
       exportNames: ["sourceName"],
       importNames: ["default", "original"],
     });
@@ -395,12 +396,12 @@ describe("no-unused-exports utilities", () => {
     const [exportStatement] = sourceFile.statements;
 
     // Act
-    const names = collectExportDeclarationNames(
+    const actualNames = collectExportDeclarationNames(
       exportStatement as Parameters<typeof collectExportDeclarationNames>[0],
     );
 
     // Assert
-    expect(names).toStrictEqual(["directName"]);
+    expect(actualNames).toStrictEqual(["directName"]);
   });
 
   it("skips malformed export declarations that do not provide names", () => {
@@ -462,10 +463,10 @@ describe("no-unused-exports utilities", () => {
     ] as unknown as AST.Program["body"];
 
     // Act
-    const exportedElements = collectExportedElements(malformedBody);
+    const actualExportedElements = collectExportedElements(malformedBody);
 
     // Assert
-    expect(exportedElements).toStrictEqual([]);
+    expect(actualExportedElements).toStrictEqual([]);
   });
 
   it("returns wildcard names for export-all and namespace-export clauses", () => {
@@ -484,7 +485,7 @@ describe("no-unused-exports utilities", () => {
       sourceFile.statements;
 
     // Act
-    const result = {
+    const actualResult = {
       exportAll: collectExportDeclarationNames(
         exportAllStatement as Parameters<
           typeof collectExportDeclarationNames
@@ -498,7 +499,7 @@ describe("no-unused-exports utilities", () => {
     };
 
     // Assert
-    expect(result).toStrictEqual({
+    expect(actualResult).toStrictEqual({
       exportAll: [wildcardExportName],
       namespaceExport: [wildcardExportName],
     });
@@ -521,7 +522,7 @@ describe("no-unused-exports utilities", () => {
       sourceFile.statements;
 
     // Act
-    const result = {
+    const actualResult = {
       defaultOnly: collectImportDeclarationNames(
         defaultImport as Parameters<typeof collectImportDeclarationNames>[0],
       ),
@@ -534,7 +535,7 @@ describe("no-unused-exports utilities", () => {
     };
 
     // Assert
-    expect(result).toStrictEqual({
+    expect(actualResult).toStrictEqual({
       defaultOnly: ["default"],
       namespace: [wildcardExportName],
       sideEffectOnly: [],
@@ -557,10 +558,10 @@ describe("no-unused-exports utilities", () => {
     } as unknown as Rule.RuleContext;
 
     // Act
-    const program = getTypeScriptProgram(context);
+    const actualProgram = getTypeScriptProgram(context);
 
     // Assert
-    expect(program).toBeUndefined();
+    expect(actualProgram).toBeUndefined();
   });
 
   it("handles fallback branches for unsupported patterns and unresolved modules", () => {

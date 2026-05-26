@@ -1,6 +1,6 @@
-import type { Linter, Rule } from "eslint";
+import type { Rule } from "eslint";
 
-import { Linter as EslintLinter } from "eslint";
+import { Linter } from "eslint";
 import { parser } from "typescript-eslint";
 
 /** One end-to-end rule case executed through the flat-config linter. */
@@ -104,7 +104,7 @@ const runRuleCase = (
   rule: Rule.RuleModule,
   testCase: EndToEndRuleCase,
 ): RuleCaseRunResult => {
-  const linter = new EslintLinter({ configType: "flat" });
+  const linter = new Linter({ configType: "flat" });
   const config = createRuleConfig(ruleName, rule, testCase);
   const filename = testCase.filename ?? defaultFilename;
   const messages = linter.verify(testCase.code, config, filename);

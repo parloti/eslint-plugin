@@ -2,6 +2,7 @@ import type { AST, Rule } from "eslint";
 
 import { ESLintUtils } from "@typescript-eslint/utils";
 import path from "node:path";
+import { platform } from "node:process";
 import * as ts from "typescript";
 
 import type {
@@ -14,6 +15,21 @@ import { isTestFile } from "./no-unused-exports-options";
 
 /** Wildcard marker used for export-all and namespace usage matching. */
 const wildcardExportName = "*";
+
+/**
+ * Normalizes an absolute file path for safe equality checks.
+ * @param inputPath Candidate path.
+ * @returns Normalized absolute path suitable for cross-platform comparisons.
+ * @example
+ * ```typescript
+ * const comparable = toComparableAbsolutePath("/repo/src/feature.ts");
+ * ```
+ */
+const toComparableAbsolutePath = (inputPath: string): string => {
+  const absolutePath = path.normalize(path.resolve(inputPath));
+
+  return platform === "win32" ? absolutePath.toLowerCase() : absolutePath;
+};
 
 /**
  * Converts one unknown value into an indexable record.
@@ -367,18 +383,21 @@ const doesUsageMatchExport = (
  * @param program TypeScript program.
  * @param sourceFilename Source filename where exports are defined.
  * @param state Normalized rule options.
+ * @param repoRoot Absolute repository root used for test-file classification.
  * @returns Cross-file usages for the source module.
  * @example
  * ```typescript
- * const usages = collectCrossFileUsages(program, "/repo/src/feature.ts", state);
+ * const usages = collectCrossFileUsages(program, "/repo/src/feature.ts", state, "/repo");
  * ```
  */
 const collectCrossFileUsages = (
   program: ts.Program,
   sourceFilename: string,
   state: NoUnusedExportsState,
+  repoRoot: string,
 ): ExportUsage[] => {
-  const normalizedSourceFilename = path.resolve(sourceFilename);
+  const normalizedSourceFilename = toComparableAbsolutePath(sourceFilename);
+  const normalizedRepoRoot = path.resolve(repoRoot);
   const usages: ExportUsage[] = [];
 
   for (const sourceFile of program.getSourceFiles()) {
@@ -387,12 +406,18 @@ const collectCrossFileUsages = (
     }
 
     const consumerFilename = path.resolve(sourceFile.fileName);
+    const normalizedConsumerFilename =
+      toComparableAbsolutePath(consumerFilename);
 
-    if (consumerFilename === normalizedSourceFilename) {
+    if (normalizedConsumerFilename === normalizedSourceFilename) {
       continue;
     }
 
-    const consumerIsTestFile = isTestFile(consumerFilename, state);
+    const consumerIsTestFile = isTestFile(
+      consumerFilename,
+      state,
+      normalizedRepoRoot,
+    );
 
     for (const statement of sourceFile.statements) {
       if (
@@ -405,7 +430,10 @@ const collectCrossFileUsages = (
           program,
         );
 
-        if (resolved !== normalizedSourceFilename) {
+        if (
+          resolved === void 0 ||
+          toComparableAbsolutePath(resolved) !== normalizedSourceFilename
+        ) {
           continue;
         }
 
@@ -427,7 +455,10 @@ const collectCrossFileUsages = (
           program,
         );
 
-        if (resolved !== normalizedSourceFilename) {
+        if (
+          resolved === void 0 ||
+          toComparableAbsolutePath(resolved) !== normalizedSourceFilename
+        ) {
           continue;
         }
 
