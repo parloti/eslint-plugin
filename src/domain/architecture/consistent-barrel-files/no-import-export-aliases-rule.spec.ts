@@ -105,11 +105,11 @@ describe("no-import-export-aliases rule", () => {
     );
 
     // Act
-    const reports = runRule(body);
+    const actualReports = runRule(body);
 
     // Assert
-    expect(reports).toHaveLength(1);
-    expect(reports[0]?.messageId).toBe("aliasNotAllowed");
+    expect(actualReports).toHaveLength(1);
+    expect(actualReports[0]?.messageId).toBe("aliasNotAllowed");
   });
 
   it("allows aliased named imports when the original name is already imported", () => {
@@ -120,10 +120,10 @@ describe("no-import-export-aliases rule", () => {
     );
 
     // Act
-    const reports = runRule(body);
+    const actualReports = runRule(body);
 
     // Assert
-    expect(reports).toStrictEqual([]);
+    expect(actualReports).toStrictEqual([]);
   });
 
   it("reports aliased named exports without collisions", () => {
@@ -133,11 +133,11 @@ describe("no-import-export-aliases rule", () => {
     );
 
     // Act
-    const reports = runRule(body);
+    const actualReports = runRule(body);
 
     // Assert
-    expect(reports).toHaveLength(1);
-    expect(reports[0]?.messageId).toBe("aliasNotAllowed");
+    expect(actualReports).toHaveLength(1);
+    expect(actualReports[0]?.messageId).toBe("aliasNotAllowed");
   });
 
   it("allows aliased named exports when the original name is already imported", () => {
@@ -148,10 +148,10 @@ describe("no-import-export-aliases rule", () => {
     );
 
     // Act
-    const reports = runRule(body);
+    const actualReports = runRule(body);
 
     // Assert
-    expect(reports).toStrictEqual([]);
+    expect(actualReports).toStrictEqual([]);
   });
 
   it("reports aliasing from export-from declarations when no collision exists", () => {
@@ -164,11 +164,11 @@ describe("no-import-export-aliases rule", () => {
     });
 
     // Act
-    const reports = runRule(body);
+    const actualReports = runRule(body);
 
     // Assert
-    expect(reports).toHaveLength(1);
-    expect(reports[0]?.messageId).toBe("aliasNotAllowed");
+    expect(actualReports).toHaveLength(1);
+    expect(actualReports[0]?.messageId).toBe("aliasNotAllowed");
   });
 
   it("does not report non-aliased named imports and exports", () => {
@@ -179,10 +179,10 @@ describe("no-import-export-aliases rule", () => {
     );
 
     // Act
-    const reports = runRule(body);
+    const actualReports = runRule(body);
 
     // Assert
-    expect(reports).toStrictEqual([]);
+    expect(actualReports).toStrictEqual([]);
   });
 
   it("does not report default or namespace imports", () => {
@@ -201,10 +201,10 @@ describe("no-import-export-aliases rule", () => {
     );
 
     // Act
-    const reports = runRule(body);
+    const actualReports = runRule(body);
 
     // Assert
-    expect(reports).toStrictEqual([]);
+    expect(actualReports).toStrictEqual([]);
   });
 
   it("allows aliased imports when the original name is already declared in a variable", () => {
@@ -227,10 +227,109 @@ describe("no-import-export-aliases rule", () => {
     );
 
     // Act
-    const reports = runRule(body);
+    const actualReports = runRule(body);
 
     // Assert
-    expect(reports).toStrictEqual([]);
+    expect(actualReports).toStrictEqual([]);
+  });
+
+  it("allows aliased imports when the original name is declared by a function", () => {
+    // Arrange
+    const body = createBody(
+      {
+        body: [],
+        expression: false,
+        generator: false,
+        id: { name: "A", type: "Identifier" },
+        params: [],
+        type: "FunctionDeclaration",
+      } as unknown as ESTree.FunctionDeclaration,
+      createImportDeclaration([createImportSpecifier("B", "A")]),
+    );
+
+    // Act
+    const actualReports = runRule(body);
+
+    // Assert
+    expect(actualReports).toStrictEqual([]);
+  });
+
+  it("allows aliased imports when the original name is declared by a class", () => {
+    // Arrange
+    const body = createBody(
+      {
+        body: { body: [], type: "ClassBody" },
+        id: { name: "A", type: "Identifier" },
+        superClass: void 0,
+        type: "ClassDeclaration",
+      } as unknown as ESTree.ClassDeclaration,
+      createImportDeclaration([createImportSpecifier("B", "A")]),
+    );
+
+    // Act
+    const actualReports = runRule(body);
+
+    // Assert
+    expect(actualReports).toStrictEqual([]);
+  });
+
+  it("reports aliased imports when only a type-only import binds the original name", () => {
+    // Arrange
+    const typeOnlyImport = {
+      ...createImportDeclaration([createImportSpecifier("A")]),
+      importKind: "type",
+    } as unknown as ESTree.ImportDeclaration;
+
+    const body = createBody(
+      typeOnlyImport,
+      createImportDeclaration([createImportSpecifier("B", "A")]),
+    );
+
+    // Act
+    const actualReports = runRule(body);
+
+    // Assert
+    expect(actualReports).toHaveLength(1);
+    expect(actualReports[0]?.messageId).toBe("aliasNotAllowed");
+  });
+
+  it("allows aliased imports when the original name is bound in an object pattern", () => {
+    // Arrange
+    const variableDeclaration = {
+      declarations: [
+        {
+          id: {
+            properties: [
+              {
+                computed: false,
+                key: { name: "source", type: "Identifier" },
+                kind: "init",
+                method: false,
+                shorthand: false,
+                type: "Property",
+                value: { name: "A", type: "Identifier" },
+              },
+            ],
+            type: "ObjectPattern",
+          },
+          init: { name: "source", type: "Identifier" },
+          type: "VariableDeclarator",
+        },
+      ],
+      kind: "const",
+      type: "VariableDeclaration",
+    } as unknown as ESTree.VariableDeclaration;
+
+    const body = createBody(
+      variableDeclaration,
+      createImportDeclaration([createImportSpecifier("B", "A")]),
+    );
+
+    // Act
+    const actualReports = runRule(body);
+
+    // Assert
+    expect(actualReports).toStrictEqual([]);
   });
 
   it("allows aliased exports when the original name is already declared by an exported variable", () => {
@@ -255,10 +354,10 @@ describe("no-import-export-aliases rule", () => {
     );
 
     // Act
-    const reports = runRule(body);
+    const actualReports = runRule(body);
 
     // Assert
-    expect(reports).toStrictEqual([]);
+    expect(actualReports).toStrictEqual([]);
   });
 
   it("still reports aliases when variable declarations use non-Identifier patterns", () => {
@@ -284,10 +383,10 @@ describe("no-import-export-aliases rule", () => {
     );
 
     // Act
-    const reports = runRule(body);
+    const actualReports = runRule(body);
 
     // Assert
-    expect(reports).toHaveLength(1);
-    expect(reports[0]?.messageId).toBe("aliasNotAllowed");
+    expect(actualReports).toHaveLength(1);
+    expect(actualReports[0]?.messageId).toBe("aliasNotAllowed");
   });
 });

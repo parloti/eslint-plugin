@@ -10,6 +10,12 @@ interface AliasedSpecifierCandidate {
   specifier: ESTree.ExportSpecifier | ESTree.ImportSpecifier;
 }
 
+/** Minimal declaration shape that may carry an identifier binding. */
+interface DeclarationWithIdentifier {
+  /** Declaration identifier if one exists. */
+  id?: ESTree.Pattern | null;
+}
+
 /** Optional export-kind carrier shape used for type-only checks. */
 interface ExportKindCarrier {
   /** ESTree-compatible export kind value. */
@@ -21,6 +27,75 @@ interface ImportKindCarrier {
   /** ESTree-compatible import kind value. */
   importKind?: "type" | "value";
 }
+
+/**
+ * Adds all identifier names introduced by one binding pattern.
+ * @param pattern Binding pattern to inspect.
+ * @param boundNames Destination set.
+ * @example
+ * ```typescript
+ * addPatternBoundNames(variable.id, names);
+ * ```
+ */
+const addPatternBoundNames = (
+  pattern: ESTree.Pattern,
+  boundNames: Set<string>,
+): void => {
+  if (pattern.type === "Identifier") {
+    boundNames.add(pattern.name);
+    return;
+  }
+
+  if (pattern.type === "RestElement") {
+    addPatternBoundNames(pattern.argument, boundNames);
+    return;
+  }
+
+  if (pattern.type === "AssignmentPattern") {
+    addPatternBoundNames(pattern.left, boundNames);
+    return;
+  }
+
+  if (pattern.type === "ObjectPattern") {
+    for (const property of pattern.properties) {
+      if (property.type === "Property") {
+        addPatternBoundNames(property.value, boundNames);
+      }
+
+      if (property.type === "RestElement") {
+        addPatternBoundNames(property.argument, boundNames);
+      }
+    }
+
+    return;
+  }
+
+  if (pattern.type === "ArrayPattern") {
+    for (const element of pattern.elements) {
+      if (element !== null) {
+        addPatternBoundNames(element, boundNames);
+      }
+    }
+  }
+};
+
+/**
+ * Adds one declaration identifier name when present.
+ * @param declaration Declaration that may bind an identifier.
+ * @param boundNames Destination set.
+ * @example
+ * ```typescript
+ * addDeclarationIdentifierBoundName(declaration, names);
+ * ```
+ */
+const addDeclarationIdentifierBoundName = (
+  declaration: DeclarationWithIdentifier,
+  boundNames: Set<string>,
+): void => {
+  if (declaration.id !== null && declaration.id !== void 0) {
+    addPatternBoundNames(declaration.id, boundNames);
+  }
+};
 
 /**
  * Adds bound variable names from one variable declaration.
@@ -36,9 +111,7 @@ const addVariableBoundNames = (
   boundNames: Set<string>,
 ): void => {
   for (const variable of declaration.declarations) {
-    if (variable.id.type === "Identifier") {
-      boundNames.add(variable.id.name);
-    }
+    addPatternBoundNames(variable.id, boundNames);
   }
 };
 
@@ -56,13 +129,29 @@ const collectBoundNames = (body: ESTree.Program["body"]): Set<string> => {
 
   for (const statement of body) {
     if (statement.type === "ImportDeclaration") {
+      const declarationImportKind = (statement as ImportKindCarrier).importKind;
+
       for (const specifier of statement.specifiers) {
-        boundNames.add(specifier.local.name);
+        const specifierImportKind = (specifier as ImportKindCarrier).importKind;
+        const isTypeOnly =
+          declarationImportKind === "type" || specifierImportKind === "type";
+
+        if (!isTypeOnly) {
+          boundNames.add(specifier.local.name);
+        }
       }
     }
 
     if (statement.type === "VariableDeclaration") {
       addVariableBoundNames(statement, boundNames);
+    }
+
+    if (statement.type === "FunctionDeclaration") {
+      addDeclarationIdentifierBoundName(statement, boundNames);
+    }
+
+    if (statement.type === "ClassDeclaration") {
+      addDeclarationIdentifierBoundName(statement, boundNames);
     }
 
     if (
@@ -72,6 +161,38 @@ const collectBoundNames = (body: ESTree.Program["body"]): Set<string> => {
       statement.declaration.type === "VariableDeclaration"
     ) {
       addVariableBoundNames(statement.declaration, boundNames);
+    }
+
+    if (
+      statement.type === "ExportNamedDeclaration" &&
+      statement.declaration !== null &&
+      statement.declaration !== void 0 &&
+      statement.declaration.type === "FunctionDeclaration"
+    ) {
+      addDeclarationIdentifierBoundName(statement.declaration, boundNames);
+    }
+
+    if (
+      statement.type === "ExportNamedDeclaration" &&
+      statement.declaration !== null &&
+      statement.declaration !== void 0 &&
+      statement.declaration.type === "ClassDeclaration"
+    ) {
+      addDeclarationIdentifierBoundName(statement.declaration, boundNames);
+    }
+
+    if (
+      statement.type === "ExportDefaultDeclaration" &&
+      statement.declaration.type === "FunctionDeclaration"
+    ) {
+      addDeclarationIdentifierBoundName(statement.declaration, boundNames);
+    }
+
+    if (
+      statement.type === "ExportDefaultDeclaration" &&
+      statement.declaration.type === "ClassDeclaration"
+    ) {
+      addDeclarationIdentifierBoundName(statement.declaration, boundNames);
     }
   }
 
