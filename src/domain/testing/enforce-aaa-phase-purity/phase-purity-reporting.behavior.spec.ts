@@ -278,4 +278,64 @@ describe("enforce-aaa-phase-purity reporting behavior", () => {
       },
     ]);
   });
+
+  it("reports setup in Act and Assert sections without Arrange", async () => {
+    // Arrange
+    const actAndAssertNode: ReportingNode = {
+      setupLike: true,
+      type: "ExpressionStatement",
+    };
+    const analysis = {
+      callExpression: { type: "CallExpression" },
+      sectionComments: [{ phases: ["Act"] }, { phases: ["Assert"] }],
+      statements: [{ node: actAndAssertNode, phases: ["Act", "Assert"] }],
+    };
+
+    // Act
+    const actual = await runReporting(analysis);
+
+    // Assert
+    expect(actual).toStrictEqual([
+      { messageId: "setupAfterAct", node: actAndAssertNode },
+      {
+        messageId: "missingMeaningfulAct",
+        node: { type: "CallExpression" },
+      },
+    ]);
+  });
+
+  it("reports assertions in Arrange and Act sections", async () => {
+    // Arrange
+    const arrangeAndActNode: ReportingNode = {
+      assertion: true,
+      meaningfulAct: true,
+      type: "ExpressionStatement",
+    };
+    const analysis = {
+      callExpression: { type: "CallExpression" },
+      sectionComments: [
+        { phases: ["Arrange"] },
+        { phases: ["Act"] },
+        { phases: ["Assert"] },
+      ],
+      statements: [
+        { node: arrangeAndActNode, phases: ["Arrange", "Act"] },
+        {
+          node: {
+            type: "ExpressionStatement",
+            validAssert: true,
+          } as ReportingNode,
+          phases: ["Assert"],
+        },
+      ],
+    };
+
+    // Act
+    const actual = await runReporting(analysis);
+
+    // Assert
+    expect(actual).toStrictEqual([
+      { messageId: "assertionOutsideAssert", node: arrangeAndActNode },
+    ]);
+  });
 });

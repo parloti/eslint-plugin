@@ -97,21 +97,50 @@ function getStatementPurityState(
 }
 
 /**
- * Checks whether the analyzed test block declares all AAA section comments.
+ * Checks whether the analyzed test block declares the Act and Assert sections.
  * @param analysis Parsed test-block analysis.
- * @returns True when Arrange, Act, and Assert are all present.
+ * @returns True when Act and Assert are both present.
  * @example
  * ```typescript
- * const complete = hasAllAaaSections({ sectionComments: [] } as never);
+ * const complete = hasRequiredAaaSections({ sectionComments: [] } as never);
  * void complete;
  * ```
  */
-function hasAllAaaSections(analysis: TestBlockAnalysis): boolean {
-  return ["Arrange", "Act", "Assert"].every((phase) =>
+function hasRequiredAaaSections(analysis: TestBlockAnalysis): boolean {
+  return ["Act", "Assert"].every((phase) =>
     analysis.sectionComments.some((sectionComment) =>
       sectionComment.phases.includes(phase as never),
     ),
   );
+}
+
+/**
+ * Reports violations for statements that belong to both Act and Assert.
+ * @param context ESLint rule context.
+ * @param statement Statement entry to report against.
+ * @param purityState Phase-purity state for the statement.
+ * @example
+ * ```typescript
+ * reportActAndAssertStatement({ report() {} } as never, { node: {} as never, phases: [] }, {} as never);
+ * ```
+ */
+function reportActAndAssertStatement(
+  context: Rule.RuleContext,
+  statement: TestBlockAnalysis["statements"][number],
+  purityState: StatementPurityState,
+): void {
+  if (purityState.containsMutation) {
+    context.report({ messageId: "mutationAfterAct", node: statement.node });
+    return;
+  }
+
+  if (purityState.isSetupLike && !purityState.isMeaningfulActContent) {
+    context.report({ messageId: "setupAfterAct", node: statement.node });
+  }
+
+  if (purityState.containsAssertion && !purityState.isValidAssert) {
+    context.report({ messageId: "nonAssertionInAssert", node: statement.node });
+  }
 }
 
 /**
@@ -146,6 +175,29 @@ function reportActOnlyStatement(
 
   if (purityState.isSetupLike && !purityState.isMeaningfulActContent) {
     context.report({ messageId: "setupAfterAct", node: statement.node });
+  }
+}
+
+/**
+ * Reports violations for statements that belong to both Arrange and Act.
+ * @param context ESLint rule context.
+ * @param statement Statement entry to report against.
+ * @param purityState Phase-purity state for the statement.
+ * @example
+ * ```typescript
+ * reportArrangeAndActStatement({ report() {} } as never, { node: {} as never, phases: [] }, {} as never);
+ * ```
+ */
+function reportArrangeAndActStatement(
+  context: Rule.RuleContext,
+  statement: TestBlockAnalysis["statements"][number],
+  purityState: StatementPurityState,
+): void {
+  if (purityState.containsAssertion) {
+    context.report({
+      messageId: "assertionOutsideAssert",
+      node: statement.node,
+    });
   }
 }
 
@@ -226,7 +278,7 @@ function reportPhasePurityViolations(
   context: Rule.RuleContext,
   analysis: TestBlockAnalysis,
 ): void {
-  if (!hasAllAaaSections(analysis)) {
+  if (!hasRequiredAaaSections(analysis)) {
     return;
   }
 
@@ -267,18 +319,59 @@ function reportStatementViolations(
   statement: TestBlockAnalysis["statements"][number],
   purityState: StatementPurityState,
 ): void {
-  if (purityState.allowsArrange && !purityState.allowsAct) {
+  if (
+    purityState.allowsArrange &&
+    !purityState.allowsAct &&
+    !purityState.allowsAssert
+  ) {
     reportArrangeOnlyStatement(context, statement, purityState);
     return;
   }
 
-  if (purityState.allowsAct && !purityState.allowsArrange) {
+  if (
+    purityState.allowsAct &&
+    !purityState.allowsArrange &&
+    !purityState.allowsAssert
+  ) {
     reportActOnlyStatement(context, statement, purityState);
     return;
   }
 
-  if (purityState.allowsAssert && !purityState.allowsAct) {
+  if (
+    purityState.allowsAssert &&
+    !purityState.allowsAct &&
+    !purityState.allowsArrange
+  ) {
     reportAssertOnlyStatement(context, statement, purityState);
+    return;
+  }
+
+  if (
+    purityState.allowsArrange &&
+    purityState.allowsAct &&
+    !purityState.allowsAssert
+  ) {
+    reportArrangeAndActStatement(context, statement, purityState);
+    return;
+  }
+
+  if (
+    purityState.allowsAct &&
+    purityState.allowsAssert &&
+    !purityState.allowsArrange
+  ) {
+    reportActAndAssertStatement(context, statement, purityState);
+    return;
+  }
+
+  if (
+    purityState.allowsArrange &&
+    purityState.allowsAct &&
+    purityState.allowsAssert &&
+    purityState.containsAssertion &&
+    !purityState.isValidAssert
+  ) {
+    context.report({ messageId: "nonAssertionInAssert", node: statement.node });
   }
 }
 
