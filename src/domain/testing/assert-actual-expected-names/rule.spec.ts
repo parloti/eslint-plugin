@@ -244,4 +244,88 @@ describe("assert-actual-expected-names rule", () => {
       },
     ]);
   });
+
+  it("reports missing actual prefix for Act declarations used in Assert", async () => {
+    // Arrange
+    const assertion = { type: "ExpressionStatement" } as Rule.Node;
+    const actDeclaration = {
+      declarations: [
+        {
+          id: { name: "result", type: "Identifier" },
+        },
+      ],
+      type: "VariableDeclaration",
+    } as Rule.Node;
+    const resultNode = { name: "result", type: "Identifier" } as Rule.Node;
+    const expectedNode = {
+      name: "expectedValue",
+      type: "Identifier",
+    } as Rule.Node;
+    const analysis = {
+      statements: [
+        { node: actDeclaration, phases: ["Act"] },
+        { node: assertion, phases: ["Assert"] },
+      ],
+    };
+    const input = {
+      analysis,
+      assertionIdentifiers: new Map([
+        [assertion, { actual: "result", expected: "expectedValue" }],
+      ]),
+      assertionNodes: new Set([assertion]),
+      declaredIdentifiers: new Map([["expectedValue", expectedNode]]),
+    } satisfies LoadRuleInput;
+
+    // Act
+    const actual = await runRule(input);
+
+    // Assert
+    expect(actual).toStrictEqual([
+      {
+        data: { name: "result", prefix: "actual" },
+        messageId: "missingPrefix",
+        node: resultNode,
+      },
+    ]);
+  });
+
+  it("reports only missing expected prefix when actual is already prefixed", async () => {
+    // Arrange
+    const assertion = { type: "ExpressionStatement" } as Rule.Node;
+    const actDeclaration = {
+      declarations: [
+        {
+          id: { name: "actualResult", type: "Identifier" },
+        },
+      ],
+      type: "VariableDeclaration",
+    } as Rule.Node;
+    const expectedNode = { name: "value", type: "Identifier" } as Rule.Node;
+    const analysis = {
+      statements: [
+        { node: actDeclaration, phases: ["Act"] },
+        { node: assertion, phases: ["Assert"] },
+      ],
+    };
+    const input = {
+      analysis,
+      assertionIdentifiers: new Map([
+        [assertion, { actual: "actualResult", expected: "value" }],
+      ]),
+      assertionNodes: new Set([assertion]),
+      declaredIdentifiers: new Map([["value", expectedNode]]),
+    } satisfies LoadRuleInput;
+
+    // Act
+    const actual = await runRule(input);
+
+    // Assert
+    expect(actual).toStrictEqual([
+      {
+        data: { name: "value", prefix: "expected" },
+        messageId: "missingPrefix",
+        node: expectedNode,
+      },
+    ]);
+  });
 });

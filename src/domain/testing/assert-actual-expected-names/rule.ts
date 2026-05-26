@@ -17,7 +17,7 @@ interface ReportAssertionIdentifierInput {
   /** Active ESLint rule context. */
   context: Rule.RuleContext;
 
-  /** Declared identifiers collected from the assert phase. */
+  /** Declared identifiers collected from Act/Assert phases. */
   declaredIdentifiers: ReturnType<typeof getAssertDeclaredIdentifiers>;
 
   /** Identifier name extracted from the assertion. */
@@ -38,7 +38,7 @@ interface ReportAssertionPrefixesInput {
   /** Active ESLint rule context. */
   context: Rule.RuleContext;
 
-  /** Declared identifiers collected from the assert phase. */
+  /** Declared identifiers collected from Act/Assert phases. */
   declaredIdentifiers: ReturnType<typeof getAssertDeclaredIdentifiers>;
 
   /** Set of already reported identifier keys. */
@@ -131,6 +131,38 @@ const reportAssertionPrefixes = (input: ReportAssertionPrefixesInput): void => {
   });
 };
 
+/**
+ * Collects declaration identifiers from Act and Assert phases.
+ * @param analysis Parsed AAA test-block analysis.
+ * @returns Declared identifiers available for assertion naming checks.
+ * @example
+ * ```typescript
+ * const identifiers = getComparisonDeclaredIdentifiers(analysis);
+ * ```
+ */
+const getComparisonDeclaredIdentifiers = (
+  analysis: NonNullable<ReturnType<typeof analyzeTestBlock>>,
+): ReturnType<typeof getAssertDeclaredIdentifiers> => {
+  const declaredIdentifiers = new Map(getAssertDeclaredIdentifiers(analysis));
+
+  for (const statement of analysis.statements) {
+    if (
+      !statement.phases.includes("Act") ||
+      statement.node.type !== "VariableDeclaration"
+    ) {
+      continue;
+    }
+
+    for (const declaration of statement.node.declarations) {
+      if (declaration.id.type === "Identifier") {
+        declaredIdentifiers.set(declaration.id.name, declaration.id);
+      }
+    }
+  }
+
+  return declaredIdentifiers;
+};
+
 /** Enforces actual/expected-style prefixes for assert-phase comparison variables. */
 const assertActualExpectedNamesRule: Rule.RuleModule = {
   create(context: Rule.RuleContext): Rule.RuleListener {
@@ -141,7 +173,7 @@ const assertActualExpectedNamesRule: Rule.RuleModule = {
           return;
         }
 
-        const declaredIdentifiers = getAssertDeclaredIdentifiers(analysis);
+        const declaredIdentifiers = getComparisonDeclaredIdentifiers(analysis);
         const reportedNames = new Set<string>();
 
         for (const statement of analysis.statements) {

@@ -24,6 +24,7 @@ Tests read more clearly when the compared values advertise their role directly. 
 - Variables may be declared in either the Act or Assert phase
 - Neutral names (e.g. `computedResult`) are allowed before assertion, but must not be used directly in `expect`
 - The rule applies to all matcher types (e.g. `toBe`, `toEqual`, `toStrictEqual`, etc.)
+- The rule checks identifier names used in assertions; inline expressions are handled by AAA structure and phase rules
 
 ## Invalid
 
@@ -62,14 +63,6 @@ it("requires actual prefix", () => {
   // Assert
   const expectedValue = 1;
   expect(result).toBe(expectedValue);
-});
-
-it("disallows inline assertion values", () => {
-  // Arrange
-  const input = 1;
-
-  // Act & Assert
-  expect(run(input)).toBe(1);
 });
 ```
 
