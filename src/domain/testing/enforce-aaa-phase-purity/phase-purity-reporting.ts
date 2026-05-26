@@ -165,14 +165,6 @@ function reportActOnlyStatement(
     });
   }
 
-  if (
-    purityState.allowsAssert &&
-    purityState.containsAssertion &&
-    !purityState.isValidAssert
-  ) {
-    context.report({ messageId: "nonAssertionInAssert", node: statement.node });
-  }
-
   if (purityState.isSetupLike && !purityState.isMeaningfulActContent) {
     context.report({ messageId: "setupAfterAct", node: statement.node });
   }

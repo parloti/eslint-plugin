@@ -15,10 +15,10 @@ describe("no-reexports test utilities", () => {
     const body = createBody();
 
     // Act
-    const reports = runRule(filePath, body);
+    const actualReports = runRule(filePath, body);
 
     // Assert
-    expect(reports).toStrictEqual([]);
+    expect(actualReports).toStrictEqual([]);
   });
 
   it("creates temporary runners", (): void => {

@@ -9,50 +9,52 @@ import {
 describe(getMockSectionComments, () => {
   it("returns array with Arrange and Act phase comments", () => {
     // Act
-    const comments = getMockSectionComments();
+    const actualComments = getMockSectionComments();
 
     // Assert
-    expect(comments).toHaveLength(2);
-    expect(comments[0]?.phases).toStrictEqual(["Arrange"]);
-    expect(comments[1]?.phases).toStrictEqual(["Act"]);
+    expect(actualComments).toHaveLength(2);
+    expect(actualComments[0]?.phases).toStrictEqual(["Arrange"]);
+    expect(actualComments[1]?.phases).toStrictEqual(["Act"]);
   });
 });
 
 describe(getMockStatements, () => {
   it("returns array with 3 statements", () => {
     // Act
-    const statements = getMockStatements();
+    const actualStatements = getMockStatements();
 
     // Assert
-    expect(statements).toHaveLength(3);
-    expect(statements[0]?.phase).toBeUndefined();
-    expect(statements[1]?.phase).toBe("Arrange");
-    expect(statements[2]?.phase).toBe("Act");
+    expect(actualStatements).toHaveLength(3);
+    expect(actualStatements[0]?.phase).toBeUndefined();
+    expect(actualStatements[1]?.phase).toBe("Arrange");
+    expect(actualStatements[2]?.phase).toBe("Act");
   });
 });
 
 describe(isRequireAaaSectionsMessageId, () => {
   it("returns true for valid message identifier blankLineBeforeSection", () => {
     // Act
-    const isValid = isRequireAaaSectionsMessageId("blankLineBeforeSection");
+    const actualIsValid = isRequireAaaSectionsMessageId(
+      "blankLineBeforeSection",
+    );
 
     // Assert
-    expect(isValid).toBe(true);
+    expect(actualIsValid).toBe(true);
   });
 
   it("returns false for invalid string identifier", () => {
     // Act
-    const isValid = isRequireAaaSectionsMessageId("invalid");
+    const actualIsValid = isRequireAaaSectionsMessageId("invalid");
 
     // Assert
-    expect(isValid).toBe(false);
+    expect(actualIsValid).toBe(false);
   });
 
   it("returns false for number values", () => {
     // Act
-    const isValid = isRequireAaaSectionsMessageId(123);
+    const actualIsValid = isRequireAaaSectionsMessageId(123);
 
     // Assert
-    expect(isValid).toBe(false);
+    expect(actualIsValid).toBe(false);
   });
 });

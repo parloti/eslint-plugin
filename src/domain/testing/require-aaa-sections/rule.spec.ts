@@ -50,12 +50,12 @@ describe("require-aaa-sections rule", () => {
       const fixable = requireAaaSectionsRule.meta?.fixable;
 
       // Act
-      const messages = requireAaaSectionsRule.meta?.messages;
+      const actualMessages = requireAaaSectionsRule.meta?.messages;
 
       // Assert
       expect(fixable).toBe("code");
-      expect(messages).toHaveProperty("emptySection");
-      expect(messages).toHaveProperty("missingSections");
+      expect(actualMessages).toHaveProperty("emptySection");
+      expect(actualMessages).toHaveProperty("missingSections");
     });
   });
 
@@ -198,10 +198,10 @@ describe("require-aaa-sections rule", () => {
       ].join("\n");
 
       // Act
-      const result = runFix(code).fixed;
+      const actualResult = runFix(code).fixed;
 
       // Assert
-      expect(result).toBe(true);
+      expect(actualResult).toBe(true);
     });
 
     it("reports section comments that appear out of canonical order", () => {

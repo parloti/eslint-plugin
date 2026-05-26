@@ -219,10 +219,10 @@ describe("enforce-aaa-phase-purity current limitations", () => {
     ].join("\n");
 
     // Act
-    const messageIds = runRule(code);
+    const actualMessageIds = runRule(code);
 
     // Assert
-    expect(messageIds).toStrictEqual(["assertionOutsideAssert"]);
+    expect(actualMessageIds).toStrictEqual(["assertionOutsideAssert"]);
   });
 
   it("currently reports helper-driven utility specs as setup after act", () => {
@@ -242,9 +242,9 @@ describe("enforce-aaa-phase-purity current limitations", () => {
     ].join("\n");
 
     // Act
-    const messageIds = runRule(code);
+    const actualMessageIds = runRule(code);
 
     // Assert
-    expect(messageIds).toStrictEqual(["setupAfterAct"]);
+    expect(actualMessageIds).toStrictEqual(["setupAfterAct"]);
   });
 });

@@ -46,10 +46,10 @@ describe("prefer-vi-mocked-import match-bindings", () => {
     ]);
 
     // Act
-    const result = collectBindings(bindings, declarations);
+    const actualResult = collectBindings(bindings, declarations);
 
     // Assert
-    expect(result).toStrictEqual([]);
+    expect(actualResult).toStrictEqual([]);
   });
 
   it("ignores non-property entries", () => {
@@ -66,9 +66,9 @@ describe("prefer-vi-mocked-import match-bindings", () => {
     const declarations = new Map<string, Declaration>();
 
     // Act
-    const result = collectBindings(bindings, declarations);
+    const actualResult = collectBindings(bindings, declarations);
 
     // Assert
-    expect(result).toStrictEqual([]);
+    expect(actualResult).toStrictEqual([]);
   });
 });

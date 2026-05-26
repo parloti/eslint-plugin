@@ -338,4 +338,36 @@ describe("enforce-aaa-phase-purity reporting behavior", () => {
       { messageId: "assertionOutsideAssert", node: arrangeAndActNode },
     ]);
   });
+
+  it("does not report Arrange and Act statements without assertions", async () => {
+    // Arrange
+    const arrangeAndActNode: ReportingNode = {
+      meaningfulAct: true,
+      type: "ExpressionStatement",
+    };
+    const analysis = {
+      callExpression: { type: "CallExpression" },
+      sectionComments: [
+        { phases: ["Arrange"] },
+        { phases: ["Act"] },
+        { phases: ["Assert"] },
+      ],
+      statements: [
+        { node: arrangeAndActNode, phases: ["Arrange", "Act"] },
+        {
+          node: {
+            type: "ExpressionStatement",
+            validAssert: true,
+          } as ReportingNode,
+          phases: ["Assert"],
+        },
+      ],
+    };
+
+    // Act
+    const actual = await runReporting(analysis);
+
+    // Assert
+    expect(actual).toStrictEqual([]);
+  });
 });

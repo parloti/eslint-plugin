@@ -63,10 +63,10 @@ describe("parameter tag parsing", () => {
     const line = createLine(" * @param context The description.");
 
     // Act
-    const tag = parseParameterTagLine(line);
+    const actualTag = parseParameterTagLine(line);
 
     // Assert
-    expect(tag).toBeUndefined();
+    expect(actualTag).toBeUndefined();
   });
 
   it("skips empty member names", () => {
@@ -74,10 +74,10 @@ describe("parameter tag parsing", () => {
     const line = createLine(" * @param context. The description.");
 
     // Act
-    const tag = parseParameterTagLine(line);
+    const actualTag = parseParameterTagLine(line);
 
     // Assert
-    expect(tag).toBeUndefined();
+    expect(actualTag).toBeUndefined();
   });
 
   it("skips non-param lines", () => {
@@ -85,10 +85,10 @@ describe("parameter tag parsing", () => {
     const line = createLine(" * @returns The description.");
 
     // Act
-    const tag = parseParameterTagLine(line);
+    const actualTag = parseParameterTagLine(line);
 
     // Assert
-    expect(tag).toBeUndefined();
+    expect(actualTag).toBeUndefined();
   });
 
   it("skips param tags without names", () => {
@@ -96,10 +96,10 @@ describe("parameter tag parsing", () => {
     const line = createLine(" * @param");
 
     // Act
-    const tag = parseParameterTagLine(line);
+    const actualTag = parseParameterTagLine(line);
 
     // Assert
-    expect(tag).toBeUndefined();
+    expect(actualTag).toBeUndefined();
   });
 
   it("parses tags with type annotations", () => {

@@ -10,10 +10,10 @@ describe("docs test helpers", () => {
     const fixer = createFixer();
 
     // Act
-    const fixText = getFixText(fixer.replaceTextRange([0, 0], "ok"));
+    const actualFixText = getFixText(fixer.replaceTextRange([0, 0], "ok"));
 
     // Assert
-    expect(fixText).toBe("ok");
+    expect(actualFixText).toBe("ok");
   });
 
   it("handles iterable and missing fix text", () => {
@@ -40,10 +40,10 @@ describe("docs test helpers", () => {
     ]);
 
     // Act
-    const output = applyFixes("", fixes);
+    const actualOutput = applyFixes("", fixes);
 
     // Assert
-    expect(output).toBe("ok");
+    expect(actualOutput).toBe("ok");
   });
 
   it("collects iterable and optional fixes", () => {
@@ -69,7 +69,7 @@ describe("docs test helpers", () => {
     const syntaxElement = { type: "Identifier" };
 
     // Act
-    const results = [
+    const actualResults = [
       fixer.insertTextAfter(syntaxElement, "a").text,
       fixer.insertTextAfterRange([0, 0], "b").text,
       fixer.insertTextBefore(syntaxElement, "c").text,
@@ -81,6 +81,6 @@ describe("docs test helpers", () => {
     ];
 
     // Assert
-    expect(results).toStrictEqual(["a", "b", "c", "d", "", "", "e", "f"]);
+    expect(actualResults).toStrictEqual(["a", "b", "c", "d", "", "", "e", "f"]);
   });
 });

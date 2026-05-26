@@ -54,10 +54,10 @@ describe("prefer-vi-mocked-import match", () => {
     }) as never;
 
     // Act
-    const match = collectMatch(context);
+    const actualMatch = collectMatch(context);
 
     // Assert
-    expect(match).toBe(void 0);
+    expect(actualMatch).toBe(void 0);
   });
 
   it("returns undefined when find returns a non-call expression statement", () => {
@@ -72,10 +72,10 @@ describe("prefer-vi-mocked-import match", () => {
     }) as never;
 
     // Act
-    const match = collectMatch(context);
+    const actualMatch = collectMatch(context);
 
     // Assert
-    expect(match).toBe(void 0);
+    expect(actualMatch).toBe(void 0);
   });
 
   it("returns undefined for mock calls with missing arguments", () => {
@@ -101,10 +101,10 @@ describe("prefer-vi-mocked-import match", () => {
     }) as never;
 
     // Act
-    const match = collectMatch(context);
+    const actualMatch = collectMatch(context);
 
     // Assert
-    expect(match).toBe(void 0);
+    expect(actualMatch).toBe(void 0);
   });
 
   it("returns undefined for spread mock arguments", () => {
@@ -139,10 +139,10 @@ describe("prefer-vi-mocked-import match", () => {
     }) as never;
 
     // Act
-    const match = collectMatch(context);
+    const actualMatch = collectMatch(context);
 
     // Assert
-    expect(match).toBe(void 0);
+    expect(actualMatch).toBe(void 0);
   });
 
   it("returns undefined when specifier expression has no range", () => {
@@ -174,10 +174,10 @@ describe("prefer-vi-mocked-import match", () => {
     }) as never;
 
     // Act
-    const match = collectMatch(context);
+    const actualMatch = collectMatch(context);
 
     // Assert
-    expect(match).toBe(void 0);
+    expect(actualMatch).toBe(void 0);
   });
 
   it("ignores call expressions that are not member invocations", () => {
@@ -198,9 +198,9 @@ describe("prefer-vi-mocked-import match", () => {
     }) as never;
 
     // Act
-    const match = collectMatch(context);
+    const actualMatch = collectMatch(context);
 
     // Assert
-    expect(match).toBe(void 0);
+    expect(actualMatch).toBe(void 0);
   });
 });

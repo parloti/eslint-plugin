@@ -33,12 +33,12 @@ describe("require-example-language content checks", () => {
     const commentValue = "* @example inline\n * more\n ";
 
     // Act
-    const examples = getExamples(commentValue);
+    const actualExamples = getExamples(commentValue);
 
     // Assert
-    expect(examples).toHaveLength(1);
-    expect(examples[0]?.content).toMatch(/^inline/u);
-    expect(examples[0]?.content).toContain("* more");
+    expect(actualExamples).toHaveLength(1);
+    expect(actualExamples[0]?.content).toMatch(/^inline/u);
+    expect(actualExamples[0]?.content).toContain("* more");
   });
 
   it("accepts a fenced example with language", () => {
@@ -46,10 +46,10 @@ describe("require-example-language content checks", () => {
     const content = "```typescript\nconst ok = true;\n```";
 
     // Act
-    const result = checkExampleContent(content);
+    const actualResult = checkExampleContent(content);
 
     // Assert
-    expect(result).toBeUndefined();
+    expect(actualResult).toBeUndefined();
   });
 
   it("detects missing fence language", () => {
@@ -57,10 +57,10 @@ describe("require-example-language content checks", () => {
     const content = "```\nconst ok = true;\n```";
 
     // Act
-    const result = checkExampleContent(content);
+    const actualResult = checkExampleContent(content);
 
     // Assert
-    expect(result).toBe("missingLanguage");
+    expect(actualResult).toBe("missingLanguage");
   });
 
   it("detects missing fences when no code block exists", () => {
@@ -68,10 +68,10 @@ describe("require-example-language content checks", () => {
     const content = "const ok = true;";
 
     // Act
-    const result = checkExampleContent(content);
+    const actualResult = checkExampleContent(content);
 
     // Assert
-    expect(result).toBe("missingFence");
+    expect(actualResult).toBe("missingFence");
   });
 
   it("treats empty content as empty examples", () => {
@@ -79,10 +79,10 @@ describe("require-example-language content checks", () => {
     const content = "";
 
     // Act
-    const result = checkExampleContent(content);
+    const actualResult = checkExampleContent(content);
 
     // Assert
-    expect(result).toBe("emptyExample");
+    expect(actualResult).toBe("emptyExample");
   });
 
   it("treats empty fenced examples as empty examples", () => {
@@ -90,10 +90,10 @@ describe("require-example-language content checks", () => {
     const content = "```typescript\n```";
 
     // Act
-    const result = checkExampleContent(content);
+    const actualResult = checkExampleContent(content);
 
     // Assert
-    expect(result).toBe("emptyExample");
+    expect(actualResult).toBe("emptyExample");
   });
 
   it("treats unclosed empty fences as empty examples", () => {
@@ -101,10 +101,10 @@ describe("require-example-language content checks", () => {
     const content = "```typescript";
 
     // Act
-    const result = checkExampleContent(content);
+    const actualResult = checkExampleContent(content);
 
     // Assert
-    expect(result).toBe("emptyExample");
+    expect(actualResult).toBe("emptyExample");
   });
 
   it("flags empty fences even when another fence has content", () => {
@@ -112,10 +112,10 @@ describe("require-example-language content checks", () => {
     const content = "```typescript\n```\n```typescript\nconst ok = true;\n```";
 
     // Act
-    const result = checkExampleContent(content);
+    const actualResult = checkExampleContent(content);
 
     // Assert
-    expect(result).toBe("emptyExample");
+    expect(actualResult).toBe("emptyExample");
   });
 });
 

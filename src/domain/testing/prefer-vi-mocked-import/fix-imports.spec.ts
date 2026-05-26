@@ -36,10 +36,10 @@ describe("prefer-vi-mocked-import fix-imports", () => {
     } as never;
 
     // Act
-    const fixes = buildCombinedImportFixes(matches, fixer);
+    const actualFixes = buildCombinedImportFixes(matches, fixer);
 
     // Assert
-    expect(fixes).toStrictEqual([]);
+    expect(actualFixes).toStrictEqual([]);
   });
 
   it("merges deferred insert and update plans across matches", () => {
@@ -102,10 +102,10 @@ describe("prefer-vi-mocked-import fix-imports", () => {
     } as never;
 
     // Act
-    const fixes = buildCombinedImportFixes(matches as never, fixer);
+    const actualFixes = buildCombinedImportFixes(matches as never, fixer);
 
     // Assert
-    expect(fixes).toStrictEqual([
+    expect(actualFixes).toStrictEqual([
       {
         range: [30, 40],
         text: 'import { eta, theta, zeta } from "./delta";',
@@ -160,10 +160,10 @@ describe("prefer-vi-mocked-import fix-imports", () => {
     } as never;
 
     // Act
-    const fixes = buildCombinedImportFixes(matches as never, fixer);
+    const actualFixes = buildCombinedImportFixes(matches as never, fixer);
 
     // Assert
-    expect(fixes).toStrictEqual([
+    expect(actualFixes).toStrictEqual([
       {
         range: [5, 10],
         text: '\nimport { alpha } from "./alpha";\nimport { zeta } from "./zeta";',
@@ -207,10 +207,10 @@ describe("prefer-vi-mocked-import fix-imports", () => {
     } as never;
 
     // Act
-    const fixes = buildCombinedImportFixes(matches as never, fixer);
+    const actualFixes = buildCombinedImportFixes(matches as never, fixer);
 
     // Assert
-    expect(fixes).toStrictEqual([
+    expect(actualFixes).toStrictEqual([
       {
         range: [30, 40],
         text: 'import { eta, theta } from "./delta";',

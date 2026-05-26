@@ -50,10 +50,14 @@ describe("example utilities", () => {
     };
 
     // Act
-    const meta = getLineMeta(context);
+    const actualMeta = getLineMeta(context);
 
     // Assert
-    expect(meta).toStrictEqual({ endIndex: 1, endOffset: 16, lineIndex: 1 });
+    expect(actualMeta).toStrictEqual({
+      endIndex: 1,
+      endOffset: 16,
+      lineIndex: 1,
+    });
   });
 
   it("derives prefixes", () => {

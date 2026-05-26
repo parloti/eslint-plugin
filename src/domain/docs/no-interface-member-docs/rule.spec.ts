@@ -22,11 +22,11 @@ describe("no interface member docs rule", () => {
     const ruleType = noInterfaceMemberDocumentationRule.meta?.type;
 
     // Act
-    const createType = typeof noInterfaceMemberDocumentationRule.create;
+    const actualCreateType = typeof noInterfaceMemberDocumentationRule.create;
 
     // Assert
     expect(ruleType).toBe("problem");
-    expect(createType).toBe("function");
+    expect(actualCreateType).toBe("function");
   });
 
   it("reports and fixes interface member param docs", () => {
@@ -199,8 +199,8 @@ describe("no interface member docs rule", () => {
       "  run(context: LineMetaContext): void {}",
       "}",
     ].join("\n");
-    const commentStart = sourceText.indexOf("/**");
-    const commentEnd = sourceText.indexOf("*/", commentStart) + 2;
+    const commentStart = 18;
+    const commentEnd = 112;
     const comment = {
       range: [commentStart, commentEnd],
       type: "Block",
@@ -208,22 +208,49 @@ describe("no interface member docs rule", () => {
     } as Comment;
     const { context, reports } = createContext(sourceText, [comment]);
     const node = {
+      params: [createParameter("TSTypeReference")],
+      range: [115, 155],
+      type: "MethodDefinition",
       value: {
         params: [createParameter("TSTypeReference")],
-        range: [sourceText.indexOf("run"), sourceText.length],
+        range: [115, 155],
         type: "FunctionExpression",
       },
-      params: [createParameter("TSTypeReference")],
-      range: [sourceText.indexOf("run"), sourceText.length],
-      type: "MethodDefinition",
-    } as Rule.Node;
+    } as unknown as Parameters<
+      NonNullable<Rule.RuleListener["MethodDefinition"]>
+    >[0];
 
     // Act
-    const listeners = noInterfaceMemberDocumentationRule.create(context);
-    listeners.MethodDefinition?.(node);
+    const actualListenerResult = noInterfaceMemberDocumentationRule
+      .create(context)
+      .MethodDefinition?.(node);
 
     // Assert
+    expect(actualListenerResult).toBeUndefined();
     expect(reports).toHaveLength(1);
     expect(reports[0]?.messageId).toBe("interfaceMemberDoc");
+  });
+
+  it("does not fail when MethodDefinition value is missing", () => {
+    // Arrange
+    const sourceText =
+      "class Example { run(context: LineMetaContext): void {} }";
+    const { context, reports } = createContext(sourceText, []);
+    const node = {
+      params: [createParameter("TSTypeReference")],
+      range: [16, sourceText.length - 2],
+      type: "MethodDefinition",
+    } as unknown as Parameters<
+      NonNullable<Rule.RuleListener["MethodDefinition"]>
+    >[0];
+
+    // Act
+    const actualListenerResult = noInterfaceMemberDocumentationRule
+      .create(context)
+      .MethodDefinition?.(node);
+
+    // Assert
+    expect(actualListenerResult).toBeUndefined();
+    expect(reports).toStrictEqual([]);
   });
 });

@@ -117,21 +117,16 @@ const getCallExpression = (program: ESTree.Program): ESTree.CallExpression => {
 const getFirstTwoCallExpressions = (
   program: ESTree.Program,
 ): [ESTree.CallExpression, ESTree.CallExpression] => {
-  const callExpressions = program.body
-    .map((statement) => {
-      if (
-        statement.type === "ExpressionStatement" &&
-        statement.expression.type === "CallExpression"
-      ) {
-        return statement.expression;
-      }
+  const callExpressions: ESTree.CallExpression[] = [];
 
-      return void 0;
-    })
-    .filter(
-      (callExpression): callExpression is ESTree.CallExpression =>
-        callExpression !== void 0,
-    );
+  for (const statement of program.body) {
+    if (
+      statement.type === "ExpressionStatement" &&
+      statement.expression.type === "CallExpression"
+    ) {
+      callExpressions.push(statement.expression);
+    }
+  }
 
   const [firstCallExpression, secondCallExpression] = callExpressions;
   if (firstCallExpression === void 0 || secondCallExpression === void 0) {

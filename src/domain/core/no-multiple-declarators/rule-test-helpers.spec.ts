@@ -15,10 +15,12 @@ describe("no-multiple-declarators rule test helpers", () => {
     ];
 
     // Act
-    const fixes = getFixes(reports);
+    const actualFixes = getFixes(reports);
 
     // Assert
-    expect(fixes).toStrictEqual([{ range: [0, 0], text: "const first = 1;" }]);
+    expect(actualFixes).toStrictEqual([
+      { range: [0, 0], text: "const first = 1;" },
+    ]);
   });
 
   it("applies fixes from the end of the file toward the start", () => {
@@ -27,7 +29,7 @@ describe("no-multiple-declarators rule test helpers", () => {
     const secondDeclarator = " second = 2;";
 
     // Act
-    const output = ((): string => {
+    const actualOutput = ((): string => {
       const secondDeclaratorStart = sourceText.indexOf(secondDeclarator);
 
       return applyFixes(sourceText, [
@@ -43,7 +45,7 @@ describe("no-multiple-declarators rule test helpers", () => {
     })();
 
     // Assert
-    expect(output).toBe("const first = 1;\nconst second = 2;");
+    expect(actualOutput).toBe("const first = 1;\nconst second = 2;");
   });
 
   it("omits the raw text property when requested", () => {

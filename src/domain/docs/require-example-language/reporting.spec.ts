@@ -54,10 +54,10 @@ describe("require example language reporting", () => {
     };
 
     // Act
-    const descriptor = buildReportDescriptor(reportInput);
+    const actualDescriptor = buildReportDescriptor(reportInput);
 
     // Assert
-    expect(descriptor).toBeDefined();
+    expect(actualDescriptor).toBeDefined();
   });
 
   it("returns a descriptor without a fixer when range is missing", () => {
@@ -83,10 +83,10 @@ describe("require example language reporting", () => {
     };
 
     // Act
-    const descriptor = buildReportDescriptor(reportInput);
+    const actualDescriptor = buildReportDescriptor(reportInput);
 
     // Assert
-    expect(descriptor).toBeDefined();
+    expect(actualDescriptor).toBeDefined();
   });
 
   it("returns a descriptor when location data is missing", () => {
@@ -112,10 +112,10 @@ describe("require example language reporting", () => {
     };
 
     // Act
-    const descriptor = buildReportDescriptor(reportInput);
+    const actualDescriptor = buildReportDescriptor(reportInput);
 
     // Assert
-    expect(descriptor).toBeDefined();
+    expect(actualDescriptor).toBeDefined();
   });
 
   it("skips reporting when example content is valid", () => {
@@ -211,11 +211,11 @@ describe("require example language reporting", () => {
     });
 
     // Act
-    const fixResult = descriptor.fix?.({
+    const actualFixResult = descriptor.fix?.({
       replaceTextRange: () => ({ range: [0, 0], text: "unused" }),
     } as unknown as Rule.RuleFixer);
 
     // Assert
-    expect(fixResult).toStrictEqual([]);
+    expect(actualFixResult).toStrictEqual([]);
   });
 });

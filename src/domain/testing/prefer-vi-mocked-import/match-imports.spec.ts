@@ -35,10 +35,10 @@ describe("prefer-vi-mocked-import match-imports", () => {
     } as never;
 
     // Act
-    const plan = resolveImportPlan(program, "./mod", ["a"]);
+    const actualPlan = resolveImportPlan(program, "./mod", ["a"]);
 
     // Assert
-    expect(plan).toStrictEqual({
+    expect(actualPlan).toStrictEqual({
       insert: { afterRange: [0, 25] },
       moduleSpecifier: "./mod",
       names: ["a"],
@@ -70,10 +70,10 @@ describe("prefer-vi-mocked-import match-imports", () => {
     } as never;
 
     // Act
-    const plan = resolveImportPlan(program, "./mod", ["a"]);
+    const actualPlan = resolveImportPlan(program, "./mod", ["a"]);
 
     // Assert
-    expect(plan).toStrictEqual({
+    expect(actualPlan).toStrictEqual({
       moduleSpecifier: "./mod",
       names: ["a"],
       update: {
@@ -105,10 +105,10 @@ describe("prefer-vi-mocked-import match-imports", () => {
     } as never;
 
     // Act
-    const plan = resolveImportPlan(program, "./mod", ["a"]);
+    const actualPlan = resolveImportPlan(program, "./mod", ["a"]);
 
     // Assert
-    expect(plan).toStrictEqual({
+    expect(actualPlan).toStrictEqual({
       insert: { afterRange: [0, 30] },
       moduleSpecifier: "./mod",
       names: ["a"],

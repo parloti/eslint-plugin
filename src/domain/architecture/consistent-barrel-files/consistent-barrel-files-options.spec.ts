@@ -43,14 +43,14 @@ describe("consistent-barrel-files options", () => {
     const nonSourceFilename = `${cwd()}/tmp/index.ts`;
 
     // Act
-    const result = {
+    const actualResult = {
       nestedSource: shouldLintFile(nestedFilename, allowedNames),
       nonSource: shouldLintFile(nonSourceFilename, allowedNames),
       source: shouldLintFile(filename, allowedNames),
     };
 
     // Assert
-    expect(result).toStrictEqual({
+    expect(actualResult).toStrictEqual({
       nestedSource: true,
       nonSource: false,
       source: true,

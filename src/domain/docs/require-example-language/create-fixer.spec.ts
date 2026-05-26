@@ -55,7 +55,7 @@ describe("require-example-language createFixer", () => {
     const sourceText = "* ```typescript\n* ok\n* ```";
 
     // Act
-    const fixResult = createFixer({
+    const actualFixResult = createFixer({
       absoluteEnd: sourceText.length,
       absoluteStart: 0,
       example,
@@ -65,7 +65,7 @@ describe("require-example-language createFixer", () => {
     })(createRuleTextEditor());
 
     // Assert
-    expect(fixResult).toBeUndefined();
+    expect(actualFixResult).toBeUndefined();
   });
 
   it("removes empty examples when other examples exist", () => {
@@ -107,7 +107,7 @@ describe("require-example-language createFixer", () => {
     const sourceText = "* @example\n* ```typescript\n* ```";
 
     // Act
-    const fixResult = createFixer({
+    const actualFixResult = createFixer({
       absoluteEnd: sourceText.length,
       absoluteStart: 0,
       example,
@@ -117,7 +117,7 @@ describe("require-example-language createFixer", () => {
     })(createRuleTextEditor());
 
     // Assert
-    expect(fixResult).toBeUndefined();
+    expect(actualFixResult).toBeUndefined();
   });
 
   it("builds a fence fix for empty examples without fences", () => {
@@ -191,7 +191,7 @@ describe("require-example-language createFixer", () => {
       '* @example Demonstrates log info with representative values.\n * logInfo("message");\n ';
 
     // Act
-    const text = createFixer({
+    const actualText = createFixer({
       absoluteEnd: sourceText.length,
       absoluteStart: 0,
       example,
@@ -201,7 +201,7 @@ describe("require-example-language createFixer", () => {
     })(createRuleTextEditor())?.text;
 
     // Assert
-    expect(text).toMatch(/\n $/u);
+    expect(actualText).toMatch(/\n $/u);
   });
 
   it("does not append trailing whitespace when none exists", () => {
@@ -227,10 +227,10 @@ describe("require-example-language createFixer", () => {
     });
 
     // Act
-    const text = fixer(createRuleTextEditor())?.text;
+    const actualText = fixer(createRuleTextEditor())?.text;
 
     // Assert
-    expect(text).not.toMatch(/\n $/u);
-    expect(text).toContain("```typescript");
+    expect(actualText).not.toMatch(/\n $/u);
+    expect(actualText).toContain("```typescript");
   });
 });

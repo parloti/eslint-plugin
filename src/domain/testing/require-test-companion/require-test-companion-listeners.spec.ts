@@ -12,14 +12,14 @@ describe("require-test-companion listeners", () => {
     const state = getOptions([{ enforceIn: [] }]);
 
     // Act
-    const listener = buildListenerForFilename(
+    const actualListener = buildListenerForFilename(
       {} as Rule.RuleContext,
       `${cwd()}/src/index.ts`,
       state,
     );
 
     // Assert
-    expect(listener).toStrictEqual({});
+    expect(actualListener).toStrictEqual({});
   });
 
   it("does not build a listener for source files", () => {
@@ -27,14 +27,14 @@ describe("require-test-companion listeners", () => {
     const state = getOptions([{ enforceIn: ["src/**/*.ts"] }]);
 
     // Act
-    const listener = buildListenerForFilename(
+    const actualListener = buildListenerForFilename(
       {} as Rule.RuleContext,
       `${cwd()}/src/feature.ts`,
       state,
     );
 
     // Assert
-    expect(listener).toStrictEqual({});
+    expect(actualListener).toStrictEqual({});
   });
 
   it("builds a listener for test files", () => {
@@ -42,13 +42,13 @@ describe("require-test-companion listeners", () => {
     const state = getOptions([{ enforceIn: ["src/**/*.ts"] }]);
 
     // Act
-    const listener = buildListenerForFilename(
+    const actualListener = buildListenerForFilename(
       {} as Rule.RuleContext,
       `${cwd()}/src/feature.spec.ts`,
       state,
     );
 
     // Assert
-    expect(listener).toHaveProperty("Program");
+    expect(actualListener).toHaveProperty("Program");
   });
 });

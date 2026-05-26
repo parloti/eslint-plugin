@@ -12,11 +12,11 @@ describe("comment utilities test helpers", () => {
     const { comment, sourceCode } = createSingleJsdocContext();
 
     // Act
-    const allComments = sourceCode.getAllComments();
+    const actualAllComments = sourceCode.getAllComments();
 
     // Assert
     expect(comment.type).toBe("Block");
-    expect(allComments).toHaveLength(1);
+    expect(actualAllComments).toHaveLength(1);
   });
 
   it("creates dual comment contexts", () => {
@@ -24,11 +24,11 @@ describe("comment utilities test helpers", () => {
     const { second, sourceCode } = createDualJsdocContext();
 
     // Act
-    const allComments = sourceCode.getAllComments();
+    const actualAllComments = sourceCode.getAllComments();
 
     // Assert
     expect(second.value).toContain("second");
-    expect(allComments).toHaveLength(2);
+    expect(actualAllComments).toHaveLength(2);
   });
 
   it("creates range-missing contexts", () => {
@@ -36,9 +36,9 @@ describe("comment utilities test helpers", () => {
     const { sourceCode } = createRangeMissingContext();
 
     // Act
-    const allComments = sourceCode.getAllComments();
+    const actualAllComments = sourceCode.getAllComments();
 
     // Assert
-    expect(allComments).toHaveLength(1);
+    expect(actualAllComments).toHaveLength(1);
   });
 });

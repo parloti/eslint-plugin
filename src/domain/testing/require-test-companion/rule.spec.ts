@@ -20,10 +20,10 @@ describe("require-test-companion rule", () => {
     const options = { enforceIn: ["**"] };
 
     // Act
-    const reports = runRule(filePath, options);
+    const actualReports = runRule(filePath, options);
 
     // Assert
-    expect(reports).toStrictEqual([]);
+    expect(actualReports).toStrictEqual([]);
   });
 
   it("does not report when test companion exists", () => {
@@ -35,10 +35,10 @@ describe("require-test-companion rule", () => {
     );
 
     // Act
-    const reports = runRule(filePath, { enforceIn: ["**"] });
+    const actualReports = runRule(filePath, { enforceIn: ["**"] });
 
     // Assert
-    expect(reports).toStrictEqual([]);
+    expect(actualReports).toStrictEqual([]);
   });
 
   it("reports missing source for test", () => {
@@ -47,11 +47,11 @@ describe("require-test-companion rule", () => {
     const options = { enforceIn: ["**"] };
 
     // Act
-    const reports = runRule(specPath, options);
+    const actualReports = runRule(specPath, options);
 
     // Assert
-    expect(reports).toHaveLength(1);
-    expect(reports[0]?.messageId).toBe("missingSource");
+    expect(actualReports).toHaveLength(1);
+    expect(actualReports[0]?.messageId).toBe("missingSource");
   });
 
   it("does not report when source exists for test", () => {
@@ -63,10 +63,10 @@ describe("require-test-companion rule", () => {
     );
 
     // Act
-    const reports = runRule(specPath, { enforceIn: ["**"] });
+    const actualReports = runRule(specPath, { enforceIn: ["**"] });
 
     // Assert
-    expect(reports).toStrictEqual([]);
+    expect(actualReports).toStrictEqual([]);
   });
 
   it("reports missing source for suffixed tests", () => {
@@ -75,11 +75,11 @@ describe("require-test-companion rule", () => {
     const options = { enforceIn: ["**"] };
 
     // Act
-    const reports = runRule(specPath, options);
+    const actualReports = runRule(specPath, options);
 
     // Assert
-    expect(reports).toHaveLength(1);
-    expect(reports[0]?.messageId).toBe("missingSource");
+    expect(actualReports).toHaveLength(1);
+    expect(actualReports[0]?.messageId).toBe("missingSource");
   });
 });
 
@@ -92,10 +92,10 @@ describe("require-test-companion rule edge cases", () => {
     const options = { enforceIn: ["**"] };
 
     // Act
-    const reports = runRule(filePath, options);
+    const actualReports = runRule(filePath, options);
 
     // Assert
-    expect(reports).toStrictEqual([]);
+    expect(actualReports).toStrictEqual([]);
   });
 
   it("skips declaration files", () => {
@@ -103,10 +103,10 @@ describe("require-test-companion rule edge cases", () => {
     const filePath = createTemporaryFile("tmp", "types.d.ts");
 
     // Act
-    const reports = runRule(filePath, { enforceIn: ["**"] });
+    const actualReports = runRule(filePath, { enforceIn: ["**"] });
 
     // Assert
-    expect(reports).toStrictEqual([]);
+    expect(actualReports).toStrictEqual([]);
   });
 
   it("skips empty base stem for sources", () => {
@@ -114,10 +114,10 @@ describe("require-test-companion rule edge cases", () => {
     const filePath = createTemporaryFile("tmp", ".ts");
 
     // Act
-    const reports = runRule(filePath, { enforceIn: ["**"] });
+    const actualReports = runRule(filePath, { enforceIn: ["**"] });
 
     // Assert
-    expect(reports).toStrictEqual([]);
+    expect(actualReports).toStrictEqual([]);
   });
 
   it("skips empty base stem for tests", () => {
@@ -125,10 +125,10 @@ describe("require-test-companion rule edge cases", () => {
     const filePath = createTemporaryFile("tmp", ".spec.ts");
 
     // Act
-    const reports = runRule(filePath, { enforceIn: ["**"] });
+    const actualReports = runRule(filePath, { enforceIn: ["**"] });
 
     // Assert
-    expect(reports).toStrictEqual([]);
+    expect(actualReports).toStrictEqual([]);
   });
 
   it("skips when path is outside cwd", () => {
@@ -136,10 +136,10 @@ describe("require-test-companion rule edge cases", () => {
     const filePath = path.join(cwd(), "..", "outside.ts");
 
     // Act
-    const reports = runRule(filePath, { enforceIn: ["**"] });
+    const actualReports = runRule(filePath, { enforceIn: ["**"] });
 
     // Assert
-    expect(reports).toStrictEqual([]);
+    expect(actualReports).toStrictEqual([]);
   });
 });
 
@@ -155,10 +155,10 @@ describe("require-test-companion rule ignore patterns", () => {
     };
 
     // Act
-    const reports = runRule(filePath, options);
+    const actualReports = runRule(filePath, options);
 
     // Assert
-    expect(reports).toStrictEqual([]);
+    expect(actualReports).toStrictEqual([]);
   });
 
   it("skips ignored index.ts by default", () => {
@@ -166,10 +166,10 @@ describe("require-test-companion rule ignore patterns", () => {
     const filePath = createTemporaryFile("src", "index.ts");
 
     // Act
-    const reports = runRule(filePath);
+    const actualReports = runRule(filePath);
 
     // Assert
-    expect(reports).toStrictEqual([]);
+    expect(actualReports).toStrictEqual([]);
   });
 
   it("respects custom test suffixes", () => {
@@ -181,13 +181,13 @@ describe("require-test-companion rule ignore patterns", () => {
     );
 
     // Act
-    const reports = runRule(filePath, {
+    const actualReports = runRule(filePath, {
       enforceIn: ["**"],
       testSuffixes: ["unit"],
     });
 
     // Assert
-    expect(reports).toStrictEqual([]);
+    expect(actualReports).toStrictEqual([]);
   });
 
   it("accepts string test suffixes", () => {
@@ -199,10 +199,10 @@ describe("require-test-companion rule ignore patterns", () => {
     } satisfies RequireTestCompanionOptions;
 
     // Act
-    const reports = runRule(filePath, options);
+    const actualReports = runRule(filePath, options);
 
     // Assert
-    expect(reports).toStrictEqual([]);
+    expect(actualReports).toStrictEqual([]);
   });
 
   it("does not report source files when ignore patterns are empty", () => {
@@ -214,9 +214,9 @@ describe("require-test-companion rule ignore patterns", () => {
     };
 
     // Act
-    const reports = runRule(filePath, options);
+    const actualReports = runRule(filePath, options);
 
     // Assert
-    expect(reports).toStrictEqual([]);
+    expect(actualReports).toStrictEqual([]);
   });
 });

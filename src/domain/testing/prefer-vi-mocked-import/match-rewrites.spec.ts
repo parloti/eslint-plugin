@@ -41,10 +41,10 @@ describe("prefer-vi-mocked-import match-rewrites", () => {
     );
 
     // Act
-    const hasDeclarationIdRange = allowed.has("10:11");
+    const actualHasDeclarationIdRange = allowed.has("10:11");
 
     // Assert
-    expect(hasDeclarationIdRange).toBe(true);
+    expect(actualHasDeclarationIdRange).toBe(true);
   });
 
   it("skips declaration id range when declaration is absent", () => {
@@ -64,9 +64,9 @@ describe("prefer-vi-mocked-import match-rewrites", () => {
     );
 
     // Act
-    const hasDeclarationIdRange = allowed.has("10:11");
+    const actualHasDeclarationIdRange = allowed.has("10:11");
 
     // Assert
-    expect(hasDeclarationIdRange).toBe(false);
+    expect(actualHasDeclarationIdRange).toBe(false);
   });
 });

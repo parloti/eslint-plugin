@@ -122,7 +122,7 @@ describe("prefer-vitest-incremental-casts rule test helpers", () => {
     eslintMockState.constructorOptions.length = 0;
 
     // Act
-    const rejection = await (async () => {
+    const actualRejection = await (async () => {
       eslintMockState.lintTextCalls.length = 0;
       return runFix(
         "throw-me",
@@ -134,8 +134,8 @@ describe("prefer-vitest-incremental-casts rule test helpers", () => {
     })();
 
     // Assert
-    expect(rejection).toBeInstanceOf(Error);
-    expect((rejection as Error).message).toBe(
+    expect(actualRejection).toBeInstanceOf(Error);
+    expect((actualRejection as Error).message).toBe(
       "Expected ESLint to return a lint result.",
     );
   });

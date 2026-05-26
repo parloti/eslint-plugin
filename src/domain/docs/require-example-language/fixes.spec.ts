@@ -17,11 +17,11 @@ describe("require-example-language fixes", () => {
     };
 
     // Act
-    const fixed = buildMissingFenceFix(example);
+    const actualFixed = buildMissingFenceFix(example);
 
     // Assert
-    expect(fixed).toContain("\n * \n");
-    expect(fixed).toContain("```typescript");
+    expect(actualFixed).toContain("\n * \n");
+    expect(actualFixed).toContain("```typescript");
   });
 
   it("builds missing fence fixes when content is empty", () => {
@@ -36,10 +36,10 @@ describe("require-example-language fixes", () => {
     };
 
     // Act
-    const fixed = buildMissingFenceFix(example);
+    const actualFixed = buildMissingFenceFix(example);
 
     // Assert
-    expect(fixed).toContain("```typescript");
+    expect(actualFixed).toContain("```typescript");
   });
 
   it("adds language to CRLF fences", () => {
@@ -47,11 +47,11 @@ describe("require-example-language fixes", () => {
     const original = "* ```\r\n* ok\r\n* ```";
 
     // Act
-    const updated = buildMissingLanguageFix(original);
+    const actualUpdated = buildMissingLanguageFix(original);
 
     // Assert
-    expect(updated).toContain("```typescript");
-    expect(updated).toContain("\r\n");
+    expect(actualUpdated).toContain("```typescript");
+    expect(actualUpdated).toContain("\r\n");
   });
 
   it("handles fences without leading whitespace", () => {
@@ -59,10 +59,10 @@ describe("require-example-language fixes", () => {
     const original = "```\nconsole.log('ok');\n```";
 
     // Act
-    const updated = buildMissingLanguageFix(original);
+    const actualUpdated = buildMissingLanguageFix(original);
 
     // Assert
-    expect(updated).toContain("```typescript");
+    expect(actualUpdated).toContain("```typescript");
   });
 
   it("returns undefined when fences already include language", () => {
@@ -70,10 +70,10 @@ describe("require-example-language fixes", () => {
     const original = "* ```typescript\n* ok\n* ```";
 
     // Act
-    const updated = buildMissingLanguageFix(original);
+    const actualUpdated = buildMissingLanguageFix(original);
 
     // Assert
-    expect(updated).toBeUndefined();
+    expect(actualUpdated).toBeUndefined();
   });
 
   it("returns undefined when no fences are present", () => {
@@ -81,10 +81,10 @@ describe("require-example-language fixes", () => {
     const original = "* no fences here";
 
     // Act
-    const updated = buildMissingLanguageFix(original);
+    const actualUpdated = buildMissingLanguageFix(original);
 
     // Assert
-    expect(updated).toBeUndefined();
+    expect(actualUpdated).toBeUndefined();
   });
 
   it("normalizes inline and prefixed lines for missing fences", () => {

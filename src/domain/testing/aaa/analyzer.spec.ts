@@ -111,10 +111,10 @@ describe("aAA analyzer helpers", () => {
     const expectedOrdering = { Act: 1, Arrange: 0, Assert: 2 };
 
     // Act
-    const ordering = aaaPhaseOrder;
+    const actualOrdering = aaaPhaseOrder;
 
     // Assert
-    expect(ordering).toStrictEqual(expectedOrdering);
+    expect(actualOrdering).toStrictEqual(expectedOrdering);
   });
 
   it("detects blank lines before section comments", () => {
@@ -147,13 +147,13 @@ describe("aAA analyzer helpers", () => {
     const expected = true;
 
     // Act
-    const result = hasBlankLineBeforeComment("// Arrange", {
+    const actualResult = hasBlankLineBeforeComment("// Arrange", {
       type: "Line",
       value: " Arrange",
     } as never);
 
     // Assert
-    expect(result).toBe(expected);
+    expect(actualResult).toBe(expected);
   });
 
   it("covers line helpers and unsupported assertion operand shapes", () => {

@@ -155,7 +155,14 @@ const getComparisonDeclaredIdentifiers = (
 
     for (const declaration of statement.node.declarations) {
       if (declaration.id.type === "Identifier") {
-        declaredIdentifiers.set(declaration.id.name, declaration.id);
+        declaredIdentifiers.set(
+          declaration.id.name,
+          declaration.id as unknown as ReturnType<
+            typeof getAssertDeclaredIdentifiers
+          > extends Map<string, infer T>
+            ? T
+            : never,
+        );
       }
     }
   }

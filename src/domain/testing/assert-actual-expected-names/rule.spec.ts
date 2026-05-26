@@ -342,7 +342,7 @@ describe("assert-actual-expected-names rule", () => {
         },
       ],
       type: "VariableDeclaration",
-    } as Rule.Node;
+    } as unknown as Rule.Node;
     const expectedNode = {
       name: "expectedValue",
       type: "Identifier",

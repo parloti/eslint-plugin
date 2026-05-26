@@ -79,6 +79,80 @@ describe("comment utilities jsdoc lookup", () => {
     // Assert
     expect(actual).toBeUndefined();
   });
+
+  it("skips comments whose end range is missing", () => {
+    // Arrange
+    const sourceText =
+      "/**\n * ok\n */\nfunction demo(context: LineMetaContext): void {}";
+    const comment = {
+      range: [0, void 0 as unknown as number],
+      type: "Block",
+      value: "*\n * ok\n ",
+    } as Comment;
+    const sourceCode = createSourceCode(sourceText, [comment]);
+    const node = {
+      range: [sourceText.indexOf("function"), sourceText.length],
+      type: "FunctionDeclaration",
+    } as Rule.Node;
+
+    // Act
+    const actual = getJsdocComment(sourceCode, node);
+
+    // Assert
+    expect(actual).toBeUndefined();
+  });
+
+  it("skips JSDoc comments when non-whitespace text appears before the node", () => {
+    // Arrange
+    const sourceText =
+      "/**\n * ok\n */\nconst marker = 1;\nfunction demo(context: LineMetaContext): void {}";
+    const comment = createComment("*\n * ok\n ", [
+      0,
+      sourceText.indexOf("*/") + 2,
+    ]);
+    const sourceCode = createSourceCode(sourceText, [comment]);
+    const node = {
+      range: [sourceText.indexOf("function"), sourceText.length],
+      type: "FunctionDeclaration",
+    } as Rule.Node;
+
+    // Act
+    const actual = getJsdocComment(sourceCode, node);
+
+    // Assert
+    expect(actual).toBeUndefined();
+  });
+
+  it("returns undefined when a selected comment no longer exposes a numeric end", () => {
+    // Arrange
+    const sourceText = "/**\n * ok\n */\nfunction demo(): void {}";
+    const stableEnd = sourceText.indexOf("*/") + 2;
+    const comment = createComment("*\n * ok\n ", [0, stableEnd]);
+    let readCount = 0;
+    const node = {
+      range: [sourceText.indexOf("function"), sourceText.length],
+      type: "FunctionDeclaration",
+    } as Rule.Node;
+
+    // Act
+    const actual = (() => {
+      Object.defineProperty(comment, "range", {
+        configurable: true,
+        get: () => {
+          readCount += 1;
+
+          return readCount === 1 ? [0, stableEnd] : [0, void 0];
+        },
+      });
+
+      const sourceCode = createSourceCode(sourceText, [comment]);
+
+      return getJsdocComment(sourceCode, node);
+    })();
+
+    // Assert
+    expect(actual).toBeUndefined();
+  });
 });
 
 describe("comment utilities removal ranges", () => {
@@ -104,11 +178,11 @@ describe("comment utilities removal ranges", () => {
     const lines = getCommentLines("single");
 
     // Act
-    const firstLineBreakLength = lines[0]?.lineBreakLength;
+    const actualFirstLineBreakLength = lines[0]?.lineBreakLength;
 
     // Assert
     expect(lines).toHaveLength(1);
-    expect(firstLineBreakLength).toBe(0);
+    expect(actualFirstLineBreakLength).toBe(0);
   });
 
   it("handles comment lines with CRLF line breaks", () => {
@@ -116,11 +190,11 @@ describe("comment utilities removal ranges", () => {
     const lines = getCommentLines("first\r\nsecond");
 
     // Act
-    const lineBreakLengths = lines.map((line) => line.lineBreakLength);
+    const actualLineBreakLengths = lines.map((line) => line.lineBreakLength);
 
     // Assert
     expect(lines).toHaveLength(2);
-    expect(lineBreakLengths).toStrictEqual([2, 0]);
+    expect(actualLineBreakLengths).toStrictEqual([2, 0]);
   });
 
   it("handles removal ranges without a line break", () => {
@@ -152,10 +226,10 @@ describe("comment utilities removal ranges", () => {
     };
 
     // Act
-    const range = buildRemovalRange(0, commentText, line);
+    const actualRange = buildRemovalRange(0, commentText, line);
 
     // Assert
-    expect(range).toStrictEqual([5, 13]);
+    expect(actualRange).toStrictEqual([5, 13]);
   });
 
   it("handles removal ranges without a prior line break", () => {
@@ -169,10 +243,10 @@ describe("comment utilities removal ranges", () => {
     };
 
     // Act
-    const range = buildRemovalRange(0, commentText, line);
+    const actualRange = buildRemovalRange(0, commentText, line);
 
     // Assert
-    expect(range).toStrictEqual([6, 12]);
+    expect(actualRange).toStrictEqual([6, 12]);
   });
 
   it("handles removal ranges at the start of text", () => {
@@ -186,10 +260,10 @@ describe("comment utilities removal ranges", () => {
     };
 
     // Act
-    const range = buildRemovalRange(0, commentText, line);
+    const actualRange = buildRemovalRange(0, commentText, line);
 
     // Assert
-    expect(range).toStrictEqual([0, 3]);
+    expect(actualRange).toStrictEqual([0, 3]);
   });
 });
 
@@ -203,13 +277,13 @@ describe("comment utilities text", () => {
     ]);
 
     // Act
-    const text = getCommentText(
+    const actualText = getCommentText(
       createSourceCode(sourceText, [comment]),
       comment,
     );
 
     // Assert
-    expect(text).toContain("ok");
+    expect(actualText).toContain("ok");
   });
 
   it("returns an empty string when comment range is missing", () => {

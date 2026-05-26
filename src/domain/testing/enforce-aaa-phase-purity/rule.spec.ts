@@ -38,10 +38,12 @@ describe("enforce-aaa-phase-purity rule", () => {
       ].join("\n");
 
       // Act
-      const messageIds = runRule(code).map((message) => message.messageId);
+      const actualMessageIds = runRule(code).map(
+        (message) => message.messageId,
+      );
 
       // Assert
-      expect(messageIds).toStrictEqual([
+      expect(actualMessageIds).toStrictEqual([
         "assertionOutsideAssert",
         "awaitOutsideAct",
         "nonAssertionInAssert",
@@ -65,10 +67,12 @@ describe("enforce-aaa-phase-purity rule", () => {
       ].join("\n");
 
       // Act
-      const messageIds = runRule(code).map((message) => message.messageId);
+      const actualMessageIds = runRule(code).map(
+        (message) => message.messageId,
+      );
 
       // Assert
-      expect(messageIds).toStrictEqual([
+      expect(actualMessageIds).toStrictEqual([
         "awaitOutsideAct",
         "nonAssertionInAssert",
       ]);
@@ -90,10 +94,12 @@ describe("enforce-aaa-phase-purity rule", () => {
       ].join("\n");
 
       // Act
-      const messageIds = runRule(code).map((message) => message.messageId);
+      const actualMessageIds = runRule(code).map(
+        (message) => message.messageId,
+      );
 
       // Assert
-      expect(messageIds).toStrictEqual(["mutationAfterAct"]);
+      expect(actualMessageIds).toStrictEqual(["mutationAfterAct"]);
     });
 
     it("reports arrange actions, async arrange work, act setup, and missing meaningful acts", () => {
@@ -112,10 +118,12 @@ describe("enforce-aaa-phase-purity rule", () => {
       ].join("\n");
 
       // Act
-      const messageIds = runRule(code).map((message) => message.messageId);
+      const actualMessageIds = runRule(code).map(
+        (message) => message.messageId,
+      );
 
       // Assert
-      expect(messageIds).toStrictEqual([
+      expect(actualMessageIds).toStrictEqual([
         "awaitOutsideAct",
         "asyncInArrange",
         "actionInArrange",
@@ -138,10 +146,12 @@ describe("enforce-aaa-phase-purity rule", () => {
       ].join("\n");
 
       // Act
-      const messageIds = runRule(code).map((message) => message.messageId);
+      const actualMessageIds = runRule(code).map(
+        (message) => message.messageId,
+      );
 
       // Assert
-      expect(messageIds).toContain("assertionOutsideAssert");
+      expect(actualMessageIds).toContain("assertionOutsideAssert");
     });
 
     it("reports expectTypeOf in Arrange as an assertion outside Assert", () => {
@@ -160,10 +170,12 @@ describe("enforce-aaa-phase-purity rule", () => {
       ].join("\n");
 
       // Act
-      const messageIds = runRule(code).map((message) => message.messageId);
+      const actualMessageIds = runRule(code).map(
+        (message) => message.messageId,
+      );
 
       // Assert
-      expect(messageIds).toContain("assertionOutsideAssert");
+      expect(actualMessageIds).toContain("assertionOutsideAssert");
     });
   });
 
@@ -178,10 +190,10 @@ describe("enforce-aaa-phase-purity rule", () => {
       ].join("\n");
 
       // Act
-      const messages = runRule(code);
+      const actualMessages = runRule(code);
 
       // Assert
-      expect(messages).toStrictEqual([]);
+      expect(actualMessages).toStrictEqual([]);
     });
 
     it.each([

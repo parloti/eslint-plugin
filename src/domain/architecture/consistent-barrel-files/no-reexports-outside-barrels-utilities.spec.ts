@@ -112,14 +112,14 @@ describe("no-reexports utilities", () => {
       const state = getOptions([{ allowedBarrelNames: ["index"] }]);
 
       // Act
-      const shouldLint = ((): boolean => {
+      const actualShouldLint = ((): boolean => {
         const foreignPath = path.win32.join(`${otherDrive}:`, "outside.ts");
 
         return shouldLintFile(foreignPath, state);
       })();
 
       // Assert
-      expect(shouldLint).toBe(false);
+      expect(actualShouldLint).toBe(false);
     });
   });
 });

@@ -35,10 +35,10 @@ describe("empty fence fixes", () => {
       "* @example\n* ```typescript\n* ```\n* ```typescript\n* const ok = true;\n* ```";
 
     // Act
-    const updated = removeEmptyFences(original);
+    const actualUpdated = removeEmptyFences(original);
 
     // Assert
-    expect(updated).toBe(
+    expect(actualUpdated).toBe(
       "* @example\n* ```typescript\n* const ok = true;\n* ```",
     );
   });
@@ -48,10 +48,10 @@ describe("empty fence fixes", () => {
     const original = "* ```typescript\n* const ok = true;\n* ```";
 
     // Act
-    const updated = removeEmptyFences(original);
+    const actualUpdated = removeEmptyFences(original);
 
     // Assert
-    expect(updated).toBeUndefined();
+    expect(actualUpdated).toBeUndefined();
   });
 
   it("parses fence lines without a language", () => {
@@ -93,16 +93,16 @@ describe("empty fence fixes", () => {
       });
 
     // Act
-    let parsedFence: ReturnType<typeof parseFenceLine>;
+    let actualParsedFence: ReturnType<typeof parseFenceLine>;
 
     try {
-      parsedFence = parseFenceLine(" * ```typescript");
+      actualParsedFence = parseFenceLine(" * ```typescript");
     } finally {
       execSpy.mockRestore();
     }
 
     // Assert
-    expect(parsedFence).toStrictEqual({
+    expect(actualParsedFence).toStrictEqual({
       language: "",
       leading: "",
     });
@@ -113,10 +113,10 @@ describe("empty fence fixes", () => {
     const original = "* ```typescript\n* const ok = true;";
 
     // Act
-    const updated = removeEmptyFences(original);
+    const actualUpdated = removeEmptyFences(original);
 
     // Assert
-    expect(updated).toBeUndefined();
+    expect(actualUpdated).toBeUndefined();
   });
 
   it("returns undefined when only empty fences exist", () => {
@@ -124,10 +124,10 @@ describe("empty fence fixes", () => {
     const original = "* ```typescript\n* ```";
 
     // Act
-    const updated = removeEmptyFences(original);
+    const actualUpdated = removeEmptyFences(original);
 
     // Assert
-    expect(updated).toBeUndefined();
+    expect(actualUpdated).toBeUndefined();
   });
 
   it("preserves CRLF line endings when removing empty fences", () => {
@@ -136,10 +136,10 @@ describe("empty fence fixes", () => {
       "* @example\r\n* ```typescript\r\n* ```\r\n* ```typescript\r\n* const ok = true;\r\n* ```";
 
     // Act
-    const updated = removeEmptyFences(original);
+    const actualUpdated = removeEmptyFences(original);
 
     // Assert
-    expect(updated).toBe(
+    expect(actualUpdated).toBe(
       "* @example\r\n* ```typescript\r\n* const ok = true;\r\n* ```",
     );
   });

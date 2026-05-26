@@ -39,14 +39,14 @@ describe("require-aaa-sections missing-section-fixes", () => {
     } as Rule.RuleFixer;
 
     // Act
-    const fixes = buildMissingSectionFixes(
+    const actualFixes = buildMissingSectionFixes(
       analysis,
       ["Arrange", "Act", "Assert"],
       fixer,
     );
 
     // Assert
-    expect(fixes).toStrictEqual([
+    expect(actualFixes).toStrictEqual([
       { range: [0, 0], text: "// Arrange\n" },
       {
         range: [secondStatementStart, secondStatementStart],
@@ -65,14 +65,14 @@ describe("require-aaa-sections missing-section-fixes", () => {
     } as Rule.RuleFixer;
 
     // Act
-    const fixes = buildMissingSectionFixes(
+    const actualFixes = buildMissingSectionFixes(
       { newline: "\n", sourceText: "", statements: [] } as never,
       ["Arrange"],
       fixer,
     );
 
     // Assert
-    expect(fixes).toStrictEqual([]);
+    expect(actualFixes).toStrictEqual([]);
   });
 
   it("supports default anchors and avoids extra blank lines at the top", () => {
@@ -86,7 +86,7 @@ describe("require-aaa-sections missing-section-fixes", () => {
     } as Rule.RuleFixer;
 
     // Act
-    const fixes = buildMissingSectionFixes(
+    const actualFixes = buildMissingSectionFixes(
       {
         newline: "\n",
         sourceText,
@@ -100,7 +100,7 @@ describe("require-aaa-sections missing-section-fixes", () => {
     );
 
     // Assert
-    expect(fixes).toStrictEqual([
+    expect(actualFixes).toStrictEqual([
       { range: [9, 9], text: "\n  // Unexpected\n" },
     ]);
   });
@@ -116,7 +116,7 @@ describe("require-aaa-sections missing-section-fixes", () => {
     } as Rule.RuleFixer;
 
     // Act
-    const fixes = buildMissingSectionFixes(
+    const actualFixes = buildMissingSectionFixes(
       {
         newline: "\n",
         sourceText,
@@ -127,7 +127,7 @@ describe("require-aaa-sections missing-section-fixes", () => {
     );
 
     // Assert
-    expect(fixes).toStrictEqual([{ range: [1, 1], text: "  // Act\n" }]);
+    expect(actualFixes).toStrictEqual([{ range: [1, 1], text: "  // Act\n" }]);
   });
 
   it("handles sparse statement collections without anchors", () => {
@@ -140,7 +140,7 @@ describe("require-aaa-sections missing-section-fixes", () => {
     } as Rule.RuleFixer;
 
     // Act
-    const fixes = buildMissingSectionFixes(
+    const actualFixes = buildMissingSectionFixes(
       {
         newline: "\n",
         sourceText: "run();",
@@ -151,6 +151,6 @@ describe("require-aaa-sections missing-section-fixes", () => {
     );
 
     // Assert
-    expect(fixes).toStrictEqual([]);
+    expect(actualFixes).toStrictEqual([]);
   });
 });

@@ -18,10 +18,10 @@ describe("require-test-companion test helpers", () => {
     const fileName = "feature.ts";
 
     // Act
-    const filePath = createTemporaryFile(directoryName, fileName);
+    const actualFilePath = createTemporaryFile(directoryName, fileName);
 
     // Assert
-    expect(filePath).toContain("feature.ts");
+    expect(actualFilePath).toContain("feature.ts");
   });
 
   it("creates temporary file pairs", () => {
@@ -49,10 +49,10 @@ describe("require-test-companion test helpers", () => {
     const options = { enforceIn: ["**"] };
 
     // Act
-    const reports = runRule(filePath, options);
+    const actualReports = runRule(filePath, options);
 
     // Assert
-    expect(reports).toStrictEqual([]);
+    expect(actualReports).toStrictEqual([]);
   });
 
   it("runs rule helpers with defaults", () => {
@@ -60,9 +60,9 @@ describe("require-test-companion test helpers", () => {
     const filePath = "relative.ts";
 
     // Act
-    const reports = runRule(filePath);
+    const actualReports = runRule(filePath);
 
     // Assert
-    expect(reports).toStrictEqual([]);
+    expect(actualReports).toStrictEqual([]);
   });
 });

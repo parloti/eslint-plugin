@@ -18,11 +18,11 @@ describe("prefer interface types rule", () => {
     const ruleType = preferInterfaceTypesRule.meta?.type;
 
     // Act
-    const createType = typeof preferInterfaceTypesRule.create;
+    const actualCreateType = typeof preferInterfaceTypesRule.create;
 
     // Assert
     expect(ruleType).toBe("suggestion");
-    expect(createType).toBe("function");
+    expect(actualCreateType).toBe("function");
   });
 
   it("reports inline object type annotations on parameters", () => {

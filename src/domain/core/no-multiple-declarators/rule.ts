@@ -133,8 +133,19 @@ const hasFixableDeclarationKind = (node: VariableDeclarationNode): boolean =>
 const getLineIndent = (sourceText: string, start: number): string => {
   const lineStart = sourceText.lastIndexOf("\n", start - 1) + 1;
   const linePrefix = sourceText.slice(lineStart, start);
+  let indentLength = 0;
 
-  return /^([\t ]*)/u.exec(linePrefix)?.[1] ?? "";
+  while (indentLength < linePrefix.length) {
+    const currentCharacter = linePrefix[indentLength];
+
+    if (currentCharacter !== "\t" && currentCharacter !== " ") {
+      break;
+    }
+
+    indentLength += 1;
+  }
+
+  return linePrefix.slice(0, indentLength);
 };
 
 /**

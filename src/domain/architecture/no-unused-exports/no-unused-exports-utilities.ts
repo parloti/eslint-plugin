@@ -2,7 +2,6 @@ import type { AST, Rule } from "eslint";
 
 import { ESLintUtils } from "@typescript-eslint/utils";
 import path from "node:path";
-import { platform } from "node:process";
 import * as ts from "typescript";
 
 import type {
@@ -28,7 +27,7 @@ const wildcardExportName = "*";
 const toComparableAbsolutePath = (inputPath: string): string => {
   const absolutePath = path.normalize(path.resolve(inputPath));
 
-  return platform === "win32" ? absolutePath.toLowerCase() : absolutePath;
+  return absolutePath.toLowerCase();
 };
 
 /**

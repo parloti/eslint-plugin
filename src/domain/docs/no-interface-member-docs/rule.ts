@@ -209,6 +209,14 @@ const resolveMemberTagContext = (
     : void 0;
 };
 
+/** Handles function-like nodes for the no-interface-member-docs rule. */
+interface NodeValue {
+  /**
+   * Value field for method definitions; function-like nodes have no value field, so this is optional.
+   */
+  value?: Rule.Node;
+}
+
 /**
  * Handles function-like nodes for this rule.
  * @param context Rule execution context.
@@ -223,16 +231,8 @@ const handleFunctionLike = (
   node: Rule.Node,
 ): void => {
   const functionLikeNode =
-    node.type === "MethodDefinition" ||
-    node.type === "TSAbstractMethodDefinition"
-      ? ((
-          node as {
-            /**
-             *
-             */
-            value?: Rule.Node;
-          }
-        ).value ?? node)
+    node.type === "MethodDefinition"
+      ? ((node as unknown as NodeValue).value ?? node)
       : node;
 
   const resolved = resolveMemberTagContext(context, functionLikeNode);

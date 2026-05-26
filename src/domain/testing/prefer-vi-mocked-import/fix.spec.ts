@@ -214,14 +214,14 @@ describe("prefer-vi-mocked-import fix", () => {
     match.importPlan = { moduleSpecifier: "./mod", names: [] };
 
     // Act
-    const insertFixes = buildFix(match, createFixer())
+    const actualInsertFixes = buildFix(match, createFixer())
       .filter((fix) => isStubFix(fix))
       .filter(
         (fix) => fix.type === "insertAfter" || fix.type === "insertBefore",
       );
 
     // Assert
-    expect(insertFixes).toStrictEqual([]);
+    expect(actualInsertFixes).toStrictEqual([]);
   });
 
   it("inserts import at the top when insert plan is omitted", () => {
@@ -230,13 +230,13 @@ describe("prefer-vi-mocked-import fix", () => {
     match.importPlan = { moduleSpecifier: "./mod", names: ["a"] };
 
     // Act
-    const beforeFix = buildFix(match, createFixer())
+    const actualBeforeFix = buildFix(match, createFixer())
       .filter((fix) => isStubFix(fix))
       .find((fix) => fix.type === "insertBefore");
 
     // Assert
-    expect(beforeFix).toBeDefined();
-    expect(beforeFix).toMatchObject({
+    expect(actualBeforeFix).toBeDefined();
+    expect(actualBeforeFix).toMatchObject({
       range: [0, 0],
       text: 'import { a } from "./mod";\n\n',
       type: "insertBefore",
@@ -257,13 +257,13 @@ describe("prefer-vi-mocked-import fix", () => {
     };
 
     // Act
-    const replaceTexts = buildFix(match, createFixer())
+    const actualReplaceTexts = buildFix(match, createFixer())
       .filter((fix) => isStubFix(fix))
       .filter((fix) => fix.type === "replace")
       .map((fix) => fix.text);
 
     // Assert
-    expect(replaceTexts).toContain('import mod, { a } from "./mod";');
+    expect(actualReplaceTexts).toContain('import mod, { a } from "./mod";');
   });
 
   it("removes trailing declaration until source end without newline", () => {
@@ -272,12 +272,12 @@ describe("prefer-vi-mocked-import fix", () => {
     match.sourceText = "const a = vi.fn();";
 
     // Act
-    const removal = buildFix(match, createFixer())
+    const actualRemoval = buildFix(match, createFixer())
       .filter((fix) => isStubFix(fix))
       .find((fix) => fix.type === "remove");
 
     // Assert
-    expect(removal).toBeDefined();
-    expect(removal).toMatchObject({ range: [0, 18], type: "remove" });
+    expect(actualRemoval).toBeDefined();
+    expect(actualRemoval).toMatchObject({ range: [0, 18], type: "remove" });
   });
 });

@@ -39,11 +39,11 @@ describe("no reexports outside barrels rule (enforced)", () => {
     const body = createBody(createExportAll());
 
     // Act
-    const reports = runDefaultFeature(body);
+    const actualReports = runDefaultFeature(body);
 
     // Assert
-    expect(reports).toHaveLength(1);
-    expect(reports[0]?.messageId).toBe("reexportNotAllowed");
+    expect(actualReports).toHaveLength(1);
+    expect(actualReports[0]?.messageId).toBe("reexportNotAllowed");
   });
 
   it("accepts string names for barrel detection", () => {
@@ -53,10 +53,13 @@ describe("no reexports outside barrels rule (enforced)", () => {
     };
 
     // Act
-    const reports = runTemporaryIndex(createBody(createExportAll()), options);
+    const actualReports = runTemporaryIndex(
+      createBody(createExportAll()),
+      options,
+    );
 
     // Assert
-    expect(reports).toStrictEqual([]);
+    expect(actualReports).toStrictEqual([]);
   });
 
   it.each([
@@ -132,10 +135,10 @@ describe("no reexports outside barrels rule (skips)", () => {
     };
 
     // Act
-    const reports = runTemporaryIndex(body, options);
+    const actualReports = runTemporaryIndex(body, options);
 
     // Assert
-    expect(reports).toStrictEqual([]);
+    expect(actualReports).toStrictEqual([]);
   });
 
   it("skips when filename is not absolute", () => {
@@ -144,10 +147,10 @@ describe("no reexports outside barrels rule (skips)", () => {
     const body = createBody(createExportAll());
 
     // Act
-    const reports = runRule(filePath, body, defaultOptions);
+    const actualReports = runRule(filePath, body, defaultOptions);
 
     // Assert
-    expect(reports).toStrictEqual([]);
+    expect(actualReports).toStrictEqual([]);
   });
 
   it("skips when file is outside the repo", () => {
@@ -156,9 +159,9 @@ describe("no reexports outside barrels rule (skips)", () => {
     const body = createBody(createExportAll());
 
     // Act
-    const reports = runRule(filePath, body, defaultOptions);
+    const actualReports = runRule(filePath, body, defaultOptions);
 
     // Assert
-    expect(reports).toStrictEqual([]);
+    expect(actualReports).toStrictEqual([]);
   });
 });

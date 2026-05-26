@@ -32,10 +32,10 @@ describe("prefer-vi-mocked-import match-helpers", () => {
     } as never;
 
     // Act
-    const factoryReturnObject = getFactoryReturnObject(factory);
+    const actualFactoryReturnObject = getFactoryReturnObject(factory);
 
     // Assert
-    expect(factoryReturnObject).toBe(void 0);
+    expect(actualFactoryReturnObject).toBe(void 0);
   });
 
   it("returns undefined when block-bodied factory does not return an object", () => {
@@ -54,10 +54,10 @@ describe("prefer-vi-mocked-import match-helpers", () => {
     } as never;
 
     // Act
-    const factoryReturnObject = getFactoryReturnObject(factory);
+    const actualFactoryReturnObject = getFactoryReturnObject(factory);
 
     // Assert
-    expect(factoryReturnObject).toBe(void 0);
+    expect(actualFactoryReturnObject).toBe(void 0);
   });
 
   it("returns undefined for arrow factories with non-block expression bodies", () => {
@@ -68,10 +68,10 @@ describe("prefer-vi-mocked-import match-helpers", () => {
     } as never;
 
     // Act
-    const factoryReturnObject = getFactoryReturnObject(factory);
+    const actualFactoryReturnObject = getFactoryReturnObject(factory);
 
     // Assert
-    expect(factoryReturnObject).toBe(void 0);
+    expect(actualFactoryReturnObject).toBe(void 0);
   });
 
   it("returns undefined for unsupported module argument expressions", () => {
@@ -82,10 +82,10 @@ describe("prefer-vi-mocked-import match-helpers", () => {
     } as never;
 
     // Act
-    const moduleSpecifier = getModuleSpecifier(argument);
+    const actualModuleSpecifier = getModuleSpecifier(argument);
 
     // Assert
-    expect(moduleSpecifier).toBe(void 0);
+    expect(actualModuleSpecifier).toBe(void 0);
   });
 
   it("detects string specifier from plain literals", () => {
@@ -96,10 +96,10 @@ describe("prefer-vi-mocked-import match-helpers", () => {
     } as never;
 
     // Act
-    const moduleSpecifier = getModuleSpecifier(argument);
+    const actualModuleSpecifier = getModuleSpecifier(argument);
 
     // Assert
-    expect(moduleSpecifier).toBe("./x");
+    expect(actualModuleSpecifier).toBe("./x");
   });
 
   it("returns false for call expressions that are not member calls", () => {
@@ -111,9 +111,9 @@ describe("prefer-vi-mocked-import match-helpers", () => {
     } as never;
 
     // Act
-    const isViCall = isViFunctionCall(callExpression);
+    const actualIsViCall = isViFunctionCall(callExpression);
 
     // Assert
-    expect(isViCall).toBe(false);
+    expect(actualIsViCall).toBe(false);
   });
 });

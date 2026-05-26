@@ -20,14 +20,14 @@ describe("test helper file writers", (): void => {
     const filePath = `${directory}/index.ts`;
 
     // Act
-    const contents = ((): string => {
+    const actualContents = ((): string => {
       writeBarrel(filePath);
 
       return readFileSync(filePath, "utf8");
     })();
 
     // Assert
-    expect(contents).toBe("export * from './feature';");
+    expect(actualContents).toBe("export * from './feature';");
   });
 
   it("writes the expected feature fixture", (): void => {
@@ -37,13 +37,13 @@ describe("test helper file writers", (): void => {
     const filePath = `${directory}/feature.ts`;
 
     // Act
-    const contents = ((): string => {
+    const actualContents = ((): string => {
       writeFeature(filePath);
 
       return readFileSync(filePath, "utf8");
     })();
 
     // Assert
-    expect(contents).toBe("export const feature = 1;");
+    expect(actualContents).toBe("export const feature = 1;");
   });
 });

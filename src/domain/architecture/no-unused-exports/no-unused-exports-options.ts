@@ -188,11 +188,10 @@ const isTestFile = (
 ): boolean => matchesAnyPattern(filename, state.testFilePatterns, repoRoot);
 
 export {
-    DEFAULT_ALLOW_IN_FILES,
-    DEFAULT_TEST_FILE_PATTERNS,
-    getOptions,
-    isAllowlistedFile,
-    isLintableFilename,
-    isTestFile
+  DEFAULT_ALLOW_IN_FILES,
+  DEFAULT_TEST_FILE_PATTERNS,
+  getOptions,
+  isAllowlistedFile,
+  isLintableFilename,
+  isTestFile,
 };
-

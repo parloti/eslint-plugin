@@ -248,10 +248,10 @@ describe("single-line-jsdoc rule lookup edge cases", () => {
     };
 
     // Act
-    const reports = runRuleForComments(comments, overrides);
+    const actualReports = runRuleForComments(comments, overrides);
 
     // Assert
-    expect(reports).toHaveLength(0);
+    expect(actualReports).toHaveLength(0);
   });
 
   it("reports when lookups fail", () => {

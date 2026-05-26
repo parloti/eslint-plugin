@@ -87,10 +87,10 @@ describe("aAA analyzer super handling", () => {
     );
 
     // Act
-    const result = hasCapturableActResult(statement);
+    const actualResult = hasCapturableActResult(statement);
 
     // Assert
-    expect(result).toBe(true);
+    expect(actualResult).toBe(true);
   });
 
   it("treats constructor super calls as capturable actions", () => {
@@ -106,9 +106,9 @@ describe("aAA analyzer super handling", () => {
     );
 
     // Act
-    const result = hasCapturableActResult(statement);
+    const actualResult = hasCapturableActResult(statement);
 
     // Assert
-    expect(result).toBe(true);
+    expect(actualResult).toBe(true);
   });
 });

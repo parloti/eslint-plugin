@@ -9,10 +9,10 @@ describe("enforce-aaa-phase-purity rule - advanced patterns", () => {
     const expectedType = "object";
 
     // Act
-    const markerType = typeof advancedPatternsMarker;
+    const actualMarkerType = typeof advancedPatternsMarker;
 
     // Assert
-    expect(markerType).toBe(expectedType);
+    expect(actualMarkerType).toBe(expectedType);
   });
 
   it("ignores statements that appear before the first AAA section marker", () => {
@@ -32,10 +32,10 @@ describe("enforce-aaa-phase-purity rule - advanced patterns", () => {
     ].join("\n");
 
     // Act
-    const messages = runRule(code);
+    const actualMessages = runRule(code);
 
     // Assert
-    expect(messages).toStrictEqual([]);
+    expect(actualMessages).toStrictEqual([]);
   });
 
   it("treats destructured act results as meaningful when asserted", () => {
@@ -60,10 +60,10 @@ describe("enforce-aaa-phase-purity rule - advanced patterns", () => {
     ].join("\n");
 
     // Act
-    const messages = runRule(code);
+    const actualMessages = runRule(code);
 
     // Assert
-    expect(messages).toStrictEqual([]);
+    expect(actualMessages).toStrictEqual([]);
   });
 
   it("ignores unsupported declaration patterns when collecting asserted act results", async () => {
@@ -99,11 +99,11 @@ describe("enforce-aaa-phase-purity rule - advanced patterns", () => {
     };
 
     // Act
-    const reportCalls = await runRuleWithMockedAnalysis(analysis);
+    const actualReportCalls = await runRuleWithMockedAnalysis(analysis);
 
     // Assert
-    expect(reportCalls).toHaveLength(1);
-    expect(reportCalls[0]?.[0]).toMatchObject({
+    expect(actualReportCalls).toHaveLength(1);
+    expect(actualReportCalls[0]?.[0]).toMatchObject({
       messageId: "missingMeaningfulAct",
     });
   });
@@ -124,10 +124,10 @@ describe("enforce-aaa-phase-purity rule - advanced patterns", () => {
     ].join("\n");
 
     // Act
-    const messages = runRule(code);
+    const actualMessages = runRule(code);
 
     // Assert
-    expect(messages).toStrictEqual([]);
+    expect(actualMessages).toStrictEqual([]);
   });
 
   it("accepts async runner function defined in Arrange without reporting asyncInArrange", () => {
@@ -149,10 +149,10 @@ describe("enforce-aaa-phase-purity rule - advanced patterns", () => {
     ].join("\n");
 
     // Act
-    const messages = runRule(code);
+    const actualMessages = runRule(code);
 
     // Assert
-    expect(messages).toStrictEqual([]);
+    expect(actualMessages).toStrictEqual([]);
   });
 
   it("accepts new Error() in Arrange without reporting actionInArrange", () => {
@@ -171,9 +171,9 @@ describe("enforce-aaa-phase-purity rule - advanced patterns", () => {
     ].join("\n");
 
     // Act
-    const messages = runRule(code);
+    const actualMessages = runRule(code);
 
     // Assert
-    expect(messages).toStrictEqual([]);
+    expect(actualMessages).toStrictEqual([]);
   });
 });

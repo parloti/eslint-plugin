@@ -51,14 +51,14 @@ describe(ruleFixesSuiteName, () => {
     ].join("\n");
 
     // Act
-    const output = ((): string => {
+    const actualOutput = ((): string => {
       runRule(context, declaration);
 
       return applyFixes(sourceText, getFixes(reports));
     })();
 
     // Assert
-    expect(output).toBe(expectedOutput);
+    expect(actualOutput).toBe(expectedOutput);
   });
 
   it("fixes destructuring declarators when they are otherwise safe", () => {
@@ -81,14 +81,14 @@ describe(ruleFixesSuiteName, () => {
     ].join("\n");
 
     // Act
-    const output = ((): string => {
+    const actualOutput = ((): string => {
       runRule(context, declaration);
 
       return applyFixes(sourceText, getFixes(reports));
     })();
 
     // Assert
-    expect(output).toBe(expectedOutput);
+    expect(actualOutput).toBe(expectedOutput);
   });
 
   it("fixes let declarations without initializers", () => {
@@ -107,14 +107,14 @@ describe(ruleFixesSuiteName, () => {
     ].join("\n");
 
     // Act
-    const output = ((): string => {
+    const actualOutput = ((): string => {
       runRule(context, declaration);
 
       return applyFixes(sourceText, getFixes(reports));
     })();
 
     // Assert
-    expect(output).toBe(expectedOutput);
+    expect(actualOutput).toBe(expectedOutput);
   });
 
   it("falls back to sourceCode.getText() when the text property is unavailable", () => {
@@ -134,14 +134,38 @@ describe(ruleFixesSuiteName, () => {
     ].join("\n");
 
     // Act
-    const output = ((): string => {
+    const actualOutput = ((): string => {
       runRule(context, declaration);
 
       return applyFixes(sourceText, getFixes(reports));
     })();
 
     // Assert
-    expect(output).toBe(expectedOutput);
+    expect(actualOutput).toBe(expectedOutput);
+  });
+
+  it("splits declarations when non-whitespace text appears before the statement", () => {
+    // Arrange
+    const sourceText = "prefix const first = 1, second = 2;";
+    const statementText = "const first = 1, second = 2;";
+    const declaration = createVariableDeclaration({
+      declaratorTexts: ["first = 1", "second = 2"],
+      kind: "const",
+      sourceText,
+      statementText,
+    });
+    const { context, reports } = createContext(sourceText);
+    const expectedOutput = "prefix const first = 1;\nconst second = 2;";
+
+    // Act
+    const actualOutput = ((): string => {
+      runRule(context, declaration);
+
+      return applyFixes(sourceText, getFixes(reports));
+    })();
+
+    // Assert
+    expect(actualOutput).toBe(expectedOutput);
   });
 
   it("collects iterable fixes from every fixer helper", () => {
@@ -183,9 +207,9 @@ describe(ruleFixesSuiteName, () => {
     ] as const satisfies readonly ReportWithOptionalFix[];
 
     // Act
-    const fixes = getFixes(reports);
+    const actualFixes = getFixes(reports);
 
     // Assert
-    expect(fixes).toStrictEqual([]);
+    expect(actualFixes).toStrictEqual([]);
   });
 });

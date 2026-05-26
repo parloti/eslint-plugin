@@ -9,10 +9,10 @@ describe("aAA types", () => {
     const analysis = void 0 as TestBlockAnalysis | undefined;
 
     // Act
-    const normalizedPhase = phase;
+    const actualNormalizedPhase = phase;
 
     // Assert
-    expect(normalizedPhase).toBe("Act");
+    expect(actualNormalizedPhase).toBe("Act");
     expect(analysis).toBeUndefined();
   });
 });

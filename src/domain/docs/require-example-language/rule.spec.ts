@@ -227,11 +227,11 @@ describe("require example language rule", () => {
     const ruleType = requireExampleLanguageRule.meta?.type;
 
     // Act
-    const createType = typeof requireExampleLanguageRule.create;
+    const actualCreateType = typeof requireExampleLanguageRule.create;
 
     // Assert
     expect(ruleType).toBe("problem");
-    expect(createType).toBe("function");
+    expect(actualCreateType).toBe("function");
   });
 
   it("ignores non-block or non-jsdoc comments", () => {

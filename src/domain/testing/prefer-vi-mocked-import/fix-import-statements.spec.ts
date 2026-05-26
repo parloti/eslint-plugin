@@ -39,10 +39,10 @@ describe("prefer-vi-mocked-import fix-import-statements", () => {
     } as never;
 
     // Act
-    const fixes = buildImportFixes(match, fixer);
+    const actualFixes = buildImportFixes(match, fixer);
 
     // Assert
-    expect(fixes).toStrictEqual([
+    expect(actualFixes).toStrictEqual([
       {
         range: [0, 0],
         text: 'import { installDevelopmentDependencies } from "./dependencies";\n\n',
@@ -70,10 +70,10 @@ describe("prefer-vi-mocked-import fix-import-statements", () => {
     } as never;
 
     // Act
-    const fixes = buildImportFixes(match, fixer);
+    const actualFixes = buildImportFixes(match, fixer);
 
     // Assert
-    expect(fixes).toStrictEqual([
+    expect(actualFixes).toStrictEqual([
       {
         range: [10, 20],
         text: '\nimport { installDevelopmentDependencies } from "./dependencies";',
@@ -104,10 +104,10 @@ describe("prefer-vi-mocked-import fix-import-statements", () => {
     } as never;
 
     // Act
-    const fixes = buildImportFixes(match, fixer);
+    const actualFixes = buildImportFixes(match, fixer);
 
     // Assert
-    expect(fixes).toStrictEqual([
+    expect(actualFixes).toStrictEqual([
       {
         range: [5, 25],
         text: 'import dependencies, { installDevelopmentDependencies, otherDependency } from "./dependencies";',

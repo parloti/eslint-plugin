@@ -17,6 +17,8 @@ interface MockAssertionFlags {
   assertion?: boolean;
   /** Whether the node is treated as capturable. */
   capturable?: boolean;
+  /** Whether the node is treated as a mutation. */
+  mutation?: boolean;
   /** Whether the node is treated as valid assert logic. */
   validAssert?: boolean;
 }
@@ -32,7 +34,8 @@ describe("enforce-aaa-phase-purity reporting behavior combined sections", () => 
       hasAwait: (): boolean => false,
       hasCapturableActResult: (node: ESTree.Statement): boolean =>
         (node as MockAssertionFlags).capturable === true,
-      hasMutation: (): boolean => false,
+      hasMutation: (node: ESTree.Statement): boolean =>
+        (node as MockAssertionFlags).mutation === true,
       isMeaningfulActStatement: (): boolean => false,
       isSetupLikeStatement: (): boolean => false,
       isValidAssertStatement: (node: ESTree.Statement): boolean =>
@@ -85,6 +88,87 @@ describe("enforce-aaa-phase-purity reporting behavior combined sections", () => 
     expect(phasePurityReportingBehaviorCombinedCompanion).toBe(true);
     expect(actual).toStrictEqual([
       { messageId: "nonAssertionInAssert", node: combinedNode },
+    ]);
+  });
+
+  it("reports mutation in combined Act and Assert sections", async () => {
+    // Arrange
+    const combinedNode = {
+      assertion: true,
+      mutation: true,
+      type: "ExpressionStatement",
+      validAssert: false,
+    };
+    const analysis = {
+      callExpression: { type: "CallExpression" },
+      sectionComments: [{ phases: ["Arrange"] }, { phases: ["Act", "Assert"] }],
+      statements: [{ node: combinedNode, phases: ["Act", "Assert"] }],
+    };
+    const reports: Rule.ReportDescriptor[] = [];
+    const context = {
+      report: (descriptor: Rule.ReportDescriptor): void => {
+        reports.push(descriptor);
+      },
+    } as Rule.RuleContext;
+
+    // Act
+    const actual = await (async (): Promise<Rule.ReportDescriptor[]> => {
+      const { reportPhasePurityViolations } =
+        await import("./phase-purity-reporting");
+
+      reportPhasePurityViolations(context, analysis as never);
+
+      return reports;
+    })();
+
+    // Assert
+    expect(actual).toStrictEqual([
+      { messageId: "mutationAfterAct", node: combinedNode },
+      {
+        messageId: "missingMeaningfulAct",
+        node: analysis.callExpression,
+      },
+    ]);
+  });
+
+  it("reports invalid assertions in combined Arrange/Act/Assert sections", async () => {
+    // Arrange
+    const combinedNode = {
+      assertion: true,
+      type: "ExpressionStatement",
+      validAssert: false,
+    };
+    const analysis = {
+      callExpression: { type: "CallExpression" },
+      sectionComments: [{ phases: ["Act", "Assert"] }],
+      statements: [
+        { node: combinedNode, phases: ["Arrange", "Act", "Assert"] },
+      ],
+    };
+    const reports: Rule.ReportDescriptor[] = [];
+    const context = {
+      report: (descriptor: Rule.ReportDescriptor): void => {
+        reports.push(descriptor);
+      },
+    } as Rule.RuleContext;
+
+    // Act
+    const actual = await (async (): Promise<Rule.ReportDescriptor[]> => {
+      const { reportPhasePurityViolations } =
+        await import("./phase-purity-reporting");
+
+      reportPhasePurityViolations(context, analysis as never);
+
+      return reports;
+    })();
+
+    // Assert
+    expect(actual).toStrictEqual([
+      { messageId: "nonAssertionInAssert", node: combinedNode },
+      {
+        messageId: "missingMeaningfulAct",
+        node: analysis.callExpression,
+      },
     ]);
   });
 });

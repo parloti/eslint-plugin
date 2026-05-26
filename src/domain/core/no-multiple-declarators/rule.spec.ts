@@ -22,12 +22,12 @@ describe("no-multiple-declarators rule", () => {
     const { fixable, type } = meta ?? {};
 
     // Act
-    const createType = typeof create;
+    const actualCreateType = typeof create;
 
     // Assert
     expect(type).toBe("suggestion");
     expect(fixable).toBe("code");
-    expect(createType).toBe("function");
+    expect(actualCreateType).toBe("function");
   });
 
   it("reports declarations with multiple declarators", () => {
