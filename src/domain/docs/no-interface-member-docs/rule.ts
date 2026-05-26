@@ -222,7 +222,20 @@ const handleFunctionLike = (
   context: Rule.RuleContext,
   node: Rule.Node,
 ): void => {
-  const resolved = resolveMemberTagContext(context, node);
+  const functionLikeNode =
+    node.type === "MethodDefinition" ||
+    node.type === "TSAbstractMethodDefinition"
+      ? ((
+          node as {
+            /**
+             *
+             */
+            value?: Rule.Node;
+          }
+        ).value ?? node)
+      : node;
+
+  const resolved = resolveMemberTagContext(context, functionLikeNode);
 
   if (resolved === void 0) {
     return;
@@ -249,6 +262,8 @@ const noInterfaceMemberDocumentationRule: Rule.RuleModule = {
       ArrowFunctionExpression: listener,
       FunctionDeclaration: listener,
       FunctionExpression: listener,
+      MethodDefinition: listener,
+      TSAbstractMethodDefinition: listener,
       TSCallSignatureDeclaration: listener,
       TSConstructSignatureDeclaration: listener,
       TSDeclareFunction: listener,

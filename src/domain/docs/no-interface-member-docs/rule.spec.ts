@@ -1,3 +1,5 @@
+import type { Rule } from "eslint";
+
 import { describe, expect, it } from "vitest";
 
 import type { Comment } from "./test-helpers";
@@ -151,5 +153,77 @@ describe("no interface member docs rule", () => {
 
     // Assert
     expect(reports).toHaveLength(0);
+  });
+
+  it("skips when the closest JSDoc is not adjacent to the function", () => {
+    // Arrange
+    const commentValue = [
+      "*",
+      " * @param context The metadata context.",
+      " * @param context.value The metadata value.",
+      " ",
+    ].join("\n");
+    const sourceText = [
+      "/**",
+      commentValue.trimEnd(),
+      "*/",
+      "const separator = true;",
+      "function getLineMeta(context: LineMetaContext): void {}",
+    ].join("\n");
+    const comment = createComment(commentValue, sourceText);
+    const { context, reports } = createContext(sourceText, [comment]);
+    const node = createFunctionNode(sourceText, [
+      createParameter("TSTypeReference"),
+    ]);
+
+    // Act
+    runFunctionListener(context, node);
+
+    // Assert
+    expect(reports).toHaveLength(0);
+  });
+
+  it("reports and fixes class method member docs", () => {
+    // Arrange
+    const commentValue = [
+      "*",
+      " * @param context The metadata context.",
+      " * @param context.value The metadata value.",
+      " ",
+    ].join("\n");
+    const sourceText = [
+      "class Example {",
+      "  /**",
+      commentValue.trimEnd(),
+      "  */",
+      "  run(context: LineMetaContext): void {}",
+      "}",
+    ].join("\n");
+    const commentStart = sourceText.indexOf("/**");
+    const commentEnd = sourceText.indexOf("*/", commentStart) + 2;
+    const comment = {
+      range: [commentStart, commentEnd],
+      type: "Block",
+      value: commentValue,
+    } as Comment;
+    const { context, reports } = createContext(sourceText, [comment]);
+    const node = {
+      value: {
+        params: [createParameter("TSTypeReference")],
+        range: [sourceText.indexOf("run"), sourceText.length],
+        type: "FunctionExpression",
+      },
+      params: [createParameter("TSTypeReference")],
+      range: [sourceText.indexOf("run"), sourceText.length],
+      type: "MethodDefinition",
+    } as Rule.Node;
+
+    // Act
+    const listeners = noInterfaceMemberDocumentationRule.create(context);
+    listeners.MethodDefinition?.(node);
+
+    // Assert
+    expect(reports).toHaveLength(1);
+    expect(reports[0]?.messageId).toBe("interfaceMemberDoc");
   });
 });

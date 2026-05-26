@@ -80,7 +80,21 @@ const getJsdocComment = (
     return void 0;
   }
 
-  return findClosestComment(comments, nodeStart);
+  const comment = findClosestComment(comments, nodeStart);
+
+  if (comment === void 0) {
+    return void 0;
+  }
+
+  const commentEnd = comment.range?.[1];
+
+  if (typeof commentEnd !== "number") {
+    return void 0;
+  }
+
+  const betweenCommentAndNode = sourceCode.text.slice(commentEnd, nodeStart);
+
+  return betweenCommentAndNode.trim().length === 0 ? comment : void 0;
 };
 
 /**
