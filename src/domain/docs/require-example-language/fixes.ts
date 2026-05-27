@@ -210,6 +210,10 @@ function getUpdatedExampleText(context: FixerContext): string | undefined {
     return resolveEmptyExampleFix({ example, hasOtherExamples, original });
   }
 
+  if (problem === "contentOutsideFence") {
+    return void 0;
+  }
+
   const fixed = buildMissingFenceFix(example);
   const trailingWhitespace = getTrailingWhitespace(original);
 

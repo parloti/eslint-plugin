@@ -33,6 +33,8 @@ const requireExampleLanguageRule: Rule.RuleModule = {
     },
     fixable: "code",
     messages: {
+      contentOutsideFence:
+        "@example content must be fully inside fenced code blocks.",
       emptyExample: "@example must include example content.",
       missingFence:
         "@example must include a fenced code block with a language (e.g. ```typescript).",

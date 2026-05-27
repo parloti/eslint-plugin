@@ -65,7 +65,8 @@ interface RuleContextState {
  * @param sourceText Full source text used by the mock source code object.
  * @param options Options that tweak the mock source code shape.
  * @returns The mock context and captured reports.
- * @example Create a context with the default source text access.
+ * Create a context with the default source text access.
+ * @example
  * ```typescript
  * const { context, reports } = createContext("const value = 1;");
  * ```
@@ -113,7 +114,8 @@ const createContext = (
  * @param input.sourceText Full file source used to resolve ranges.
  * @param input.statementText Exact statement text containing the declaration.
  * @returns A mock variable declaration node with linked declarator parents.
- * @example Build a declaration with two declarators.
+ * Build a declaration with two declarators.
+ * @example
  * ```typescript
  * const declaration = createVariableDeclaration({
  *   declaratorTexts: ["first = 1", "second = 2"],
@@ -166,7 +168,8 @@ const createVariableDeclaration = ({
  * Executes the rule listener for a variable declaration node.
  * @param context Rule execution context.
  * @param node Declaration node passed to the rule listener.
- * @example Execute the rule against a mock declaration.
+ * Execute the rule against a mock declaration.
+ * @example
  * ```typescript
  * const state = createContext("const first = 1, second = 2;");
  * const declaration = createVariableDeclaration({

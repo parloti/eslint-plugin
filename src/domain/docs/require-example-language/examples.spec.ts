@@ -92,6 +92,18 @@ describe("require-example-language content checks", () => {
     // Assert
     expect(actualResult).toBe("emptyExample");
   });
+
+  it("rejects content outside fenced code when fences are present", () => {
+    // Arrange
+    const content =
+      "const outside = true;\n```typescript\nconst inside = true;\n```";
+
+    // Act
+    const actualResult = checkExampleContent(content);
+
+    // Assert
+    expect(actualResult).toBe("contentOutsideFence");
+  });
 });
 
 describe("require-example-language example parsing", () => {
@@ -110,5 +122,29 @@ describe("require-example-language example parsing", () => {
     expect(actualFirstExample?.content).toContain("inline");
     expect(actualFirstExample?.prefix).toBe(" * ");
     expect(actualFirstExample?.startOffset).toBeTypeOf("number");
+  });
+
+  it("keeps @-prefixed lines inside fenced example content", () => {
+    // Arrange
+    const commentValue = [
+      "*",
+      " * @example",
+      " * ```typescript",
+      " * @Component({ standalone: true })",
+      " * export class Demo {}",
+      " * ```",
+      " * @returns Demo",
+      " ",
+    ].join("\n");
+
+    // Act
+    const actualExamples = getExamples(commentValue);
+
+    // Assert
+    expect(actualExamples).toHaveLength(1);
+    expect(actualExamples[0]?.content).toContain(
+      "@Component({ standalone: true })",
+    );
+    expect(actualExamples[0]?.content).toContain("```typescript");
   });
 });

@@ -8,9 +8,71 @@ import {
   hasLineContent,
 } from "./example-utilities";
 
-/** Captures `@example` headers and bodies for analysis. */
-const examplePattern =
-  /^(?<header>\s*\*?\s*@example\b[^\n]*)(?<body>[\s\S]*?)(?=^\s*\*?\s*@\w+|(?![\s\S]))/gmu;
+/** Type definition for rule data. */
+interface ActiveExampleState {
+  /** BodyLines field value. */
+  bodyLines: string[];
+
+  /** Header field value. */
+  header: string;
+
+  /** InFence field value. */
+  inFence: boolean;
+
+  /** StartOffset field value. */
+  startOffset: number;
+}
+
+/** Type definition for rule data. */
+interface CommentLine {
+  /** StartOffset field value. */
+  startOffset: number;
+
+  /** Text field value. */
+  text: string;
+}
+
+/** Type definition for rule data. */
+interface ExampleContentContext {
+  /** Body field value. */
+  body: string;
+
+  /** Header field value. */
+  header: string;
+}
+
+/** Type definition for rule data. */
+interface ExampleFromPartsContext {
+  /** BodyLines field value. */
+  bodyLines: string[];
+
+  /** CommentValue field value. */
+  commentValue: string;
+
+  /** EndOffset field value. */
+  endOffset: number;
+
+  /** Header field value. */
+  header: string;
+
+  /** StartOffset field value. */
+  startOffset: number;
+}
+
+/** Type definition for rule data. */
+interface FenceAnalysis {
+  /** HasEmptyFence field value. */
+  hasEmptyFence: boolean;
+
+  /** HasOutsideFenceContent field value. */
+  hasOutsideFenceContent: boolean;
+
+  /** MissingLanguage field value. */
+  missingLanguage: boolean;
+
+  /** SawFence field value. */
+  sawFence: boolean;
+}
 
 /** Type definition for rule data. */
 interface FenceState {
@@ -19,6 +81,9 @@ interface FenceState {
 
   /** HasEmptyFence field value. */
   hasEmptyFence: boolean;
+
+  /** HasOutsideFenceContent field value. */
+  hasOutsideFenceContent: boolean;
 
   /** InFence field value. */
   inFence: boolean;
@@ -89,29 +154,12 @@ const updateFenceStateForLine = (
     return { ...state, currentFenceHasContent: true };
   }
 
+  if (!state.inFence && hasLineContent(line)) {
+    return { ...state, hasOutsideFenceContent: true };
+  }
+
   return state;
 };
-
-/** Type definition for rule data. */
-interface ExampleContentContext {
-  /** Body field value. */
-  body: string;
-
-  /** Header field value. */
-  header: string;
-}
-
-/** Type definition for rule data. */
-interface FenceAnalysis {
-  /** HasEmptyFence field value. */
-  hasEmptyFence: boolean;
-
-  /** MissingLanguage field value. */
-  missingLanguage: boolean;
-
-  /** SawFence field value. */
-  sawFence: boolean;
-}
 
 /**
  * Analyzes fenced code blocks for missing language identifiers.
@@ -127,6 +175,7 @@ function analyzeFenceContent(content: string): FenceAnalysis {
   let state: FenceState = {
     currentFenceHasContent: false,
     hasEmptyFence: false,
+    hasOutsideFenceContent: false,
     inFence: false,
     missingLanguage: false,
     sawFence: false,
@@ -146,6 +195,7 @@ function analyzeFenceContent(content: string): FenceAnalysis {
 
   return {
     hasEmptyFence: state.hasEmptyFence,
+    hasOutsideFenceContent: state.hasOutsideFenceContent,
     missingLanguage: state.missingLanguage,
     sawFence: state.sawFence,
   };
@@ -172,26 +222,19 @@ function buildExampleContent(context: ExampleContentContext): string {
 }
 
 /**
- * Builds an Example from a regex match and raw comment value.
- * @param match Regex match from the example pattern.
- * @param commentValue Raw comment value.
- * @returns Example metadata extracted from the match.
+ * Builds an Example from parsed header and body data.
+ * @param context Parsed example context.
+ * @returns Example metadata extracted from the parsed data.
  * @example
  * ```typescript
- * const example = buildExampleFromMatch(match, commentValue);
+ * const example = buildExampleFromParts(context);
  * ```
  */
-function buildExampleFromMatch(
-  match: RegExpMatchArray,
-  commentValue: string,
-): Example {
-  const [full] = match;
-  const header = match.groups?.["header"] ?? "";
-  const body = match.groups?.["body"] ?? "";
-  const startOffset = match.index ?? 0;
-  const content = buildExampleContent({ body, header });
-  const prefix = getPrefix(header);
-  const { endIndex, endOffset, lineIndex } = getLineMeta({
+function buildExampleFromParts(context: ExampleFromPartsContext): Example {
+  const { bodyLines, commentValue, endOffset, header, startOffset } = context;
+  const content = buildExampleContent({ body: bodyLines.join("\n"), header });
+  const full = commentValue.slice(startOffset, endOffset);
+  const lineMeta = getLineMeta({
     commentValue,
     full,
     startOffset,
@@ -199,10 +242,10 @@ function buildExampleFromMatch(
 
   return {
     content: content.trim(),
-    endIndex,
+    endIndex: lineMeta.endIndex,
     endOffset,
-    lineIndex,
-    prefix,
+    lineIndex: lineMeta.lineIndex,
+    prefix: getPrefix(header),
     startOffset,
   };
 }
@@ -220,11 +263,16 @@ function checkExampleContent(content: string): Problem | undefined {
   if (content.trim().length === 0) {
     return "emptyExample";
   }
-  const { hasEmptyFence, missingLanguage, sawFence } =
+
+  const { hasEmptyFence, hasOutsideFenceContent, missingLanguage, sawFence } =
     analyzeFenceContent(content);
 
   if (missingLanguage) {
     return "missingLanguage";
+  }
+
+  if (sawFence && hasOutsideFenceContent) {
+    return "contentOutsideFence";
   }
 
   if (sawFence && hasEmptyFence) {
@@ -239,9 +287,37 @@ function checkExampleContent(content: string): Problem | undefined {
 }
 
 /**
- * Extracts all `@example` entries from a JSDoc comment value.
- * Uses a multiline regex to capture the header and following lines
- * until the next JSDoc tag or the end of the comment.
+ * Collects comment lines with their offsets.
+ * @param commentValue Raw comment value.
+ * @returns Parsed comment lines.
+ * @example
+ * ```typescript
+ * const lines = getCommentLines("* @example\n* value");
+ * ```
+ */
+function getCommentLines(commentValue: string): CommentLine[] {
+  const lines: CommentLine[] = [];
+
+  for (const match of commentValue.matchAll(/[^\r\n]*(?:\r?\n|$)/gu)) {
+    const value = match[0];
+
+    if (value.length === 0) {
+      continue;
+    }
+
+    lines.push({
+      startOffset: match.index,
+      text: value.replace(/\r?\n$/u, ""),
+    });
+  }
+
+  return lines;
+}
+
+/**
+ * Extracts all \@example entries from a JSDoc comment value.
+ * Uses a fence-aware parser so lines that start with `@` inside
+ * fenced blocks remain part of the same example.
  * @param commentValue Raw comment value.
  * @returns Extracted examples.
  * @example
@@ -250,13 +326,93 @@ function checkExampleContent(content: string): Problem | undefined {
  * ```
  */
 function getExamples(commentValue: string): Example[] {
+  const commentLines = getCommentLines(commentValue);
   const examples: Example[] = [];
+  let activeExample: ActiveExampleState | undefined;
 
-  for (const match of commentValue.matchAll(examplePattern)) {
-    examples.push(buildExampleFromMatch(match, commentValue));
+  for (const line of commentLines) {
+    if (activeExample === void 0) {
+      if (!isExampleHeaderLine(line.text)) {
+        continue;
+      }
+
+      activeExample = {
+        bodyLines: [],
+        header: line.text,
+        inFence: false,
+        startOffset: line.startOffset,
+      };
+      continue;
+    }
+
+    if (!activeExample.inFence && isJSDocumentTagLine(line.text)) {
+      examples.push(
+        buildExampleFromParts({
+          bodyLines: activeExample.bodyLines,
+          commentValue,
+          endOffset: line.startOffset,
+          header: activeExample.header,
+          startOffset: activeExample.startOffset,
+        }),
+      );
+
+      activeExample = isExampleHeaderLine(line.text)
+        ? {
+            bodyLines: [],
+            header: line.text,
+            inFence: false,
+            startOffset: line.startOffset,
+          }
+        : void 0;
+      continue;
+    }
+
+    activeExample.bodyLines.push(line.text);
+
+    if (getFenceLanguage(line.text) !== void 0) {
+      activeExample.inFence = !activeExample.inFence;
+    }
+  }
+
+  if (activeExample !== void 0) {
+    examples.push(
+      buildExampleFromParts({
+        bodyLines: activeExample.bodyLines,
+        commentValue,
+        endOffset: commentValue.length,
+        header: activeExample.header,
+        startOffset: activeExample.startOffset,
+      }),
+    );
   }
 
   return examples;
+}
+
+/**
+ * Checks whether a line starts an \@example tag.
+ * @param line Line to inspect.
+ * @returns True when the line starts an \@example tag.
+ * @example
+ * ```typescript
+ * const isHeader = isExampleHeaderLine(" * @example");
+ * ```
+ */
+function isExampleHeaderLine(line: string): boolean {
+  return /^\s*\*?\s*@example\b/u.test(line);
+}
+
+/**
+ * Checks whether a line starts a JSDoc tag.
+ * @param line Line to inspect.
+ * @returns True when the line starts a JSDoc tag.
+ * @example
+ * ```typescript
+ * const isTag = isJSDocumentTagLine(" * @returns value");
+ * ```
+ */
+function isJSDocumentTagLine(line: string): boolean {
+  return /^\s*\*?\s*@\w+\b/u.test(line);
 }
 
 export { checkExampleContent, getExamples };
