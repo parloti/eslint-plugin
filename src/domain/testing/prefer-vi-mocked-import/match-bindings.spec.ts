@@ -71,4 +71,40 @@ describe("prefer-vi-mocked-import match-bindings", () => {
     // Assert
     expect(actualResult).toStrictEqual([]);
   });
+
+  it("ignores computed properties", () => {
+    // Arrange
+    const bindings = {
+      properties: [
+        {
+          computed: true,
+          key: { name: "a", range: [0, 1], type: "Identifier" },
+          kind: "init",
+          method: false,
+          range: [0, 6],
+          shorthand: false,
+          type: "Property",
+          value: { name: "a", range: [4, 5], type: "Identifier" },
+        },
+      ],
+      type: "ObjectExpression",
+    } as never;
+    const declarations = new Map<string, Declaration>([
+      [
+        "a",
+        {
+          declarationIdRange: [0, 1],
+          initializerRange: [4, 10],
+          localName: "a",
+          statementRange: [0, 10],
+        },
+      ],
+    ]);
+
+    // Act
+    const actualResult = collectBindings(bindings, declarations);
+
+    // Assert
+    expect(actualResult).toStrictEqual([]);
+  });
 });

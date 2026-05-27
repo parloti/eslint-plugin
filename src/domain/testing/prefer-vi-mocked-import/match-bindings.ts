@@ -41,6 +41,7 @@ function toBinding(
 ): Binding | undefined {
   if (
     propertyNode.type !== "Property" ||
+    propertyNode.computed ||
     propertyNode.key.type !== "Identifier"
   ) {
     return void 0;

@@ -5,6 +5,12 @@ import type { Declaration } from "./types";
 
 import { hasRange, isViFunctionCall } from "./match-helpers";
 
+/** Type definition for rule data. */
+interface RangedVariableDeclaration extends ESTree.VariableDeclaration {
+  /** Source range for the full declaration statement. */
+  range: [number, number];
+}
+
 /**
  * Collects top-level `const x = vi.fn(...)` declarations.
  * @param program Program node.
@@ -109,10 +115,7 @@ function getNextAttachedCommentStart(
  * ```
  */
 function getRemovalRange(
-  statement: ESTree.VariableDeclaration & {
-    /** Source range for the full declaration statement. */
-    range: [number, number];
-  },
+  statement: RangedVariableDeclaration,
   sourceCode?: Rule.RuleContext["sourceCode"],
 ): [number, number] {
   const [statementStart, statementEnd] = statement.range;

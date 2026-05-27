@@ -286,4 +286,76 @@ describe("prefer-vi-mocked-import rule (additional)", () => {
     expect(actual.messages).toStrictEqual([]);
     expect(actual.output).toBe(input);
   });
+
+  it("does not report when the factory property key is computed", () => {
+    // Arrange
+    const input = [
+      'const key = "installDevelopmentDependencies";',
+      "const installDevelopmentDependencies = vi.fn();",
+      'vi.mock(import("./dependencies"), () => ({ [key]: installDevelopmentDependencies }));',
+      "installDevelopmentDependencies.mockResolvedValue(void 0);",
+      "",
+    ].join("\n");
+
+    // Act
+    const actual = runFix(input);
+
+    // Assert
+    expect(actual.messages).toStrictEqual([]);
+    expect(actual.output).toBe(input);
+  });
+
+  it("does not report when imported export name would collide with top-level declaration", () => {
+    // Arrange
+    const input = [
+      "const d = 1;",
+      "const c = vi.fn();",
+      'vi.mock(import("./mod"), () => ({ d: c }));',
+      "c.mockResolvedValue(void 0);",
+      "",
+    ].join("\n");
+
+    // Act
+    const actual = runFix(input);
+
+    // Assert
+    expect(actual.messages).toStrictEqual([]);
+    expect(actual.output).toBe(input);
+  });
+
+  it("does not report when imported export name would collide with another module import", () => {
+    // Arrange
+    const input = [
+      'import { d } from "./other";',
+      "const c = vi.fn();",
+      'vi.mock(import("./mod"), () => ({ d: c }));',
+      "c.mockResolvedValue(void 0);",
+      "",
+    ].join("\n");
+
+    // Act
+    const actual = runFix(input);
+
+    // Assert
+    expect(actual.messages).toStrictEqual([]);
+    expect(actual.output).toBe(input);
+  });
+
+  it("does not report when existing same-module import uses alias", () => {
+    // Arrange
+    const input = [
+      'import { d as dependencyMock } from "./mod";',
+      "const c = vi.fn();",
+      'vi.mock(import("./mod"), () => ({ d: c }));',
+      "c.mockResolvedValue(void 0);",
+      "",
+    ].join("\n");
+
+    // Act
+    const actual = runFix(input);
+
+    // Assert
+    expect(actual.messages).toStrictEqual([]);
+    expect(actual.output).toBe(input);
+  });
 });
