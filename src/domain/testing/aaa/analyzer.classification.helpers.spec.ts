@@ -4,21 +4,12 @@ import { describe, expect, it } from "vitest";
 
 import type { SourceComment } from "./types";
 
-import { hasBlankLineBeforeComment, hasCapturableActResult } from "./analyzer";
-import { analyzerClassificationHelpersCompanion } from "./analyzer.classification.helpers";
+import {
+  hasBlankLineBeforeComment,
+  hasCapturableActResult,
+} from "./analyzer.classification.helpers";
 
 describe("aAA analyzer classification helpers", () => {
-  it("exports the companion marker", () => {
-    // Arrange
-    const expected = true;
-
-    // Act
-    const actual = analyzerClassificationHelpersCompanion;
-
-    // Assert
-    expect(actual).toBe(expected);
-  });
-
   it("classifies blank-line boundaries and capturable act results", () => {
     // Arrange
     const sourceText = ["const a = 1;", "", "// Arrange"].join("\n");

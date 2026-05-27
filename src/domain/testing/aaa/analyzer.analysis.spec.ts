@@ -6,7 +6,8 @@ import { describe, expect, it } from "vitest";
 
 import type { TestBlockAnalysis } from "./types";
 
-import { analyzeTestBlock, countActStatements } from "./analyzer";
+import { analyzeTestBlock } from "./analyzer.analysis";
+import { countActStatements } from "./analyzer.analysis.helpers";
 
 /** Parser options used by the fixture adapter. */
 interface ParseForEslintOptions {

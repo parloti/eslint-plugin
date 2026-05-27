@@ -1,8 +1,11 @@
 import type { Rule } from "eslint";
 
-import type { AaaPhase, TestBlockAnalysis } from "../aaa";
+import type { AaaPhase, TestBlockAnalysis } from "../aaa/types";
 
-import { aaaPhaseOrder, getLineStartRange } from "../aaa";
+import {
+  aaaPhaseOrder,
+  getLineStartRange,
+} from "../aaa/analyzer.analysis.helpers";
 
 /** Composite input for building one missing-section fix. */
 interface MissingSectionFixInput {

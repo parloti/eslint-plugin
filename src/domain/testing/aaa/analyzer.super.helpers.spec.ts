@@ -2,21 +2,9 @@ import type * as ESTree from "estree";
 
 import { describe, expect, it } from "vitest";
 
-import { visitNode } from "./analyzer.super";
-import { analyzerSuperHelpersCompanion } from "./analyzer.super.helpers";
+import { visitNode } from "./analyzer.super.helpers";
 
 describe("aAA analyzer super helpers", () => {
-  it("exports the companion marker", () => {
-    // Arrange
-    const expected = true;
-
-    // Act
-    const actual = analyzerSuperHelpersCompanion;
-
-    // Assert
-    expect(actual).toBe(expected);
-  });
-
   it("visits each node exactly once even when graph references repeat", () => {
     // Arrange
     const identifier: ESTree.Identifier = { name: "value", type: "Identifier" };

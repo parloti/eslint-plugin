@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
+import { runRule } from "../../../shared/test-utils/enforce-aaa-phase-purity-rule-test-helpers";
 import { enforceAaaPhasePurityRule } from "./rule";
-import { runRule } from "./rule-test-helpers";
 
 describe("enforce-aaa-phase-purity rule", () => {
   describe("metadata", () => {

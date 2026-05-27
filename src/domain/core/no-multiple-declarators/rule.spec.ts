@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
 
-import type { MockNode } from "./rule-test-helpers";
+import type { MockNode } from "../../../shared/test-utils/no-multiple-declarators-rule-test-helpers";
 
-import { noMultipleDeclaratorsRule } from "./rule";
 import {
   createContext,
   createVariableDeclaration,
   runRule,
-} from "./rule-test-helpers";
+} from "../../../shared/test-utils/no-multiple-declarators-rule-test-helpers";
+import { noMultipleDeclaratorsRule } from "./rule";
 
 /** Variable declaration fixture with two declarators. */
 interface DeclarationWithTwoDeclarators extends MockNode {

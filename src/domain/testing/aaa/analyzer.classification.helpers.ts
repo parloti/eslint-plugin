@@ -7,7 +7,7 @@ import {
   hasAssertion,
   isActionExpression,
   unwrapExpression,
-} from "./analyzer.assertions";
+} from "./analyzer.assertions.helpers";
 import { visitStatementWithoutDeferredBodies } from "./analyzer.classification.traversal";
 import {
   arrayMutationMethods,
@@ -19,9 +19,9 @@ import {
   isUtilityNamedCall,
   isUtilityNamespaceCall,
   isVoidLikeMethodName,
-  visitNode,
   voidLikeMethodNames,
 } from "./analyzer.super";
+import { visitNode } from "./analyzer.super.helpers";
 
 /**
  * Checks for async logic.
@@ -253,11 +253,7 @@ function isUtilityLikeExpression(
   );
 }
 
-/** Companion marker for test isolation. */
-const analyzerClassificationHelpersCompanion = true as const;
-
 export {
-  analyzerClassificationHelpersCompanion,
   hasAsyncLogic,
   hasAwait,
   hasBlankLineBeforeComment,

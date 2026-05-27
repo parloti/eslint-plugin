@@ -3,7 +3,6 @@ import type { Rule } from "eslint";
 import type { Range } from "./match-helpers";
 import type { RuleMatch } from "./types";
 
-import { buildImportFixes } from "./fix-import-statements";
 import { buildCombinedImportFixes } from "./fix-imports";
 
 /**
@@ -37,24 +36,6 @@ function buildBindingFixes(
       ),
     ];
   });
-}
-
-/**
- * Builds all autofix operations for a single match.
- * @param match Autofix context produced by the matcher.
- * @param fixer ESLint fixer.
- * @returns Combined fix list.
- * @example
- * ```typescript
- * const fixes = buildFix({} as never, {} as never);
- * void fixes;
- * ```
- */
-function buildFix(match: RuleMatch, fixer: Rule.RuleFixer): Rule.Fix[] {
-  return [
-    ...buildImportFixes(match, fixer),
-    ...buildNonImportFixes(match, fixer),
-  ];
 }
 
 /**
@@ -216,4 +197,4 @@ function getUniqueStatementRanges(match: RuleMatch): Range[] {
   return [...rangeMap.values()];
 }
 
-export { buildFix, buildFixes };
+export { buildFixes };

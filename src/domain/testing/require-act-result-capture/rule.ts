@@ -1,7 +1,8 @@
 import type { Rule } from "eslint";
 import type * as ESTree from "estree";
 
-import { analyzeTestBlock, hasCapturableActResult } from "../aaa";
+import { analyzeTestBlock } from "../aaa/analyzer.analysis";
+import { hasCapturableActResult } from "../aaa/analyzer.classification.helpers";
 
 /**
  * Checks whether a call reports through `context.report(...)`.

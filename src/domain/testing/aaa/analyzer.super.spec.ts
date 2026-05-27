@@ -3,7 +3,7 @@ import type * as ESTree from "estree";
 import { parser } from "typescript-eslint";
 import { describe, expect, it } from "vitest";
 
-import { hasCapturableActResult } from "./analyzer";
+import { hasCapturableActResult } from "./analyzer.classification.helpers";
 
 /** Parser options used by the fixture adapter. */
 interface ParseForEslintOptions {

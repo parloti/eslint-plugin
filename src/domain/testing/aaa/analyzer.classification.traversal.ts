@@ -1,6 +1,6 @@
 import type * as ESTree from "estree";
 
-import { visitNode } from "./analyzer.super";
+import { visitNode } from "./analyzer.super.helpers";
 
 /**
  * Checks whether a node introduces deferred execution.
@@ -38,10 +38,4 @@ function visitStatementWithoutDeferredBodies(
   });
 }
 
-/** Companion marker for test isolation. */
-const analyzerClassificationTraversalCompanion = true as const;
-
-export {
-  analyzerClassificationTraversalCompanion,
-  visitStatementWithoutDeferredBodies,
-};
+export { visitStatementWithoutDeferredBodies };

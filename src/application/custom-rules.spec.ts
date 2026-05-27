@@ -1,7 +1,19 @@
 import { describe, expect, it } from "vitest";
 
-import { getCustomRuleDocumentationUrl } from "../domain";
 import { customRules } from "./custom-rules";
+
+/**
+ * Builds the canonical documentation URL used by package-owned rules.
+ * @param ruleName Package-owned ESLint rule name.
+ * @returns Canonical markdown URL for the rule documentation page.
+ * @example
+ * ```typescript
+ * const url = getCustomRuleDocumentationUrl("prefer-interface-types");
+ * void url;
+ * ```
+ */
+const getCustomRuleDocumentationUrl = (ruleName: string): string =>
+  `https://github.com/parloti/eslint-plugin/blob/main/docs/rules/${ruleName}.md`;
 
 /** Summary of the enforced custom rule contract. */
 interface CustomRuleSummary {

@@ -6,21 +6,9 @@ import {
   getAssertionIdentifiers,
   hasAssertion,
   isValidAssertStatement,
-} from "./analyzer";
-import { analyzerAssertionsHelpersCompanion } from "./analyzer.assertions.helpers";
+} from "./analyzer.assertions.helpers";
 
 describe("aAA analyzer assertions helpers", () => {
-  it("exports the companion marker", () => {
-    // Arrange
-    const expected = true;
-
-    // Act
-    const actual = analyzerAssertionsHelpersCompanion;
-
-    // Assert
-    expect(actual).toBe(expected);
-  });
-
   it("resolves identifiers and assertion validity through the public analyzer api", () => {
     // Arrange
     const statement = {

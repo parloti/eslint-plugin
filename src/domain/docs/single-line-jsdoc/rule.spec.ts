@@ -2,7 +2,10 @@ import type { Rule } from "eslint";
 
 import { describe, expect, it } from "vitest";
 
-import { createFixer, getFixText } from "../test-helpers";
+import {
+  createFixer,
+  getFixText,
+} from "../../../shared/test-utils/documentation-test-helpers";
 import { singleLineJsdocRule } from "./rule";
 
 /** Type definition for rule data. */

@@ -3,23 +3,11 @@ import type * as ESTree from "estree";
 import { describe, expect, it } from "vitest";
 
 import {
-  analyzerAssertionsOperandsCompanion,
   getExpectOperands,
   isAssertionCall,
 } from "./analyzer.assertions.operands";
 
 describe("aAA analyzer assertions operands", () => {
-  it("exports the companion marker", () => {
-    // Arrange
-    const expected = true;
-
-    // Act
-    const actual = analyzerAssertionsOperandsCompanion;
-
-    // Assert
-    expect(actual).toBe(expected);
-  });
-
   it("extracts expect operands and detects assertion call expressions", () => {
     // Arrange
     const expression = {

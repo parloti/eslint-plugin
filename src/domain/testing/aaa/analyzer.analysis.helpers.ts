@@ -84,24 +84,6 @@ function getFlattenedSections(
 }
 
 /**
- * Gets indentation at an offset.
- * @param sourceText Input sourceText value.
- * @param offset Input offset value.
- * @returns Return value output.
- * @example
- * ```typescript
- * getIndentationAtOffset(sourceText, 4);
- * ```
- */
-function getIndentationAtOffset(sourceText: string, offset: number): string {
-  const lineStart = sourceText.lastIndexOf("\n", Math.max(0, offset - 1)) + 1;
-  const linePrefix = sourceText.slice(lineStart, offset);
-  const trimmedPrefix = linePrefix.trimStart();
-
-  return linePrefix.slice(0, linePrefix.length - trimmedPrefix.length);
-}
-
-/**
  * Gets the start range for a line.
  * @param sourceText Input sourceText value.
  * @param line Input line value.
@@ -273,21 +255,14 @@ function isAaaPhase(value: string): value is AaaPhase {
 }
 
 /** Companion marker for test isolation. */
-const analyzerAnalysisHelpersCompanion = true as const;
-
 export {
   aaaPhaseOrder,
-  analyzerAnalysisHelpersCompanion,
   countActStatements,
   getFlattenedSections,
-  getIndentationAtOffset,
   getLineStartRange,
   getNewline,
   getPhaseBoundaryComments,
   getSectionPhases,
   getStatementPhases,
   getSupportedTestCall,
-  getTestRootName,
-  isAaaPhase,
 };
-export type { FlattenedSection };

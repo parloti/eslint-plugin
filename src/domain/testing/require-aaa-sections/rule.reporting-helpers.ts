@@ -1,4 +1,4 @@
-import type { TestBlockAnalysis } from "../aaa";
+import type { TestBlockAnalysis } from "../aaa/types";
 
 /** Message identifiers emitted by the rule under test. */
 type RequireAaaSectionsMessageId =

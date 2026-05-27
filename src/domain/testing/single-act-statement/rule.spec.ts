@@ -20,13 +20,16 @@ interface SingleActAaaMockState {
   count: number;
 }
 
-/** Mocked AAA module shape used by the rule tests. */
-interface SingleActAaaModule {
-  /** Mocked analyzer result. */
-  analyzeTestBlock: () => unknown;
-
+/** Mocked analysis-helper module shape used by the rule tests. */
+interface SingleActAnalysisHelpersModule {
   /** Mocked Act statement counter. */
   countActStatements: () => number;
+}
+
+/** Mocked analysis module shape used by the rule tests. */
+interface SingleActAnalysisModule {
+  /** Mocked analyzer result. */
+  analyzeTestBlock: () => unknown;
 }
 
 /** Imported rule module shape used by these tests. */
@@ -39,17 +42,30 @@ interface SingleActStatementModule {
 let activeAaaState: SingleActAaaMockState;
 
 /**
- * Creates the mocked AAA module for the single-act rule tests.
- * @returns Mocked AAA helpers.
+ * Creates the mocked analysis-helper module for the single-act rule tests.
+ * @returns Mocked analysis helpers.
  * @example
  * ```typescript
- * const mockedAaa = createAaaModule();
+ * const mockedHelpers = createAnalysisHelpersModule();
  * ```
  */
-function createAaaModule(): SingleActAaaModule {
+function createAnalysisHelpersModule(): SingleActAnalysisHelpersModule {
+  return {
+    countActStatements: (): number => activeAaaState.count,
+  };
+}
+
+/**
+ * Creates the mocked analysis module for the single-act rule tests.
+ * @returns Mocked analyzer helper.
+ * @example
+ * ```typescript
+ * const mockedAnalysis = createAnalysisModule();
+ * ```
+ */
+function createAnalysisModule(): SingleActAnalysisModule {
   return {
     analyzeTestBlock: (): unknown => activeAaaState.analysis,
-    countActStatements: (): number => activeAaaState.count,
   };
 }
 
@@ -124,7 +140,14 @@ const runRule = async (
 describe("single-act-statement rule", () => {
   beforeEach(() => {
     activeAaaState = { analysis: void 0, count: 0 };
-    vi.doMock(import("../aaa"), (): never => createAaaModule() as never);
+    vi.doMock(
+      import("../aaa/analyzer.analysis"),
+      (): never => createAnalysisModule() as never,
+    );
+    vi.doMock(
+      import("../aaa/analyzer.analysis.helpers"),
+      (): never => createAnalysisHelpersModule() as never,
+    );
   });
 
   it("defines metadata and messages", async () => {

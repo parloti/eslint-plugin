@@ -3,10 +3,13 @@ import type { Rule } from "eslint";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 /** Mocked AAA module shape used by the assertion-name rule tests. */
-interface AssertActualExpectedNamesAaaModule {
+interface AssertActualExpectedNamesAnalysisModule {
   /** Mocked analyzer result. */
   analyzeTestBlock: () => unknown;
+}
 
+/** Mocked assertion helper module shape used by the assertion-name rule tests. */
+interface AssertActualExpectedNamesAssertionsModule {
   /** Assert-scope declared identifiers. */
   getAssertDeclaredIdentifiers: () => Map<string, Rule.Node>;
 
@@ -84,16 +87,29 @@ const createContext = (): RuleContextState => {
 };
 
 /**
- * Creates the mocked AAA module for the assertion-name rule tests.
- * @returns Mocked AAA helpers.
+ * Creates the mocked analysis module for the assertion-name rule tests.
+ * @returns Mocked analyzer helper.
  * @example
  * ```typescript
- * const mockedAaa = createAaaModule();
+ * const mockedAnalysis = createAnalysisModule();
  * ```
  */
-function createAaaModule(): AssertActualExpectedNamesAaaModule {
+function createAnalysisModule(): AssertActualExpectedNamesAnalysisModule {
   return {
     analyzeTestBlock: (): unknown => activeLoadRuleInput.analysis,
+  };
+}
+
+/**
+ * Creates the mocked assertion helper module for the assertion-name rule tests.
+ * @returns Mocked assertion helpers.
+ * @example
+ * ```typescript
+ * const mockedAssertions = createAssertionsModule();
+ * ```
+ */
+function createAssertionsModule(): AssertActualExpectedNamesAssertionsModule {
+  return {
     getAssertDeclaredIdentifiers: (): Map<string, Rule.Node> =>
       activeLoadRuleInput.declaredIdentifiers,
     getAssertionIdentifiers: (node: unknown): AssertionIdentifier =>
@@ -151,7 +167,14 @@ describe("assert-actual-expected-names rule", () => {
       assertionNodes: new Set(),
       declaredIdentifiers: new Map(),
     };
-    vi.doMock(import("../aaa"), (): never => createAaaModule() as never);
+    vi.doMock(
+      import("../aaa/analyzer.analysis"),
+      (): never => createAnalysisModule() as never,
+    );
+    vi.doMock(
+      import("../aaa/analyzer.assertions.helpers"),
+      (): never => createAssertionsModule() as never,
+    );
   });
 
   it("defines metadata and messages", async () => {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { collectMatch } from "./match";
+import { collectMatches } from "./match";
 
 /** Type definition for rule data. */
 interface TestContext {
@@ -34,17 +34,6 @@ function createContext(ast: unknown): TestContext {
 }
 
 describe("prefer-vi-mocked-import match", () => {
-  it("exports collectMatch", () => {
-    // Arrange
-    const expectedType = "function";
-
-    // Act
-    const actualType = typeof collectMatch;
-
-    // Assert
-    expect(actualType).toBe(expectedType);
-  });
-
   it("returns undefined when no top-level mock call exists", () => {
     // Arrange
     const context = createContext({
@@ -54,7 +43,7 @@ describe("prefer-vi-mocked-import match", () => {
     }) as never;
 
     // Act
-    const actualMatch = collectMatch(context);
+    const actualMatch = collectMatches(context)[0];
 
     // Assert
     expect(actualMatch).toBe(void 0);
@@ -72,7 +61,7 @@ describe("prefer-vi-mocked-import match", () => {
     }) as never;
 
     // Act
-    const actualMatch = collectMatch(context);
+    const actualMatch = collectMatches(context)[0];
 
     // Assert
     expect(actualMatch).toBe(void 0);
@@ -101,7 +90,7 @@ describe("prefer-vi-mocked-import match", () => {
     }) as never;
 
     // Act
-    const actualMatch = collectMatch(context);
+    const actualMatch = collectMatches(context)[0];
 
     // Assert
     expect(actualMatch).toBe(void 0);
@@ -139,7 +128,7 @@ describe("prefer-vi-mocked-import match", () => {
     }) as never;
 
     // Act
-    const actualMatch = collectMatch(context);
+    const actualMatch = collectMatches(context)[0];
 
     // Assert
     expect(actualMatch).toBe(void 0);
@@ -174,7 +163,7 @@ describe("prefer-vi-mocked-import match", () => {
     }) as never;
 
     // Act
-    const actualMatch = collectMatch(context);
+    const actualMatch = collectMatches(context)[0];
 
     // Assert
     expect(actualMatch).toBe(void 0);
@@ -198,7 +187,7 @@ describe("prefer-vi-mocked-import match", () => {
     }) as never;
 
     // Act
-    const actualMatch = collectMatch(context);
+    const actualMatch = collectMatches(context)[0];
 
     // Assert
     expect(actualMatch).toBe(void 0);

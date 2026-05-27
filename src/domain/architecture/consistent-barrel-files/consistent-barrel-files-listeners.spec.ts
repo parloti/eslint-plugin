@@ -5,10 +5,10 @@ import path from "node:path";
 import { cwd } from "node:process";
 import { afterEach, describe, expect, it } from "vitest";
 
+import { createRepoDirectory } from "../../../shared/test-utils/consistent-barrel-files/test-helpers";
+import { writeFeature } from "../../../shared/test-utils/consistent-barrel-files/test-helpers.file-writers";
 import { buildListenerForFile } from "./consistent-barrel-files-listeners";
 import { getOptions } from "./consistent-barrel-files-options";
-import { createRepoDirectory } from "./test-helpers";
-import { writeFeature } from "./test-helpers.file-writers";
 
 /** Captured program-listener state for one synthetic file. */
 interface ProgramListenerState {

@@ -1,17 +1,19 @@
 import type { Rule } from "eslint";
 
-import type { TestBlockAnalysis } from "../aaa";
+import type { TestBlockAnalysis } from "../aaa/types";
 
 import {
   hasAssertion,
+  isValidAssertStatement,
+} from "../aaa/analyzer.assertions.helpers";
+import {
   hasAsyncLogic,
   hasAwait,
   hasCapturableActResult,
   hasMutation,
   isMeaningfulActStatement,
   isSetupLikeStatement,
-  isValidAssertStatement,
-} from "../aaa";
+} from "../aaa/analyzer.classification.helpers";
 import {
   getAssertReferencedIdentifiers,
   isActResultAsserted,

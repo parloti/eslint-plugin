@@ -9,7 +9,7 @@ import {
   hasEvaluatedAssertionActual,
   isAssertionCall,
 } from "./analyzer.assertions.operands";
-import { visitNode } from "./analyzer.super";
+import { visitNode } from "./analyzer.super.helpers";
 
 /** Identifier names extracted from an assertion statement. */
 interface AssertionIdentifiers {
@@ -236,10 +236,7 @@ function usesPrefix(name: string, prefix: "actual" | "expected"): boolean {
 }
 
 /** Companion marker for test isolation. */
-const analyzerAssertionsHelpersCompanion = true as const;
-
 export {
-  analyzerAssertionsHelpersCompanion,
   getAssertDeclaredIdentifiers,
   getAssertionIdentifiers,
   getStatementExpression,
@@ -249,4 +246,3 @@ export {
   unwrapExpression,
   usesPrefix,
 };
-export type { AssertionIdentifiers };

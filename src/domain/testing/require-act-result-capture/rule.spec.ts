@@ -18,11 +18,14 @@ interface IdentifierNode {
   type: string;
 }
 
-/** Mocked AAA module shape used by the act-result rule tests. */
-interface RequireActResultCaptureAaaModule {
+/** Mocked analysis module shape used by the act-result rule tests. */
+interface RequireActResultCaptureAnalysisModule {
   /** Mocked analyzer result. */
   analyzeTestBlock: () => unknown;
+}
 
+/** Mocked classification helper module shape used by the act-result rule tests. */
+interface RequireActResultCaptureClassificationModule {
   /** Predicate for capturable Act results. */
   hasCapturableActResult: (node: unknown) => boolean;
 }
@@ -85,16 +88,29 @@ const createCallStatement = (
 });
 
 /**
- * Creates the mocked AAA module for the act-result rule tests.
- * @returns Mocked AAA helpers.
+ * Creates the mocked analysis module for the act-result rule tests.
+ * @returns Mocked analyzer helper.
  * @example
  * ```typescript
- * const mockedAaa = createAaaModule();
+ * const mockedAnalysis = createAnalysisModule();
  * ```
  */
-function createAaaModule(): RequireActResultCaptureAaaModule {
+function createAnalysisModule(): RequireActResultCaptureAnalysisModule {
   return {
     analyzeTestBlock: (): unknown => activeCaptureState.analysis,
+  };
+}
+
+/**
+ * Creates the mocked classification helper module for the act-result rule tests.
+ * @returns Mocked classification helpers.
+ * @example
+ * ```typescript
+ * const mockedClassification = createClassificationModule();
+ * ```
+ */
+function createClassificationModule(): RequireActResultCaptureClassificationModule {
+  return {
     hasCapturableActResult: (node: unknown): boolean =>
       activeCaptureState.capturableNodes.has(node),
   };
@@ -169,7 +185,14 @@ const runRule = async (
 describe("require-act-result-capture rule", () => {
   beforeEach(() => {
     activeCaptureState = { analysis: void 0, capturableNodes: new Set() };
-    vi.doMock(import("../aaa"), (): never => createAaaModule() as never);
+    vi.doMock(
+      import("../aaa/analyzer.analysis"),
+      (): never => createAnalysisModule() as never,
+    );
+    vi.doMock(
+      import("../aaa/analyzer.classification.helpers"),
+      (): never => createClassificationModule() as never,
+    );
   });
 
   it("defines metadata and messages", async () => {

@@ -1,6 +1,10 @@
 import type { Rule } from "eslint";
 
-import { aaaPhaseOrder, analyzeTestBlock, getFlattenedSections } from "../aaa";
+import { analyzeTestBlock } from "../aaa/analyzer.analysis";
+import {
+  aaaPhaseOrder,
+  getFlattenedSections,
+} from "../aaa/analyzer.analysis.helpers";
 
 /** Flattened section entry emitted by the AAA analyzer helper. */
 type FlattenedSection = ReturnType<typeof getFlattenedSections>[number];

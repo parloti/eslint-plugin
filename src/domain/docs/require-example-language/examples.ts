@@ -259,4 +259,4 @@ function getExamples(commentValue: string): Example[] {
   return examples;
 }
 
-export { buildExampleFromMatch, checkExampleContent, getExamples };
+export { checkExampleContent, getExamples };

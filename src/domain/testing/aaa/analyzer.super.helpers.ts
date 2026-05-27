@@ -84,7 +84,4 @@ function visitValue(
   }
 }
 
-/** Companion marker for test isolation. */
-const analyzerSuperHelpersCompanion = true as const;
-
-export { analyzerSuperHelpersCompanion, visitNode, visitValue };
+export { visitNode };

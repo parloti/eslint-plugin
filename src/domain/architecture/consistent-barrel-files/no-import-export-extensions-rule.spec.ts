@@ -4,12 +4,12 @@ import type * as ESTree from "estree";
 import { SourceCode } from "eslint";
 import { describe, expect, it } from "vitest";
 
-import { noImportExportExtensionsRule } from "./no-import-export-extensions-rule";
 import {
   createBody,
   createImportDeclaration,
   createProgram,
-} from "./test-helpers";
+} from "../../../shared/test-utils/consistent-barrel-files/test-helpers";
+import { noImportExportExtensionsRule } from "./no-import-export-extensions-rule";
 
 /** Message-id view over ESLint report descriptors used in tests. */
 interface ReportDescriptorWithMessageId {

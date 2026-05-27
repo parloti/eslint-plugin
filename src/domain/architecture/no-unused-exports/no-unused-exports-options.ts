@@ -6,7 +6,7 @@ import type { NoUnusedExportsOptions, NoUnusedExportsState } from "./types";
 /** Default public API files where exported symbols are intentionally exposed. */
 export const DEFAULT_PUBLIC_API_FILES = [
   "**/src/index.ts",
-  "**/test-util/**/*.ts",
+  "**/test-utils/**/*.ts",
   "tests/support/**/*.ts",
 ] as const;
 

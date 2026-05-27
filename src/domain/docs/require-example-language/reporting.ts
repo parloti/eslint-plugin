@@ -247,4 +247,4 @@ function reportExample(context: ReportExampleContext): void {
   ruleContext.report(descriptor);
 }
 
-export { buildReportDescriptor, reportExample };
+export { reportExample };

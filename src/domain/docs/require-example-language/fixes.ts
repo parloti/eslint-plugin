@@ -287,4 +287,4 @@ function stripContentPrefix(context: StripContentPrefixContext): string {
   return line.replace(/^\s*\*\s?/u, "");
 }
 
-export { buildMissingFenceFix, buildMissingLanguageFix, createFixer };
+export { createFixer };

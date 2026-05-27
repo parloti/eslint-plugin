@@ -1,24 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import {
-  createRuleDocumentation,
-  customRuleDocumentationBaseUrl,
-  getCustomRuleDocumentationUrl,
-} from "./custom-rule-documentation";
+import { createRuleDocumentation } from "./custom-rule-documentation";
 
-describe(getCustomRuleDocumentationUrl, () => {
-  it("builds the canonical rule URL", () => {
-    // Arrange
-    const ruleName = "prefer-interface-types";
-    const expectedUrl = `${customRuleDocumentationBaseUrl}/prefer-interface-types.md`;
-
-    // Act
-    const actualUrl = getCustomRuleDocumentationUrl(ruleName);
-
-    // Assert
-    expect(actualUrl).toBe(expectedUrl);
-  });
-});
+/** Canonical base URL for package-owned rule documentation pages. */
+const customRuleDocumentationBaseUrl =
+  "https://github.com/parloti/eslint-plugin/blob/main/docs/rules";
 
 describe(createRuleDocumentation, () => {
   it("returns the shared custom rule docs shape", () => {

@@ -9,7 +9,7 @@ import {
   createTemporaryFile,
   createTemporaryPair,
   runRule,
-} from "./require-test-companion-test-helpers";
+} from "../../../shared/test-utils/require-test-companion-test-helpers";
 
 describe("require-test-companion rule", () => {
   afterEach(cleanupTemporaryDirectories);

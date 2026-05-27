@@ -14,16 +14,19 @@ interface AaaPhaseOrder {
   Assert: number;
 }
 
-/** Mocked AAA module shape used by the structure rule tests. */
-interface EnforceAaaStructureAaaModule {
+/** Mocked analysis helper module shape used by the structure rule tests. */
+interface EnforceAaaStructureAnalysisHelpersModule {
   /** AAA phase ordering. */
   aaaPhaseOrder: AaaPhaseOrder;
 
-  /** Mocked analyzer result. */
-  analyzeTestBlock: () => unknown;
-
   /** Mocked flattened section list. */
   getFlattenedSections: () => FlattenedSection[];
+}
+
+/** Mocked analysis module shape used by the structure rule tests. */
+interface EnforceAaaStructureAnalysisModule {
+  /** Mocked analyzer result. */
+  analyzeTestBlock: () => unknown;
 }
 
 /** Mocked AAA structure state for the current test. */
@@ -63,19 +66,32 @@ interface RuleContextState {
 let activeStructureState: EnforceAaaStructureMockState;
 
 /**
- * Creates the mocked AAA module for the structure rule tests.
- * @returns Mocked AAA helpers.
+ * Creates the mocked analysis helpers for the structure rule tests.
+ * @returns Mocked analysis helpers.
  * @example
  * ```typescript
- * const mockedAaa = createAaaModule();
+ * const mockedHelpers = createAnalysisHelpersModule();
  * ```
  */
-function createAaaModule(): EnforceAaaStructureAaaModule {
+function createAnalysisHelpersModule(): EnforceAaaStructureAnalysisHelpersModule {
   return {
     aaaPhaseOrder: { Act: 1, Arrange: 0, Assert: 2 },
-    analyzeTestBlock: (): unknown => activeStructureState.analysis,
     getFlattenedSections: (): FlattenedSection[] =>
       activeStructureState.flattenedSections,
+  };
+}
+
+/**
+ * Creates the mocked analysis module for the structure rule tests.
+ * @returns Mocked analyzer helper.
+ * @example
+ * ```typescript
+ * const mockedAnalysis = createAnalysisModule();
+ * ```
+ */
+function createAnalysisModule(): EnforceAaaStructureAnalysisModule {
+  return {
+    analyzeTestBlock: (): unknown => activeStructureState.analysis,
   };
 }
 
@@ -148,7 +164,14 @@ const runRule = async (
 describe("enforce-aaa-structure rule", () => {
   beforeEach(() => {
     activeStructureState = { analysis: void 0, flattenedSections: [] };
-    vi.doMock(import("../aaa"), (): never => createAaaModule() as never);
+    vi.doMock(
+      import("../aaa/analyzer.analysis"),
+      (): never => createAnalysisModule() as never,
+    );
+    vi.doMock(
+      import("../aaa/analyzer.analysis.helpers"),
+      (): never => createAnalysisHelpersModule() as never,
+    );
   });
 
   it("defines metadata and messages", async () => {

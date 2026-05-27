@@ -90,20 +90,6 @@ function buildMatch(
 }
 
 /**
- * Collects the first applicable rule match from the file.
- * @param context Rule context.
- * @returns Collected match when pattern is found.
- * @example
- * ```typescript
- * const match = collectMatch({ sourceCode: { ast: { body: [], sourceType: "module", type: "Program" }, text: "" } } as never);
- * void match;
- * ```
- */
-function collectMatch(context: Rule.RuleContext): RuleMatch | undefined {
-  return collectMatches(context)[0];
-}
-
-/**
  * Collects every applicable rule match from the file.
  * @param context Rule context.
  * @returns Collected matches when patterns are found.
@@ -282,4 +268,4 @@ function toLocalMap(bindings: RuleMatch["bindings"]): Map<string, string> {
   );
 }
 
-export { collectMatch, collectMatches };
+export { collectMatches };

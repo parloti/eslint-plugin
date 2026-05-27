@@ -1,31 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import {
-  buildExampleFromMatch,
-  checkExampleContent,
-  getExamples,
-} from "./examples";
-
-/**
- * Gets getMatch.
- * @param input Input source text.
- * @param pattern Input regex pattern.
- * @returns Return matched array.
- * @throws {Error} When the regex match is missing.
- * @example
- * ```typescript
- * getMatch();
- * ```
- */
-const getMatch = (input: string, pattern: RegExp): RegExpMatchArray => {
-  const match = pattern.exec(input);
-
-  if (match === null) {
-    throw new Error("Expected example match for test case.");
-  }
-
-  return match;
-};
+import { checkExampleContent, getExamples } from "./examples";
 
 describe("require-example-language content checks", () => {
   it("captures inline example content", () => {
@@ -120,45 +95,20 @@ describe("require-example-language content checks", () => {
 });
 
 describe("require-example-language example parsing", () => {
-  it("builds an example from a regex match", () => {
+  it("parses examples with expected metadata", () => {
     // Arrange
-    const match = getMatch(
-      "* @example inline",
-      /^(?<header>\* @example inline)(?<body>)$/u,
-    );
+    const commentValue = ["*", " * @example inline", " * body", " "].join("\n");
 
     // Act
-    const example = buildExampleFromMatch(match, "* @example inline");
+    const actualExamples = getExamples(commentValue);
 
     // Assert
-    expect(example.content).toMatch(/^inline/u);
-    expect(example.prefix).toBe("* ");
-  });
+    const actualFirstExample = actualExamples[0];
 
-  it("defaults the start offset when index is missing", () => {
-    // Arrange
-    const match = getMatch(
-      "* @example inline",
-      /^(?<header>\* @example inline)(?<body>)$/u,
-    );
-    delete match.index;
-
-    // Act
-    const example = buildExampleFromMatch(match, "* @example inline");
-
-    // Assert
-    expect(example.startOffset).toBe(0);
-  });
-
-  it("falls back when match groups are missing", () => {
-    // Arrange
-    const match = getMatch("* @example", /^.*$/u);
-
-    // Act
-    const example = buildExampleFromMatch(match, "* @example");
-
-    // Assert
-    expect(example.content).toBe("");
-    expect(example.prefix).toBe("");
+    expect(actualExamples).toHaveLength(1);
+    expect(actualFirstExample).toBeDefined();
+    expect(actualFirstExample?.content).toContain("inline");
+    expect(actualFirstExample?.prefix).toBe(" * ");
+    expect(actualFirstExample?.startOffset).toBeTypeOf("number");
   });
 });

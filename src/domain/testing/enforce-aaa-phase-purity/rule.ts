@@ -1,6 +1,6 @@
 import type { Rule } from "eslint";
 
-import { analyzeTestBlock } from "../aaa";
+import { analyzeTestBlock } from "../aaa/analyzer.analysis";
 import { reportPhasePurityViolations } from "./phase-purity-reporting";
 
 /** Enforces pure Arrange, Act, and Assert behavior inside AAA-marked tests. */

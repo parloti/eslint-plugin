@@ -81,6 +81,5 @@ export type {
   LocatedNode,
   SectionComment,
   SourceComment,
-  StatementPhase,
   TestBlockAnalysis,
 };

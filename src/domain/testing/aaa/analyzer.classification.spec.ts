@@ -3,14 +3,14 @@ import type * as ESTree from "estree";
 import { parser } from "typescript-eslint";
 import { describe, expect, it } from "vitest";
 
+import { isValidAssertStatement } from "./analyzer.assertions.helpers";
 import {
   hasAsyncLogic,
   hasAwait,
   hasCapturableActResult,
   isMeaningfulActStatement,
   isSetupLikeStatement,
-  isValidAssertStatement,
-} from "./analyzer";
+} from "./analyzer.classification.helpers";
 
 /** Parser options used by the fixture adapter. */
 interface ParseForEslintOptions {

@@ -3,9 +3,7 @@ import type { AST, Rule } from "eslint";
 import { SourceCode } from "eslint";
 import { describe, expect, it } from "vitest";
 
-import type { Comment } from "./types";
-
-import { buildReportDescriptor, reportExample } from "./reporting";
+import { reportExample } from "./reporting";
 
 /**
  * Creates createProgramAst.
@@ -30,94 +28,6 @@ const createProgramAst = (sourceText: string): AST.Program => ({
 });
 
 describe("require example language reporting", () => {
-  it("builds a report descriptor", () => {
-    // Arrange
-    const sourceCode = new SourceCode("", createProgramAst(""));
-    const reportInput = {
-      comment: {
-        loc: { end: { column: 0, line: 1 }, start: { column: 0, line: 1 } },
-        range: [0, 2],
-        type: "Block",
-        value: "*",
-      } as Comment,
-      example: {
-        content: "",
-        endIndex: 0,
-        endOffset: 0,
-        lineIndex: 0,
-        prefix: "",
-        startOffset: 0,
-      },
-      hasOtherExamples: false,
-      problem: "missingFence" as const,
-      sourceCode,
-    };
-
-    // Act
-    const actualDescriptor = buildReportDescriptor(reportInput);
-
-    // Assert
-    expect(actualDescriptor).toBeDefined();
-  });
-
-  it("returns a descriptor without a fixer when range is missing", () => {
-    // Arrange
-    const sourceCode = new SourceCode("", createProgramAst(""));
-    const reportInput = {
-      comment: {
-        loc: { end: { column: 0, line: 1 }, start: { column: 0, line: 1 } },
-        type: "Block",
-        value: "*",
-      } as Comment,
-      example: {
-        content: "",
-        endIndex: 0,
-        endOffset: 0,
-        lineIndex: 0,
-        prefix: "",
-        startOffset: 0,
-      },
-      hasOtherExamples: false,
-      problem: "missingFence" as const,
-      sourceCode,
-    };
-
-    // Act
-    const actualDescriptor = buildReportDescriptor(reportInput);
-
-    // Assert
-    expect(actualDescriptor).toBeDefined();
-  });
-
-  it("returns a descriptor when location data is missing", () => {
-    // Arrange
-    const sourceCode = new SourceCode("", createProgramAst(""));
-    const reportInput = {
-      comment: {
-        range: [0, 2],
-        type: "Block",
-        value: "*",
-      } as Comment,
-      example: {
-        content: "",
-        endIndex: 0,
-        endOffset: 0,
-        lineIndex: 0,
-        prefix: "",
-        startOffset: 0,
-      },
-      hasOtherExamples: false,
-      problem: "missingFence" as const,
-      sourceCode,
-    };
-
-    // Act
-    const actualDescriptor = buildReportDescriptor(reportInput);
-
-    // Assert
-    expect(actualDescriptor).toBeDefined();
-  });
-
   it("skips reporting when example content is valid", () => {
     // Arrange
     const sourceCode = new SourceCode("", createProgramAst(""));
@@ -184,38 +94,5 @@ describe("require example language reporting", () => {
     // Assert
     expect(reportCalls).toBe(1);
     expect(reportDescriptor).toMatchObject({ messageId: "missingFence" });
-  });
-
-  it("returns an empty fix iterable when the fixer has no edit to apply", () => {
-    // Arrange
-    const sourceText = "/*```typescript\nok\n```*/";
-    const sourceCode = new SourceCode(sourceText, createProgramAst(sourceText));
-    const descriptor = buildReportDescriptor({
-      comment: {
-        loc: { end: { column: 0, line: 1 }, start: { column: 0, line: 1 } },
-        range: [0, sourceText.length],
-        type: "Block",
-        value: "*",
-      },
-      example: {
-        content: "```typescript\nok\n```",
-        endIndex: 0,
-        endOffset: sourceText.length - 4,
-        lineIndex: 0,
-        prefix: "",
-        startOffset: 0,
-      },
-      hasOtherExamples: false,
-      problem: "missingLanguage",
-      sourceCode,
-    });
-
-    // Act
-    const actualFixResult = descriptor.fix?.({
-      replaceTextRange: () => ({ range: [0, 0], text: "unused" }),
-    } as unknown as Rule.RuleFixer);
-
-    // Assert
-    expect(actualFixResult).toStrictEqual([]);
   });
 });

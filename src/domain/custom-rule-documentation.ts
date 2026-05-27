@@ -51,9 +51,4 @@ function getCustomRuleDocumentationUrl(ruleName: string): string {
   return `${customRuleDocumentationBaseUrl}/${ruleName}.md`;
 }
 
-export {
-  createRuleDocumentation,
-  customRuleDocumentationBaseUrl,
-  getCustomRuleDocumentationUrl,
-};
-export type { CustomRuleDocumentation };
+export { createRuleDocumentation };

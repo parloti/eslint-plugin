@@ -1,13 +1,13 @@
 import type { Rule } from "eslint";
 import type * as ESTree from "estree";
 
+import { analyzeTestBlock } from "../aaa/analyzer.analysis";
 import {
-  analyzeTestBlock,
   getAssertDeclaredIdentifiers,
   getAssertionIdentifiers,
   hasAssertion,
   usesPrefix,
-} from "../aaa";
+} from "../aaa/analyzer.assertions.helpers";
 
 /** Supported assertion variable prefixes enforced by this rule. */
 type AssertionPrefix = "actual" | "expected";

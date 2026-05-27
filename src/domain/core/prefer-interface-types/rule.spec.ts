@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 
-import { preferInterfaceTypesRule } from "./rule";
 import {
   createBareParameter,
   createContext,
@@ -10,7 +9,8 @@ import {
   createRestParameter,
   createTypeAnnotation,
   runListener,
-} from "./test-helpers";
+} from "../../../shared/test-utils/prefer-interface-types-test-helpers";
+import { preferInterfaceTypesRule } from "./rule";
 
 describe("prefer interface types rule", () => {
   it("exposes metadata", () => {

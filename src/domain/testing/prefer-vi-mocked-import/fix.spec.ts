@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 
 import type { RuleMatch } from "./types";
 
-import { buildFix } from "./fix";
+import { buildFixes } from "./fix";
 
 /** Type definition for rule data. */
 interface StubFix {
@@ -174,12 +174,12 @@ function replaceTextRange(range: [number, number], text: string): Rule.Fix {
 }
 
 describe("prefer-vi-mocked-import fix", () => {
-  it("exports buildFix", () => {
+  it("exports buildFixes", () => {
     // Arrange
     const expectedType = "function";
 
     // Act
-    const actualType = typeof buildFix;
+    const actualType = typeof buildFixes;
 
     // Assert
     expect(actualType).toBe(expectedType);
@@ -199,7 +199,7 @@ describe("prefer-vi-mocked-import fix", () => {
     ];
 
     // Act
-    const replaceTexts = buildFix(match, createFixer())
+    const replaceTexts = buildFixes([match], createFixer())
       .filter((fix) => isStubFix(fix))
       .filter((fix) => fix.type === "replace")
       .map((fix) => fix.text);
@@ -214,7 +214,7 @@ describe("prefer-vi-mocked-import fix", () => {
     match.importPlan = { moduleSpecifier: "./mod", names: [] };
 
     // Act
-    const actualInsertFixes = buildFix(match, createFixer())
+    const actualInsertFixes = buildFixes([match], createFixer())
       .filter((fix) => isStubFix(fix))
       .filter(
         (fix) => fix.type === "insertAfter" || fix.type === "insertBefore",
@@ -230,7 +230,7 @@ describe("prefer-vi-mocked-import fix", () => {
     match.importPlan = { moduleSpecifier: "./mod", names: ["a"] };
 
     // Act
-    const actualBeforeFix = buildFix(match, createFixer())
+    const actualBeforeFix = buildFixes([match], createFixer())
       .filter((fix) => isStubFix(fix))
       .find((fix) => fix.type === "insertBefore");
 
@@ -257,7 +257,7 @@ describe("prefer-vi-mocked-import fix", () => {
     };
 
     // Act
-    const actualReplaceTexts = buildFix(match, createFixer())
+    const actualReplaceTexts = buildFixes([match], createFixer())
       .filter((fix) => isStubFix(fix))
       .filter((fix) => fix.type === "replace")
       .map((fix) => fix.text);
@@ -272,7 +272,7 @@ describe("prefer-vi-mocked-import fix", () => {
     match.sourceText = "const a = vi.fn();";
 
     // Act
-    const actualRemoval = buildFix(match, createFixer())
+    const actualRemoval = buildFixes([match], createFixer())
       .filter((fix) => isStubFix(fix))
       .find((fix) => fix.type === "remove");
 

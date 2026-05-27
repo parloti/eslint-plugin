@@ -1,14 +1,14 @@
 import type { Rule } from "eslint";
 
-import type { SectionComment, TestBlockAnalysis } from "../aaa";
+import type { SectionComment, TestBlockAnalysis } from "../aaa/types";
 
+import { analyzeTestBlock } from "../aaa/analyzer.analysis";
 import {
   aaaPhaseOrder,
-  analyzeTestBlock,
   getLineStartRange,
   getPhaseBoundaryComments,
-  hasBlankLineBeforeComment,
-} from "../aaa";
+} from "../aaa/analyzer.analysis.helpers";
+import { hasBlankLineBeforeComment } from "../aaa/analyzer.classification.helpers";
 import { buildMissingSectionFixes } from "./missing-section-fixes";
 
 /** Enforces explicit AAA section comments and spacing within supported test blocks. */

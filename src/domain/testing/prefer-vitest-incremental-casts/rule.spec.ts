@@ -1,6 +1,9 @@
 import { afterAll, describe, expect, it } from "vitest";
 
-import { cleanupTemporaryDirectories, runFix } from "./rule-test-helpers";
+import {
+  cleanupTemporaryDirectories,
+  runFix,
+} from "../../../shared/test-utils/prefer-vitest-incremental-casts-rule-test-helpers";
 
 describe("prefer-vitest-incremental-casts rule", () => {
   afterAll(cleanupTemporaryDirectories);

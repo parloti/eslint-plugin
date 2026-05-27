@@ -4,14 +4,14 @@ import type * as ESTree from "estree";
 import { SourceCode } from "eslint";
 import { describe, expect, it } from "vitest";
 
-import { noImportExportAliasesRule } from "./no-import-export-aliases-rule";
 import {
   createBody,
   createExportWithoutSource,
   createImportDeclaration,
   createImportSpecifier,
   createProgram,
-} from "./test-helpers";
+} from "../../../shared/test-utils/consistent-barrel-files/test-helpers";
+import { noImportExportAliasesRule } from "./no-import-export-aliases-rule";
 
 /** Message-id view over ESLint report descriptors used in tests. */
 interface ReportDescriptorWithMessageId {

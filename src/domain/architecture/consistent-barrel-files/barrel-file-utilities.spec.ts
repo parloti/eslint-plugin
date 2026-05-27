@@ -3,14 +3,14 @@ import path from "node:path";
 import { cwd } from "node:process";
 import { afterEach, describe, expect, it } from "vitest";
 
+import { createRepoDirectory } from "../../../shared/test-utils/consistent-barrel-files/test-helpers";
+import { writeFeature } from "../../../shared/test-utils/consistent-barrel-files/test-helpers.file-writers";
 import {
   getDirectoryBarrelState,
   isBarrelFile,
   isLintableModuleFile,
   normalizeAllowedBarrelNames,
 } from "./barrel-file-utilities";
-import { createRepoDirectory } from "./test-helpers";
-import { writeFeature } from "./test-helpers.file-writers";
 
 describe("barrel file utilities", () => {
   const temporaryDirectories: string[] = [];

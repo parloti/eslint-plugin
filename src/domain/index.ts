@@ -7,11 +7,7 @@ export {
   noUnusedExportsRule,
 } from "./architecture";
 export { noMultipleDeclaratorsRule, preferInterfaceTypesRule } from "./core";
-export {
-  createRuleDocumentation,
-  customRuleDocumentationBaseUrl,
-  getCustomRuleDocumentationUrl,
-} from "./custom-rule-documentation";
+export { createRuleDocumentation } from "./custom-rule-documentation";
 export {
   noInterfaceMemberDocumentationRule,
   requireExampleLanguageRule,

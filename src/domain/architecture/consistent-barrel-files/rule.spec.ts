@@ -8,9 +8,15 @@ import { afterEach, describe, expect, it } from "vitest";
 
 import type { ConsistentBarrelFilesOptions } from "./types";
 
+import {
+  createProgram,
+  createRepoDirectory,
+} from "../../../shared/test-utils/consistent-barrel-files/test-helpers";
+import {
+  writeBarrel,
+  writeFeature,
+} from "../../../shared/test-utils/consistent-barrel-files/test-helpers.file-writers";
 import { consistentBarrelFilesRule } from "./rule";
-import { createProgram, createRepoDirectory } from "./test-helpers";
-import { writeBarrel, writeFeature } from "./test-helpers.file-writers";
 
 /** Type definition for rule data. */
 interface RuleReport {

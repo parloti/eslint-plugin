@@ -1,6 +1,7 @@
 import type { Rule } from "eslint";
 
-import { analyzeTestBlock, countActStatements } from "../aaa";
+import { analyzeTestBlock } from "../aaa/analyzer.analysis";
+import { countActStatements } from "../aaa/analyzer.analysis.helpers";
 
 /** Requires the Act phase to contain a single top-level statement. */
 const singleActStatementRule: Rule.RuleModule = {

@@ -1,8 +1,65 @@
+import type { Rule } from "eslint";
+
 import { describe, expect, it } from "vitest";
 
 import type { Example } from "./types";
 
-import { buildMissingFenceFix, buildMissingLanguageFix } from "./fixes";
+import { createFixer } from "./fixes";
+
+/** Supported problem identifiers used by this test suite. */
+interface ApplyFixInput {
+  /** Parsed example metadata. */
+  example: Example;
+  /** Problem code that determines which fix branch runs. */
+  problem: "emptyExample" | "missingFence" | "missingLanguage";
+  /** Original source text segment to patch. */
+  sourceText: string;
+}
+
+/**
+ * Applies a createFixer callback and returns the replacement text.
+ * @param context Fixture context used to build the fix callback.
+ * @returns Replacement text emitted by the fixer when available.
+ * @example
+ * ```typescript
+ * const text = applyFix({
+ *   example: {
+ *     content: "value",
+ *     endIndex: 0,
+ *     endOffset: 0,
+ *     lineIndex: 0,
+ *     prefix: " * ",
+ *     startOffset: 0,
+ *   },
+ *   problem: "missingFence",
+ *   sourceText: "* @example value",
+ * });
+ * void text;
+ * ```
+ */
+const applyFix = (context: ApplyFixInput): string | undefined => {
+  const fixer: Rule.RuleFixer = {
+    insertTextAfter: () => ({ range: [0, 0], text: "" }),
+    insertTextAfterRange: () => ({ range: [0, 0], text: "" }),
+    insertTextBefore: () => ({ range: [0, 0], text: "" }),
+    insertTextBeforeRange: () => ({ range: [0, 0], text: "" }),
+    remove: () => ({ range: [0, 0], text: "" }),
+    removeRange: () => ({ range: [0, 0], text: "" }),
+    replaceText: () => ({ range: [0, 0], text: "" }),
+    replaceTextRange: (_range, text) => ({ range: [0, 0], text }),
+  };
+
+  const actualFixResult = createFixer({
+    absoluteEnd: context.sourceText.length,
+    absoluteStart: 0,
+    example: context.example,
+    hasOtherExamples: false,
+    problem: context.problem,
+    sourceText: context.sourceText,
+  })(fixer);
+
+  return actualFixResult?.text;
+};
 
 describe("require-example-language fixes", () => {
   it("builds missing fence fixes with blank lines", () => {
@@ -17,7 +74,11 @@ describe("require-example-language fixes", () => {
     };
 
     // Act
-    const actualFixed = buildMissingFenceFix(example);
+    const actualFixed = applyFix({
+      example,
+      problem: "missingFence",
+      sourceText: "* @example first\n * second",
+    });
 
     // Assert
     expect(actualFixed).toContain("\n * \n");
@@ -36,7 +97,11 @@ describe("require-example-language fixes", () => {
     };
 
     // Act
-    const actualFixed = buildMissingFenceFix(example);
+    const actualFixed = applyFix({
+      example,
+      problem: "missingFence",
+      sourceText: "* @example",
+    });
 
     // Assert
     expect(actualFixed).toContain("```typescript");
@@ -47,7 +112,18 @@ describe("require-example-language fixes", () => {
     const original = "* ```\r\n* ok\r\n* ```";
 
     // Act
-    const actualUpdated = buildMissingLanguageFix(original);
+    const actualUpdated = applyFix({
+      example: {
+        content: "",
+        endIndex: 0,
+        endOffset: 0,
+        lineIndex: 0,
+        prefix: "* ",
+        startOffset: 0,
+      },
+      problem: "missingLanguage",
+      sourceText: original,
+    });
 
     // Assert
     expect(actualUpdated).toContain("```typescript");
@@ -59,7 +135,18 @@ describe("require-example-language fixes", () => {
     const original = "```\nconsole.log('ok');\n```";
 
     // Act
-    const actualUpdated = buildMissingLanguageFix(original);
+    const actualUpdated = applyFix({
+      example: {
+        content: "",
+        endIndex: 0,
+        endOffset: 0,
+        lineIndex: 0,
+        prefix: "",
+        startOffset: 0,
+      },
+      problem: "missingLanguage",
+      sourceText: original,
+    });
 
     // Assert
     expect(actualUpdated).toContain("```typescript");
@@ -70,7 +157,18 @@ describe("require-example-language fixes", () => {
     const original = "* ```typescript\n* ok\n* ```";
 
     // Act
-    const actualUpdated = buildMissingLanguageFix(original);
+    const actualUpdated = applyFix({
+      example: {
+        content: "",
+        endIndex: 0,
+        endOffset: 0,
+        lineIndex: 0,
+        prefix: "* ",
+        startOffset: 0,
+      },
+      problem: "missingLanguage",
+      sourceText: original,
+    });
 
     // Assert
     expect(actualUpdated).toBeUndefined();
@@ -81,7 +179,18 @@ describe("require-example-language fixes", () => {
     const original = "* no fences here";
 
     // Act
-    const actualUpdated = buildMissingLanguageFix(original);
+    const actualUpdated = applyFix({
+      example: {
+        content: "",
+        endIndex: 0,
+        endOffset: 0,
+        lineIndex: 0,
+        prefix: "* ",
+        startOffset: 0,
+      },
+      problem: "missingLanguage",
+      sourceText: original,
+    });
 
     // Assert
     expect(actualUpdated).toBeUndefined();
@@ -100,7 +209,11 @@ describe("require-example-language fixes", () => {
     };
 
     // Act
-    const actualFixed = buildMissingFenceFix(example);
+    const actualFixed = applyFix({
+      example,
+      problem: "missingFence",
+      sourceText: "* @example",
+    });
 
     // Assert
     expect(actualFixed).toContain(

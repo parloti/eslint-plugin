@@ -1,6 +1,6 @@
 import type * as ESTree from "estree";
 
-import type { TestBlockAnalysis } from "../aaa";
+import type { TestBlockAnalysis } from "../aaa/types";
 
 import { collectPatternIdentifiers } from "./pattern-identifiers";
 

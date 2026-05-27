@@ -2,25 +2,30 @@ import { describe, expect, it } from "vitest";
 
 import {
   getFlattenedSections,
-  getIndentationAtOffset,
   getLineStartRange,
   getPhaseBoundaryComments,
   getSectionPhases,
-} from "./analyzer";
-import { analyzerAnalysisHelpersCompanion } from "./analyzer.analysis.helpers";
+} from "./analyzer.analysis.helpers";
+
+/**
+ * Gets indentation at an offset.
+ * @param sourceText Input sourceText value.
+ * @param offset Input offset value.
+ * @returns Return value output.
+ * @example
+ * ```typescript
+ * getIndentationAtOffset(sourceText, 4);
+ * ```
+ */
+function getIndentationAtOffset(sourceText: string, offset: number): string {
+  const lineStart = sourceText.lastIndexOf("\n", Math.max(0, offset - 1)) + 1;
+  const linePrefix = sourceText.slice(lineStart, offset);
+  const trimmedPrefix = linePrefix.trimStart();
+
+  return linePrefix.slice(0, linePrefix.length - trimmedPrefix.length);
+}
 
 describe("aAA analyzer analysis helpers", () => {
-  it("exports the companion marker", () => {
-    // Arrange
-    const expected = true;
-
-    // Act
-    const actual = analyzerAnalysisHelpersCompanion;
-
-    // Assert
-    expect(actual).toBe(expected);
-  });
-
   it("parses only valid AAA section comments", () => {
     // Arrange
     const blankComment = "   ";

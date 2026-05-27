@@ -2,14 +2,8 @@ import type { Rule } from "eslint";
 
 import { describe, expect, it } from "vitest";
 
-import type { Comment } from "./comment-utilities-test-helpers";
+import type { Comment } from "../../../shared/test-utils/no-interface-member-documentation-comment-utilities-test-helpers";
 
-import {
-  buildRemovalRange,
-  getCommentLines,
-  getCommentText,
-  getJsdocComment,
-} from "./comment-utilities";
 import {
   createComment,
   createDualJsdocContext,
@@ -17,7 +11,13 @@ import {
   createRangeMissingContext,
   createSingleJsdocContext,
   createSourceCode,
-} from "./comment-utilities-test-helpers";
+} from "../../../shared/test-utils/no-interface-member-documentation-comment-utilities-test-helpers";
+import {
+  buildRemovalRange,
+  getCommentLines,
+  getCommentText,
+  getJsdocComment,
+} from "./comment-utilities";
 
 describe("comment utilities jsdoc lookup", () => {
   it("finds the closest JSDoc comment", () => {

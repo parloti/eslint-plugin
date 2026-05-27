@@ -2,28 +2,6 @@ import type * as ESTree from "estree";
 
 import type { LocatedComment, SourceComment } from "./types";
 
-import { visitNode as visitNodeImplementation } from "./analyzer.super.helpers";
-
-/**
- * Creates a local forwarding function for an imported analyzer helper.
- * @template TParameters Forwarded parameter tuple.
- * @template TResult Forwarded return type.
- * @param implementation Imported helper implementation.
- * @returns Local function that forwards all arguments to the implementation.
- * @example
- * ```typescript
- * const localHelper = forward(implementation);
- * ```
- */
-function forward<TParameters extends unknown[], TResult>(
-  implementation: (...parameters: TParameters) => TResult,
-): (...parameters: TParameters) => TResult {
-  return (...parameters) => implementation(...parameters);
-}
-
-/** Visits an ESTree node graph while ignoring cycles. */
-const visitNode = forward(visitNodeImplementation);
-
 /** Array mutator methods that imply observable state changes. */
 const arrayMutationMethods = new Set([
   "copyWithin",
@@ -271,8 +249,5 @@ export {
   isUtilityNamedCall,
   isUtilityNamespaceCall,
   isVoidLikeMethodName,
-  setupLikeNames,
-  utilityMethodNames,
-  visitNode,
   voidLikeMethodNames,
 };

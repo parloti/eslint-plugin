@@ -1,5 +1,5 @@
 import type { Rule } from "eslint";
-import type { Comment as EstreeComment, Node as EstreeNode } from "estree";
+import type { Comment, Node } from "estree";
 
 import {
   normalizeMaxLineLength,
@@ -7,7 +7,7 @@ import {
 } from "./single-line-jsdoc-utilities";
 
 /** Type union for nodes that may be missing. */
-type MaybeNode = EstreeNode | NodeWithType | null | undefined;
+type MaybeNode = Node | NodeWithType | null | undefined;
 
 /** Shape for export nodes that wrap a declaration. */
 interface NodeWithDeclaration {
@@ -32,15 +32,15 @@ interface NodeWithValue {
 /** SourceCode accessors used by this rule. */
 interface SourceCodeAccess {
   /** Returns the node at a range index. */
-  getNodeByRangeIndex: (index: number) => EstreeNode | null;
+  getNodeByRangeIndex: (index: number) => Node | null;
   /** Returns the first token after a comment. */
   getTokenAfter: (
-    node: EstreeComment,
+    node: Comment,
     options?: TokenAfterOptions,
   ) => null | TokenWithOptionalRange;
 }
 /** Type alias for comment nodes provided by ESLint. */
-type SourceComment = EstreeComment;
+type SourceComment = Comment;
 /** Options used when fetching tokens after comments. */
 interface TokenAfterOptions {
   /** Whether to include comment tokens. */
@@ -108,7 +108,7 @@ const functionLikeTypes = new Set<string>([
  * @returns True when the node is a function expression.
  * @example
  * ```typescript
- * isFunctionExpression({ type: "FunctionExpression" } as EstreeNode);
+ * isFunctionExpression({ type: "FunctionExpression" } as Node);
  * ```
  */
 const isFunctionExpression = (node: MaybeNode): boolean =>
@@ -121,7 +121,7 @@ const isFunctionExpression = (node: MaybeNode): boolean =>
  * @returns True when the node is a function declaration.
  * @example
  * ```typescript
- * isFunctionDeclaration({ type: "FunctionDeclaration" } as EstreeNode);
+ * isFunctionDeclaration({ type: "FunctionDeclaration" } as Node);
  * ```
  */
 const isFunctionDeclaration = (node: MaybeNode): boolean =>
@@ -133,7 +133,7 @@ const isFunctionDeclaration = (node: MaybeNode): boolean =>
  * @returns True when the node is a method-like declaration.
  * @example
  * ```typescript
- * isMethodLike({ type: "MethodDefinition" } as EstreeNode);
+ * isMethodLike({ type: "MethodDefinition" } as Node);
  * ```
  */
 const isMethodLike = (node: MaybeNode): boolean =>
@@ -145,10 +145,10 @@ const isMethodLike = (node: MaybeNode): boolean =>
  * @returns True when the property value is a function.
  * @example
  * ```typescript
- * isPropertyWithFunctionValue({ type: "Property" } as EstreeNode);
+ * isPropertyWithFunctionValue({ type: "Property" } as Node);
  * ```
  */
-const isPropertyWithFunctionValue = (node: EstreeNode): boolean => {
+const isPropertyWithFunctionValue = (node: Node): boolean => {
   if (node.type !== "PropertyDefinition" && node.type !== "Property") {
     return false;
   }
@@ -163,10 +163,10 @@ const isPropertyWithFunctionValue = (node: EstreeNode): boolean => {
  * @returns True when any initializer is a function.
  * @example
  * ```typescript
- * isVariableWithFunctionInit({ type: "VariableDeclaration" } as EstreeNode);
+ * isVariableWithFunctionInit({ type: "VariableDeclaration" } as Node);
  * ```
  */
-const isVariableWithFunctionInit = (node: EstreeNode): boolean => {
+const isVariableWithFunctionInit = (node: Node): boolean => {
   if (node.type !== "VariableDeclaration") {
     return false;
   }
@@ -185,10 +185,10 @@ const isVariableWithFunctionInit = (node: EstreeNode): boolean => {
  * @returns True when the exported declaration is function-like.
  * @example
  * ```typescript
- * isExportedFunctionLike({ type: "ExportNamedDeclaration" } as EstreeNode);
+ * isExportedFunctionLike({ type: "ExportNamedDeclaration" } as Node);
  * ```
  */
-const isExportedFunctionLike = (node: EstreeNode): boolean => {
+const isExportedFunctionLike = (node: Node): boolean => {
   if (
     node.type !== "ExportNamedDeclaration" &&
     node.type !== "ExportDefaultDeclaration"
@@ -207,7 +207,7 @@ const isExportedFunctionLike = (node: EstreeNode): boolean => {
  * @returns True when the node is function-like.
  * @example
  * ```typescript
- * isFunctionLikeNode({ type: "FunctionDeclaration" } as EstreeNode);
+ * isFunctionLikeNode({ type: "FunctionDeclaration" } as Node);
  * ```
  */
 const isFunctionLikeNode = (node: MaybeNode): boolean => {
@@ -220,9 +220,9 @@ const isFunctionLikeNode = (node: MaybeNode): boolean => {
     isFunctionExpression(node) ||
     isMethodLike(node) ||
     functionLikeTypes.has(node.type) ||
-    isPropertyWithFunctionValue(node as EstreeNode) ||
-    isVariableWithFunctionInit(node as EstreeNode) ||
-    isExportedFunctionLike(node as EstreeNode)
+    isPropertyWithFunctionValue(node as Node) ||
+    isVariableWithFunctionInit(node as Node) ||
+    isExportedFunctionLike(node as Node)
   );
 };
 

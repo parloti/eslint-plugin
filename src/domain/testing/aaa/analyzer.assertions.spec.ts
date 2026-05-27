@@ -6,11 +6,11 @@ import { describe, expect, it } from "vitest";
 
 import type { TestBlockAnalysis } from "./types";
 
+import { analyzeTestBlock } from "./analyzer.analysis";
 import {
-  analyzeTestBlock,
   getAssertDeclaredIdentifiers,
   getAssertionIdentifiers,
-} from "./analyzer";
+} from "./analyzer.assertions.helpers";
 
 /** Parser options used by the fixture adapter. */
 interface ParseForEslintOptions {

@@ -149,11 +149,7 @@ function isAssertionCall(node: ESTree.CallExpression): boolean {
   );
 }
 
-/** Companion marker for test isolation. */
-const analyzerAssertionsOperandsCompanion = true as const;
-
 export {
-  analyzerAssertionsOperandsCompanion,
   getAssertOperands,
   getExpectOperands,
   getIdentifierName,

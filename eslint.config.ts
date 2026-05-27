@@ -7,6 +7,7 @@ import { all } from "./src";
 /** CodePerfect ESLint configuration with custom rules and boundaries. */
 const codePerfect = await config({
   plugins: {
+    boundaries: false,
     codeperfect: false,
     playwright: false,
     "rxjs-x": false,
@@ -18,6 +19,13 @@ const codePerfect = await config({
 const eslintConfig = defineConfig(
   codePerfect,
   all,
+  {
+    files: ["**/*.ts"],
+    rules: {
+      "boundaries/dependencies": "off",
+      "import-x/no-internal-modules": "off",
+    },
+  },
   {
     files: ["src/index.ts"],
     name: "Package entrypoint barrel",

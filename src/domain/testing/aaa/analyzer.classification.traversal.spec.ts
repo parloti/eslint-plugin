@@ -2,23 +2,9 @@ import type * as ESTree from "estree";
 
 import { describe, expect, it } from "vitest";
 
-import {
-  analyzerClassificationTraversalCompanion,
-  visitStatementWithoutDeferredBodies,
-} from "./analyzer.classification.traversal";
+import { visitStatementWithoutDeferredBodies } from "./analyzer.classification.traversal";
 
 describe("aaa analyzer classification traversal", () => {
-  it("exports the companion marker", () => {
-    // Arrange
-    const expected = true;
-
-    // Act
-    const actual = analyzerClassificationTraversalCompanion;
-
-    // Assert
-    expect(actual).toBe(expected);
-  });
-
   it("skips nested deferred function bodies during traversal", () => {
     // Arrange
     const statement = {
