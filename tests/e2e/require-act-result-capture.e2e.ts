@@ -36,6 +36,38 @@ describe("require-act-result-capture e2e", () => {
     );
   });
 
+  it("rejects report-prefixed calls outside the helper allowlist", () => {
+    // Arrange
+    const testCase = {
+      code: [
+        'it("flags report-prefixed non-helper calls", () => {',
+        "  // Arrange",
+        "  const input = 1;",
+        "",
+        "  // Act",
+        "  reportMetrics(input);",
+        "",
+        "  // Assert",
+        "  expect(input).toBe(1);",
+        "});",
+      ].join("\n"),
+      errors: [{ messageId: "captureActResult" }],
+      filename: "example.spec.ts",
+    };
+
+    // Act
+    const result = runRuleCase(
+      "require-act-result-capture",
+      requireActResultCaptureRule,
+      testCase,
+    );
+
+    // Assert
+    expect(result.messageIds).toStrictEqual(
+      testCase.errors.map((error) => error.messageId),
+    );
+  });
+
   it.each([
     {
       code: [
@@ -91,6 +123,23 @@ describe("require-act-result-capture e2e", () => {
         "",
         "  // Act",
         "  customRule.create(context);",
+        "",
+        "  // Assert",
+        "  expect(reportCalls).toStrictEqual([]);",
+        "});",
+      ].join("\n"),
+      filename: "example.spec.ts",
+    },
+    {
+      code: [
+        'it("allows namespaced rule listener creation", () => {',
+        "  // Arrange",
+        "  const reportCalls = [];",
+        "  const namespace = { customRule: { create: (context) => ({ context }) } };",
+        "  const context = { report: (value) => reportCalls.push(value) };",
+        "",
+        "  // Act",
+        "  namespace.customRule.create(context);",
         "",
         "  // Assert",
         "  expect(reportCalls).toStrictEqual([]);",

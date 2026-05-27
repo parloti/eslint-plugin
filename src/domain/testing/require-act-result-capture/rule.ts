@@ -4,6 +4,40 @@ import type * as ESTree from "estree";
 import { analyzeTestBlock } from "../aaa/analyzer.analysis";
 import { hasCapturableActResult } from "../aaa/analyzer.classification.helpers";
 
+/** Known helper wrappers whose return value is intentionally ignored in Act. */
+const knownActHelpers = new Set([
+  "runFunctionListener",
+  "runListener",
+  "runRule",
+]);
+
+/**
+ * Gets the nearest identifier-like name from a member expression object.
+ * @param object Member expression object node.
+ * @returns Identifier-like name when it can be resolved statically.
+ * @example
+ * ```typescript
+ * const name = getMemberObjectName({} as ESTree.MemberExpression["object"]);
+ * void name;
+ * ```
+ */
+function getMemberObjectName(
+  object: ESTree.MemberExpression["object"],
+): string | undefined {
+  if (object.type === "Identifier") {
+    return object.name;
+  }
+
+  if (
+    object.type === "MemberExpression" &&
+    object.property.type === "Identifier"
+  ) {
+    return object.property.name;
+  }
+
+  return void 0;
+}
+
 /**
  * Checks whether a call reports through `context.report(...)`.
  * @param expression Call expression to inspect.
@@ -64,9 +98,7 @@ function isHelperDrivenAct(statement: ESTree.Statement): boolean {
 function isNamedHelperCall(expression: ESTree.CallExpression): boolean {
   return (
     expression.callee.type === "Identifier" &&
-    /^(?:report[A-Z]\w*|run(?:FunctionListener|Listener|Rule))$/u.test(
-      expression.callee.name,
-    )
+    knownActHelpers.has(expression.callee.name)
   );
 }
 
@@ -81,13 +113,17 @@ function isNamedHelperCall(expression: ESTree.CallExpression): boolean {
  * ```
  */
 function isRuleCreateCall(expression: ESTree.CallExpression): boolean {
-  return (
-    expression.callee.type === "MemberExpression" &&
-    expression.callee.object.type === "Identifier" &&
-    expression.callee.object.name.endsWith("Rule") &&
-    expression.callee.property.type === "Identifier" &&
-    expression.callee.property.name === "create"
-  );
+  if (
+    expression.callee.type !== "MemberExpression" ||
+    expression.callee.property.type !== "Identifier" ||
+    expression.callee.property.name !== "create"
+  ) {
+    return false;
+  }
+
+  const objectName = getMemberObjectName(expression.callee.object);
+
+  return objectName !== void 0 && objectName.endsWith("Rule");
 }
 
 /** Requires Act-phase expressions to capture non-void results before asserting. */

@@ -244,7 +244,7 @@ describe("require-act-result-capture rule", () => {
     });
     const helperDrivenStatement = createCallStatement({
       arguments: [],
-      callee: createIdentifier("reportLintMessage"),
+      callee: createIdentifier("runListener"),
       type: "CallExpression",
     });
     const ruleCreateStatement = createCallStatement({
@@ -290,7 +290,7 @@ describe("require-act-result-capture rule", () => {
     ]);
   });
 
-  it("skips non-call and non-expression Act statements", async () => {
+  it("does not report when statements are not capturable", async () => {
     // Arrange
     const nonExpressionStatement = { type: "VariableDeclaration" };
     const nonCallStatement = {
@@ -303,15 +303,63 @@ describe("require-act-result-capture rule", () => {
         { node: nonCallStatement, phases: ["Act"] },
       ],
     };
-    const capturableNodes = new Set([nonCallStatement, nonExpressionStatement]);
+    const capturableNodes = new Set();
+
+    // Act
+    const actual = await runRule(analysis, capturableNodes);
+
+    // Assert
+    expect(actual).toStrictEqual([]);
+  });
+
+  it("reports report-prefixed calls that are not in the helper allowlist", async () => {
+    // Arrange
+    const reportMetricsStatement = createCallStatement({
+      arguments: [],
+      callee: createIdentifier("reportMetrics"),
+      type: "CallExpression",
+    });
+    const analysis = {
+      statements: [{ node: reportMetricsStatement, phases: ["Act"] }],
+    };
+    const capturableNodes = new Set([reportMetricsStatement]);
 
     // Act
     const actual = await runRule(analysis, capturableNodes);
 
     // Assert
     expect(actual).toStrictEqual([
-      { messageId: "captureActResult", node: nonExpressionStatement },
-      { messageId: "captureActResult", node: nonCallStatement },
+      {
+        messageId: "captureActResult",
+        node: reportMetricsStatement,
+      },
     ]);
+  });
+
+  it("skips namespaced rule create calls", async () => {
+    // Arrange
+    const namespacedRuleCreateStatement = createCallStatement({
+      arguments: [],
+      callee: {
+        object: {
+          object: createIdentifier("testing"),
+          property: createIdentifier("customRule"),
+          type: "MemberExpression",
+        },
+        property: createIdentifier("create"),
+        type: "MemberExpression",
+      },
+      type: "CallExpression",
+    });
+    const analysis = {
+      statements: [{ node: namespacedRuleCreateStatement, phases: ["Act"] }],
+    };
+    const capturableNodes = new Set([namespacedRuleCreateStatement]);
+
+    // Act
+    const actual = await runRule(analysis, capturableNodes);
+
+    // Assert
+    expect(actual).toStrictEqual([]);
   });
 });
