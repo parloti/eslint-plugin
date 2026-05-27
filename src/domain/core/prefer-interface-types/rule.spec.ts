@@ -12,6 +12,31 @@ import {
 } from "../../../shared/test-utils/prefer-interface-types-test-helpers";
 import { preferInterfaceTypesRule } from "./rule";
 
+/** Listener keys expected on the rule listener map. */
+type PreferInterfaceTypesListener =
+  | "ArrowFunctionExpression"
+  | "FunctionDeclaration"
+  | "FunctionExpression"
+  | "TSCallSignatureDeclaration"
+  | "TSConstructSignatureDeclaration"
+  | "TSDeclareFunction"
+  | "TSFunctionType"
+  | "TSMethodSignature"
+  | "VariableDeclarator";
+
+/** Listener keys provided by the rule. */
+const listenerKeys: PreferInterfaceTypesListener[] = [
+  "ArrowFunctionExpression",
+  "FunctionDeclaration",
+  "FunctionExpression",
+  "TSCallSignatureDeclaration",
+  "TSConstructSignatureDeclaration",
+  "TSDeclareFunction",
+  "TSFunctionType",
+  "TSMethodSignature",
+  "VariableDeclarator",
+];
+
 describe("prefer interface types rule", () => {
   it("exposes metadata", () => {
     // Arrange
@@ -73,11 +98,123 @@ describe("prefer interface types rule", () => {
     ]);
   });
 
+  it("reports inline object type annotations on default parameters", () => {
+    // Arrange
+    const { context, reports } = createContext();
+    const node = createFunctionNode({
+      params: [
+        {
+          left: createParameter("TSTypeLiteral"),
+          right: { name: "fallback", type: "Identifier" },
+          type: "AssignmentPattern",
+        },
+      ],
+    });
+
+    // Act
+    runListener(context, node);
+
+    // Assert
+    expect(reports).toStrictEqual([
+      { messageId: "preferNamedObject", nodeType: "TSTypeLiteral" },
+    ]);
+  });
+
+  it("reports inline object type annotations on default parameter properties", () => {
+    // Arrange
+    const { context, reports } = createContext();
+    const node = createFunctionNode({
+      params: [
+        {
+          parameter: {
+            left: createParameter("TSTypeLiteral"),
+            right: { name: "fallback", type: "Identifier" },
+            type: "AssignmentPattern",
+          },
+          type: "TSParameterProperty",
+        },
+      ],
+    });
+
+    // Act
+    runListener(context, node);
+
+    // Assert
+    expect(reports).toStrictEqual([
+      { messageId: "preferNamedObject", nodeType: "TSTypeLiteral" },
+    ]);
+  });
+
   it("reports inline object type annotations on return types", () => {
     // Arrange
     const { context, reports } = createContext();
     const node = createFunctionNode({
       returnType: createTypeAnnotation("TSTypeLiteral"),
+    });
+
+    // Act
+    runListener(context, node);
+
+    // Assert
+    expect(reports).toStrictEqual([
+      { messageId: "preferNamedObject", nodeType: "TSTypeLiteral" },
+    ]);
+  });
+
+  it("reports inline object types in variable annotations", () => {
+    // Arrange
+    const { context, reports } = createContext();
+    const node = {
+      id: createParameter("TSTypeLiteral"),
+      type: "VariableDeclarator",
+    };
+
+    // Act
+    runListener(context, node, "VariableDeclarator");
+
+    // Assert
+    expect(reports).toStrictEqual([
+      { messageId: "preferNamedObject", nodeType: "TSTypeLiteral" },
+    ]);
+  });
+
+  it("reports nested inline object types in union wrappers", () => {
+    // Arrange
+    const { context, reports } = createContext();
+    const node = createFunctionNode({
+      params: [
+        {
+          name: "value",
+          type: "Identifier",
+          typeAnnotation: {
+            typeAnnotation: {
+              type: "TSUnionType",
+              types: [{ type: "TSTypeReference" }, { type: "TSTypeLiteral" }],
+            },
+          },
+        },
+      ],
+    });
+
+    // Act
+    runListener(context, node);
+
+    // Assert
+    expect(reports).toStrictEqual([
+      { messageId: "preferNamedObject", nodeType: "TSTypeLiteral" },
+    ]);
+  });
+
+  it("reports nested inline object types in parenthesized wrappers", () => {
+    // Arrange
+    const { context, reports } = createContext();
+    const node = createFunctionNode({
+      returnType: {
+        typeAnnotation: {
+          type: "TSParenthesizedType",
+          typeAnnotation: { type: "TSTypeLiteral" },
+        },
+      },
     });
 
     // Act
@@ -156,5 +293,37 @@ describe("prefer interface types rule", () => {
 
     // Assert
     expect(reports).toStrictEqual([]);
+  });
+
+  it("wires all listener keys to executable handlers", () => {
+    // Arrange
+    const variableNode = {
+      id: createParameter("TSTypeLiteral"),
+      type: "VariableDeclarator",
+    };
+    const functionNode = createFunctionNode({
+      params: [createParameter("TSTypeLiteral")],
+    });
+
+    // Act
+    const actual = listenerKeys.map((listenerKey) => {
+      const { context, reports } = createContext();
+      const node =
+        listenerKey === "VariableDeclarator" ? variableNode : functionNode;
+
+      runListener(context, node, listenerKey);
+
+      return { listenerKey, reports };
+    });
+
+    // Assert
+    expect(actual).toStrictEqual(
+      listenerKeys.map((listenerKey) => ({
+        listenerKey,
+        reports: [
+          { messageId: "preferNamedObject", nodeType: "TSTypeLiteral" },
+        ],
+      })),
+    );
   });
 });

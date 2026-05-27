@@ -11,6 +11,18 @@ interface MockNode {
   type: string;
 }
 
+/** Listener keys exposed by this rule helper. */
+type PreferInterfaceTypesListener =
+  | "ArrowFunctionExpression"
+  | "FunctionDeclaration"
+  | "FunctionExpression"
+  | "TSCallSignatureDeclaration"
+  | "TSConstructSignatureDeclaration"
+  | "TSDeclareFunction"
+  | "TSFunctionType"
+  | "TSMethodSignature"
+  | "VariableDeclarator";
+
 /** Type definition for rule data. */
 interface ReportDescriptorDetails {
   /** MessageId field value. */
@@ -44,6 +56,12 @@ interface TypeAnnotationWrapper {
   typeAnnotation: {
     /** Type field value. */
     type: string;
+
+    /** Nested annotation for wrappers. */
+    typeAnnotation?: MockNode;
+
+    /** Nested members for union/intersection wrappers. */
+    types?: MockNode[];
   };
 }
 
@@ -156,17 +174,22 @@ const createFunctionNode = (overrides: Partial<MockNode>): MockNode => ({
 });
 
 /**
- * Runs the listener for the supplied node.
+ * Runs the selected listener for the supplied node.
  * @param context Rule execution context.
  * @param node Node to run through the listener.
+ * @param listenerName Listener key to execute.
  * @example
  * ```typescript
  * runListener(context, node);
  * ```
  */
-const runListener = (context: Rule.RuleContext, node?: MockNode): void => {
+const runListener = (
+  context: Rule.RuleContext,
+  node?: MockNode,
+  listenerName: PreferInterfaceTypesListener = "FunctionDeclaration",
+): void => {
   const listeners = preferInterfaceTypesRule.create(context);
-  const listener = listeners.FunctionDeclaration as
+  const listener = listeners[listenerName] as
     | ((node: Rule.Node) => void)
     | undefined;
 

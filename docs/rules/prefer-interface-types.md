@@ -27,7 +27,6 @@ Named types improve readability, reuse, and documentation quality. Inline object
 
 - Named interfaces or type aliases
 - Inline object types in:
-  - simple, local, or one-off cases (see below)
   - generic constraints
   - mapped or utility types
 
@@ -35,20 +34,13 @@ Named types improve readability, reuse, and documentation quality. Inline object
 
 Inline object types are allowed when:
 
-- the type is trivial and unlikely to be reused
-  ```typescript
-  const point: { x: number } = { x: 1 };
-  ```
-
-````
-
-* used in generic constraints
+- used in generic constraints
 
   ```typescript
   function process<T extends { id: string }>(input: T): T {
     return input;
   }
-````
+  ```
 
 - used with utility or mapped types
 
@@ -110,13 +102,6 @@ type SaveUserInput = {
 };
 
 function saveUser(user: SaveUserInput): void {}
-```
-
-### Allowed inline cases
-
-```typescript
-// trivial, local usage
-const point: { x: number } = { x: 1 };
 ```
 
 ```typescript

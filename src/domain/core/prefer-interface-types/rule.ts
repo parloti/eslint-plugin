@@ -17,6 +17,9 @@ interface ParameterContainer {
   /** Argument helper value. */
   argument?: unknown;
 
+  /** Left-side helper value used by assignment patterns. */
+  left?: unknown;
+
   /** Parameter helper value. */
   parameter?: unknown;
 }
@@ -34,6 +37,18 @@ interface TypeAnnotationContainer {
 interface TypeAnnotationNode {
   /** Type field value. */
   type: string;
+
+  /** Nested annotation for parenthesized types. */
+  typeAnnotation?: unknown;
+
+  /** Nested member annotations for union/intersection types. */
+  types?: unknown[];
+}
+
+/** Type definition for variable declarator nodes with optional identifiers. */
+interface VariableDeclaratorNode {
+  /** Identifier or binding pattern for the variable declarator. */
+  id?: unknown;
 }
 
 /**
@@ -50,6 +65,10 @@ const getNestedTypeAnnotation = (
 ): TypeAnnotationNode | undefined => {
   if (node.argument !== void 0) {
     return getTypeAnnotationNode(node.argument);
+  }
+
+  if (node.left !== void 0) {
+    return getTypeAnnotationNode(node.left);
   }
 
   if (node.parameter !== void 0) {
@@ -126,17 +145,47 @@ const getParameters = (node: unknown): unknown[] => {
 };
 
 /**
- * Checks whether the node represents a type literal.
- * @param node Type annotation node to check.
- * @returns True when the node is a type literal.
+ * Finds an inline object type literal within a type annotation node.
+ * @param node Type annotation node to inspect.
+ * @returns The first inline object type literal when present.
  * @example
  * ```typescript
- * const isLiteral = isTypeLiteral(annotation);
+ * const inlineObjectType = getInlineObjectTypeLiteral(annotation);
  * ```
  */
-const isTypeLiteral = (
+const getInlineObjectTypeLiteral = (
   node: TypeAnnotationNode | undefined,
-): node is TypeAnnotationNode => node?.type === "TSTypeLiteral";
+): TypeAnnotationNode | undefined => {
+  if (node === void 0) {
+    return void 0;
+  }
+
+  if (node.type === "TSTypeLiteral") {
+    return node;
+  }
+
+  if (node.type === "TSParenthesizedType") {
+    return getInlineObjectTypeLiteral(
+      node.typeAnnotation as TypeAnnotationNode | undefined,
+    );
+  }
+
+  if (node.type === "TSUnionType" || node.type === "TSIntersectionType") {
+    const nestedTypes = Array.isArray(node.types) ? node.types : [];
+
+    for (const nestedType of nestedTypes) {
+      const nestedInlineObjectType = getInlineObjectTypeLiteral(
+        nestedType as TypeAnnotationNode | undefined,
+      );
+
+      if (nestedInlineObjectType !== void 0) {
+        return nestedInlineObjectType;
+      }
+    }
+  }
+
+  return void 0;
+};
 
 /**
  * Reports an inline object type annotation.
@@ -171,42 +220,100 @@ const checkFunctionLike = (
   node: Rule.Node,
 ): void => {
   for (const parameter of getParameters(node)) {
-    const typeAnnotation = getTypeAnnotationNode(parameter);
+    const inlineObjectType = getInlineObjectTypeLiteral(
+      getTypeAnnotationNode(parameter),
+    );
 
-    if (isTypeLiteral(typeAnnotation)) {
-      reportTypeLiteral(context, typeAnnotation);
+    if (inlineObjectType !== void 0) {
+      reportTypeLiteral(context, inlineObjectType);
     }
   }
 
-  const returnTypeAnnotation = getReturnTypeAnnotation(node);
+  const inlineReturnObjectType = getInlineObjectTypeLiteral(
+    getReturnTypeAnnotation(node),
+  );
 
-  if (isTypeLiteral(returnTypeAnnotation)) {
-    reportTypeLiteral(context, returnTypeAnnotation);
+  if (inlineReturnObjectType !== void 0) {
+    reportTypeLiteral(context, inlineReturnObjectType);
+  }
+};
+
+/**
+ * Checks variable declarators for inline object types.
+ * @param context Rule execution context.
+ * @param node Variable declarator to check.
+ * @example
+ * ```typescript
+ * checkVariableDeclarator(context, node);
+ * ```
+ */
+const checkVariableDeclarator = (
+  context: Rule.RuleContext,
+  node: Rule.Node,
+): void => {
+  const typedNode = node as VariableDeclaratorNode;
+
+  const inlineObjectType = getInlineObjectTypeLiteral(
+    getTypeAnnotationNode(typedNode.id),
+  );
+
+  if (inlineObjectType !== void 0) {
+    reportTypeLiteral(context, inlineObjectType);
   }
 };
 
 /** ESLint rule requiring named interface/type aliases for object types. */
 const preferInterfaceTypesRule: Rule.RuleModule = {
+  /**
+   * Creates listeners that validate function-like and variable annotations.
+   * @param context Rule execution context.
+   * @returns Rule listener map.
+   * @example
+   * ```typescript
+   * const listeners = preferInterfaceTypesRule.create(context);
+   * ```
+   */
   create(context: Rule.RuleContext): Rule.RuleListener {
-    const listener = (node: Rule.Node): void => {
+    /**
+     * Checks function-like nodes for inline object types.
+     * @param node Function-like node to inspect.
+     * @example
+     * ```typescript
+     * functionLikeListener(node);
+     * ```
+     */
+    const functionLikeListener = (node: Rule.Node): void => {
       checkFunctionLike(context, node);
     };
 
+    /**
+     * Checks variable declarators for inline object types.
+     * @param node Variable declarator to inspect.
+     * @example
+     * ```typescript
+     * variableDeclaratorListener(node);
+     * ```
+     */
+    const variableDeclaratorListener = (node: Rule.Node): void => {
+      checkVariableDeclarator(context, node);
+    };
+
     return {
-      ArrowFunctionExpression: listener,
-      FunctionDeclaration: listener,
-      FunctionExpression: listener,
-      TSCallSignatureDeclaration: listener,
-      TSConstructSignatureDeclaration: listener,
-      TSDeclareFunction: listener,
-      TSFunctionType: listener,
-      TSMethodSignature: listener,
+      ArrowFunctionExpression: functionLikeListener,
+      FunctionDeclaration: functionLikeListener,
+      FunctionExpression: functionLikeListener,
+      TSCallSignatureDeclaration: functionLikeListener,
+      TSConstructSignatureDeclaration: functionLikeListener,
+      TSDeclareFunction: functionLikeListener,
+      TSFunctionType: functionLikeListener,
+      TSMethodSignature: functionLikeListener,
+      VariableDeclarator: variableDeclaratorListener,
     };
   },
   meta: {
     docs: {
       description:
-        "Require named interfaces or type aliases for object types in parameters and return types.",
+        "Require named interfaces or type aliases for object types in parameters, return types, and variable annotations.",
       recommended: false,
       url: "https://github.com/parloti/eslint-plugin/blob/main/docs/rules/prefer-interface-types.md",
     },
