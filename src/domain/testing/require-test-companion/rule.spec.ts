@@ -10,9 +10,23 @@ import {
   createTemporaryPair,
   runRule,
 } from "../../../shared/test-utils/require-test-companion-test-helpers";
+import { requireTestCompanionRule } from "./rule";
 
 describe("require-test-companion rule", () => {
   afterEach(cleanupTemporaryDirectories);
+
+  it("uses actionable feedback for orphan test files", () => {
+    // Arrange
+    const expectedMessage =
+      "Test file requires a matching source file '{{sourceFile}}' in the same folder. If this test file is orphaned, move its tests to the correct companion file or delete this orphan file.";
+
+    // Act
+    const actualMessage =
+      requireTestCompanionRule.meta?.messages?.["missingSource"];
+
+    // Assert
+    expect(actualMessage).toBe(expectedMessage);
+  });
 
   it("does not report source files without test companions", () => {
     // Arrange

@@ -31,7 +31,7 @@ const requireTestCompanionRule: Rule.RuleModule = {
     },
     messages: {
       missingSource:
-        "Test file requires a matching source file '{{sourceFile}}' in the same folder.",
+        "Test file requires a matching source file '{{sourceFile}}' in the same folder. If this test file is orphaned, move its tests to the correct companion file or delete this orphan file.",
     },
     schema: [
       {

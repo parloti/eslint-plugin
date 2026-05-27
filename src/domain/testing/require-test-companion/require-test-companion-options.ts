@@ -168,6 +168,6 @@ export {
   isLintableFilename,
   isPathMatch,
   isTypeScriptFile,
-  TYPESCRIPT_EXTENSION,
   type RequireTestCompanionState,
+  TYPESCRIPT_EXTENSION,
 };
