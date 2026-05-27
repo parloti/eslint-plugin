@@ -45,11 +45,23 @@ describe("require-test-companion options", () => {
     // Act
     const result = {
       lintableFilename: isLintableFilename(filename),
-      pathMatch: isPathMatch(filename, ["src/**"]),
+      pathMatch: isPathMatch(filename, ["src/**"], cwd()),
     };
 
     // Assert
     expect(result.lintableFilename).toBe(true);
     expect(result.pathMatch).toBe(true);
+  });
+
+  it("matches paths relative to provided runtime cwd", () => {
+    // Arrange
+    const runtimeCwd = `${cwd()}/src`;
+    const filename = `${runtimeCwd}/index.ts`;
+
+    // Act
+    const actualMatch = isPathMatch(filename, ["**/*.ts"], runtimeCwd);
+
+    // Assert
+    expect(actualMatch).toBe(true);
   });
 });

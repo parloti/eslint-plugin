@@ -1,5 +1,7 @@
 import type { Rule } from "eslint";
 
+import { cwd } from "node:process";
+
 import { buildListenerForFilename } from "./require-test-companion-listeners";
 import { getOptions } from "./require-test-companion-options";
 
@@ -10,6 +12,7 @@ const requireTestCompanionRule: Rule.RuleModule = {
       context,
       context.filename,
       getOptions(context.options),
+      typeof context.cwd === "string" ? context.cwd : cwd(),
     );
   },
   meta: {

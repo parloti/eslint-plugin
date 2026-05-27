@@ -1,6 +1,5 @@
 import { minimatch } from "minimatch";
 import path from "node:path";
-import { cwd } from "node:process";
 
 import type { RequireTestCompanionOptions } from "./types";
 
@@ -109,14 +108,17 @@ const getOptions = (options: readonly unknown[]): RequireTestCompanionState => {
 /**
  * Normalizes normalizeRelativePath.
  * @param filename Input filename value.
+ * @param baseDirectory Input baseDirectory value.
  * @returns Return value output.
  * @example
  * ```typescript
  * normalizeRelativePath();
  * ```
  */
-const normalizeRelativePath = (filename: string): string =>
-  path.relative(cwd(), filename).split(path.sep).join("/");
+const normalizeRelativePath = (
+  filename: string,
+  baseDirectory: string,
+): string => path.relative(baseDirectory, filename).split(path.sep).join("/");
 
 /**
  * Normalizes normalizePattern.
@@ -134,18 +136,23 @@ const normalizePattern = (pattern: string): string =>
  * Checks isPathMatch.
  * @param filename Input filename value.
  * @param patterns Input patterns value.
+ * @param baseDirectory Input baseDirectory value.
  * @returns Return value output.
  * @example
  * ```typescript
  * isPathMatch();
  * ```
  */
-const isPathMatch = (filename: string, patterns: string[]): boolean => {
+const isPathMatch = (
+  filename: string,
+  patterns: string[],
+  baseDirectory: string,
+): boolean => {
   if (patterns.length === 0) {
     return false;
   }
 
-  const relativePath = normalizeRelativePath(filename);
+  const relativePath = normalizeRelativePath(filename, baseDirectory);
 
   if (relativePath.startsWith("..") || path.isAbsolute(relativePath)) {
     return false;
@@ -161,6 +168,6 @@ export {
   isLintableFilename,
   isPathMatch,
   isTypeScriptFile,
-  type RequireTestCompanionState,
   TYPESCRIPT_EXTENSION,
+  type RequireTestCompanionState,
 };

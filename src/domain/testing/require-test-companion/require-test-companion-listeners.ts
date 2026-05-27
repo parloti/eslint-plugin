@@ -2,6 +2,7 @@ import type { Rule } from "eslint";
 
 import { existsSync } from "node:fs";
 import path from "node:path";
+import { cwd } from "node:process";
 
 import type { RequireTestCompanionState } from "./require-test-companion-options";
 
@@ -87,6 +88,7 @@ const buildMissingSourceListener = (
  * Determines whether a file should be linted.
  * @param filename Input filename value.
  * @param options Input options value.
+ * @param baseDirectory Input baseDirectory value.
  * @returns True when the file should be linted.
  * @example
  * ```typescript
@@ -96,6 +98,7 @@ const buildMissingSourceListener = (
 const shouldLintFile = (
   filename: string,
   options: RequireTestCompanionState,
+  baseDirectory: string,
 ): boolean => {
   const { enforceIn, ignorePatterns } = options;
 
@@ -107,11 +110,11 @@ const shouldLintFile = (
     return false;
   }
 
-  if (!isPathMatch(filename, enforceIn)) {
+  if (!isPathMatch(filename, enforceIn, baseDirectory)) {
     return false;
   }
 
-  return !isPathMatch(filename, ignorePatterns);
+  return !isPathMatch(filename, ignorePatterns, baseDirectory);
 };
 
 /**
@@ -119,6 +122,7 @@ const shouldLintFile = (
  * @param context Input context value.
  * @param filename Input filename value.
  * @param options Input options value.
+ * @param baseDirectory Input baseDirectory value.
  * @returns Rule listener for the filename.
  * @example
  * ```typescript
@@ -129,8 +133,9 @@ const buildListenerForFilename = (
   context: Rule.RuleContext,
   filename: string,
   options: RequireTestCompanionState,
+  baseDirectory: string = cwd(),
 ): Rule.RuleListener => {
-  if (!shouldLintFile(filename, options)) {
+  if (!shouldLintFile(filename, options, baseDirectory)) {
     return {};
   }
 

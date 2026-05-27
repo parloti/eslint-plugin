@@ -219,4 +219,18 @@ describe("require-test-companion rule ignore patterns", () => {
     // Assert
     expect(actualReports).toStrictEqual([]);
   });
+
+  it("does not report missing source for ignored test files", () => {
+    // Arrange
+    const specPath = createTemporaryFile("tmp", "feature.spec.ts");
+
+    // Act
+    const actualReports = runRule(specPath, {
+      enforceIn: ["**"],
+      ignorePatterns: ["**/*.spec.ts"],
+    });
+
+    // Assert
+    expect(actualReports).toStrictEqual([]);
+  });
 });
