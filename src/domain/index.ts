@@ -7,7 +7,6 @@ export {
   noUnusedExportsRule,
 } from "./architecture";
 export { noMultipleDeclaratorsRule, preferInterfaceTypesRule } from "./core";
-export { createRuleDocumentation } from "./custom-rule-documentation";
 export {
   noInterfaceMemberDocumentationRule,
   requireExampleLanguageRule,
@@ -18,7 +17,6 @@ export {
   enforceAaaPhasePurityRule,
   enforceAaaStructureRule,
   preferViMockedImportRule,
-  preferVitestIncrementalCastsRule,
   requireAaaSectionsRule,
   requireActResultCaptureRule,
   requireTestCompanionRule,

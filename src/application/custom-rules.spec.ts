@@ -68,7 +68,7 @@ const summarizeCustomRuleContract = (
 describe("custom rule registry", () => {
   it("covers every package-owned rule with metadata", () => {
     // Arrange
-    const expectedRuleCount = 20;
+    const expectedRuleCount = 19;
 
     // Act
     const actualRuleSummaries = customRules.map((ruleEntry) =>
@@ -181,7 +181,7 @@ describe("custom rule registry", () => {
       {
         createType: "function",
         description:
-          "Require named interfaces or type aliases for object types in parameters and return types.",
+          "Require named interfaces or type aliases for object types in parameters, return types, and variable annotations.",
         hasMessages: true,
         ruleName: "prefer-interface-types",
         schemaIsArray: true,
@@ -227,16 +227,6 @@ describe("custom rule registry", () => {
         schemaIsArray: true,
         type: "suggestion",
         url: getCustomRuleDocumentationUrl("prefer-vi-mocked-import"),
-      },
-      {
-        createType: "function",
-        description:
-          "Prefer minimal nested casts in vi.mock/vi.doMock factory return objects when TypeScript rejects the module shape.",
-        hasMessages: true,
-        ruleName: "prefer-vitest-incremental-casts",
-        schemaIsArray: true,
-        type: "suggestion",
-        url: getCustomRuleDocumentationUrl("prefer-vitest-incremental-casts"),
       },
       {
         createType: "function",

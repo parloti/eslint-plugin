@@ -14,7 +14,6 @@ import {
   noUnusedExportsRule,
   preferInterfaceTypesRule,
   preferViMockedImportRule,
-  preferVitestIncrementalCastsRule,
   requireAaaSectionsRule,
   requireActResultCaptureRule,
   requireExampleLanguageRule,
@@ -93,10 +92,6 @@ const customRules = [
   {
     rule: preferViMockedImportRule,
     ruleName: "prefer-vi-mocked-import",
-  },
-  {
-    rule: preferVitestIncrementalCastsRule,
-    ruleName: "prefer-vitest-incremental-casts",
   },
   {
     rule: requireAaaSectionsRule,

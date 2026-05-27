@@ -12,7 +12,6 @@ export {
   noUnusedExportsRule,
   preferInterfaceTypesRule,
   preferViMockedImportRule,
-  preferVitestIncrementalCastsRule,
   requireAaaSectionsRule,
   requireActResultCaptureRule,
   requireExampleLanguageRule,
