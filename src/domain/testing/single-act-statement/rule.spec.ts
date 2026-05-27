@@ -2,6 +2,12 @@ import type { Rule } from "eslint";
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+/** Mocked top-level Act statement shape used by test helpers. */
+interface MockActStatement {
+  /** Statement node exposed to the rule under test. */
+  node: Rule.Node;
+}
+
 /** Captured rule context and emitted reports. */
 interface RuleContextState {
   /** Mock ESLint rule context. */
@@ -13,6 +19,9 @@ interface RuleContextState {
 
 /** Mocked AAA analysis state for the current test. */
 interface SingleActAaaMockState {
+  /** Ordered Act statements returned by the mocked selector. */
+  actStatements: readonly MockActStatement[];
+
   /** Parsed analysis returned by the mocked analyzer. */
   analysis: unknown;
 
@@ -24,6 +33,9 @@ interface SingleActAaaMockState {
 interface SingleActAnalysisHelpersModule {
   /** Mocked Act statement counter. */
   countActStatements: () => number;
+
+  /** Mocked Act statement selector. */
+  getActTopLevelStatements: () => readonly MockActStatement[];
 }
 
 /** Mocked analysis module shape used by the rule tests. */
@@ -52,6 +64,8 @@ let activeAaaState: SingleActAaaMockState;
 function createAnalysisHelpersModule(): SingleActAnalysisHelpersModule {
   return {
     countActStatements: (): number => activeAaaState.count,
+    getActTopLevelStatements: (): readonly MockActStatement[] =>
+      activeAaaState.actStatements,
   };
 }
 
@@ -94,6 +108,7 @@ const createContext = (): RuleContextState => {
  * Loads the rule with mocked AAA analysis helpers.
  * @param analysis Parsed AAA analysis returned by the mock.
  * @param actStatementCount Act statement count returned by the mock.
+ * @param actStatements Act statements returned by the mock selector.
  * @returns Imported rule module.
  * @example
  * ```typescript
@@ -103,8 +118,13 @@ const createContext = (): RuleContextState => {
 const loadRule = async (
   analysis: unknown,
   actStatementCount: number,
+  actStatements: readonly MockActStatement[] = [],
 ): Promise<SingleActStatementModule> => {
-  activeAaaState = { analysis, count: actStatementCount };
+  activeAaaState = {
+    actStatements,
+    analysis,
+    count: actStatementCount,
+  };
 
   return import("./rule");
 };
@@ -114,6 +134,7 @@ const loadRule = async (
  * @param analysis Parsed AAA analysis returned by the mock.
  * @param actStatementCount Act statement count returned by the mock.
  * @param callExpression Call expression inspected by the rule.
+ * @param actStatements Act statements returned by the mock selector.
  * @returns Reports emitted by the rule.
  * @example
  * ```typescript
@@ -124,10 +145,12 @@ const runRule = async (
   analysis: unknown,
   actStatementCount: number,
   callExpression: Rule.Node = { type: "CallExpression" } as Rule.Node,
+  actStatements: readonly MockActStatement[] = [],
 ): Promise<Rule.ReportDescriptor[]> => {
   const { singleActStatementRule } = await loadRule(
     analysis,
     actStatementCount,
+    actStatements,
   );
   const { context, reports } = createContext();
   const listener = singleActStatementRule.create(context).CallExpression;
@@ -139,7 +162,7 @@ const runRule = async (
 
 describe("single-act-statement rule", () => {
   beforeEach(() => {
-    activeAaaState = { analysis: void 0, count: 0 };
+    activeAaaState = { actStatements: [], analysis: void 0, count: 0 };
     vi.doMock(
       import("../aaa/analyzer.analysis"),
       (): never => createAnalysisModule() as never,
@@ -184,16 +207,23 @@ describe("single-act-statement rule", () => {
   it("reports when the Act phase contains multiple statements", async () => {
     // Arrange
     const callExpression = { type: "CallExpression" } as Rule.Node;
+    const firstActStatement = {
+      node: { type: "ExpressionStatement" } as Rule.Node,
+    };
+    const secondActStatement = { node: { type: "IfStatement" } as Rule.Node };
 
     // Act
-    const actual = await runRule({ callExpression }, 2, callExpression);
+    const actual = await runRule({ callExpression }, 2, callExpression, [
+      firstActStatement,
+      secondActStatement,
+    ]);
 
     // Assert
     expect(actual).toStrictEqual([
       {
         data: { count: "2" },
         messageId: "multipleActStatements",
-        node: callExpression,
+        node: secondActStatement.node,
       },
     ]);
   });

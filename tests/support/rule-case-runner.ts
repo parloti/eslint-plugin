@@ -24,8 +24,32 @@ interface EndToEndRuleCase {
   output?: string;
 }
 
+/** Lint message extension that includes optional nodeType metadata. */
+interface LintMessageWithNodeType extends Linter.LintMessage {
+  /** ESTree node type reported by ESLint when available. */
+  nodeType?: string;
+}
+
+/** Diagnostic details emitted for one lint finding. */
+interface RuleCaseDiagnostic {
+  /** One-based column for the lint finding. */
+  column: number;
+
+  /** One-based line for the lint finding. */
+  line: number;
+
+  /** Rule message id for the finding, when available. */
+  messageId: string | undefined;
+
+  /** ESTree node type reported by ESLint for this finding. */
+  nodeType: string | undefined;
+}
+
 /** Result returned after running one rule case. */
 interface RuleCaseRunResult {
+  /** Full diagnostics emitted by the lint run. */
+  diagnostics: RuleCaseDiagnostic[];
+
   /** Message ids emitted by the rule. */
   messageIds: (string | undefined)[];
 
@@ -88,6 +112,25 @@ const createRuleConfig = (
 };
 
 /**
+ * Converts one ESLint lint message into a compact diagnostic shape.
+ * @param message Lint message produced by ESLint.
+ * @returns Diagnostic summary consumed by e2e assertions.
+ * @example
+ * ```typescript
+ * const diagnostic = toRuleCaseDiagnostic({} as Linter.LintMessage);
+ * void diagnostic;
+ * ```
+ */
+const toRuleCaseDiagnostic = (
+  message: Linter.LintMessage,
+): RuleCaseDiagnostic => ({
+  column: message.column,
+  line: message.line,
+  messageId: message.messageId,
+  nodeType: (message as LintMessageWithNodeType).nodeType,
+});
+
+/**
  * Runs one rule case and returns the observed message ids and optional fixed output.
  * @param ruleName Rule name without the plugin prefix.
  * @param rule Rule implementation under test.
@@ -112,9 +155,17 @@ const runRuleCase = (
     testCase.output === void 0
       ? void 0
       : linter.verifyAndFix(testCase.code, config, filename).output;
+  const diagnostics: RuleCaseDiagnostic[] = [];
+  const messageIds: (string | undefined)[] = [];
+
+  for (const message of messages) {
+    diagnostics.push(toRuleCaseDiagnostic(message));
+    messageIds.push(message.messageId);
+  }
 
   return {
-    messageIds: messages.map((message) => message.messageId),
+    diagnostics,
+    messageIds,
     ...(output === void 0 ? {} : { output }),
   };
 };

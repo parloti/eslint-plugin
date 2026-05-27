@@ -55,12 +55,25 @@ type SupportedTestCallback = LocatedNode<
  * ```
  */
 function countActStatements(analysis: TestBlockAnalysis): number {
+  return getActTopLevelStatements(analysis).length;
+}
+
+/**
+ * Gets top-level statements that belong to the Act phase only.
+ * @param analysis Input analysis value.
+ * @returns Return value output.
+ * @example
+ * ```typescript
+ * getActTopLevelStatements(analysis);
+ * ```
+ */
+function getActTopLevelStatements(
+  analysis: Pick<TestBlockAnalysis, "statements">,
+): TestBlockAnalysis["statements"] {
   return analysis.statements.filter(
     (statement) =>
-      statement.phases.includes("Act") &&
-      (statement.node.type === "ExpressionStatement" ||
-        statement.node.type === "VariableDeclaration"),
-  ).length;
+      statement.phases.includes("Act") && !statement.phases.includes("Assert"),
+  );
 }
 
 /**
@@ -261,6 +274,7 @@ function isAaaPhase(value: string): value is AaaPhase {
 export {
   aaaPhaseOrder,
   countActStatements,
+  getActTopLevelStatements,
   getFlattenedSections,
   getLineStartRange,
   getNewline,

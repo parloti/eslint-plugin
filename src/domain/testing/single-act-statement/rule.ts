@@ -1,7 +1,10 @@
 import type { Rule } from "eslint";
 
 import { analyzeTestBlock } from "../aaa/analyzer.analysis";
-import { countActStatements } from "../aaa/analyzer.analysis.helpers";
+import {
+  countActStatements,
+  getActTopLevelStatements,
+} from "../aaa/analyzer.analysis.helpers";
 
 /** Requires the Act phase to contain a single top-level statement. */
 const singleActStatementRule: Rule.RuleModule = {
@@ -18,10 +21,13 @@ const singleActStatementRule: Rule.RuleModule = {
           return;
         }
 
+        const actStatements = getActTopLevelStatements(analysis);
+        const firstExcessActStatement = actStatements.at(1)?.node;
+
         context.report({
           data: { count: String(actStatementCount) },
           messageId: "multipleActStatements",
-          node: analysis.callExpression,
+          node: firstExcessActStatement ?? analysis.callExpression,
         });
       },
     } satisfies Rule.RuleListener;
