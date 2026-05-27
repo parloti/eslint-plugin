@@ -3,11 +3,11 @@ import type { Rule } from "eslint";
 import path from "node:path";
 
 import {
-  DEFAULT_ALLOW_IN_FILES,
+  DEFAULT_PUBLIC_API_FILES,
   DEFAULT_TEST_FILE_PATTERNS,
   getOptions,
-  isAllowlistedFile,
   isLintableFilename,
+  isPublicApiFile,
 } from "./no-unused-exports-options";
 import {
   classifyExportUsage,
@@ -34,7 +34,7 @@ const noUnusedExportsRule: Rule.RuleModule = {
 
     const projectRoot = path.resolve(program.getCurrentDirectory());
 
-    if (isAllowlistedFile(filename, state, projectRoot)) {
+    if (isPublicApiFile(filename, state, projectRoot)) {
       return {};
     }
 
@@ -46,17 +46,15 @@ const noUnusedExportsRule: Rule.RuleModule = {
           return;
         }
 
-        const usages = collectCrossFileUsages(
-          program,
-          filename,
-          state,
-          projectRoot,
-        );
-
         for (const element of exportedElements) {
           const usageClassification = classifyExportUsage(
-            element.exportedName,
-            usages,
+            collectCrossFileUsages(
+              program,
+              filename,
+              state,
+              projectRoot,
+              element,
+            ),
           );
 
           if (usageClassification === "production") {
@@ -78,7 +76,7 @@ const noUnusedExportsRule: Rule.RuleModule = {
   meta: {
     defaultOptions: [
       {
-        allowInFiles: [...DEFAULT_ALLOW_IN_FILES],
+        publicApiFiles: [...DEFAULT_PUBLIC_API_FILES],
         testFilePatterns: [...DEFAULT_TEST_FILE_PATTERNS],
       },
     ],
@@ -98,9 +96,8 @@ const noUnusedExportsRule: Rule.RuleModule = {
       {
         additionalProperties: false,
         properties: {
-          allowInFiles: {
-            description:
-              "File globs where exports can remain unused without diagnostics.",
+          publicApiFiles: {
+            description: "File globs that define public API export surfaces.",
             items: { type: "string" },
             minItems: 1,
             type: "array",

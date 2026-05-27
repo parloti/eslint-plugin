@@ -3,15 +3,15 @@ import path from "node:path";
 
 import type { NoUnusedExportsOptions, NoUnusedExportsState } from "./types";
 
-/** Default allowlist where unused exports are intentionally allowed. */
-const DEFAULT_ALLOW_IN_FILES = [
+/** Default public API files where exported symbols are intentionally exposed. */
+export const DEFAULT_PUBLIC_API_FILES = [
   "**/src/index.ts",
   "**/test-util/**/*.ts",
   "tests/support/**/*.ts",
 ] as const;
 
 /** Default glob patterns used to classify test files. */
-const DEFAULT_TEST_FILE_PATTERNS = ["**/*.{test,spec,e2e}.ts"] as const;
+export const DEFAULT_TEST_FILE_PATTERNS = ["**/*.{test,spec,e2e}.ts"] as const;
 
 /** Default file pattern used to scope analysis to source files. */
 const DEFAULT_LINTABLE_FILE_PATTERN = "**/src/**/*.ts";
@@ -37,7 +37,7 @@ const isAbsolutePath = (filename: string): boolean =>
  * const ok = isLintableFilename("/repo/src/feature.ts");
  * ```
  */
-const isLintableFilename = (filename: string): boolean => {
+export const isLintableFilename = (filename: string): boolean => {
   if (!isAbsolutePath(filename)) {
     return false;
   }
@@ -84,13 +84,15 @@ const normalizeStringList = (
  * const state = getOptions([{}]);
  * ```
  */
-const getOptions = (options: readonly unknown[]): NoUnusedExportsState => {
+export const getOptions = (
+  options: readonly unknown[],
+): NoUnusedExportsState => {
   const raw = options[0] as NoUnusedExportsOptions | undefined;
 
   return {
-    allowInFiles: normalizeStringList(
-      raw?.allowInFiles,
-      DEFAULT_ALLOW_IN_FILES,
+    publicApiFiles: normalizeStringList(
+      raw?.publicApiFiles,
+      DEFAULT_PUBLIC_API_FILES,
     ),
     testFilePatterns: normalizeStringList(
       raw?.testFilePatterns,
@@ -154,21 +156,21 @@ const matchesAnyPattern = (
 };
 
 /**
- * Checks whether unused exports are allowed in the current file.
+ * Checks whether one file defines a public API export surface.
  * @param filename Absolute filename.
  * @param state Normalized options.
  * @param repoRoot Absolute repository root.
- * @returns True when the file is allowlisted.
+ * @returns True when the file is a public API file.
  * @example
  * ```typescript
- * const allowed = isAllowlistedFile("/repo/src/index.ts", state, "/repo");
+ * const publicApiFile = isPublicApiFile("/repo/src/index.ts", state, "/repo");
  * ```
  */
-const isAllowlistedFile = (
+export const isPublicApiFile = (
   filename: string,
   state: NoUnusedExportsState,
   repoRoot: string,
-): boolean => matchesAnyPattern(filename, state.allowInFiles, repoRoot);
+): boolean => matchesAnyPattern(filename, state.publicApiFiles, repoRoot);
 
 /**
  * Checks whether one file should be treated as a test file.
@@ -181,17 +183,8 @@ const isAllowlistedFile = (
  * const testFile = isTestFile("/repo/tests/e2e/demo.ts", state, "/repo");
  * ```
  */
-const isTestFile = (
+export const isTestFile = (
   filename: string,
   state: NoUnusedExportsState,
   repoRoot: string,
 ): boolean => matchesAnyPattern(filename, state.testFilePatterns, repoRoot);
-
-export {
-  DEFAULT_ALLOW_IN_FILES,
-  DEFAULT_TEST_FILE_PATTERNS,
-  getOptions,
-  isAllowlistedFile,
-  isLintableFilename,
-  isTestFile,
-};

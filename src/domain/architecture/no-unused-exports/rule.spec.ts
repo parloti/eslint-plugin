@@ -28,14 +28,14 @@ interface RuleCaseResult {
 
 /** Optional behavior overrides for mocked rule execution. */
 interface RunMockedRuleOptions {
-  /** Whether the mocked file should be treated as allowlisted. */
-  allowlisted?: boolean;
   /** Whether collectExportedElements should return one export. */
   hasExportedElements?: boolean;
   /** Whether getTypeScriptProgram should return a program. */
   hasTypeScriptProgram?: boolean;
   /** Whether the mocked file should be treated as lintable. */
   lintable?: boolean;
+  /** Whether the mocked file should be treated as public API. */
+  publicApiFile?: boolean;
 }
 
 /**
@@ -101,10 +101,10 @@ const runMockedRule = async (
 ): Promise<MockedRuleExecutionResult> => {
   vi.resetModules();
 
-  const allowlisted = options?.allowlisted ?? false;
   const hasExportedElements = options?.hasExportedElements ?? true;
   const hasTypeScriptProgram = options?.hasTypeScriptProgram ?? true;
   const lintable = options?.lintable ?? true;
+  const publicApiFile = options?.publicApiFile ?? false;
   const reports: ReportDescriptorWithMessageId[] = [];
 
   vi.doMock(import("./no-unused-exports-options"), async () => {
@@ -115,11 +115,11 @@ const runMockedRule = async (
     return {
       ...actual,
       getOptions: () => ({
-        allowInFiles: ["**/index.ts"],
+        publicApiFiles: ["**/index.ts"],
         testFilePatterns: ["**/*.spec.ts"],
       }),
-      isAllowlistedFile: () => allowlisted,
       isLintableFilename: () => lintable,
+      isPublicApiFile: () => publicApiFile,
     };
   });
 
@@ -136,18 +136,25 @@ const runMockedRule = async (
         _sourceFilename: unknown,
         _state: unknown,
         _repoRoot: unknown,
+        _exportedElement: unknown,
       ) => {
         void _program;
         void _sourceFilename;
         void _state;
         void _repoRoot;
-        return [];
+        void _exportedElement;
+        return [
+          {
+            isTestFile: classification === "test-only",
+          },
+        ];
       },
       collectExportedElements: () =>
         hasExportedElements
           ? [
               {
                 exportedName: "feature",
+                exportKind: "value",
                 node: { type: "ExportNamedDeclaration" } as never,
               },
             ]
@@ -163,7 +170,7 @@ const runMockedRule = async (
 
   const { noUnusedExportsRule: mockedRule } = await import("./rule");
   const context = {
-    filename: allowlisted ? "C:/repo/src/index.ts" : "C:/repo/src/feature.ts",
+    filename: publicApiFile ? "C:/repo/src/index.ts" : "C:/repo/src/feature.ts",
     options: [],
     report: (descriptor: ReportDescriptorWithMessageId) => {
       reports.push(descriptor);
@@ -241,9 +248,9 @@ describe("no-unused-exports rule", () => {
     expect(actual.messageIds).toStrictEqual([]);
   });
 
-  it("returns an empty listener when the file is allowlisted", async () => {
+  it("returns an empty listener when the file is a public API file", async () => {
     // Act
-    const actual = await runMockedRule("unused", { allowlisted: true });
+    const actual = await runMockedRule("unused", { publicApiFile: true });
 
     // Assert
     expect(actual.listener).toStrictEqual({});

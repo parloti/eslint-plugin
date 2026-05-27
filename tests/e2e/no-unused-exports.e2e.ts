@@ -178,7 +178,7 @@ describe("no-unused-exports e2e", () => {
     expect(actual).toStrictEqual(["unusedExport"]);
   });
 
-  it("skips configured allowlisted files", async () => {
+  it("skips configured public API files", async () => {
     // Arrange
     const run = {
       files: {
@@ -194,7 +194,43 @@ describe("no-unused-exports e2e", () => {
     expect(actual).toStrictEqual([]);
   });
 
-  it("reports test-only usage for re-export specifiers", async () => {
+  it("accepts exports exposed through public API files", async () => {
+    // Arrange
+    const run = {
+      files: {
+        "src/feature.ts": "export const feature = 1;",
+        "src/index.ts": 'export { feature } from "./public";',
+        "src/public.ts": 'export { feature } from "./feature";',
+      },
+      targetRelativePath: "src/feature.ts",
+    };
+
+    // Act
+    const actual = await runFixtureLint(run);
+
+    // Assert
+    expect(actual).toStrictEqual([]);
+  });
+
+  it("accepts exports exposed through custom public API files", async () => {
+    // Arrange
+    const run = {
+      files: {
+        "src/feature.ts": "export const feature = 1;",
+        "src/public-api.ts": 'export { feature } from "./feature";',
+      },
+      ruleOptions: [{ publicApiFiles: ["**/src/public-api.ts"] }],
+      targetRelativePath: "src/feature.ts",
+    };
+
+    // Act
+    const actual = await runFixtureLint(run);
+
+    // Assert
+    expect(actual).toStrictEqual([]);
+  });
+
+  it("does not report pass-through re-export files", async () => {
     // Arrange
     const run = {
       files: {
@@ -212,6 +248,61 @@ describe("no-unused-exports e2e", () => {
     const actual = await runFixtureLint(run);
 
     // Assert
-    expect(actual).toStrictEqual(["usedOnlyInTests"]);
+    expect(actual).toStrictEqual([]);
+  });
+
+  it("reports declarations that are only forwarded by non-public barrels", async () => {
+    // Arrange
+    const run = {
+      files: {
+        "src/feature.ts": "export const feature = 1;",
+        "src/reexport.ts": 'export { feature } from "./feature";',
+      },
+      targetRelativePath: "src/feature.ts",
+    };
+
+    // Act
+    const actual = await runFixtureLint(run);
+
+    // Assert
+    expect(actual).toStrictEqual(["unusedExport"]);
+  });
+
+  it("accepts declaration files when barrel consumers concretely use the export", async () => {
+    // Arrange
+    const run = {
+      files: {
+        "src/feature.ts": "export const feature = 1;",
+        "src/reexport-consumer.ts": [
+          'import { feature } from "./reexport";',
+          "void feature;",
+        ].join("\n"),
+        "src/reexport.ts": 'export { feature } from "./feature";',
+      },
+      targetRelativePath: "src/feature.ts",
+    };
+
+    // Act
+    const actual = await runFixtureLint(run);
+
+    // Assert
+    expect(actual).toStrictEqual([]);
+  });
+
+  it("reports exports imported but never used", async () => {
+    // Arrange
+    const run = {
+      files: {
+        "src/consumer.ts": 'import { feature } from "./feature";',
+        "src/feature.ts": "export const feature = 1;",
+      },
+      targetRelativePath: "src/feature.ts",
+    };
+
+    // Act
+    const actual = await runFixtureLint(run);
+
+    // Assert
+    expect(actual).toStrictEqual(["unusedExport"]);
   });
 });

@@ -3,11 +3,11 @@ import { cwd } from "node:process";
 import { describe, expect, it } from "vitest";
 
 import {
-  DEFAULT_ALLOW_IN_FILES,
+  DEFAULT_PUBLIC_API_FILES,
   DEFAULT_TEST_FILE_PATTERNS,
   getOptions,
-  isAllowlistedFile,
   isLintableFilename,
+  isPublicApiFile,
   isTestFile,
 } from "./no-unused-exports-options";
 
@@ -21,7 +21,7 @@ describe("no-unused-exports options", () => {
 
     // Assert
     expect(actualState).toStrictEqual({
-      allowInFiles: [...DEFAULT_ALLOW_IN_FILES],
+      publicApiFiles: [...DEFAULT_PUBLIC_API_FILES],
       testFilePatterns: [...DEFAULT_TEST_FILE_PATTERNS],
     });
   });
@@ -30,7 +30,7 @@ describe("no-unused-exports options", () => {
     // Arrange
     const rawOptions = [
       {
-        allowInFiles: ["  src/index.ts  ", "", 1],
+        publicApiFiles: ["  src/index.ts  ", "", 1],
         testFilePatterns: ["tests/**/*.ts", "  "],
       },
     ];
@@ -40,7 +40,7 @@ describe("no-unused-exports options", () => {
 
     // Assert
     expect(actualState).toStrictEqual({
-      allowInFiles: ["src/index.ts"],
+      publicApiFiles: ["src/index.ts"],
       testFilePatterns: ["tests/**/*.ts"],
     });
   });
@@ -49,7 +49,7 @@ describe("no-unused-exports options", () => {
     // Arrange
     const rawOptions = [
       {
-        allowInFiles: ["   ", 123],
+        publicApiFiles: ["   ", 123],
         testFilePatterns: [void 0],
       },
     ];
@@ -59,7 +59,7 @@ describe("no-unused-exports options", () => {
 
     // Assert
     expect(actualState).toStrictEqual({
-      allowInFiles: [...DEFAULT_ALLOW_IN_FILES],
+      publicApiFiles: [...DEFAULT_PUBLIC_API_FILES],
       testFilePatterns: [...DEFAULT_TEST_FILE_PATTERNS],
     });
   });
@@ -86,19 +86,19 @@ describe("no-unused-exports options", () => {
     });
   });
 
-  it("matches allowlist using repo-relative normalization", () => {
+  it("matches public API files using repo-relative normalization", () => {
     // Arrange
     const sourcePath = path.join(cwd(), "src", "index.ts");
     const state = getOptions([]);
 
     // Act
-    const actualAllowlisted = isAllowlistedFile(sourcePath, state, cwd());
+    const actualPublicApiFile = isPublicApiFile(sourcePath, state, cwd());
 
     // Assert
-    expect(actualAllowlisted).toBe(true);
+    expect(actualPublicApiFile).toBe(true);
   });
 
-  it("matches allowlisted and test globs", () => {
+  it("matches public API and test globs", () => {
     // Arrange
     const sourceIndexPath = path.join(cwd(), "src", "index.ts");
     const testPath = path.join(cwd(), "tests", "e2e", "demo.e2e.ts");
@@ -106,36 +106,36 @@ describe("no-unused-exports options", () => {
 
     // Act
     const actualResult = {
-      allowlisted: isAllowlistedFile(sourceIndexPath, state, cwd()),
+      publicApiFile: isPublicApiFile(sourceIndexPath, state, cwd()),
       testFile: isTestFile(testPath, state, cwd()),
     };
 
     // Assert
     expect(actualResult).toStrictEqual({
-      allowlisted: true,
+      publicApiFile: true,
       testFile: true,
     });
   });
 
-  it("returns false for non-matching allowlist and test patterns", () => {
+  it("returns false for non-matching public API and test patterns", () => {
     // Arrange
     const featurePath = path.join(cwd(), "src", "feature.ts");
     const state = getOptions([
       {
-        allowInFiles: ["tests/**/*.ts"],
+        publicApiFiles: ["tests/**/*.ts"],
         testFilePatterns: ["tests/**/*.ts"],
       },
     ]);
 
     // Act
     const actualResult = {
-      allowlisted: isAllowlistedFile(featurePath, state, cwd()),
+      publicApiFile: isPublicApiFile(featurePath, state, cwd()),
       testFile: isTestFile(featurePath, state, cwd()),
     };
 
     // Assert
     expect(actualResult).toStrictEqual({
-      allowlisted: false,
+      publicApiFile: false,
       testFile: false,
     });
   });
@@ -147,13 +147,13 @@ describe("no-unused-exports options", () => {
 
     // Act
     const actualResult = {
-      allowlisted: isAllowlistedFile(outsidePath, state, cwd()),
+      publicApiFile: isPublicApiFile(outsidePath, state, cwd()),
       testFile: isTestFile(outsidePath, state, cwd()),
     };
 
     // Assert
     expect(actualResult).toStrictEqual({
-      allowlisted: false,
+      publicApiFile: false,
       testFile: false,
     });
   });
@@ -165,13 +165,13 @@ describe("no-unused-exports options", () => {
 
     // Act
     const actualResult = {
-      allowlisted: isAllowlistedFile(nonLintablePath, state, cwd()),
+      publicApiFile: isPublicApiFile(nonLintablePath, state, cwd()),
       testFile: isTestFile(nonLintablePath, state, cwd()),
     };
 
     // Assert
     expect(actualResult).toStrictEqual({
-      allowlisted: false,
+      publicApiFile: false,
       testFile: false,
     });
   });
@@ -185,13 +185,13 @@ describe("no-unused-exports options", () => {
 
     // Act
     const actualResult = {
-      allowlisted: isAllowlistedFile(sourceIndexPath, state, repositoryRoot),
+      publicApiFile: isPublicApiFile(sourceIndexPath, state, repositoryRoot),
       testFile: isTestFile(testPath, state, repositoryRoot),
     };
 
     // Assert
     expect(actualResult).toStrictEqual({
-      allowlisted: true,
+      publicApiFile: true,
       testFile: true,
     });
   });

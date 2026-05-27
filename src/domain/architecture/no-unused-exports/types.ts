@@ -1,44 +1,40 @@
 import type { AST } from "eslint";
 
 /** One exported element discovered in the current source file. */
-interface ExportedElement {
+export interface ExportedElement {
   /** Exported name as seen by importers. */
   exportedName: string;
+
+  /** Whether the exported entity is type-only or value-capable. */
+  exportKind: ExportKind;
 
   /** AST node used for diagnostics. */
   node: AST.Program["body"][number];
 }
 
-/** One import or re-export usage found in another file. */
-interface ExportUsage {
-  /** Imported export name, `default`, or `*` wildcard. */
-  importedName: string;
+/** Export category used when classifying concrete usages. */
+export type ExportKind = "type" | "value";
 
+/** One concrete usage found in another file. */
+export interface ExportUsage {
   /** Whether the usage comes from a test file. */
   isTestFile: boolean;
 }
 
 /** Rule options for no-unused-exports. */
-interface NoUnusedExportsOptions {
-  /** File globs where unused exports are allowed. */
-  allowInFiles?: string[];
+export interface NoUnusedExportsOptions {
+  /** File globs that define public API export surfaces. */
+  publicApiFiles?: string[];
 
   /** File globs treated as test files when classifying usages. */
   testFilePatterns?: string[];
 }
 
 /** Normalized state used by the rule implementation. */
-interface NoUnusedExportsState {
-  /** File globs where unused exports are allowed. */
-  allowInFiles: string[];
+export interface NoUnusedExportsState {
+  /** File globs that define public API export surfaces. */
+  publicApiFiles: string[];
 
   /** File globs treated as test files when classifying usages. */
   testFilePatterns: string[];
 }
-
-export type {
-  ExportedElement,
-  ExportUsage,
-  NoUnusedExportsOptions,
-  NoUnusedExportsState,
-};
