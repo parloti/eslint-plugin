@@ -32,7 +32,7 @@ const requireAaaSectionsRule: Rule.RuleModule = {
   meta: {
     docs: {
       description:
-        "Require strict // Arrange, // Act, and // Assert markers in supported test blocks.",
+        "Require ordered // Act and // Assert markers, with optional // Arrange, in supported test blocks.",
       recommended: false,
       url: "https://github.com/parloti/eslint-plugin/blob/main/docs/rules/require-aaa-sections.md",
     },

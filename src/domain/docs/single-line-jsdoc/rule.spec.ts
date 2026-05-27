@@ -141,12 +141,16 @@ describe("single-line-jsdoc rule", () => {
     ["skips JSDoc with multiple content lines", multiLineCommentValue, 4],
     ["skips comments with paragraph breaks", paragraphCommentValue, 5],
   ])("%s", (caseLabel, commentValue, endLine): void => {
+    // Arrange
     void caseLabel;
     const comment = createComment(commentValue, sourceText, { endLine });
+
+    // Act
     const { context, reports } = createContext([comment]);
 
     singleLineJsdocRule.create(context);
 
+    // Assert
     expect(reports).toHaveLength(0);
   });
 

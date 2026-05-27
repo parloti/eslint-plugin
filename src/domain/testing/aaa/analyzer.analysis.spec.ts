@@ -242,6 +242,51 @@ const analyzeSourceWithoutFirstCallbackLocation = (
 };
 
 describe("aAA analyzer block analysis", () => {
+  it("supports parameterized test wrappers based on it.each and test.each", () => {
+    // Arrange
+    const parameterizedItSource = [
+      'it.each([[1]])("tracks rows", (input) => {',
+      "  // Act",
+      "  const actualResult = run(input);",
+      "",
+      "  // Assert",
+      "  expect(actualResult).toBe(1);",
+      "});",
+    ].join("\n");
+    const parameterizedTestSource = [
+      'test.each([[1]])("tracks rows", (input) => {',
+      "  // Act",
+      "  const actualResult = run(input);",
+      "",
+      "  // Assert",
+      "  expect(actualResult).toBe(1);",
+      "});",
+    ].join("\n");
+
+    // Act
+    const actual = (() => {
+      const actualItAnalysis = analyzeMaybeSource(parameterizedItSource);
+      const actualTestAnalysis = analyzeMaybeSource(parameterizedTestSource);
+
+      return {
+        actualItAnalysis,
+        actualItPhases: actualItAnalysis?.sectionComments.map(
+          (comment) => comment.phases,
+        ),
+        actualTestAnalysis,
+        actualTestPhases: actualTestAnalysis?.sectionComments.map(
+          (comment) => comment.phases,
+        ),
+      };
+    })();
+
+    // Assert
+    expect(actual.actualItAnalysis).toBeDefined();
+    expect(actual.actualItPhases).toStrictEqual([["Act"], ["Assert"]]);
+    expect(actual.actualTestAnalysis).toBeDefined();
+    expect(actual.actualTestPhases).toStrictEqual([["Act"], ["Assert"]]);
+  });
+
   it("preserves combined AAA phases for statements", () => {
     // Arrange
     const sourceText = [

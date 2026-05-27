@@ -2,7 +2,7 @@
 
 ## Summary
 
-Require supported `it(...)` and `test(...)` blocks to include `// Act` and `// Assert` sections, with an optional `// Arrange`, using consistent structure and spacing.
+Require supported `it(...)` and `test(...)` blocks to include ordered `// Act` and `// Assert` sections, with an optional `// Arrange`, using consistent structure and spacing.
 
 ## Enabled by
 
@@ -19,6 +19,7 @@ The rule applies to test blocks using:
 
 - `it(...)`
 - `test(...)`
+- parameterized wrappers rooted at `it` or `test` (for example `it.each(...)` and `test.each(...)`)
 
 ### Required sections
 
@@ -61,8 +62,7 @@ The fixer applies the smallest safe transformation:
 - **Missing sections**
   - inserts `// Act` and `// Assert` when possible
 - **Empty sections**
-  - removes empty `// Arrange`
-  - merges `// Act` with `// Assert` when one is empty
+  - reports empty sections without an autofix
 - **Spacing**
   - inserts required blank lines
 - **Combined sections**
@@ -76,7 +76,6 @@ The fixer does not:
 ### Non-goals
 
 - This rule does not validate:
-  - ordering correctness (handled by `enforce-aaa-structure`)
   - phase purity (handled by `enforce-aaa-phase-purity`)
 
 ## Invalid
@@ -90,7 +89,7 @@ it("captures the result", () => {
 });
 ```
 
-### Empty Arrange (should be removed)
+### Empty Arrange
 
 ```typescript
 it("has empty arrange", () => {
@@ -104,7 +103,7 @@ it("has empty arrange", () => {
 });
 ```
 
-### Empty Act (should merge with Assert)
+### Empty Act
 
 ```typescript
 it("has empty act", () => {
@@ -142,62 +141,6 @@ it("rejects mixed section styles", () => {
 ```
 
 ## Autofix examples
-
-### Remove empty Arrange
-
-**Before**
-
-```typescript
-it("has empty arrange", () => {
-  // Arrange
-
-  // Act
-  const result = run();
-
-  // Assert
-  expect(result).toBe(1);
-});
-```
-
-**After**
-
-```typescript
-it("has empty arrange", () => {
-  // Act
-  const result = run();
-
-  // Assert
-  expect(result).toBe(1);
-});
-```
-
-### Merge empty Act into Assert
-
-**Before**
-
-```typescript
-it("has empty act", () => {
-  // Arrange
-  const input = 1;
-
-  // Act
-
-  // Assert
-  expect(run(input)).toBe(1);
-});
-```
-
-**After**
-
-```typescript
-it("has empty act", () => {
-  // Arrange
-  const input = 1;
-
-  // Act & Assert
-  expect(run(input)).toBe(1);
-});
-```
 
 ### Insert missing sections
 

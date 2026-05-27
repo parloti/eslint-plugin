@@ -232,6 +232,9 @@ function getSupportedTestCall(
 function getTestRootName(
   callee: ESTree.CallExpression["callee"],
 ): string | undefined {
+  if (callee.type === "CallExpression") {
+    return getTestRootName(callee.callee);
+  }
   if (callee.type === "Identifier") {
     return callee.name;
   }
