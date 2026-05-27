@@ -2,11 +2,19 @@ import type { TestBlockAnalysis } from "../aaa/types";
 
 /** Message identifiers emitted by the rule under test. */
 type RequireAaaSectionsMessageId =
+  | "actionInArrange"
+  | "assertionOutsideAssert"
+  | "asyncInArrange"
+  | "awaitOutsideAct"
   | "blankLineBeforeSection"
   | "codeBeforeArrange"
   | "emptySection"
+  | "missingMeaningfulAct"
   | "missingSections"
-  | "outOfOrderSection";
+  | "mutationAfterAct"
+  | "nonAssertionInAssert"
+  | "outOfOrderSection"
+  | "setupAfterAct";
 
 /**
  * Creates mock section comments.
@@ -96,11 +104,19 @@ function isRequireAaaSectionsMessageId(
   value: unknown,
 ): value is RequireAaaSectionsMessageId {
   return (
+    value === "actionInArrange" ||
+    value === "assertionOutsideAssert" ||
+    value === "asyncInArrange" ||
+    value === "awaitOutsideAct" ||
     value === "blankLineBeforeSection" ||
     value === "codeBeforeArrange" ||
     value === "emptySection" ||
+    value === "missingMeaningfulAct" ||
     value === "missingSections" ||
-    value === "outOfOrderSection"
+    value === "mutationAfterAct" ||
+    value === "nonAssertionInAssert" ||
+    value === "outOfOrderSection" ||
+    value === "setupAfterAct"
   );
 }
 

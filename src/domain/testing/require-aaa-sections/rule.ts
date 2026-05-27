@@ -9,6 +9,7 @@ import {
   getPhaseBoundaryComments,
 } from "../aaa/analyzer.analysis.helpers";
 import { hasBlankLineBeforeComment } from "../aaa/analyzer.classification.helpers";
+import { reportPhasePurityViolations } from "../enforce-aaa-phase-purity/phase-purity-reporting";
 import { buildMissingSectionFixes } from "./missing-section-fixes";
 
 /** Enforces explicit AAA section comments and spacing within supported test blocks. */
@@ -26,30 +27,45 @@ const requireAaaSectionsRule: Rule.RuleModule = {
         reportOutOfOrderSections(context, analysis);
         reportCodeBeforeArrange(context, analysis);
         reportBlankLineSeparators(context, analysis);
+        reportPhasePurityViolations(context, analysis);
       },
     } satisfies Rule.RuleListener;
   },
   meta: {
     docs: {
       description:
-        "Require ordered // Act and // Assert markers, with optional // Arrange, in supported test blocks.",
+        "Require explicit AAA markers and keep setup, action, and assertions in their intended phases.",
       recommended: false,
       url: "https://github.com/parloti/eslint-plugin/blob/main/docs/rules/require-aaa-sections.md",
     },
     fixable: "code",
     messages: {
+      actionInArrange:
+        "Keep the function under test out of Arrange; reserve Arrange for setup only.",
+      assertionOutsideAssert:
+        "Move assertions into the // Assert section so test logic does not leak earlier.",
+      asyncInArrange: "Do not trigger async behavior in Arrange.",
+      awaitOutsideAct: "Use await only inside the // Act section.",
       blankLineBeforeSection:
         "Insert a blank line before the // {{section}} section comment.",
       codeBeforeArrange:
         "Move setup statements below the first // Arrange section comment.",
       emptySection:
         "The // {{section}} section must contain code; comments alone do not count.",
+      missingMeaningfulAct:
+        "The // Act section must contain a meaningful SUT interaction, not only utility or setup calls.",
       missingSections: "Add the missing AAA section comments: {{sections}}.",
+      mutationAfterAct:
+        "Do not mutate test data after the // Act section has run.",
+      nonAssertionInAssert:
+        "Keep the // Assert section focused on assertions and assertion-local values.",
       outOfOrderSection:
         "The // {{section}} section comment appears out of order.",
+      setupAfterAct:
+        "Do not continue arranging test data after the // Act section has started.",
     },
     schema: [],
-    type: "layout",
+    type: "problem",
   },
 };
 

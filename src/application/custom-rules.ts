@@ -4,7 +4,6 @@ import {
   assertActualExpectedNamesRule,
   barrelFilesExportsOnlyRule,
   consistentBarrelFilesRule,
-  enforceAaaPhasePurityRule,
   enforceAaaStructureRule,
   noImportExportAliasesRule,
   noImportExportExtensionsRule,
@@ -44,10 +43,6 @@ const customRules = [
   {
     rule: consistentBarrelFilesRule,
     ruleName: "consistent-barrel-files",
-  },
-  {
-    rule: enforceAaaPhasePurityRule,
-    ruleName: "enforce-aaa-phase-purity",
   },
   {
     rule: enforceAaaStructureRule,

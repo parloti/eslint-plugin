@@ -68,7 +68,7 @@ const summarizeCustomRuleContract = (
 describe("custom rule registry", () => {
   it("covers every package-owned rule with metadata", () => {
     // Arrange
-    const expectedRuleCount = 19;
+    const expectedRuleCount = 18;
 
     // Act
     const actualRuleSummaries = customRules.map((ruleEntry) =>
@@ -107,16 +107,6 @@ describe("custom rule registry", () => {
         schemaIsArray: true,
         type: "problem",
         url: getCustomRuleDocumentationUrl("consistent-barrel-files"),
-      },
-      {
-        createType: "function",
-        description:
-          "Keep setup, action, and assertions inside their intended AAA phases.",
-        hasMessages: true,
-        ruleName: "enforce-aaa-phase-purity",
-        schemaIsArray: true,
-        type: "problem",
-        url: getCustomRuleDocumentationUrl("enforce-aaa-phase-purity"),
       },
       {
         createType: "function",
@@ -231,11 +221,11 @@ describe("custom rule registry", () => {
       {
         createType: "function",
         description:
-          "Require strict // Arrange, // Act, and // Assert markers in supported test blocks.",
+          "Require explicit AAA markers and keep setup, action, and assertions in their intended phases.",
         hasMessages: true,
         ruleName: "require-aaa-sections",
         schemaIsArray: true,
-        type: "layout",
+        type: "problem",
         url: getCustomRuleDocumentationUrl("require-aaa-sections"),
       },
       {

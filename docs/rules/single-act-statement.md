@@ -49,8 +49,7 @@ Within the `// Act` section, the rule considers **top-level statements only**, i
 
 - This rule does not enforce:
   - result capture (handled by `require-act-result-capture`)
-  - AAA structure or presence (handled by `require-aaa-sections`)
-  - phase purity (handled by `enforce-aaa-phase-purity`)
+  - AAA structure, section presence, or phase purity (handled by `require-aaa-sections`)
 
 ## Invalid
 

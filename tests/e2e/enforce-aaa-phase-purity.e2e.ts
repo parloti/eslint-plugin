@@ -2,7 +2,7 @@ import { Linter } from "eslint";
 import { parser } from "typescript-eslint";
 import { describe, expect, it } from "vitest";
 
-import { enforceAaaPhasePurityRule } from "../../src";
+import { requireAaaSectionsRule } from "../../src";
 import { runRuleCase } from "../support";
 
 /**
@@ -50,12 +50,12 @@ function runRule(code: string): (string | undefined)[] {
           plugins: {
             codeperfect: {
               rules: {
-                "enforce-aaa-phase-purity": enforceAaaPhasePurityRule,
+                "require-aaa-sections": requireAaaSectionsRule,
               },
             },
           },
           rules: {
-            "codeperfect/enforce-aaa-phase-purity": "error",
+            "codeperfect/require-aaa-sections": "error",
           },
         },
       ],
@@ -113,8 +113,8 @@ describe("enforce-aaa-phase-purity e2e", () => {
 
     // Act
     const result = runRuleCase(
-      "enforce-aaa-phase-purity",
-      enforceAaaPhasePurityRule,
+      "require-aaa-sections",
+      requireAaaSectionsRule,
       testCase,
     );
 
@@ -162,8 +162,8 @@ describe("enforce-aaa-phase-purity e2e", () => {
 
     // Act
     const result = runRuleCase(
-      "enforce-aaa-phase-purity",
-      enforceAaaPhasePurityRule,
+      "require-aaa-sections",
+      requireAaaSectionsRule,
       testCase,
     );
 
@@ -192,8 +192,8 @@ describe("enforce-aaa-phase-purity e2e", () => {
 
     // Act
     const result = runRuleCase(
-      "enforce-aaa-phase-purity",
-      enforceAaaPhasePurityRule,
+      "require-aaa-sections",
+      requireAaaSectionsRule,
       testCase,
     );
 

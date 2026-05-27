@@ -56,6 +56,34 @@ describe("require-aaa-sections rule", () => {
       expect(fixable).toBe("code");
       expect(actualMessages).toHaveProperty("emptySection");
       expect(actualMessages).toHaveProperty("missingSections");
+      expect(actualMessages).toHaveProperty("missingMeaningfulAct");
+    });
+  });
+
+  describe("merged phase purity reporting", () => {
+    it("reports purity violations while keeping message IDs distinct", () => {
+      // Arrange
+      const code = [
+        'it("keeps assertions in assert", () => {',
+        "  // Arrange",
+        "  const expectedValue = 1;",
+        "",
+        "  // Act",
+        "  expect(run()).toBe(expectedValue);",
+        "",
+        "  // Assert",
+        "  const actualResult = 1;",
+        "  expect(actualResult).toBe(expectedValue);",
+        "});",
+      ].join("\n");
+
+      // Act
+      const actualMessageIds = runFix(code).messages.map(
+        (message) => message.messageId,
+      );
+
+      // Assert
+      expect(actualMessageIds).toStrictEqual(["assertionOutsideAssert"]);
     });
   });
 

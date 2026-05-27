@@ -2,7 +2,7 @@
 
 ## Summary
 
-Require supported `it(...)` and `test(...)` blocks to include ordered `// Act` and `// Assert` sections, with an optional `// Arrange`, using consistent structure and spacing.
+Require supported `it(...)` and `test(...)` blocks to include explicit AAA sections and keep setup, action, and assertions in their intended phases.
 
 ## Enabled by
 
@@ -76,7 +76,8 @@ The fixer does not:
 ### Non-goals
 
 - This rule does not validate:
-  - phase purity (handled by `enforce-aaa-phase-purity`)
+  - single-Act constraints (handled by `single-act-statement`)
+  - Act result capture requirements (handled by `require-act-result-capture`)
 
 ## Invalid
 

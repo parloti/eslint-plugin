@@ -5,7 +5,6 @@ import { parser } from "typescript-eslint";
 import { describe, expect, it } from "vitest";
 
 import {
-  enforceAaaPhasePurityRule,
   enforceAaaStructureRule,
   requireAaaSectionsRule,
   requireActResultCaptureRule,
@@ -35,7 +34,6 @@ const aaaConfig: EslintLinterType.Config[] = [
     plugins: {
       codeperfect: {
         rules: {
-          "enforce-aaa-phase-purity": enforceAaaPhasePurityRule,
           "enforce-aaa-structure": enforceAaaStructureRule,
           "require-aaa-sections": requireAaaSectionsRule,
           "require-act-result-capture": requireActResultCaptureRule,
@@ -43,7 +41,6 @@ const aaaConfig: EslintLinterType.Config[] = [
       },
     },
     rules: {
-      "codeperfect/enforce-aaa-phase-purity": "error",
       "codeperfect/enforce-aaa-structure": "error",
       "codeperfect/require-aaa-sections": "error",
       "codeperfect/require-act-result-capture": "error",

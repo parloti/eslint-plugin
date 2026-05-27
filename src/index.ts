@@ -2,7 +2,6 @@ export {
   assertActualExpectedNamesRule,
   barrelFilesExportsOnlyRule,
   consistentBarrelFilesRule,
-  enforceAaaPhasePurityRule,
   enforceAaaStructureRule,
   noImportExportAliasesRule,
   noImportExportExtensionsRule,

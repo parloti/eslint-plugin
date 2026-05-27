@@ -9,7 +9,6 @@ describe("codeperfect plugin", () => {
       "assert-actual-expected-names",
       "barrel-files-exports-only",
       "consistent-barrel-files",
-      "enforce-aaa-phase-purity",
       "enforce-aaa-structure",
       "no-import-export-aliases",
       "no-import-export-extensions",

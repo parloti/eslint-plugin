@@ -14,7 +14,6 @@ export {
 } from "./docs";
 export {
   assertActualExpectedNamesRule,
-  enforceAaaPhasePurityRule,
   enforceAaaStructureRule,
   preferViMockedImportRule,
   requireAaaSectionsRule,

@@ -56,7 +56,6 @@ describe("ready-to-use presets", () => {
       "codeperfect/assert-actual-expected-names",
       "codeperfect/barrel-files-exports-only",
       "codeperfect/consistent-barrel-files",
-      "codeperfect/enforce-aaa-phase-purity",
       "codeperfect/enforce-aaa-structure",
       "codeperfect/no-import-export-aliases",
       "codeperfect/no-import-export-extensions",
@@ -132,7 +131,6 @@ describe("ready-to-use presets", () => {
     // Arrange
     const expectedRuleKeys = [
       "codeperfect/assert-actual-expected-names",
-      "codeperfect/enforce-aaa-phase-purity",
       "codeperfect/enforce-aaa-structure",
       "codeperfect/prefer-vi-mocked-import",
       "codeperfect/require-aaa-sections",
@@ -151,7 +149,6 @@ describe("ready-to-use presets", () => {
   it("groups the AAA rules", () => {
     // Arrange
     const expectedRuleKeys = [
-      "codeperfect/enforce-aaa-phase-purity",
       "codeperfect/enforce-aaa-structure",
       "codeperfect/require-aaa-sections",
     ];

@@ -96,7 +96,6 @@ void preferInterfaceTypesRule;
 - `codeperfect/assert-actual-expected-names`
 - `codeperfect/barrel-files-exports-only`
 - `codeperfect/consistent-barrel-files`
-- `codeperfect/enforce-aaa-phase-purity`
 - `codeperfect/enforce-aaa-structure`
 - `codeperfect/no-import-export-aliases`
 - `codeperfect/no-import-export-extensions`

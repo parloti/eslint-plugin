@@ -41,7 +41,6 @@ const documentationRuleNames = [
 
 /** Rule names grouped into the AAA-focused preset. */
 const aaaRuleNames = [
-  "enforce-aaa-phase-purity",
   "enforce-aaa-structure",
   "require-aaa-sections",
 ] as const satisfies readonly CodeperfectRuleName[];
@@ -49,7 +48,6 @@ const aaaRuleNames = [
 /** Rule names grouped into the broader testing preset. */
 const testingRuleNames = [
   "assert-actual-expected-names",
-  "enforce-aaa-phase-purity",
   "enforce-aaa-structure",
   "prefer-vi-mocked-import",
   "require-aaa-sections",
@@ -63,7 +61,6 @@ const allRuleNames = [
   "assert-actual-expected-names",
   "barrel-files-exports-only",
   "consistent-barrel-files",
-  "enforce-aaa-phase-purity",
   "enforce-aaa-structure",
   "no-import-export-aliases",
   "no-import-export-extensions",
