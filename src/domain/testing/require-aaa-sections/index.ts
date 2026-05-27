@@ -1,1 +1,0 @@
-export { requireAaaSectionsRule } from "./rule";

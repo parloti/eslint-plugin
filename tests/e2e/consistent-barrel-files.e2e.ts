@@ -51,13 +51,10 @@ describe("consistent-barrel-files e2e", () => {
     },
   ])("rejects missing or forbidden barrels %#", (testCase) => {
     // Arrange
+    const ruleName = "consistent-barrel-files";
 
     // Act
-    const result = runRuleCase(
-      "consistent-barrel-files",
-      consistentBarrelFilesRule,
-      testCase,
-    );
+    const result = runRuleCase(ruleName, consistentBarrelFilesRule, testCase);
 
     // Assert
     expect(result.messageIds).toStrictEqual(
@@ -82,13 +79,10 @@ describe("consistent-barrel-files e2e", () => {
     },
   ])("accepts configured barrel layouts %#", (testCase) => {
     // Arrange
+    const ruleName = "consistent-barrel-files";
 
     // Act
-    const result = runRuleCase(
-      "consistent-barrel-files",
-      consistentBarrelFilesRule,
-      testCase,
-    );
+    const result = runRuleCase(ruleName, consistentBarrelFilesRule, testCase);
 
     // Assert
     expect(result.messageIds).toStrictEqual([]);

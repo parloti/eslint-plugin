@@ -33,18 +33,23 @@ describe("single-line-jsdoc utilities", () => {
     } as Rule.RuleContext;
 
     // Act
-    reportIfSingleLine(
-      context,
-      {
-        loc: { end: { column: 0, line: 3 }, start: { column: 0, line: 1 } },
-        range: [0, 10],
-        type: "Block",
-        value: "*\n * ok\n ",
-      },
-      80,
-    );
+    const actualResult = (() => {
+      reportIfSingleLine(
+        context,
+        {
+          loc: { end: { column: 0, line: 3 }, start: { column: 0, line: 1 } },
+          range: [0, 10],
+          type: "Block",
+          value: "*\n * ok\n ",
+        },
+        80,
+      );
+
+      return "completed";
+    })();
 
     // Assert
+    expect(actualResult).toBe("completed");
     expect(reports).toHaveLength(1);
   });
 });

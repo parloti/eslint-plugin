@@ -1,301 +1,184 @@
-import type { Rule } from "eslint";
+import { Linter } from "eslint";
+import { parser } from "typescript-eslint";
+import { describe, expect, it } from "vitest";
 
-import { beforeEach, describe, expect, it, vi } from "vitest";
-
-/** AAA phase-order mapping used by the mock. */
-interface AaaPhaseOrder {
-  /** Sort index for the Act phase. */
-  Act: number;
-
-  /** Sort index for the Arrange phase. */
-  Arrange: number;
-
-  /** Sort index for the Assert phase. */
-  Assert: number;
-}
-
-/** Mocked analysis helper module shape used by the structure rule tests. */
-interface EnforceAaaStructureAnalysisHelpersModule {
-  /** AAA phase ordering. */
-  aaaPhaseOrder: AaaPhaseOrder;
-
-  /** Mocked flattened section list. */
-  getFlattenedSections: () => FlattenedSection[];
-}
-
-/** Mocked analysis module shape used by the structure rule tests. */
-interface EnforceAaaStructureAnalysisModule {
-  /** Mocked analyzer result. */
-  analyzeTestBlock: () => unknown;
-}
-
-/** Mocked AAA structure state for the current test. */
-interface EnforceAaaStructureMockState {
-  /** Parsed analysis returned by the mocked analyzer. */
-  analysis: unknown;
-
-  /** Flattened AAA sections returned by the mocked helper. */
-  flattenedSections: FlattenedSection[];
-}
-
-/** Imported rule module shape used by these tests. */
-interface EnforceAaaStructureModule {
-  /** Rule under test. */
-  enforceAaaStructureRule: Rule.RuleModule;
-}
-
-/** Flattened AAA section entry used by the mocked analyzer. */
-interface FlattenedSection {
-  /** Comment node associated with the section. */
-  comment: Rule.Node;
-
-  /** AAA phase label reported by the analyzer. */
-  phase: string;
-}
-
-/** Captured rule context and emitted reports. */
-interface RuleContextState {
-  /** Mock ESLint rule context. */
-  context: Rule.RuleContext;
-
-  /** Reports emitted during rule execution. */
-  reports: Rule.ReportDescriptor[];
-}
-
-/** Active AAA structure mock state used by the module mock. */
-let activeStructureState: EnforceAaaStructureMockState;
+import { enforceAaaStructureRule } from "./rule";
 
 /**
- * Creates the mocked analysis helpers for the structure rule tests.
- * @returns Mocked analysis helpers.
+ * Runs the merged rule with autofix enabled for a single source snippet.
+ * @param code Source text passed to the linter.
+ * @returns ESLint verify-and-fix result for the snippet.
  * @example
  * ```typescript
- * const mockedHelpers = createAnalysisHelpersModule();
+ * const result = runFix('it("works", () => {});');
+ * void result;
  * ```
  */
-function createAnalysisHelpersModule(): EnforceAaaStructureAnalysisHelpersModule {
-  return {
-    aaaPhaseOrder: { Act: 1, Arrange: 0, Assert: 2 },
-    getFlattenedSections: (): FlattenedSection[] =>
-      activeStructureState.flattenedSections,
-  };
-}
+function runFix(code: string): ReturnType<Linter["verifyAndFix"]> {
+  const linter = new Linter({ configType: "flat" });
 
-/**
- * Creates the mocked analysis module for the structure rule tests.
- * @returns Mocked analyzer helper.
- * @example
- * ```typescript
- * const mockedAnalysis = createAnalysisModule();
- * ```
- */
-function createAnalysisModule(): EnforceAaaStructureAnalysisModule {
-  return {
-    analyzeTestBlock: (): unknown => activeStructureState.analysis,
-  };
-}
-
-/**
- * Builds a mock ESLint context that records emitted reports.
- * @returns Captured context state.
- * @example
- * ```typescript
- * const state = createContext();
- * ```
- */
-const createContext = (): RuleContextState => {
-  const reports: Rule.ReportDescriptor[] = [];
-
-  return {
-    context: {
-      report: (descriptor: Rule.ReportDescriptor): void => {
-        reports.push(descriptor);
+  return linter.verifyAndFix(
+    code,
+    [
+      {
+        files: ["**/*.ts"],
+        languageOptions: {
+          ecmaVersion: 2022,
+          parser,
+          sourceType: "module",
+        },
+        plugins: {
+          codeperfect: {
+            rules: {
+              "enforce-aaa-structure": enforceAaaStructureRule,
+            },
+          },
+        },
+        rules: {
+          "codeperfect/enforce-aaa-structure": "error",
+        },
       },
-    } as Rule.RuleContext,
-    reports,
-  };
-};
-
-/**
- * Loads the rule with mocked AAA structure analysis.
- * @param analysis Parsed AAA analysis returned by the mock.
- * @param flattenedSections Flattened sections returned by the mock.
- * @returns Imported rule module.
- * @example
- * ```typescript
- * const module = await loadRule(void 0, []);
- * ```
- */
-const loadRule = async (
-  analysis: unknown,
-  flattenedSections: FlattenedSection[],
-): Promise<EnforceAaaStructureModule> => {
-  activeStructureState = { analysis, flattenedSections };
-
-  return import("./rule");
-};
-
-/**
- * Runs the rule against one synthetic call expression.
- * @param analysis Parsed AAA analysis returned by the mock.
- * @param flattenedSections Flattened sections returned by the mock.
- * @returns Reports emitted by the rule.
- * @example
- * ```typescript
- * const reports = await runRule(void 0, []);
- * ```
- */
-const runRule = async (
-  analysis: unknown,
-  flattenedSections: FlattenedSection[],
-): Promise<Rule.ReportDescriptor[]> => {
-  const { enforceAaaStructureRule } = await loadRule(
-    analysis,
-    flattenedSections,
+    ],
+    { filename: "example.spec.ts" },
   );
-  const { context, reports } = createContext();
-  const listener = enforceAaaStructureRule.create(context).CallExpression;
-
-  listener?.({ type: "CallExpression" } as never);
-
-  return reports;
-};
+}
 
 describe("enforce-aaa-structure rule", () => {
-  beforeEach(() => {
-    activeStructureState = { analysis: void 0, flattenedSections: [] };
-    vi.doMock(
-      import("../aaa/analyzer.analysis"),
-      (): never => createAnalysisModule() as never,
-    );
-    vi.doMock(
-      import("../aaa/analyzer.analysis.helpers"),
-      (): never => createAnalysisHelpersModule() as never,
-    );
-  });
-
-  it("defines metadata and messages", async () => {
+  it("defines metadata, messages, and fix support", () => {
     // Arrange
-    const expectedDescriptionFragment = "Arrange, Act, Assert";
-
-    // Act
-    const result = await loadRule(void 0, []).then((actual) => ({
-      actual,
-      descriptionIncludesFragment:
-        actual.enforceAaaStructureRule.meta?.docs?.description?.includes(
-          expectedDescriptionFragment,
-        ) ?? false,
-    }));
-
-    // Assert
-    expect(result.actual.enforceAaaStructureRule.meta?.messages).toHaveProperty(
+    const fixable = enforceAaaStructureRule.meta?.fixable;
+    const expectedMessageIds = [
       "duplicateSection",
+      "invalidOrder",
+      "missingSections",
+      "emptySection",
+      "assertionOutsideAssert",
+    ];
+
+    // Act
+    const actualMessages = enforceAaaStructureRule.meta?.messages;
+
+    // Assert
+    expect(fixable).toBe("code");
+    expect(actualMessages).toStrictEqual(
+      expect.objectContaining(
+        Object.fromEntries(
+          expectedMessageIds.map((messageId) => [
+            messageId,
+            expect.any(String),
+          ]),
+        ),
+      ),
     );
-    expect(result.descriptionIncludesFragment).toBe(true);
   });
 
-  it("skips unsupported test blocks", async () => {
+  it("reports duplicate and out-of-order sections", () => {
     // Arrange
-    const expected: [] = [];
+    const code = [
+      'it("orders AAA phases", () => {',
+      "  // Arrange",
+      "  const input = 1;",
+      "",
+      "  // Assert",
+      "  expect(run(input)).toBe(1);",
+      "",
+      "  // Arrange",
+      "  const nextInput = 2;",
+      "",
+      "  // Act",
+      "  const actualResult = run(nextInput);",
+      "});",
+    ].join("\n");
 
     // Act
-    const actual = await runRule(void 0, []);
+    const actualMessageIds = runFix(code).messages.map(
+      (message) => message.messageId,
+    );
 
     // Assert
-    expect(actual).toStrictEqual(expected);
+    expect(actualMessageIds).toContain("duplicateSection");
+    expect(actualMessageIds).toContain("invalidOrder");
+    expect(actualMessageIds).toContain("outOfOrderSection");
   });
 
-  it("reports duplicate and out-of-order sections", async () => {
+  it("autofixes missing section markers and spacing", () => {
     // Arrange
-    const arrangeComment = { type: "Line" } as unknown as Rule.Node;
-    const duplicateArrangeComment = { type: "Line" } as unknown as Rule.Node;
-    const actComment = { type: "Line" } as unknown as Rule.Node;
-    const sections = [
-      { comment: arrangeComment, phase: "Arrange" },
-      { comment: { type: "Line" } as unknown as Rule.Node, phase: "Assert" },
-      { comment: duplicateArrangeComment, phase: "Arrange" },
-      { comment: actComment, phase: "Act" },
-    ];
+    const code = [
+      'it("captures the result", () => {',
+      "  const input = 1;",
+      "  const actualResult = run(input);",
+      "  expect(actualResult).toBe(1);",
+      "});",
+    ].join("\n");
 
     // Act
-    const actual = await runRule({}, sections);
+    const result = runFix(code);
 
     // Assert
-    expect(actual).toStrictEqual([
-      {
-        data: { section: "Arrange" },
-        messageId: "duplicateSection",
-        node: duplicateArrangeComment,
-      },
-      {
-        data: { section: "Act" },
-        messageId: "invalidOrder",
-        node: actComment,
-      },
-    ]);
+    expect(result.messages).toStrictEqual([]);
+    expect(result.output).toBe(
+      [
+        'it("captures the result", () => {',
+        "  // Arrange",
+        "  const input = 1;",
+        "",
+        "  // Act",
+        "  const actualResult = run(input);",
+        "",
+        "  // Assert",
+        "  expect(actualResult).toBe(1);",
+        "});",
+      ].join("\n"),
+    );
   });
 
-  it("accepts valid combined AAA phase coverage", async () => {
+  it("reports purity violations while keeping message IDs distinct", () => {
     // Arrange
-    const arrangeCombinedComment = { type: "Line" } as unknown as Rule.Node;
-    const assertComment = { type: "Line" } as unknown as Rule.Node;
-    const sections = [
-      { comment: arrangeCombinedComment, phase: "Arrange" },
-      { comment: arrangeCombinedComment, phase: "Act" },
-      { comment: assertComment, phase: "Assert" },
-    ];
+    const code = [
+      'it("keeps assertions in assert", () => {',
+      "  // Arrange",
+      "  const expectedValue = 1;",
+      "",
+      "  // Act",
+      "  expect(run()).toBe(expectedValue);",
+      "",
+      "  // Assert",
+      "  const actualResult = 1;",
+      "  expect(actualResult).toBe(expectedValue);",
+      "});",
+    ].join("\n");
 
     // Act
-    const actual = await runRule({}, sections);
+    const actualMessageIds = runFix(code).messages.map(
+      (message) => message.messageId,
+    );
 
     // Assert
-    expect(actual).toStrictEqual([]);
+    expect(actualMessageIds).toStrictEqual(["assertionOutsideAssert"]);
   });
 
-  it("reports duplicate phase introduced by combined and split comments", async () => {
+  it("reports code before Arrange", () => {
     // Arrange
-    const arrangeAndActComment = { type: "Line" } as unknown as Rule.Node;
-    const duplicateActComment = { type: "Line" } as unknown as Rule.Node;
-    const sections = [
-      { comment: arrangeAndActComment, phase: "Arrange" },
-      { comment: arrangeAndActComment, phase: "Act" },
-      { comment: duplicateActComment, phase: "Act" },
-      { comment: { type: "Line" } as unknown as Rule.Node, phase: "Assert" },
-    ];
+    const code = [
+      'it("starts with arrange", () => {',
+      "  const input = 1;",
+      "  // Arrange",
+      "  const fixture = input + 1;",
+      "",
+      "  // Act",
+      "  const nextResult = rerun(fixture);",
+      "",
+      "  // Assert",
+      "  expect(nextResult).toBe(2);",
+      "});",
+    ].join("\n");
 
     // Act
-    const actual = await runRule({}, sections);
+    const actualMessageIds = runFix(code).messages.map(
+      (message) => message.messageId,
+    );
 
     // Assert
-    expect(actual).toStrictEqual([
-      {
-        data: { section: "Act" },
-        messageId: "duplicateSection",
-        node: duplicateActComment,
-      },
-    ]);
-  });
-
-  it("reports out-of-order phase introduced after combined Act and Assert", async () => {
-    // Arrange
-    const actAndAssertComment = { type: "Line" } as unknown as Rule.Node;
-    const arrangeComment = { type: "Line" } as unknown as Rule.Node;
-    const sections = [
-      { comment: actAndAssertComment, phase: "Act" },
-      { comment: actAndAssertComment, phase: "Assert" },
-      { comment: arrangeComment, phase: "Arrange" },
-    ];
-
-    // Act
-    const actual = await runRule({}, sections);
-
-    // Assert
-    expect(actual).toStrictEqual([
-      {
-        data: { section: "Arrange" },
-        messageId: "invalidOrder",
-        node: arrangeComment,
-      },
-    ]);
+    expect(actualMessageIds).toContain("codeBeforeArrange");
   });
 });

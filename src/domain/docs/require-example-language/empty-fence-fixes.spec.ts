@@ -2,6 +2,47 @@ import { describe, expect, it, vi } from "vitest";
 
 import { parseFenceLine, removeEmptyFences } from "./empty-fence-fixes";
 
+/**
+ * Parses one fence line while forcing the regex-groups fallback path.
+ * @param value Fence line to parse.
+ * @returns Parsed fence output.
+ * @example
+ * ```typescript
+ * const parsed = parseFenceLineWithoutGroups(" * ```typescript");
+ * void parsed;
+ * ```
+ */
+function parseFenceLineWithoutGroups(
+  value: string,
+): ReturnType<typeof parseFenceLine> {
+  const originalExec = RegExp.prototype.exec;
+  const execSpy = vi
+    .spyOn(RegExp.prototype, "exec")
+    .mockImplementation(function execSpyImplementation(
+      this: RegExp,
+      currentValue: string,
+    ): null | RegExpExecArray {
+      if (
+        this.source ===
+          "^(?<leading>\\s*\\*?\\s*)```(?<lang>[^\\s`]+)?[ \\t]*$" &&
+        currentValue === value
+      ) {
+        return Object.assign([value], {
+          index: 0,
+          input: currentValue,
+        }) as RegExpExecArray;
+      }
+
+      return originalExec.call(this, currentValue);
+    });
+
+  try {
+    return parseFenceLine(value);
+  } finally {
+    execSpy.mockRestore();
+  }
+}
+
 describe("empty fence fixes", () => {
   it("parses fence lines with language", () => {
     // Arrange
@@ -71,35 +112,10 @@ describe("empty fence fixes", () => {
 
   it("handles fence lines when regex groups are unavailable", () => {
     // Arrange
-    const originalExec = RegExp.prototype.exec;
-    const execSpy = vi
-      .spyOn(RegExp.prototype, "exec")
-      .mockImplementation(function execSpyImplementation(
-        this: RegExp,
-        value: string,
-      ): null | RegExpExecArray {
-        if (
-          this.source ===
-            "^(?<leading>\\s*\\*?\\s*)```(?<lang>[^\\s`]+)?[ \\t]*$" &&
-          value === " * ```typescript"
-        ) {
-          return Object.assign([" * ```typescript"], {
-            index: 0,
-            input: value,
-          }) as RegExpExecArray;
-        }
-
-        return originalExec.call(this, value);
-      });
+    const line = " * ```typescript";
 
     // Act
-    let actualParsedFence: ReturnType<typeof parseFenceLine>;
-
-    try {
-      actualParsedFence = parseFenceLine(" * ```typescript");
-    } finally {
-      execSpy.mockRestore();
-    }
+    const actualParsedFence = parseFenceLineWithoutGroups(line);
 
     // Assert
     expect(actualParsedFence).toStrictEqual({

@@ -11,7 +11,6 @@ export {
   noUnusedExportsRule,
   preferInterfaceTypesRule,
   preferViMockedImportRule,
-  requireAaaSectionsRule,
   requireActResultCaptureRule,
   requireExampleLanguageRule,
   requireTestCompanionRule,

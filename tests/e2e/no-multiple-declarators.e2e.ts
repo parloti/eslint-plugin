@@ -49,13 +49,10 @@ describe("no-multiple-declarators e2e", () => {
     },
   ])("rejects multiple declarators %#", (testCase) => {
     // Arrange
+    const ruleName = "no-multiple-declarators";
 
     // Act
-    const result = runRuleCase(
-      "no-multiple-declarators",
-      noMultipleDeclaratorsRule,
-      testCase,
-    );
+    const result = runRuleCase(ruleName, noMultipleDeclaratorsRule, testCase);
 
     // Assert
     expect(result.messageIds).toStrictEqual(

@@ -42,7 +42,6 @@ const documentationRuleNames = [
 /** Rule names grouped into the AAA-focused preset. */
 const aaaRuleNames = [
   "enforce-aaa-structure",
-  "require-aaa-sections",
 ] as const satisfies readonly CodeperfectRuleName[];
 
 /** Rule names grouped into the broader testing preset. */
@@ -50,7 +49,6 @@ const testingRuleNames = [
   "assert-actual-expected-names",
   "enforce-aaa-structure",
   "prefer-vi-mocked-import",
-  "require-aaa-sections",
   "require-act-result-capture",
   "require-test-companion",
   "single-act-statement",
@@ -70,7 +68,6 @@ const allRuleNames = [
   "no-unused-exports",
   "prefer-interface-types",
   "prefer-vi-mocked-import",
-  "require-aaa-sections",
   "require-act-result-capture",
   "require-example-language",
   "require-test-companion",

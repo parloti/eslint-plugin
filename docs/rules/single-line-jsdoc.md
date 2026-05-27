@@ -22,7 +22,6 @@ Short documentation should remain compact and easy to scan. Single-line JSDoc:
 ### What the rule targets
 
 - JSDoc block comments (`/** ... */`)
-- non-function targets in this plugin's supported AST shapes
 
 ### When a single-line format is required
 

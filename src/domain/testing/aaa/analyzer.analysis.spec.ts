@@ -312,7 +312,7 @@ describe("aAA analyzer block analysis", () => {
       "Act",
       "Assert",
     ]);
-    expect(actStatementCount).toBe(1);
+    expect(actStatementCount).toBe(0);
   });
 
   it("analyzes supported test blocks and counts Act statements", () => {

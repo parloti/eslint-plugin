@@ -57,13 +57,10 @@ describe("prefer-vi-mocked-import e2e", () => {
     },
   ])("rewrites direct mocks to vi.mocked imports %#", (testCase) => {
     // Arrange
+    const ruleName = "prefer-vi-mocked-import";
 
     // Act
-    const result = runRuleCase(
-      "prefer-vi-mocked-import",
-      preferViMockedImportRule,
-      testCase,
-    );
+    const result = runRuleCase(ruleName, preferViMockedImportRule, testCase);
 
     // Assert
     expect(result.messageIds).toStrictEqual(

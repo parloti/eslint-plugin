@@ -68,7 +68,7 @@ const summarizeCustomRuleContract = (
 describe("custom rule registry", () => {
   it("covers every package-owned rule with metadata", () => {
     // Arrange
-    const expectedRuleCount = 18;
+    const expectedRuleCount = 17;
 
     // Act
     const actualRuleSummaries = customRules.map((ruleEntry) =>
@@ -111,7 +111,7 @@ describe("custom rule registry", () => {
       {
         createType: "function",
         description:
-          "Require AAA sections to appear once and in Arrange, Act, Assert order.",
+          "Require explicit AAA markers, enforce section order and uniqueness, and keep setup, action, and assertions in their intended phases.",
         hasMessages: true,
         ruleName: "enforce-aaa-structure",
         schemaIsArray: true,
@@ -217,16 +217,6 @@ describe("custom rule registry", () => {
         schemaIsArray: true,
         type: "suggestion",
         url: getCustomRuleDocumentationUrl("prefer-vi-mocked-import"),
-      },
-      {
-        createType: "function",
-        description:
-          "Require explicit AAA markers and keep setup, action, and assertions in their intended phases.",
-        hasMessages: true,
-        ruleName: "require-aaa-sections",
-        schemaIsArray: true,
-        type: "problem",
-        url: getCustomRuleDocumentationUrl("require-aaa-sections"),
       },
       {
         createType: "function",

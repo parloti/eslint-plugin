@@ -29,13 +29,10 @@ describe("require-test-companion e2e", () => {
     },
   ])("rejects missing source/test companions %#", (testCase) => {
     // Arrange
+    const ruleName = "require-test-companion";
 
     // Act
-    const result = runRuleCase(
-      "require-test-companion",
-      requireTestCompanionRule,
-      testCase,
-    );
+    const result = runRuleCase(ruleName, requireTestCompanionRule, testCase);
 
     // Assert
     expect(result.messageIds).toStrictEqual(
@@ -61,13 +58,10 @@ describe("require-test-companion e2e", () => {
     },
   ])("accepts matched source/test companions %#", (testCase) => {
     // Arrange
+    const ruleName = "require-test-companion";
 
     // Act
-    const result = runRuleCase(
-      "require-test-companion",
-      requireTestCompanionRule,
-      testCase,
-    );
+    const result = runRuleCase(ruleName, requireTestCompanionRule, testCase);
 
     // Assert
     expect(result.messageIds).toStrictEqual([]);

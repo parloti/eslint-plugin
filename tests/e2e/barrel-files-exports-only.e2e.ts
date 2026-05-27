@@ -62,13 +62,10 @@ describe("barrel-files-exports-only e2e", () => {
     },
   ])("rejects invalid barrel content %#", (testCase) => {
     // Arrange
+    const ruleName = "barrel-files-exports-only";
 
     // Act
-    const result = runRuleCase(
-      "barrel-files-exports-only",
-      barrelFilesExportsOnlyRule,
-      testCase,
-    );
+    const result = runRuleCase(ruleName, barrelFilesExportsOnlyRule, testCase);
 
     // Assert
     expect(result.messageIds).toStrictEqual(["invalidBarrelContent"]);
@@ -111,13 +108,10 @@ describe("barrel-files-exports-only e2e", () => {
     },
   ])("accepts valid barrel content %#", (testCase) => {
     // Arrange
+    const ruleName = "barrel-files-exports-only";
 
     // Act
-    const result = runRuleCase(
-      "barrel-files-exports-only",
-      barrelFilesExportsOnlyRule,
-      testCase,
-    );
+    const result = runRuleCase(ruleName, barrelFilesExportsOnlyRule, testCase);
 
     // Assert
     expect(result.messageIds).toStrictEqual([]);

@@ -18,7 +18,10 @@ describe("enforce-aaa-structure e2e", () => {
         "  expect(actualResult).toBe(input);",
         "});",
       ].join("\n"),
-      errors: [{ messageId: "invalidOrder" }],
+      errors: [
+        { messageId: "invalidOrder" },
+        { messageId: "outOfOrderSection" },
+      ],
       filename: "example.spec.ts",
     },
     {
@@ -42,18 +45,82 @@ describe("enforce-aaa-structure e2e", () => {
     },
   ])("rejects invalid AAA ordering %#", (testCase) => {
     // Arrange
+    const ruleName = "enforce-aaa-structure";
 
     // Act
-    const result = runRuleCase(
-      "enforce-aaa-structure",
-      enforceAaaStructureRule,
-      testCase,
-    );
+    const result = runRuleCase(ruleName, enforceAaaStructureRule, testCase);
 
     // Assert
     expect(result.messageIds).toStrictEqual(
       testCase.errors.map((error) => error.messageId),
     );
+  });
+
+  it.each([
+    {
+      code: [
+        'it("captures the result", () => {',
+        "  const input = 1;",
+        "  const actualResult = run(input);",
+        "  expect(actualResult).toBe(1);",
+        "});",
+      ].join("\n"),
+      errors: [{ messageId: "missingSections" }],
+      filename: "example.spec.ts",
+      output: [
+        'it("captures the result", () => {',
+        "  // Arrange",
+        "  const input = 1;",
+        "",
+        "  // Act",
+        "  const actualResult = run(input);",
+        "",
+        "  // Assert",
+        "  expect(actualResult).toBe(1);",
+        "});",
+      ].join("\n"),
+    },
+    {
+      code: [
+        'it("separates phases", () => {',
+        "  // Arrange",
+        "  const input = 1;",
+        "  // Act",
+        "  const actualResult = run(input);",
+        "  // Assert",
+        "  expect(actualResult).toBe(1);",
+        "});",
+      ].join("\n"),
+      errors: [
+        { messageId: "blankLineBeforeSection" },
+        { messageId: "blankLineBeforeSection" },
+      ],
+      filename: "example.spec.ts",
+      output: [
+        'it("separates phases", () => {',
+        "  // Arrange",
+        "  const input = 1;",
+        "",
+        "  // Act",
+        "  const actualResult = run(input);",
+        "",
+        "  // Assert",
+        "  expect(actualResult).toBe(1);",
+        "});",
+      ].join("\n"),
+    },
+  ])("fixes incomplete AAA section layouts %#", (testCase) => {
+    // Arrange
+    const ruleName = "enforce-aaa-structure";
+
+    // Act
+    const result = runRuleCase(ruleName, enforceAaaStructureRule, testCase);
+
+    // Assert
+    expect(result.messageIds).toStrictEqual(
+      testCase.errors.map((error) => error.messageId),
+    );
+    expect(result.output).toBe(testCase.output);
   });
 
   it("accepts a single AAA flow", () => {

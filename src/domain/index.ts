@@ -16,7 +16,6 @@ export {
   assertActualExpectedNamesRule,
   enforceAaaStructureRule,
   preferViMockedImportRule,
-  requireAaaSectionsRule,
   requireActResultCaptureRule,
   requireTestCompanionRule,
   singleActStatementRule,

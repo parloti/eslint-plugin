@@ -194,13 +194,10 @@ describe("require-act-result-capture e2e", () => {
     },
   ])("accepts allowed Act patterns %#", (testCase) => {
     // Arrange
+    const ruleName = "require-act-result-capture";
 
     // Act
-    const result = runRuleCase(
-      "require-act-result-capture",
-      requireActResultCaptureRule,
-      testCase,
-    );
+    const result = runRuleCase(ruleName, requireActResultCaptureRule, testCase);
 
     // Assert
     expect(result.messageIds).toStrictEqual([]);

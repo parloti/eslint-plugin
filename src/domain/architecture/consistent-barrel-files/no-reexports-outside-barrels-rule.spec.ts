@@ -67,11 +67,11 @@ describe("no reexports outside barrels rule (enforced)", () => {
     ["export named from re-exports", createBody(createExportNamedFrom())],
   ])("reports on %s", (_label, body) => {
     // Act
-    const reports = runTemporaryFeature(body, defaultOptions);
+    const actualReports = runTemporaryFeature(body, defaultOptions);
 
     // Assert
-    expect(reports).toHaveLength(1);
-    expect(reports[0]?.messageId).toBe("reexportNotAllowed");
+    expect(actualReports).toHaveLength(1);
+    expect(actualReports[0]?.messageId).toBe("reexportNotAllowed");
   });
 
   it.each([
@@ -91,11 +91,11 @@ describe("no reexports outside barrels rule (enforced)", () => {
     ],
   ])("reports on %s", (_label, body) => {
     // Act
-    const reports = runTemporaryFeature(body, defaultOptions);
+    const actualReports = runTemporaryFeature(body, defaultOptions);
 
     // Assert
-    expect(reports).toHaveLength(1);
-    expect(reports[0]?.messageId).toBe("reexportedImport");
+    expect(actualReports).toHaveLength(1);
+    expect(actualReports[0]?.messageId).toBe("reexportedImport");
   });
 
   it.each([
@@ -109,10 +109,10 @@ describe("no reexports outside barrels rule (enforced)", () => {
     ],
   ])("allows %s", (_label, body) => {
     // Act
-    const reports = runTemporaryFeature(body, defaultOptions);
+    const actualReports = runTemporaryFeature(body, defaultOptions);
 
     // Assert
-    expect(reports).toStrictEqual([]);
+    expect(actualReports).toStrictEqual([]);
   });
 });
 

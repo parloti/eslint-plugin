@@ -110,11 +110,11 @@ describe("no-import-export-extensions rule", () => {
     });
 
     // Act
-    const reports = runRule(body);
+    const actualReports = runRule(body);
 
     // Assert
-    expect(reports).toHaveLength(1);
-    expect(reports[0]?.messageId).toBe("unexpectedExtension");
+    expect(actualReports).toHaveLength(1);
+    expect(actualReports[0]?.messageId).toBe("unexpectedExtension");
   });
 
   it("reports export-all declarations with extension suffixes", () => {
@@ -161,11 +161,11 @@ describe("no-import-export-extensions rule", () => {
       });
 
       // Act
-      const reports = runRule(body);
+      const actualReports = runRule(body);
 
       // Assert
-      expect(reports).toHaveLength(1);
-      expect(reports[0]?.messageId).toBe("unexpectedExtension");
+      expect(actualReports).toHaveLength(1);
+      expect(actualReports[0]?.messageId).toBe("unexpectedExtension");
     },
   );
 
@@ -179,10 +179,10 @@ describe("no-import-export-extensions rule", () => {
       });
 
       // Act
-      const reports = runRule(body);
+      const actualReports = runRule(body);
 
       // Assert
-      expect(reports).toStrictEqual([]);
+      expect(actualReports).toStrictEqual([]);
     },
   );
 

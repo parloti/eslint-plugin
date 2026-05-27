@@ -44,10 +44,11 @@ describe("no-reexports-outside-barrels e2e", () => {
     },
   ])("rejects re-exports outside barrels %#", (testCase) => {
     // Arrange
+    const ruleName = "no-reexports-outside-barrels";
 
     // Act
     const result = runRuleCase(
-      "no-reexports-outside-barrels",
+      ruleName,
       noReexportsOutsideBarrelsRule,
       testCase,
     );
@@ -74,10 +75,11 @@ describe("no-reexports-outside-barrels e2e", () => {
     },
   ])("accepts local exports and barrels %#", (testCase) => {
     // Arrange
+    const ruleName = "no-reexports-outside-barrels";
 
     // Act
     const result = runRuleCase(
-      "no-reexports-outside-barrels",
+      ruleName,
       noReexportsOutsideBarrelsRule,
       testCase,
     );

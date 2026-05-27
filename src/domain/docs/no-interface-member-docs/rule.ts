@@ -14,6 +14,33 @@ import {
   isNamedTypeReference,
 } from "./parameter-utilities";
 
+/** JSDoc data extracted from a function-like node. */
+interface JsdocData {
+  /** Comment field value. */
+  comment: Comment;
+
+  /** CommentStart field value. */
+  commentStart: number;
+
+  /** Text field value. */
+  text: string;
+}
+
+/** Member-tag context resolved for reporting. */
+interface MemberTagContext {
+  /** Comment field value. */
+  comment: Comment;
+
+  /** CommentStart field value. */
+  commentStart: number;
+
+  /** CommentText field value. */
+  commentText: string;
+
+  /** MemberTags field value. */
+  memberTags: ParameterMemberTag[];
+}
+
 /** Type definition for rule data. */
 interface ReportMemberDocumentationContext {
   /** Comment field value. */
@@ -133,18 +160,7 @@ const getParameterTypes = (
 const getJsdocData = (
   sourceCode: Rule.RuleContext["sourceCode"],
   node: Rule.Node,
-):
-  | undefined
-  | {
-      /** Comment field value. */
-      comment: Comment;
-
-      /** CommentStart field value. */
-      commentStart: number;
-
-      /** Text field value. */
-      text: string;
-    } => {
+): JsdocData | undefined => {
   const comment = getJsdocComment(sourceCode, node);
 
   if (comment === void 0) {
@@ -175,21 +191,7 @@ const getJsdocData = (
 const resolveMemberTagContext = (
   context: Rule.RuleContext,
   node: Rule.Node,
-):
-  | undefined
-  | {
-      /** Comment field value. */
-      comment: Comment;
-
-      /** CommentStart field value. */
-      commentStart: number;
-
-      /** CommentText field value. */
-      commentText: string;
-
-      /** MemberTags field value. */
-      memberTags: ParameterMemberTag[];
-    } => {
+): MemberTagContext | undefined => {
   const parameterTypes = getParameterTypes(node);
   const jsdocData = getJsdocData(context.sourceCode, node);
 

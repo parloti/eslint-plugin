@@ -13,7 +13,6 @@ import {
   noUnusedExportsRule,
   preferInterfaceTypesRule,
   preferViMockedImportRule,
-  requireAaaSectionsRule,
   requireActResultCaptureRule,
   requireExampleLanguageRule,
   requireTestCompanionRule,
@@ -87,10 +86,6 @@ const customRules = [
   {
     rule: preferViMockedImportRule,
     ruleName: "prefer-vi-mocked-import",
-  },
-  {
-    rule: requireAaaSectionsRule,
-    ruleName: "require-aaa-sections",
   },
   {
     rule: requireActResultCaptureRule,

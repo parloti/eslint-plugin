@@ -2,7 +2,7 @@ import { Linter } from "eslint";
 import { parser } from "typescript-eslint";
 import { describe, expect, it } from "vitest";
 
-import { requireAaaSectionsRule } from "../../src";
+import { enforceAaaStructureRule } from "../../src";
 import { runRuleCase } from "../support";
 
 /**
@@ -50,12 +50,12 @@ function runRule(code: string): (string | undefined)[] {
           plugins: {
             codeperfect: {
               rules: {
-                "require-aaa-sections": requireAaaSectionsRule,
+                "enforce-aaa-structure": enforceAaaStructureRule,
               },
             },
           },
           rules: {
-            "codeperfect/require-aaa-sections": "error",
+            "codeperfect/enforce-aaa-structure": "error",
           },
         },
       ],
@@ -110,15 +110,13 @@ describe("enforce-aaa-phase-purity e2e", () => {
     },
   ])("rejects impure AAA phases %#", (testCase) => {
     // Arrange
+    const ruleName = "enforce-aaa-phase-purity";
 
     // Act
-    const result = runRuleCase(
-      "require-aaa-sections",
-      requireAaaSectionsRule,
-      testCase,
-    );
+    const result = runRuleCase(ruleName, enforceAaaStructureRule, testCase);
 
     // Assert
+    // eslint-disable-next-line codeperfect/enforce-aaa-structure -- This assertion compares ordered diagnostics and intentionally performs helper mapping inline.
     expect(result.messageIds.toSorted(compareMessageIds)).toStrictEqual(
       testCase.errors
         .map((error) => error.messageId)
@@ -159,13 +157,10 @@ describe("enforce-aaa-phase-purity e2e", () => {
     },
   ])("accepts pure AAA phases %#", (testCase) => {
     // Arrange
+    const ruleName = "enforce-aaa-phase-purity";
 
     // Act
-    const result = runRuleCase(
-      "require-aaa-sections",
-      requireAaaSectionsRule,
-      testCase,
-    );
+    const result = runRuleCase(ruleName, enforceAaaStructureRule, testCase);
 
     // Assert
     expect(result.messageIds).toStrictEqual([]);
@@ -192,8 +187,8 @@ describe("enforce-aaa-phase-purity e2e", () => {
 
     // Act
     const result = runRuleCase(
-      "require-aaa-sections",
-      requireAaaSectionsRule,
+      "enforce-aaa-structure",
+      enforceAaaStructureRule,
       testCase,
     );
 

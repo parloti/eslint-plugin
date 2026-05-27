@@ -1,5 +1,14 @@
 import type { CommentLine, ParameterMemberTag } from "./types";
 
+/** Member path details extracted from a parameter tag. */
+interface ParameterMemberName {
+  /** Basename field value. */
+  basename: string;
+
+  /** MemberPath field value. */
+  memberPath: string;
+}
+
 /** Extracts the parameter name from an `@param` tag line. */
 const parameterTagPattern = /@param\s+(?:\{[^}]*\}\s+)?(?<name>[^\s-]+)/u;
 
@@ -75,17 +84,7 @@ const getParameterName = (content: string): string | undefined => {
  * const member = getMemberName("props.title");
  * ```
  */
-const getMemberName = (
-  normalized: string,
-):
-  | undefined
-  | {
-      /** Basename field value. */
-      basename: string;
-
-      /** MemberPath field value. */
-      memberPath: string;
-    } => {
+const getMemberName = (normalized: string): ParameterMemberName | undefined => {
   const dotIndex = normalized.indexOf(".");
 
   if (dotIndex <= 0) {

@@ -2,7 +2,7 @@
 
 ## Summary
 
-Require AAA section comments to appear at most once and in a valid order, including support for combined phase comments.
+Require explicit AAA section comments, enforce section order and uniqueness, and keep setup, action, and assertions in their intended phases.
 
 ## Enabled by
 
@@ -12,6 +12,8 @@ Require AAA section comments to appear at most once and in a valid order, includ
 ## Why this rule exists
 
 AAA tests are easier to follow when each phase appears once and in a predictable order. Reordered, duplicated, or partially overlapping phase markers make test flow ambiguous and harder to reason about.
+
+The rule also protects section quality by requiring meaningful section content, preserving section boundaries with blank-line separators, and reporting phase-purity violations when setup, action, and assertion behavior leaks across sections.
 
 ## Rule Details
 
@@ -69,7 +71,8 @@ Invalid:
 
 ### Presence
 
-- If any AAA comment is used, the structure must be valid
+- Act and Assert markers must exist in supported test blocks
+- Arrange is required when statements appear before the first section marker
 - Valid structures include:
   - Full separation: `Arrange → Act → Assert`
   - Partial combinations:
@@ -78,6 +81,20 @@ Invalid:
   - Fully combined:
     - `Arrange & Act & Assert`
 - Missing phases are allowed only if they are not implied elsewhere
+
+### Section Quality
+
+- Each section must contain executable statements; comment-only sections are invalid
+- Statements before the first Arrange marker are invalid
+- A blank line is required before boundary section comments after the first section
+
+### Phase Purity
+
+- Setup must remain in Arrange
+- The primary interaction belongs in Act
+- Assertions belong in Assert
+- Mutations and setup work after Act are reported
+- Await usage outside Act is reported
 
 ### Invalid
 

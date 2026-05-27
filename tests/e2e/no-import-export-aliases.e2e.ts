@@ -17,13 +17,10 @@ describe("no-import-export-aliases e2e", () => {
     },
   ])("rejects aliased imports/exports without collisions %#", (testCase) => {
     // Arrange
+    const ruleName = "no-import-export-aliases";
 
     // Act
-    const result = runRuleCase(
-      "no-import-export-aliases",
-      noImportExportAliasesRule,
-      testCase,
-    );
+    const result = runRuleCase(ruleName, noImportExportAliasesRule, testCase);
 
     // Assert
     expect(result.messageIds).toStrictEqual(
@@ -49,13 +46,10 @@ describe("no-import-export-aliases e2e", () => {
     },
   ])("accepts non-aliased or collision-avoiding forms %#", (testCase) => {
     // Arrange
+    const ruleName = "no-import-export-aliases";
 
     // Act
-    const result = runRuleCase(
-      "no-import-export-aliases",
-      noImportExportAliasesRule,
-      testCase,
-    );
+    const result = runRuleCase(ruleName, noImportExportAliasesRule, testCase);
 
     // Assert
     expect(result.messageIds).toStrictEqual([]);

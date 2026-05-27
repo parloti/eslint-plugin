@@ -65,7 +65,6 @@ describe("ready-to-use presets", () => {
       "codeperfect/no-unused-exports",
       "codeperfect/prefer-interface-types",
       "codeperfect/prefer-vi-mocked-import",
-      "codeperfect/require-aaa-sections",
       "codeperfect/require-act-result-capture",
       "codeperfect/require-example-language",
       "codeperfect/require-test-companion",
@@ -133,7 +132,6 @@ describe("ready-to-use presets", () => {
       "codeperfect/assert-actual-expected-names",
       "codeperfect/enforce-aaa-structure",
       "codeperfect/prefer-vi-mocked-import",
-      "codeperfect/require-aaa-sections",
       "codeperfect/require-act-result-capture",
       "codeperfect/require-test-companion",
       "codeperfect/single-act-statement",
@@ -148,10 +146,7 @@ describe("ready-to-use presets", () => {
 
   it("groups the AAA rules", () => {
     // Arrange
-    const expectedRuleKeys = [
-      "codeperfect/enforce-aaa-structure",
-      "codeperfect/require-aaa-sections",
-    ];
+    const expectedRuleKeys = ["codeperfect/enforce-aaa-structure"];
 
     // Act
     const actualRuleKeys = getRuleKeys(aaa);

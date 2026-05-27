@@ -104,7 +104,6 @@ void preferInterfaceTypesRule;
 - `codeperfect/no-unused-exports`
 - `codeperfect/prefer-interface-types`
 - `codeperfect/prefer-vi-mocked-import`
-- `codeperfect/require-aaa-sections`
 - `codeperfect/require-act-result-capture`
 - `codeperfect/require-example-language`
 - `codeperfect/require-test-companion`

@@ -24,10 +24,11 @@ describe("no-import-export-extensions e2e", () => {
     "rejects import/export module specifiers with extensions %#",
     (testCase) => {
       // Arrange
+      const ruleName = "no-import-export-extensions";
 
       // Act
       const result = runRuleCase(
-        "no-import-export-extensions",
+        ruleName,
         noImportExportExtensionsRule,
         testCase,
       );
@@ -54,10 +55,11 @@ describe("no-import-export-extensions e2e", () => {
     },
   ])("accepts module specifiers without extensions %#", (testCase) => {
     // Arrange
+    const ruleName = "no-import-export-extensions";
 
     // Act
     const result = runRuleCase(
-      "no-import-export-extensions",
+      ruleName,
       noImportExportExtensionsRule,
       testCase,
     );

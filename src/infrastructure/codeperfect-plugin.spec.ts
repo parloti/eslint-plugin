@@ -18,7 +18,6 @@ describe("codeperfect plugin", () => {
       "no-unused-exports",
       "prefer-interface-types",
       "prefer-vi-mocked-import",
-      "require-aaa-sections",
       "require-act-result-capture",
       "require-example-language",
       "require-test-companion",

@@ -38,26 +38,31 @@ describe("require example language reporting", () => {
     const reportExampleUnsafe = reportExample;
 
     // Act
-    reportExampleUnsafe({
-      comment: {
-        loc: { end: { column: 0, line: 1 }, start: { column: 0, line: 1 } },
-        range: [0, 2],
-        type: "Block",
-        value: "*\n * @example\n * ```typescript\n * ok\n * ```",
-      },
-      context: { report, sourceCode } as Rule.RuleContext,
-      example: {
-        content: "```typescript\nok\n```",
-        endIndex: 0,
-        endOffset: 0,
-        lineIndex: 0,
-        prefix: "",
-        startOffset: 0,
-      },
-      hasOtherExamples: false,
-    });
+    const actualResult = (() => {
+      reportExampleUnsafe({
+        comment: {
+          loc: { end: { column: 0, line: 1 }, start: { column: 0, line: 1 } },
+          range: [0, 2],
+          type: "Block",
+          value: "*\n * @example\n * ```typescript\n * ok\n * ```",
+        },
+        context: { report, sourceCode } as Rule.RuleContext,
+        example: {
+          content: "```typescript\nok\n```",
+          endIndex: 0,
+          endOffset: 0,
+          lineIndex: 0,
+          prefix: "",
+          startOffset: 0,
+        },
+        hasOtherExamples: false,
+      });
+
+      return "completed";
+    })();
 
     // Assert
+    expect(actualResult).toBe("completed");
     expect(reportCalls).toBe(0);
   });
 
@@ -72,26 +77,31 @@ describe("require example language reporting", () => {
     }) as Rule.RuleContext["report"];
 
     // Act
-    reportExample({
-      comment: {
-        loc: { end: { column: 0, line: 1 }, start: { column: 0, line: 1 } },
-        range: [0, 2],
-        type: "Block",
-        value: "*\n * @example ok()",
-      },
-      context: { report, sourceCode } as Rule.RuleContext,
-      example: {
-        content: "ok()",
-        endIndex: 0,
-        endOffset: 0,
-        lineIndex: 0,
-        prefix: "",
-        startOffset: 0,
-      },
-      hasOtherExamples: false,
-    });
+    const actualResult = (() => {
+      reportExample({
+        comment: {
+          loc: { end: { column: 0, line: 1 }, start: { column: 0, line: 1 } },
+          range: [0, 2],
+          type: "Block",
+          value: "*\n * @example ok()",
+        },
+        context: { report, sourceCode } as Rule.RuleContext,
+        example: {
+          content: "ok()",
+          endIndex: 0,
+          endOffset: 0,
+          lineIndex: 0,
+          prefix: "",
+          startOffset: 0,
+        },
+        hasOtherExamples: false,
+      });
+
+      return "completed";
+    })();
 
     // Assert
+    expect(actualResult).toBe("completed");
     expect(reportCalls).toBe(1);
     expect(reportDescriptor).toMatchObject({ messageId: "missingFence" });
   });

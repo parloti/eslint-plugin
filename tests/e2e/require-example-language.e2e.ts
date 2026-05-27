@@ -46,13 +46,10 @@ describe("require-example-language e2e", () => {
     },
   ])("adds missing example fence metadata %#", (testCase) => {
     // Arrange
+    const ruleName = "require-example-language";
 
     // Act
-    const result = runRuleCase(
-      "require-example-language",
-      requireExampleLanguageRule,
-      testCase,
-    );
+    const result = runRuleCase(ruleName, requireExampleLanguageRule, testCase);
 
     // Assert
     expect(result.messageIds).toStrictEqual(

@@ -52,13 +52,10 @@ describe("prefer-interface-types e2e", () => {
     },
   ])("accepts named reusable object types %#", (testCase) => {
     // Arrange
+    const ruleName = "prefer-interface-types";
 
     // Act
-    const result = runRuleCase(
-      "prefer-interface-types",
-      preferInterfaceTypesRule,
-      testCase,
-    );
+    const result = runRuleCase(ruleName, preferInterfaceTypesRule, testCase);
 
     // Assert
     expect(result.messageIds).toStrictEqual([]);

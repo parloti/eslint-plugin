@@ -6,7 +6,6 @@ import { describe, expect, it } from "vitest";
 
 import {
   enforceAaaStructureRule,
-  requireAaaSectionsRule,
   requireActResultCaptureRule,
 } from "../../src";
 
@@ -35,14 +34,12 @@ const aaaConfig: EslintLinterType.Config[] = [
       codeperfect: {
         rules: {
           "enforce-aaa-structure": enforceAaaStructureRule,
-          "require-aaa-sections": requireAaaSectionsRule,
           "require-act-result-capture": requireActResultCaptureRule,
         },
       },
     },
     rules: {
       "codeperfect/enforce-aaa-structure": "error",
-      "codeperfect/require-aaa-sections": "error",
       "codeperfect/require-act-result-capture": "error",
     },
   },
