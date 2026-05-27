@@ -45,6 +45,28 @@ interface SingleLineJsdocOptions {
   maxLineLength?: number;
 }
 
+/** Type definition for rule data. */
+type SourceCodeAdapterOverrides = SourceCodeOverrides &
+  SourceCodeTokenAfterOverride;
+
+/** Type definition for rule data. */
+interface SourceCodeOverrides {
+  /** Optional getNodeByRangeIndex override. */
+  getNodeByRangeIndex?: (index: number) => unknown;
+}
+
+/** Type definition for rule data. */
+interface SourceCodeTokenAfterOverride {
+  /** Optional getTokenAfter override. */
+  getTokenAfter?: (comment: Comment, options?: TokenAfterOptions) => unknown;
+}
+
+/** Type definition for rule data. */
+interface TokenAfterOptions {
+  /** Whether comment tokens are included. */
+  includeComments?: boolean;
+}
+
 /** Base JSDoc used across tests. */
 const documentCommentValue = "*\n * doc\n ";
 
@@ -80,6 +102,7 @@ const createComment = (
  * Creates a rule context with the provided comments.
  * @param comments Input comments value.
  * @param options Input options value.
+ * @param sourceCodeOverrides Optional sourceCode adapter overrides.
  * @returns Rule context state for tests.
  * @example
  * ```typescript
@@ -89,10 +112,12 @@ const createComment = (
 const createContext = (
   comments: Comment[],
   options?: SingleLineJsdocOptions,
+  sourceCodeOverrides?: SourceCodeAdapterOverrides,
 ): RuleContextState => {
   const reports: ReportEntry[] = [];
   const sourceCode = {
     getAllComments: (): Comment[] => comments,
+    ...sourceCodeOverrides,
   };
   const context: Rule.RuleContext = {
     id: "single-line-jsdoc",
@@ -144,10 +169,9 @@ describe("single-line-jsdoc rule", () => {
     // Arrange
     void caseLabel;
     const comment = createComment(commentValue, sourceText, { endLine });
-
-    // Act
     const { context, reports } = createContext([comment]);
 
+    // Act
     singleLineJsdocRule.create(context);
 
     // Assert
@@ -168,5 +192,74 @@ describe("single-line-jsdoc rule", () => {
 
     // Assert
     expect(reports).toHaveLength(0);
+  });
+
+  it.each([
+    { nodeType: "FunctionDeclaration" },
+    { nodeType: "TSDeclareFunction" },
+    { nodeType: "TSFunctionType" },
+    { nodeType: "MethodDefinition" },
+    { nodeType: "TSMethodSignature" },
+    { nodeType: "TSCallSignatureDeclaration" },
+    { nodeType: "TSConstructSignatureDeclaration" },
+    {
+      declarations: [{ init: { type: "ArrowFunctionExpression" } }],
+      nodeType: "VariableDeclaration",
+    },
+    { nodeType: "Property", value: { type: "FunctionExpression" } },
+    {
+      nodeType: "PropertyDefinition",
+      value: { type: "ArrowFunctionExpression" },
+    },
+    {
+      declaration: { type: "FunctionDeclaration" },
+      nodeType: "ExportDefaultDeclaration",
+    },
+    {
+      declaration: { type: "FunctionDeclaration" },
+      nodeType: "ExportNamedDeclaration",
+    },
+  ])("skips JSDoc for function-like targets: $nodeType", (nodeShape) => {
+    // Arrange
+    const comment = createComment(documentCommentValue, sourceText, {
+      endLine: 3,
+    });
+    const { context, reports } = createContext([comment], void 0, {
+      getNodeByRangeIndex: () => ({
+        ...(nodeShape.declarations === void 0
+          ? {}
+          : { declarations: nodeShape.declarations }),
+        ...(nodeShape.declaration === void 0
+          ? {}
+          : { declaration: nodeShape.declaration }),
+        ...(nodeShape.value === void 0 ? {} : { value: nodeShape.value }),
+        type: nodeShape.nodeType,
+      }),
+      getTokenAfter: () => ({ range: [0, 1] }),
+    });
+
+    // Act
+    singleLineJsdocRule.create(context);
+
+    // Assert
+    expect(reports).toHaveLength(0);
+  });
+
+  it("reports when token-after lookup cannot provide range", () => {
+    // Arrange
+    const comment = createComment(documentCommentValue, sourceText, {
+      endLine: 3,
+    });
+    const { context, reports } = createContext([comment], void 0, {
+      getNodeByRangeIndex: () => ({ type: "FunctionDeclaration" }),
+      getTokenAfter: () => ({}),
+    });
+
+    // Act
+    singleLineJsdocRule.create(context);
+
+    // Assert
+    expect(reports).toHaveLength(1);
+    expect(reports[0]?.messageId).toBe("singleLine");
   });
 });

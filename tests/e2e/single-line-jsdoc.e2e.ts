@@ -31,6 +31,9 @@ describe("single-line-jsdoc e2e", () => {
       code: ["/** doc */", "const value = 1;"].join("\n"),
     },
     {
+      code: ["/**", " * doc", " */", "function demo(): void {}"].join("\n"),
+    },
+    {
       code: [
         "/**",
         " * @param value Input value.",
@@ -42,12 +45,13 @@ describe("single-line-jsdoc e2e", () => {
     },
   ])("accepts already-compliant JSDoc forms %#", (testCase) => {
     // Arrange
+    const arrangedTestCase = testCase;
 
     // Act
     const result = runRuleCase(
       "single-line-jsdoc",
       singleLineJsdocRule,
-      testCase,
+      arrangedTestCase,
     );
 
     // Assert

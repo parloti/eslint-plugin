@@ -22,6 +22,7 @@ Short documentation should remain compact and easy to scan. Single-line JSDoc:
 ### What the rule targets
 
 - JSDoc block comments (`/** ... */`)
+- non-function targets in this plugin's supported AST shapes
 
 ### When a single-line format is required
 
@@ -44,6 +45,7 @@ The rule does **not** enforce single-line format when:
 - the content exceeds the configured line length
 - the comment includes multiple logical lines or paragraphs
 - formatting would reduce clarity
+- the comment documents a function-like target (function declaration/expression, method, function signature, function-valued property, or function-valued variable declaration)
 
 ### Autofix behavior
 
@@ -119,6 +121,15 @@ const value = 1;
 function demo(value: string): string {
   return value;
 }
+```
+
+### Function-target JSDoc
+
+```typescript
+/**
+ * doc
+ */
+function demo(): void {}
 ```
 
 ### Multi-line due to length
