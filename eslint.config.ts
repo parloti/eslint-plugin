@@ -4,10 +4,9 @@ import { defineConfig } from "eslint/config";
 
 import { all } from "./src";
 
-/** CodePerfect ESLint configuration with custom rules and boundaries. */
+/** CodePerfect ESLint configuration. */
 const codePerfect = await config({
   plugins: {
-    boundaries: false,
     codeperfect: false,
     playwright: false,
     "rxjs-x": false,

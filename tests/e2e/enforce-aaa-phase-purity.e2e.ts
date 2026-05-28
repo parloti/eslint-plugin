@@ -113,11 +113,14 @@ describe("enforce-aaa-phase-purity e2e", () => {
     const ruleName = "enforce-aaa-phase-purity";
 
     // Act
-    const result = runRuleCase(ruleName, enforceAaaStructureRule, testCase);
+    const actual = runRuleCase(
+      ruleName,
+      enforceAaaStructureRule,
+      testCase,
+    ).messageIds.toSorted(compareMessageIds);
 
     // Assert
-    // eslint-disable-next-line codeperfect/enforce-aaa-structure -- This assertion compares ordered diagnostics and intentionally performs helper mapping inline.
-    expect(result.messageIds.toSorted(compareMessageIds)).toStrictEqual(
+    expect(actual).toStrictEqual(
       testCase.errors
         .map((error) => error.messageId)
         .toSorted(compareMessageIds),

@@ -13,7 +13,9 @@ beforeEach(() => {
  * ```
  */
 type DeepPartial<T> = T extends object
-  ? { [P in keyof T]?: DeepPartial<T[P]> }
+  ? {
+      [P in keyof T]?: DeepPartial<T[P]>;
+    }
   : T;
 
 /**
@@ -39,9 +41,11 @@ const mockProxyFactory =
         if (property === "then") {
           return void 0;
         }
+
         if (property in object) {
           return object[property as keyof TModule];
         }
+
         throw new Error(
           `Attempted to access unmocked property: ${String(property)}`,
         );
