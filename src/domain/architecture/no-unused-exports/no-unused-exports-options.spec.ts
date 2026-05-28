@@ -195,4 +195,43 @@ describe("no-unused-exports options", () => {
       testFile: true,
     });
   });
+
+  it("returns false when the repository root is not absolute", () => {
+    // Arrange
+    const sourceIndexPath = path.join(cwd(), "src", "index.ts");
+    const state = getOptions([]);
+
+    // Act
+    const actualResult = {
+      publicApiFile: isPublicApiFile(sourceIndexPath, state, "src"),
+      testFile: isTestFile(sourceIndexPath, state, "src"),
+    };
+
+    // Assert
+    expect(actualResult).toStrictEqual({
+      publicApiFile: false,
+      testFile: false,
+    });
+  });
+
+  it("returns false when the configured pattern list is empty", () => {
+    // Arrange
+    const sourceIndexPath = path.join(cwd(), "src", "index.ts");
+    const state = {
+      publicApiFiles: [],
+      testFilePatterns: [],
+    };
+
+    // Act
+    const actualResult = {
+      publicApiFile: isPublicApiFile(sourceIndexPath, state, cwd()),
+      testFile: isTestFile(sourceIndexPath, state, cwd()),
+    };
+
+    // Assert
+    expect(actualResult).toStrictEqual({
+      publicApiFile: false,
+      testFile: false,
+    });
+  });
 });

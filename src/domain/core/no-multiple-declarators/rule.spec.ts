@@ -151,4 +151,155 @@ describe("no-multiple-declarators rule", () => {
     expect(reports[0]?.fix).toBeUndefined();
     expect(reports[0]?.messageId).toBe("singleDeclarator");
   });
+
+  it("builds a replacement fix for split declarations", () => {
+    // Arrange
+    const sourceText = "const first = 1, second = 2;";
+    const declaration = createVariableDeclaration({
+      declaratorTexts: ["first = 1", "second = 2"],
+      kind: "const",
+      sourceText,
+      statementText: sourceText,
+    });
+    const { context, reports } = createContext(sourceText);
+    const fixer = {
+      replaceTextRange: (_range: [number, number], text: string) => ({ text }),
+    } as never;
+    const getReplacement = (): string | undefined => {
+      const reportFix = reports[0]?.fix;
+      if (typeof reportFix !== "function") {
+        return undefined;
+      }
+
+      const fixResult = reportFix(fixer);
+      if (!fixResult || Array.isArray(fixResult) || !("text" in fixResult)) {
+        return undefined;
+      }
+
+      return fixResult.text;
+    };
+
+    // Act
+    const actualReplacement = (runRule(context, declaration), getReplacement());
+
+    // Assert
+    expect(actualReplacement).toBe("const first = 1;\nconst second = 2;");
+  });
+
+  it("preserves indentation and CRLF line endings in generated fixes", () => {
+    // Arrange
+    const sourceText = "if (ready) {\r\n  const first = 1, second = 2;\r\n}";
+    const declaration = createVariableDeclaration({
+      declaratorTexts: ["first = 1", "second = 2"],
+      kind: "const",
+      sourceText,
+      statementText: "const first = 1, second = 2;",
+    });
+    const { context, reports } = createContext(sourceText);
+    const fixer = {
+      replaceTextRange: (_range: [number, number], text: string) => ({ text }),
+    } as never;
+    const getReplacement = (): string | undefined => {
+      const reportFix = reports[0]?.fix;
+      if (typeof reportFix !== "function") {
+        return undefined;
+      }
+
+      const fixResult = reportFix(fixer);
+      if (!fixResult || Array.isArray(fixResult) || !("text" in fixResult)) {
+        return undefined;
+      }
+
+      return fixResult.text;
+    };
+
+    // Act
+    const actualReplacement = (runRule(context, declaration), getReplacement());
+
+    // Assert
+    expect(actualReplacement).toBe("const first = 1;\r\n  const second = 2;");
+  });
+
+  it("uses sourceCode.getText fallback when raw source text is omitted", () => {
+    // Arrange
+    const sourceText = "const first = 1, second = 2;";
+    const declaration = createVariableDeclaration({
+      declaratorTexts: ["first = 1", "second = 2"],
+      kind: "const",
+      sourceText,
+      statementText: sourceText,
+    });
+    const { context, reports } = createContext(sourceText, { omitText: true });
+    const fixer = {
+      replaceTextRange: (_range: [number, number], text: string) => ({ text }),
+    } as never;
+    const getReplacement = (): string | undefined => {
+      const reportFix = reports[0]?.fix;
+      if (typeof reportFix !== "function") {
+        return undefined;
+      }
+
+      const fixResult = reportFix(fixer);
+      if (!fixResult || Array.isArray(fixResult) || !("text" in fixResult)) {
+        return undefined;
+      }
+
+      return fixResult.text;
+    };
+
+    // Act
+    const actualReplacement = (runRule(context, declaration), getReplacement());
+
+    // Assert
+    expect(actualReplacement).toBe("const first = 1;\nconst second = 2;");
+  });
+
+  it("does not offer fixes for loop initializers, ambient declarations, or unsupported kinds", () => {
+    // Arrange
+    const sourceText = "const first = 1, second = 2;";
+    const loopDeclaration = createVariableDeclaration({
+      declaratorTexts: ["first = 1", "second = 2"],
+      kind: "const",
+      sourceText,
+      statementText: sourceText,
+    });
+    loopDeclaration.parent = { init: loopDeclaration, type: "ForStatement" };
+
+    const ambientDeclaration = createVariableDeclaration({
+      declaratorTexts: ["first = 1", "second = 2"],
+      kind: "const",
+      sourceText,
+      statementText: sourceText,
+    });
+    ambientDeclaration.declare = true;
+
+    const unsupportedKindDeclaration = createVariableDeclaration({
+      declaratorTexts: ["first = 1", "second = 2"],
+      kind: "using",
+      sourceText,
+      statementText: sourceText,
+    });
+
+    const loopContext = createContext(sourceText);
+    const ambientContext = createContext(sourceText);
+    const unsupportedContext = createContext(sourceText);
+
+    // Act
+    const actualFixes = (() => {
+      runRule(loopContext.context, loopDeclaration);
+      runRule(ambientContext.context, ambientDeclaration);
+      runRule(unsupportedContext.context, unsupportedKindDeclaration);
+
+      return {
+        ambient: ambientContext.reports[0]?.fix,
+        loop: loopContext.reports[0]?.fix,
+        unsupported: unsupportedContext.reports[0]?.fix,
+      };
+    })();
+
+    // Assert
+    expect(actualFixes.loop).toBeUndefined();
+    expect(actualFixes.ambient).toBeUndefined();
+    expect(actualFixes.unsupported).toBeUndefined();
+  });
 });

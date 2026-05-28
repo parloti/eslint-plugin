@@ -1,5 +1,3 @@
-import type { Linter as EslintLinterType } from "eslint";
-
 import { Linter } from "eslint";
 import { parser } from "typescript-eslint";
 import { describe, expect, it } from "vitest";
@@ -22,7 +20,7 @@ interface AaaLintResult {
 const aaaFilename = "example.spec.ts";
 
 /** Shared flat config for the combined AAA rules. */
-const aaaConfig: EslintLinterType.Config[] = [
+const aaaConfig: Linter.Config[] = [
   {
     files: ["**/*.ts"],
     languageOptions: {

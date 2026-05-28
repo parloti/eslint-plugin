@@ -52,4 +52,52 @@ describe("single-line-jsdoc content", () => {
     // Assert
     expect(actual).toBeUndefined();
   });
+
+  it("trims empty edge lines before collapsing content", () => {
+    // Arrange
+    const comment: Comment = {
+      loc: { end: { column: 0, line: 5 }, start: { column: 0, line: 1 } },
+      range: [0, 0],
+      type: "Block",
+      value: "*\n *\n * value\n *\n ",
+    };
+
+    // Act
+    const actual = getCollapsedContent(comment);
+
+    // Assert
+    expect(actual).toBe("value");
+  });
+
+  it("keeps a single non-prefixed content line", () => {
+    // Arrange
+    const comment: Comment = {
+      loc: { end: { column: 0, line: 2 }, start: { column: 0, line: 1 } },
+      range: [0, 0],
+      type: "Block",
+      value: "*\nvalue\n ",
+    };
+
+    // Act
+    const actual = getCollapsedContent(comment);
+
+    // Assert
+    expect(actual).toBe("value");
+  });
+
+  it("skips content that still contains blank interior lines", () => {
+    // Arrange
+    const comment: Comment = {
+      loc: { end: { column: 0, line: 4 }, start: { column: 0, line: 1 } },
+      range: [0, 0],
+      type: "Block",
+      value: "*\n * first\n *\n * second\n ",
+    };
+
+    // Act
+    const actual = getCollapsedContent(comment);
+
+    // Assert
+    expect(actual).toBeUndefined();
+  });
 });

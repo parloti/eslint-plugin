@@ -53,6 +53,53 @@ const withTemporaryDirectory = <Result>(
 };
 
 /**
+ * Creates one fake symbol for branch-focused type-checker tests.
+ * @param fileName Source file that owns the declaration.
+ * @param declarationName Symbol name used for diagnostics.
+ * @param pos Declaration start position.
+ * @returns Fake symbol with one declaration key.
+ * @example
+ * ```typescript
+ * const symbol = createFakeSymbol("/repo/src/feature.ts", "feature", 0);
+ * ```
+ */
+const createFakeSymbol = (
+  fileName: string,
+  declarationName: string,
+  pos: number,
+): ts.Symbol =>
+  ({
+    declarations: [
+      {
+        end: pos + 1,
+        getSourceFile: () => ({ fileName }) as ts.SourceFile,
+        pos,
+      } as never,
+    ],
+    flags: 0,
+    getName: () => declarationName,
+  }) as never;
+
+/**
+ * Creates one fake program with just the members used by the utility tests.
+ * @param sourceFiles Source files exposed by the fake program.
+ * @param checker Type checker used by the fake program.
+ * @returns Fake TypeScript program.
+ * @example
+ * ```typescript
+ * const program = createFakeProgram([], {} as never);
+ * ```
+ */
+const createFakeProgram = (
+  sourceFiles: ts.SourceFile[],
+  checker: ts.TypeChecker,
+): ts.Program =>
+  ({
+    getSourceFiles: () => sourceFiles,
+    getTypeChecker: () => checker,
+  }) as never;
+
+/**
  * Builds one temporary project and collects concrete usages for one exported value.
  * @returns Collected usages for `feature` export.
  * @example
@@ -64,15 +111,19 @@ const collectValueFixtureUsages = () => {
   const temporaryRoot = mkdtempSync(path.join(tmpdir(), "no-unused-exports-"));
 
   try {
-    const sourceDirectory = path.join(temporaryRoot, "src");
-    const testsDirectory = path.join(temporaryRoot, "tests");
+    const packageDirectory = path.join(temporaryRoot, "packages", "pkg");
+    const sourceDirectory = path.join(packageDirectory, "src");
+    const testsDirectory = path.join(packageDirectory, "tests");
 
     mkdirSync(sourceDirectory, { recursive: true });
     mkdirSync(testsDirectory, { recursive: true });
 
     const featureFile = path.join(sourceDirectory, "feature.ts");
     const consumerFile = path.join(sourceDirectory, "consumer.ts");
+    const exporterFile = path.join(sourceDirectory, "exporter.ts");
     const importOnlyFile = path.join(sourceDirectory, "import-only.ts");
+    const labelFile = path.join(sourceDirectory, "label.ts");
+    const missingFile = path.join(sourceDirectory, "missing.ts");
     const otherFile = path.join(sourceDirectory, "other.ts");
     const testConsumerFile = path.join(testsDirectory, "feature.spec.ts");
 
@@ -91,14 +142,31 @@ const collectValueFixtureUsages = () => {
         "void unrelated;",
       ].join("\n"),
     );
+    writeFileSync(
+      exporterFile,
+      ["import { feature } from './feature';", "export { feature };"].join(
+        "\n",
+      ),
+    );
     writeFileSync(importOnlyFile, "import { feature } from './feature';\n");
+    writeFileSync(labelFile, "feature: void 0;\n");
+    writeFileSync(missingFile, "feature;\n");
     writeFileSync(
       testConsumerFile,
       "import { feature } from '../src/feature';\nvoid feature;\n",
     );
 
     const program = ts.createProgram(
-      [featureFile, consumerFile, importOnlyFile, otherFile, testConsumerFile],
+      [
+        featureFile,
+        consumerFile,
+        exporterFile,
+        importOnlyFile,
+        labelFile,
+        missingFile,
+        otherFile,
+        testConsumerFile,
+      ],
       {
         module: ts.ModuleKind.ESNext,
         moduleResolution: ts.ModuleResolutionKind.Bundler,
@@ -212,17 +280,17 @@ const collectForwardingOnlyFixtureUsages = () =>
       target: ts.ScriptTarget.ESNext,
     });
 
-    return collectCrossFileUsages(
-      program,
-      featureFile,
-      getOptions([]),
-      temporaryRoot,
+    const state = getOptions([
       {
-        exportedName: "feature",
-        exportKind: "value",
-        node: { type: "ExportNamedDeclaration" } as never,
+        publicApiFiles: ["src/index.ts", "src/other-index.ts"],
       },
-    );
+    ]);
+
+    return collectCrossFileUsages(program, featureFile, state, temporaryRoot, {
+      exportedName: "feature",
+      exportKind: "value",
+      node: { type: "ExportNamedDeclaration" } as never,
+    });
   });
 
 /**
@@ -235,22 +303,37 @@ const collectForwardingOnlyFixtureUsages = () =>
  */
 const collectPublicApiFixtureUsages = () =>
   withTemporaryDirectory("no-unused-public-api-", (temporaryRoot) => {
-    const sourceDirectory = path.join(temporaryRoot, "src");
+    const packageDirectory = path.join(temporaryRoot, "packages", "pkg");
+    const otherPackageDirectory = path.join(temporaryRoot, "packages", "other");
+    const sourceDirectory = path.join(packageDirectory, "src");
+    const otherSourceDirectory = path.join(otherPackageDirectory, "src");
+
     mkdirSync(sourceDirectory, { recursive: true });
+    mkdirSync(otherSourceDirectory, { recursive: true });
 
     const featureFile = path.join(sourceDirectory, "feature.ts");
     const infrastructureFile = path.join(sourceDirectory, "infrastructure.ts");
+    const emptyPublicApiFile = path.join(sourceDirectory, "empty.ts");
     const publicApiFile = path.join(sourceDirectory, "index.ts");
+    const otherPublicApiFile = path.join(otherSourceDirectory, "index.ts");
 
     writeFileSync(featureFile, "export const feature = 1;\n");
     writeFileSync(infrastructureFile, "export { feature } from './feature';\n");
+    writeFileSync(emptyPublicApiFile, "\n");
+    writeFileSync(otherPublicApiFile, "export const other = 1;\n");
     writeFileSync(
       publicApiFile,
       "export { feature } from './infrastructure';\n",
     );
 
     const program = ts.createProgram(
-      [featureFile, infrastructureFile, publicApiFile],
+      [
+        featureFile,
+        infrastructureFile,
+        emptyPublicApiFile,
+        otherPublicApiFile,
+        publicApiFile,
+      ],
       {
         module: ts.ModuleKind.ESNext,
         moduleResolution: ts.ModuleResolutionKind.Bundler,
@@ -261,7 +344,15 @@ const collectPublicApiFixtureUsages = () =>
     return collectCrossFileUsages(
       program,
       featureFile,
-      getOptions([]),
+      getOptions([
+        {
+          publicApiFiles: [
+            "packages/pkg/src/empty.ts",
+            "packages/pkg/src/index.ts",
+            "packages/other/src/index.ts",
+          ],
+        },
+      ]),
       temporaryRoot,
       {
         exportedName: "feature",
@@ -389,6 +480,45 @@ describe("no-unused-exports utilities", () => {
         exportKind: "type",
         nodeType: "VariableDeclaration",
       },
+    ]);
+  });
+
+  it("collects exported names from pattern-based declarations", () => {
+    // Arrange
+    const program = parseProgram(
+      [
+        "const source = { alias: 1, nested: { inner: 2 }, list: [3] };",
+        "export const [first, second = source.alias, ...rest] = source.list;",
+        "export const { alias: renamed, nested: { inner }, ...others } = source;",
+        "export function buildFeature() {}",
+        "export class FeatureClass {}",
+        "export enum FeatureEnum { A }",
+        "export interface FeatureShape { readonly id: string; }",
+        "export type FeatureAlias = string;",
+      ].join("\n"),
+    );
+
+    // Act
+    const actualExportData = collectExportedElements(program.body).map(
+      (element) => ({
+        exportedName: element.exportedName,
+        exportKind: element.exportKind,
+      }),
+    );
+
+    // Assert
+    expect(actualExportData).toStrictEqual([
+      { exportedName: "first", exportKind: "value" },
+      { exportedName: "second", exportKind: "value" },
+      { exportedName: "rest", exportKind: "value" },
+      { exportedName: "renamed", exportKind: "value" },
+      { exportedName: "inner", exportKind: "value" },
+      { exportedName: "others", exportKind: "value" },
+      { exportedName: "buildFeature", exportKind: "value" },
+      { exportedName: "FeatureClass", exportKind: "value" },
+      { exportedName: "FeatureEnum", exportKind: "value" },
+      { exportedName: "FeatureShape", exportKind: "type" },
+      { exportedName: "FeatureAlias", exportKind: "type" },
     ]);
   });
 
@@ -600,5 +730,429 @@ describe("no-unused-exports utilities", () => {
 
     // Assert
     expect(actualUsages).toStrictEqual([]);
+  });
+
+  it("returns no usages when the source filename is missing from the program", () => {
+    // Arrange
+    const missingFilename = "missing.ts";
+
+    // Act
+    const actualUsages = withTemporaryDirectory(
+      "no-unused-missing-file-",
+      (temporaryRoot) => {
+        const sourceDirectory = path.join(temporaryRoot, "src");
+        mkdirSync(sourceDirectory, { recursive: true });
+
+        const featureFile = path.join(sourceDirectory, "feature.ts");
+        writeFileSync(featureFile, "export const feature = 1;\n");
+
+        const program = ts.createProgram([featureFile], {
+          module: ts.ModuleKind.ESNext,
+          moduleResolution: ts.ModuleResolutionKind.Bundler,
+          target: ts.ScriptTarget.ESNext,
+        });
+
+        // Act
+        return collectCrossFileUsages(
+          program,
+          path.join(sourceDirectory, missingFilename),
+          getOptions([]),
+          temporaryRoot,
+          {
+            exportedName: "feature",
+            exportKind: "value",
+            node: { type: "ExportNamedDeclaration" } as never,
+          },
+        );
+      },
+    );
+
+    // Assert
+    expect(actualUsages).toStrictEqual([]);
+  });
+
+  it("returns no usages for source files without a module symbol", () => {
+    // Arrange & Act
+    const actualUsages = withTemporaryDirectory(
+      "no-unused-script-",
+      (temporaryRoot) => {
+        const sourceDirectory = path.join(temporaryRoot, "src");
+        mkdirSync(sourceDirectory, { recursive: true });
+
+        const scriptFile = path.join(sourceDirectory, "script.ts");
+        writeFileSync(scriptFile, "const scriptOnly = 1;\nscriptOnly;\n");
+
+        const program = ts.createProgram([scriptFile], {
+          module: ts.ModuleKind.ESNext,
+          moduleResolution: ts.ModuleResolutionKind.Bundler,
+          target: ts.ScriptTarget.ESNext,
+        });
+
+        // Act
+        return collectCrossFileUsages(
+          program,
+          scriptFile,
+          getOptions([]),
+          temporaryRoot,
+          {
+            exportedName: "missing",
+            exportKind: "value",
+            node: { type: "ExportNamedDeclaration" } as never,
+          },
+        );
+      },
+    );
+
+    // Assert
+    expect(actualUsages).toStrictEqual([]);
+  });
+
+  it("returns no usages for public API files without exports", () => {
+    // Arrange & Act
+    const actualUsages = withTemporaryDirectory(
+      "no-unused-empty-public-api-",
+      (temporaryRoot) => {
+        const sourceDirectory = path.join(temporaryRoot, "src");
+        mkdirSync(sourceDirectory, { recursive: true });
+
+        const featureFile = path.join(sourceDirectory, "feature.ts");
+        const emptyPublicApiFile = path.join(sourceDirectory, "empty.ts");
+
+        writeFileSync(featureFile, "export const feature = 1;\n");
+        writeFileSync(emptyPublicApiFile, "const placeholder = 1;\n");
+
+        const program = ts.createProgram([featureFile, emptyPublicApiFile], {
+          module: ts.ModuleKind.ESNext,
+          moduleResolution: ts.ModuleResolutionKind.Bundler,
+          target: ts.ScriptTarget.ESNext,
+        });
+        const state = getOptions([
+          {
+            publicApiFiles: ["src/empty.ts"],
+          },
+        ]);
+
+        // Act
+        return collectCrossFileUsages(
+          program,
+          featureFile,
+          state,
+          temporaryRoot,
+          {
+            exportedName: "feature",
+            exportKind: "value",
+            node: { type: "ExportNamedDeclaration" } as never,
+          },
+        );
+      },
+    );
+
+    // Assert
+    expect(actualUsages).toStrictEqual([]);
+  });
+
+  it("returns no usages for public API files exporting other symbols", () => {
+    // Arrange & Act
+    const actualUsages = withTemporaryDirectory(
+      "no-unused-other-public-api-",
+      (temporaryRoot) => {
+        const sourceDirectory = path.join(temporaryRoot, "src");
+        mkdirSync(sourceDirectory, { recursive: true });
+
+        const featureFile = path.join(sourceDirectory, "feature.ts");
+        const otherPublicApiFile = path.join(sourceDirectory, "index.ts");
+
+        writeFileSync(featureFile, "export const feature = 1;\n");
+        writeFileSync(otherPublicApiFile, "export const other = 1;\n");
+
+        const program = ts.createProgram([featureFile, otherPublicApiFile], {
+          module: ts.ModuleKind.ESNext,
+          moduleResolution: ts.ModuleResolutionKind.Bundler,
+          target: ts.ScriptTarget.ESNext,
+        });
+        const state = getOptions([
+          {
+            publicApiFiles: ["src/index.ts"],
+          },
+        ]);
+
+        // Act
+        return collectCrossFileUsages(
+          program,
+          featureFile,
+          state,
+          temporaryRoot,
+          {
+            exportedName: "feature",
+            exportKind: "value",
+            node: { type: "ExportNamedDeclaration" } as never,
+          },
+        );
+      },
+    );
+
+    // Assert
+    expect(actualUsages).toStrictEqual([]);
+  });
+
+  it("resolves aliased public API exports when alias resolution fails", () => {
+    // Arrange & Act
+    const actualUsages = withTemporaryDirectory(
+      "no-unused-alias-fallback-",
+      (temporaryRoot) => {
+        const sourceDirectory = path.join(temporaryRoot, "src");
+        mkdirSync(sourceDirectory, { recursive: true });
+
+        const featureFile = path.join(sourceDirectory, "feature.ts");
+        const apiFile = path.join(sourceDirectory, "index.ts");
+
+        const featureSourceFile = ts.createSourceFile(
+          featureFile,
+          "export const feature = 1;\n",
+          ts.ScriptTarget.ESNext,
+          true,
+          ts.ScriptKind.TS,
+        );
+        const apiSourceFile = ts.createSourceFile(
+          apiFile,
+          "export { feature as exposed } from './feature';\n",
+          ts.ScriptTarget.ESNext,
+          true,
+          ts.ScriptKind.TS,
+        );
+
+        const featureSymbol = createFakeSymbol(featureFile, "feature", 0);
+        const exposedSymbol = createFakeSymbol(featureFile, "feature", 0);
+        const moduleSymbolFeature = { fileName: featureFile } as never;
+        const moduleSymbolApi = { fileName: apiFile } as never;
+
+        const checker = {
+          getAliasedSymbol: () => {
+            throw new Error("alias resolution unavailable");
+          },
+          getExportsOfModule: (moduleSymbol: unknown) => {
+            if (moduleSymbol === moduleSymbolFeature) {
+              return [featureSymbol];
+            }
+
+            if (moduleSymbol === moduleSymbolApi) {
+              return [exposedSymbol];
+            }
+
+            return [];
+          },
+          getSymbolAtLocation: (node: unknown) => {
+            if (node === featureSourceFile) {
+              return moduleSymbolFeature;
+            }
+
+            if (node === apiSourceFile) {
+              return moduleSymbolApi;
+            }
+
+            return void 0;
+          },
+        } as never;
+
+        const program = createFakeProgram(
+          [featureSourceFile, apiSourceFile],
+          checker,
+        );
+        const state = getOptions([{ publicApiFiles: ["src/index.ts"] }]);
+
+        // Act
+        return collectCrossFileUsages(
+          program,
+          featureFile,
+          state,
+          temporaryRoot,
+          {
+            exportedName: "feature",
+            exportKind: "value",
+            node: { type: "ExportNamedDeclaration" } as never,
+          },
+        );
+      },
+    );
+
+    // Assert
+    expect(actualUsages).toStrictEqual([{ isTestFile: false }]);
+  });
+
+  it("returns no usages when public API exports resolve to different symbols", () => {
+    // Arrange & Act
+    const actualUsages = withTemporaryDirectory(
+      "no-unused-public-api-miss-",
+      (temporaryRoot) => {
+        const sourceDirectory = path.join(temporaryRoot, "src");
+        mkdirSync(sourceDirectory, { recursive: true });
+
+        const featureFile = path.join(sourceDirectory, "feature.ts");
+        const apiFile = path.join(sourceDirectory, "index.ts");
+
+        const featureSourceFile = ts.createSourceFile(
+          featureFile,
+          "export const feature = 1;\n",
+          ts.ScriptTarget.ESNext,
+          true,
+          ts.ScriptKind.TS,
+        );
+        const apiSourceFile = ts.createSourceFile(
+          apiFile,
+          "export const other = 1;\n",
+          ts.ScriptTarget.ESNext,
+          true,
+          ts.ScriptKind.TS,
+        );
+
+        const featureSymbol = createFakeSymbol(featureFile, "feature", 0);
+        const otherSymbol = createFakeSymbol(apiFile, "other", 0);
+        const moduleSymbolFeature = { fileName: featureFile } as never;
+        const moduleSymbolApi = { fileName: apiFile } as never;
+
+        const checker = {
+          getAliasedSymbol: (symbol: ts.Symbol) => symbol,
+          getExportsOfModule: (moduleSymbol: unknown) => {
+            if (moduleSymbol === moduleSymbolFeature) {
+              return [featureSymbol];
+            }
+
+            if (moduleSymbol === moduleSymbolApi) {
+              return [otherSymbol];
+            }
+
+            return [];
+          },
+          getSymbolAtLocation: (node: unknown) => {
+            if (node === featureSourceFile) {
+              return moduleSymbolFeature;
+            }
+
+            if (node === apiSourceFile) {
+              return moduleSymbolApi;
+            }
+
+            return void 0;
+          },
+        } as never;
+
+        const program = createFakeProgram(
+          [featureSourceFile, apiSourceFile],
+          checker,
+        );
+        const state = getOptions([{ publicApiFiles: ["src/index.ts"] }]);
+
+        // Act
+        return collectCrossFileUsages(
+          program,
+          featureFile,
+          state,
+          temporaryRoot,
+          {
+            exportedName: "feature",
+            exportKind: "value",
+            node: { type: "ExportNamedDeclaration" } as never,
+          },
+        );
+      },
+    );
+
+    // Assert
+    expect(actualUsages).toStrictEqual([]);
+  });
+
+  it("classifies concrete usages across production, test, type, and public API consumers", () => {
+    // Arrange & Act
+    const actualResult = withTemporaryDirectory(
+      "no-unused-mixed-",
+      (temporaryRoot) => {
+        const sourceDirectory = path.join(temporaryRoot, "src");
+        const testsDirectory = path.join(temporaryRoot, "tests");
+
+        mkdirSync(sourceDirectory, { recursive: true });
+        mkdirSync(testsDirectory, { recursive: true });
+
+        const featureFile = path.join(sourceDirectory, "feature.ts");
+        const consumerFile = path.join(sourceDirectory, "consumer.ts");
+        const typeConsumerFile = path.join(sourceDirectory, "type-consumer.ts");
+        const shadowFile = path.join(sourceDirectory, "shadow.ts");
+        const publicApiFile = path.join(sourceDirectory, "index.ts");
+        const testFile = path.join(testsDirectory, "feature.spec.ts");
+
+        writeFileSync(
+          featureFile,
+          "export const feature = { id: 1 } as const;\n",
+        );
+        writeFileSync(
+          consumerFile,
+          ["import { feature } from './feature';", "void feature.id;"].join(
+            "\n",
+          ),
+        );
+        writeFileSync(
+          typeConsumerFile,
+          [
+            "import { feature } from './feature';",
+            "export type FeatureShape = typeof feature;",
+          ].join("\n"),
+        );
+        writeFileSync(
+          shadowFile,
+          ["const feature = 1;", "void feature;"].join("\n"),
+        );
+        writeFileSync(publicApiFile, "export { feature } from './feature';\n");
+        writeFileSync(
+          testFile,
+          [
+            "import { feature } from '../src/feature';",
+            "void feature.id;",
+          ].join("\n"),
+        );
+
+        const program = ts.createProgram(
+          [
+            featureFile,
+            consumerFile,
+            typeConsumerFile,
+            shadowFile,
+            publicApiFile,
+            testFile,
+          ],
+          {
+            module: ts.ModuleKind.ESNext,
+            moduleResolution: ts.ModuleResolutionKind.Bundler,
+            target: ts.ScriptTarget.ESNext,
+          },
+        );
+        const state = getOptions([
+          {
+            testFilePatterns: ["tests/**/*.ts", "**/*.spec.ts"],
+          },
+        ]);
+
+        // Act
+        const actualUsages = collectCrossFileUsages(
+          program,
+          featureFile,
+          state,
+          temporaryRoot,
+          {
+            exportedName: "feature",
+            exportKind: "value",
+            node: { type: "ExportNamedDeclaration" } as never,
+          },
+        );
+
+        return {
+          actualUsages,
+          classification: classifyExportUsage(actualUsages),
+        };
+      },
+    );
+
+    // Assert
+    expect(actualResult.actualUsages).toContainEqual({ isTestFile: false });
+    expect(actualResult.actualUsages).toContainEqual({ isTestFile: true });
+    expect(actualResult.classification).toBe("production");
   });
 });

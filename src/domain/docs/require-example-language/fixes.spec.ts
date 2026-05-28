@@ -10,8 +10,14 @@ import { createFixer } from "./fixes";
 interface ApplyFixInput {
   /** Parsed example metadata. */
   example: Example;
+  /** Whether the comment contains additional examples. */
+  hasOtherExamples?: boolean;
   /** Problem code that determines which fix branch runs. */
-  problem: "emptyExample" | "missingFence" | "missingLanguage";
+  problem:
+    | "contentOutsideFence"
+    | "emptyExample"
+    | "missingFence"
+    | "missingLanguage";
   /** Original source text segment to patch. */
   sourceText: string;
 }
@@ -53,7 +59,7 @@ const applyFix = (context: ApplyFixInput): string | undefined => {
     absoluteEnd: context.sourceText.length,
     absoluteStart: 0,
     example: context.example,
-    hasOtherExamples: false,
+    hasOtherExamples: context.hasOtherExamples ?? false,
     problem: context.problem,
     sourceText: context.sourceText,
   })(fixer);
@@ -221,5 +227,94 @@ describe("require-example-language fixes", () => {
     );
     expect(actualFixed).toContain('\n *  logInfo("message");');
     expect(actualFixed).not.toContain("\n *   * logInfo");
+  });
+
+  it("returns undefined for contentOutsideFence problems", () => {
+    // Arrange
+    const sourceText = "```typescript\nvalue\n```\nextra";
+
+    // Act
+    const actualFixed = applyFix({
+      example: {
+        content: sourceText,
+        endIndex: 0,
+        endOffset: 0,
+        lineIndex: 0,
+        prefix: "",
+        startOffset: 0,
+      },
+      problem: "contentOutsideFence",
+      sourceText,
+    });
+
+    // Assert
+    expect(actualFixed).toBeUndefined();
+  });
+
+  it("removes empty examples when other examples exist", () => {
+    // Arrange
+    const sourceText = "* @example";
+
+    // Act
+    const actualFixed = applyFix({
+      example: {
+        content: "",
+        endIndex: 0,
+        endOffset: 0,
+        lineIndex: 0,
+        prefix: "* ",
+        startOffset: 0,
+      },
+      hasOtherExamples: true,
+      problem: "emptyExample",
+      sourceText,
+    });
+
+    // Assert
+    expect(actualFixed).toBe("");
+  });
+
+  it("preserves trailing whitespace for missing fence fixes", () => {
+    // Arrange
+    const sourceText = "* @example value\n   ";
+
+    // Act
+    const actualHasTrailingWhitespace = applyFix({
+      example: {
+        content: "value",
+        endIndex: 0,
+        endOffset: 0,
+        lineIndex: 0,
+        prefix: "* ",
+        startOffset: 0,
+      },
+      problem: "missingFence",
+      sourceText,
+    })?.endsWith("\n   ");
+
+    // Assert
+    expect(actualHasTrailingWhitespace).toBe(true);
+  });
+
+  it("returns undefined for empty examples that already have fences", () => {
+    // Arrange
+    const sourceText = "* ```\n* ```";
+
+    // Act
+    const actualFixed = applyFix({
+      example: {
+        content: "",
+        endIndex: 0,
+        endOffset: 0,
+        lineIndex: 0,
+        prefix: "* ",
+        startOffset: 0,
+      },
+      problem: "emptyExample",
+      sourceText,
+    });
+
+    // Assert
+    expect(actualFixed).toBeUndefined();
   });
 });

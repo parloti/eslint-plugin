@@ -228,6 +228,23 @@ describe("single-act-statement rule", () => {
     ]);
   });
 
+  it("falls back to the call expression when excess Act statement node is missing", async () => {
+    // Arrange
+    const callExpression = { type: "CallExpression" } as Rule.Node;
+
+    // Act
+    const actual = await runRule({ callExpression }, 2, callExpression, []);
+
+    // Assert
+    expect(actual).toStrictEqual([
+      {
+        data: { count: "2" },
+        messageId: "multipleActStatements",
+        node: callExpression,
+      },
+    ]);
+  });
+
   it("does not report when the Act phase already has one statement", async () => {
     // Arrange
     const callExpression = { type: "CallExpression" } as Rule.Node;

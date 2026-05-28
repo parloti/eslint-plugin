@@ -131,38 +131,41 @@ function collectPatternNames(
   pattern: ESTree.Pattern,
   names: Set<string>,
 ): void {
-  if (pattern.type === "Identifier") {
-    names.add(pattern.name);
-    return;
-  }
-
-  if (pattern.type === "RestElement") {
-    collectPatternNames(pattern.argument, names);
-    return;
-  }
-
-  if (pattern.type === "AssignmentPattern") {
-    collectPatternNames(pattern.left, names);
-    return;
-  }
-
-  if (pattern.type === "ArrayPattern") {
-    for (const element of pattern.elements) {
-      if (element !== null) {
-        collectPatternNames(element, names);
+  switch (pattern.type) {
+    case "ArrayPattern": {
+      for (const element of pattern.elements) {
+        if (element !== null) {
+          collectPatternNames(element, names);
+        }
       }
+      return;
     }
-    return;
-  }
 
-  if (pattern.type === "ObjectPattern") {
-    for (const property of pattern.properties) {
-      if (property.type === "RestElement") {
-        collectPatternNames(property.argument, names);
+    case "AssignmentPattern": {
+      collectPatternNames(pattern.left, names);
+      return;
+    }
+
+    case "Identifier": {
+      names.add(pattern.name);
+      return;
+    }
+
+    case "ObjectPattern": {
+      for (const property of pattern.properties) {
+        if (property.type === "RestElement") {
+          collectPatternNames(property.argument, names);
+        }
+        if (property.type === "Property") {
+          collectPatternNames(property.value, names);
+        }
       }
-      if (property.type === "Property") {
-        collectPatternNames(property.value, names);
-      }
+      return;
+    }
+
+    case "RestElement": {
+      collectPatternNames(pattern.argument, names);
+      return;
     }
   }
 }
@@ -390,9 +393,6 @@ function hasUnsafeImportCollisions(
   const requestedExports = new Set(
     bindings.map((binding) => binding.exportedName),
   );
-  if (requestedExports.size === 0) {
-    return false;
-  }
 
   const topLevelBoundNames = collectTopLevelBoundNames(program);
   const removableLocalNames = new Set(

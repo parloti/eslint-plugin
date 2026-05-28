@@ -18,7 +18,7 @@ export default defineConfig({
     mockReset: true,
     name: "eslint-plugin-e2e",
     restoreMocks: true,
-    setupFiles: ["test-setup.ts"],
+    setupFiles: ["vitest.setup.ts"],
     testTimeout: 30_000,
     unstubEnvs: true,
     unstubGlobals: true,

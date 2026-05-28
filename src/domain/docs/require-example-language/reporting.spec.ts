@@ -105,4 +105,124 @@ describe("require example language reporting", () => {
     expect(reportCalls).toBe(1);
     expect(reportDescriptor).toMatchObject({ messageId: "missingFence" });
   });
+
+  it("falls back to reporting on the AST node when location is unavailable", () => {
+    // Arrange
+    const sourceCode = new SourceCode("", createProgramAst(""));
+    let reportDescriptor: Rule.ReportDescriptor | undefined;
+    const report = ((descriptor: Rule.ReportDescriptor): void => {
+      reportDescriptor = descriptor;
+    }) as Rule.RuleContext["report"];
+
+    // Act
+    const actualReportDescriptor = (() => {
+      reportExample({
+        comment: {
+          loc: void 0,
+          range: [0, 2],
+          type: "Block",
+          value: "*\n * @example plain text",
+        },
+        context: { report, sourceCode } as Rule.RuleContext,
+        example: {
+          content: "plain text",
+          endIndex: 0,
+          endOffset: 0,
+          lineIndex: 0,
+          prefix: "",
+          startOffset: 0,
+        },
+        hasOtherExamples: false,
+      });
+
+      return reportDescriptor;
+    })();
+
+    // Assert
+    expect(actualReportDescriptor).toMatchObject({
+      messageId: "missingFence",
+      node: sourceCode.ast,
+    });
+  });
+
+  it("reports contentOutsideFence without an autofix", () => {
+    // Arrange
+    const sourceCode = new SourceCode("", createProgramAst(""));
+    let reportDescriptor: Rule.ReportDescriptor | undefined;
+    const report = ((descriptor: Rule.ReportDescriptor): void => {
+      reportDescriptor = descriptor;
+    }) as Rule.RuleContext["report"];
+
+    // Act
+    const actualFallbackFixes = (() => {
+      reportExample({
+        comment: {
+          loc: { end: { column: 0, line: 1 }, start: { column: 0, line: 1 } },
+          range: [0, 2],
+          type: "Block",
+          value: "*\n * @example mixed fence",
+        },
+        context: { report, sourceCode } as Rule.RuleContext,
+        example: {
+          content: "```typescript\nok\n```\noutside",
+          endIndex: 0,
+          endOffset: 0,
+          lineIndex: 0,
+          prefix: "",
+          startOffset: 0,
+        },
+        hasOtherExamples: false,
+      });
+
+      const actualFixFunction = reportDescriptor?.fix;
+      if (typeof actualFixFunction !== "function") {
+        return [];
+      }
+
+      return actualFixFunction({} as Rule.RuleFixer);
+    })();
+
+    // Assert
+    expect(reportDescriptor).toMatchObject({
+      messageId: "contentOutsideFence",
+    });
+    expect(reportDescriptor).toHaveProperty("fix");
+    expect(actualFallbackFixes).toStrictEqual([]);
+  });
+
+  it("omits fixes when comment ranges are unavailable", () => {
+    // Arrange
+    const sourceCode = new SourceCode("", createProgramAst(""));
+    let reportDescriptor: Rule.ReportDescriptor | undefined;
+    const report = ((descriptor: Rule.ReportDescriptor): void => {
+      reportDescriptor = descriptor;
+    }) as Rule.RuleContext["report"];
+
+    // Act
+    const actualFix = (() => {
+      reportExample({
+        comment: {
+          loc: { end: { column: 0, line: 1 }, start: { column: 0, line: 1 } },
+          range: void 0,
+          type: "Block",
+          value: "*\n * @example plain text",
+        },
+        context: { report, sourceCode } as Rule.RuleContext,
+        example: {
+          content: "plain text",
+          endIndex: 0,
+          endOffset: 0,
+          lineIndex: 0,
+          prefix: "",
+          startOffset: 0,
+        },
+        hasOtherExamples: false,
+      });
+
+      return reportDescriptor?.fix;
+    })();
+
+    // Assert
+    expect(actualFix).toBeUndefined();
+  });
 });

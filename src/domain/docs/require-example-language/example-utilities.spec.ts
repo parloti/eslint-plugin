@@ -29,16 +29,19 @@ describe("example utilities", () => {
     // Arrange
     const emptyInlineExample = "* @example";
     const inlineExample = "* @example inline";
+    const nonExampleLine = "* @remarks plain";
 
     // Act
     const result = {
       emptyInlineContent: getInlineContent(emptyInlineExample),
       inlineContent: getInlineContent(inlineExample),
+      noExampleContent: getInlineContent(nonExampleLine),
     };
 
     // Assert
     expect(result.inlineContent).toBe("inline");
     expect(result.emptyInlineContent).toBe("");
+    expect(result.noExampleContent).toBe("");
   });
 
   it("computes line metadata", () => {
