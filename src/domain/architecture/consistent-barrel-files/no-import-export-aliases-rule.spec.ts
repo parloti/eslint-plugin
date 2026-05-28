@@ -10,7 +10,7 @@ import {
   createImportDeclaration,
   createImportSpecifier,
   createProgram,
-} from "../../../shared/test-utils/consistent-barrel-files/test-helpers";
+} from "./__tests__/test-helpers";
 import { noImportExportAliasesRule } from "./no-import-export-aliases-rule";
 
 /** Message-id view over ESLint report descriptors used in tests. */

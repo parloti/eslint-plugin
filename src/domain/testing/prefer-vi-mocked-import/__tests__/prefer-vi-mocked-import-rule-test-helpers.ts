@@ -1,7 +1,7 @@
 import { Linter } from "eslint";
 import { parser } from "typescript-eslint";
 
-import { preferViMockedImportRule } from "../../domain/testing/prefer-vi-mocked-import/rule";
+import { preferViMockedImportRule } from "../rule";
 
 /** Type definition for rule data. */
 interface FixRunResult {

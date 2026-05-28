@@ -5,9 +5,7 @@ import { SourceCode } from "eslint";
 import path from "node:path";
 import { cwd } from "node:process";
 
-import type { NoReexportsOutsideBarrelsOptions } from "../../../domain/architecture/consistent-barrel-files/types";
-
-import { noReexportsOutsideBarrelsRule } from "../../../domain/architecture/consistent-barrel-files/no-reexports-outside-barrels-rule";
+import { barrelFilesExportsOnlyRule } from "../exports-only-rule";
 import { createProgram, createRepoDirectory } from "./test-helpers";
 
 /** Type definition for rule data. */
@@ -21,8 +19,8 @@ interface RuleContextParameters {
   /** Filename field value. */
   filename: string;
 
-  /** Options helper value. */
-  options?: NoReexportsOutsideBarrelsOptions;
+  /** Options field value. */
+  options: readonly unknown[];
 
   /** Reports field value. */
   reports: RuleReport[];
@@ -45,8 +43,8 @@ interface TemporaryFileOptions {
   /** Filename field value. */
   filename: string;
 
-  /** Options helper value. */
-  options?: NoReexportsOutsideBarrelsOptions;
+  /** Options field value. */
+  options?: readonly unknown[];
 
   /** Root field value. */
   root: "src" | "tmp";
@@ -54,20 +52,21 @@ interface TemporaryFileOptions {
 
 /** Type definition for rule data. */
 interface TemporaryRunner {
-  /** RunDefaultFeature field value. */
-  runDefaultFeature: (body: ESTree.Program["body"]) => RuleReport[];
+  /** RunDefaultIndex field value. */
+  runDefaultIndex: (body: ESTree.Program["body"]) => RuleReport[];
+
+  /** RunTemporaryBarrel field value. */
+  runTemporaryBarrel: (
+    filename: string,
+    body: ESTree.Program["body"],
+    options?: readonly unknown[],
+  ) => RuleReport[];
 
   /** RunTemporaryFeature field value. */
-  runTemporaryFeature: (
-    body: ESTree.Program["body"],
-    options?: NoReexportsOutsideBarrelsOptions,
-  ) => RuleReport[];
+  runTemporaryFeature: (body: ESTree.Program["body"]) => RuleReport[];
 
   /** RunTemporaryIndex field value. */
-  runTemporaryIndex: (
-    body: ESTree.Program["body"],
-    options?: NoReexportsOutsideBarrelsOptions,
-  ) => RuleReport[];
+  runTemporaryIndex: (body: ESTree.Program["body"]) => RuleReport[];
 }
 
 /**
@@ -85,12 +84,12 @@ const createRuleContext = (
   ({
     cwd: cwd(),
     filename: parameters.filename,
-    id: "no-reexports-outside-barrels",
+    id: "barrel-files-exports-only",
     languageOptions: {
       ecmaVersion: "latest",
       sourceType: "module",
     },
-    options: parameters.options === void 0 ? [] : [parameters.options],
+    options: parameters.options,
     parserOptions: {},
     parserPath: void 0,
     physicalFilename: parameters.filename,
@@ -110,23 +109,23 @@ const createRuleContext = (
  * @returns The captured rule reports.
  * @example
  * ```typescript
- * const reports = runRule("feature.ts", createBody());
+ * const reports = runRule("index.ts", createBody());
  * ```
  */
 const runRule = (
   filename: string,
   body: ESTree.Program["body"],
-  options?: NoReexportsOutsideBarrelsOptions,
+  options: readonly unknown[] = [],
 ): RuleReport[] => {
   const reports: RuleReport[] = [];
   const sourceCode = new SourceCode("", createProgram(body));
   const context = createRuleContext({
     filename,
+    options,
     reports,
     sourceCode,
-    ...(options === void 0 ? {} : { options }),
   });
-  const listeners = noReexportsOutsideBarrelsRule.create(context);
+  const listeners = barrelFilesExportsOnlyRule.create(context);
   const programListener = listeners.Program;
 
   programListener?.(context.sourceCode.ast);
@@ -154,32 +153,28 @@ const createTemporaryRunner = (
     return runRule(filePath, options.body, options.options);
   };
 
-  const runDefaultFeature = (body: ESTree.Program["body"]): RuleReport[] =>
-    runForTemporaryFile({ body, filename: "feature.ts", root: "src" });
+  const runDefaultIndex = (body: ESTree.Program["body"]): RuleReport[] =>
+    runForTemporaryFile({ body, filename: "index.ts", root: "src" });
 
-  const runTemporaryFeature = (
+  const runTemporaryBarrel = (
+    filename: string,
     body: ESTree.Program["body"],
-    options?: NoReexportsOutsideBarrelsOptions,
+    options: readonly unknown[] = [],
   ): RuleReport[] =>
-    runForTemporaryFile({
-      body,
-      filename: "feature.ts",
-      root: "tmp",
-      ...(options === void 0 ? {} : { options }),
-    });
+    runForTemporaryFile({ body, filename, options, root: "tmp" });
 
-  const runTemporaryIndex = (
-    body: ESTree.Program["body"],
-    options?: NoReexportsOutsideBarrelsOptions,
-  ): RuleReport[] =>
-    runForTemporaryFile({
-      body,
-      filename: "index.ts",
-      root: "tmp",
-      ...(options === void 0 ? {} : { options }),
-    });
+  const runTemporaryIndex = (body: ESTree.Program["body"]): RuleReport[] =>
+    runForTemporaryFile({ body, filename: "index.ts", root: "tmp" });
 
-  return { runDefaultFeature, runTemporaryFeature, runTemporaryIndex };
+  const runTemporaryFeature = (body: ESTree.Program["body"]): RuleReport[] =>
+    runForTemporaryFile({ body, filename: "feature.ts", root: "tmp" });
+
+  return {
+    runDefaultIndex,
+    runTemporaryBarrel,
+    runTemporaryFeature,
+    runTemporaryIndex,
+  };
 };
 
 export { createTemporaryRunner, runRule };

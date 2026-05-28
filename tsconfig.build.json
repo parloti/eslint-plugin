@@ -19,6 +19,7 @@
     "**/*.spec.ts",
     "**/*.e2e.ts",
     "**/*.test.ts",
+    "src/**/__tests__/**",
     "dist",
     "coverage",
     "node_modules"

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { runFix } from "../../../shared/test-utils/prefer-vi-mocked-import-rule-test-helpers";
+import { runFix } from "./__tests__/prefer-vi-mocked-import-rule-test-helpers";
 
 describe("prefer-vi-mocked-import rule (core)", () => {
   it("autofixes the basic pattern", () => {

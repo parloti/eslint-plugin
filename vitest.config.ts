@@ -5,7 +5,7 @@ export default defineConfig({
     clearMocks: true,
     coverage: {
       enabled: true,
-      exclude: ["**/index.ts", "**/*.types.ts"],
+      exclude: ["**/index.ts", "**/*.types.ts", "**/__tests__/**/*.ts"],
       include: ["src/**/*.ts", "tests/support/**/*.ts"],
       thresholds: {
         "100": true,

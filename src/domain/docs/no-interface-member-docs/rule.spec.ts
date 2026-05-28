@@ -2,12 +2,9 @@ import type { Rule } from "eslint";
 
 import { describe, expect, it } from "vitest";
 
-import type { Comment } from "../../../shared/test-utils/no-interface-member-documentation-test-helpers";
+import type { Comment } from "./__tests__/no-interface-member-documentation-test-helpers";
 
-import {
-  applyFixes,
-  getFixes,
-} from "../../../shared/test-utils/documentation-test-helpers";
+import { applyFixes, getFixes } from "../__tests__/documentation-test-helpers";
 import {
   buildSourceText,
   createComment,
@@ -16,7 +13,7 @@ import {
   createInterfaceSample,
   createParameter,
   runFunctionListener,
-} from "../../../shared/test-utils/no-interface-member-documentation-test-helpers";
+} from "./__tests__/no-interface-member-documentation-test-helpers";
 import { noInterfaceMemberDocumentationRule } from "./rule";
 
 describe("no interface member docs rule", () => {

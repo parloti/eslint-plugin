@@ -22,7 +22,6 @@ const eslintConfig = defineConfig(
   {
     files: ["**/*.ts"],
     rules: {
-      "boundaries/dependencies": "off",
       "import-x/no-internal-modules": "off",
     },
   },

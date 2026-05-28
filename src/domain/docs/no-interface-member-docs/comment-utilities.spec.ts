@@ -2,7 +2,7 @@ import type { Rule } from "eslint";
 
 import { describe, expect, it } from "vitest";
 
-import type { Comment } from "../../../shared/test-utils/no-interface-member-documentation-comment-utilities-test-helpers";
+import type { Comment } from "./__tests__/no-interface-member-documentation-comment-utilities-test-helpers";
 
 import {
   createComment,
@@ -11,7 +11,7 @@ import {
   createRangeMissingContext,
   createSingleJsdocContext,
   createSourceCode,
-} from "../../../shared/test-utils/no-interface-member-documentation-comment-utilities-test-helpers";
+} from "./__tests__/no-interface-member-documentation-comment-utilities-test-helpers";
 import {
   buildRemovalRange,
   getCommentLines,

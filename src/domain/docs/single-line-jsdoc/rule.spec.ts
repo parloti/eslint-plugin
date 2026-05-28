@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import {
   createFixer,
   getFixText,
-} from "../../../shared/test-utils/documentation-test-helpers";
+} from "../__tests__/documentation-test-helpers";
 import { singleLineJsdocRule } from "./rule";
 
 /** Type definition for rule data. */

@@ -6,12 +6,14 @@ import type { NoUnusedExportsOptions, NoUnusedExportsState } from "./types";
 /** Default public API files where exported symbols are intentionally exposed. */
 export const DEFAULT_PUBLIC_API_FILES = [
   "**/src/index.ts",
-  "**/test-utils/**/*.ts",
-  "tests/support/**/*.ts",
+  "**/__tests__/**/*.ts",
 ] as const;
 
 /** Default glob patterns used to classify test files. */
-export const DEFAULT_TEST_FILE_PATTERNS = ["**/*.{test,spec,e2e}.ts"] as const;
+export const DEFAULT_TEST_FILE_PATTERNS = [
+  "**/*.{test,spec,e2e}.ts",
+  "**/__tests__/**/*.ts",
+] as const;
 
 /** Default file pattern used to scope analysis to source files. */
 const DEFAULT_LINTABLE_FILE_PATTERN = "**/src/**/*.ts";

@@ -6,7 +6,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import {
   createTemporaryRunner,
   runRule,
-} from "../../../shared/test-utils/consistent-barrel-files/exports-only-rule-test-utilities";
+} from "./__tests__/exports-only-rule-test-utilities";
 import {
   createBody,
   createExportAll,
@@ -16,7 +16,7 @@ import {
   createExportWithDeclaration,
   createExportWithoutSource,
   createImportDeclaration,
-} from "../../../shared/test-utils/consistent-barrel-files/test-helpers";
+} from "./__tests__/test-helpers";
 
 describe("barrel files exports-only rule (enforced)", () => {
   const temporaryDirectories: string[] = [];

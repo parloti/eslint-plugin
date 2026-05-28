@@ -36,8 +36,8 @@ Classification rules:
 
 ```typescript
 type Options = {
-  publicApiFiles?: string[]; // default: ["**/src/index.ts", "**/test-utils/**/*.ts", "tests/support/**/*.ts"]
-  testFilePatterns?: string[]; // default: ["**/*.{test,spec,e2e}.ts"]
+  publicApiFiles?: string[]; // default: ["**/src/index.ts", "**/__tests__/**/*.ts"]
+  testFilePatterns?: string[]; // default: ["**/*.{test,spec,e2e}.ts", "**/__tests__/**/*.ts"]
 };
 ```
 

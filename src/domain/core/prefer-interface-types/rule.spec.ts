@@ -9,7 +9,7 @@ import {
   createRestParameter,
   createTypeAnnotation,
   runListener,
-} from "../../../shared/test-utils/prefer-interface-types-test-helpers";
+} from "./__tests__/prefer-interface-types-test-helpers";
 import { preferInterfaceTypesRule } from "./rule";
 
 /** Listener keys expected on the rule listener map. */

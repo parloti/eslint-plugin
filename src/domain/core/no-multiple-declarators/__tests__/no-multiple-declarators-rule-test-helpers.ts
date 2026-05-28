@@ -1,8 +1,6 @@
 import type { Rule } from "eslint";
 
-import type { Range } from "../../domain/core/no-multiple-declarators/types";
-
-import { noMultipleDeclaratorsRule } from "../../domain/core/no-multiple-declarators/rule";
+import { noMultipleDeclaratorsRule } from "../rule";
 
 /** Options that shape the mock ESLint source access used by the tests. */
 interface ContextOptions {
@@ -41,6 +39,9 @@ interface MockNode {
   /** ESTree node type. */
   type: string;
 }
+
+/** Represents a source range within the original file. */
+type Range = [number, number];
 
 /** Captured report metadata asserted by the unit tests. */
 interface ReportEntry {

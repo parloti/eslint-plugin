@@ -5,9 +5,9 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { cwd } from "node:process";
 
-import type { RequireTestCompanionOptions } from "../../domain/testing/require-test-companion/types";
+import type { RequireTestCompanionOptions } from "../types";
 
-import { requireTestCompanionRule } from "../../domain/testing/require-test-companion/rule";
+import { requireTestCompanionRule } from "../rule";
 
 /** Type definition for rule data. */
 interface ReportDescriptorWithMessageId {

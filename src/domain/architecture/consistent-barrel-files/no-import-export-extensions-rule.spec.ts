@@ -8,7 +8,7 @@ import {
   createBody,
   createImportDeclaration,
   createProgram,
-} from "../../../shared/test-utils/consistent-barrel-files/test-helpers";
+} from "./__tests__/test-helpers";
 import { noImportExportExtensionsRule } from "./no-import-export-extensions-rule";
 
 /** Message-id view over ESLint report descriptors used in tests. */

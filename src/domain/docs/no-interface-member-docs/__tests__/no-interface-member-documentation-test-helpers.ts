@@ -1,6 +1,6 @@
 import type { Rule } from "eslint";
 
-import { noInterfaceMemberDocumentationRule } from "../../domain/docs/no-interface-member-docs/rule";
+import { noInterfaceMemberDocumentationRule } from "../rule";
 
 /** Type definition for rule data. */
 type Comment = ReturnType<

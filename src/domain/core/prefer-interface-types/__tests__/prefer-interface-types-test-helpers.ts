@@ -1,6 +1,6 @@
 import type { Rule } from "eslint";
 
-import { preferInterfaceTypesRule } from "../../domain/core/prefer-interface-types/rule";
+import { preferInterfaceTypesRule } from "../rule";
 
 /** Type definition for rule data. */
 interface MockNode {

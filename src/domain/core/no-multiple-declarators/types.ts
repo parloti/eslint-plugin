@@ -115,7 +115,6 @@ export type {
   FixableVariableDeclarationNode,
   ForInOrOfStatementNode,
   ForStatementNode,
-  Range,
   RangedVariableDeclaratorNode,
   SourceCodeAccess,
   VariableDeclarationNode,

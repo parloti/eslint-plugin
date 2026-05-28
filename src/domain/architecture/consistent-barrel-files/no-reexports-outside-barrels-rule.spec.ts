@@ -8,7 +8,7 @@ import type { NoReexportsOutsideBarrelsOptions } from "./types";
 import {
   createTemporaryRunner,
   runRule,
-} from "../../../shared/test-utils/consistent-barrel-files/no-reexports-outside-barrels-test-utilities";
+} from "./__tests__/no-reexports-outside-barrels-test-utilities";
 import {
   createBody,
   createExportAll,
@@ -20,7 +20,7 @@ import {
   createImportDeclaration,
   createImportDefaultSpecifier,
   createImportSpecifier,
-} from "../../../shared/test-utils/consistent-barrel-files/test-helpers";
+} from "./__tests__/test-helpers";
 
 describe("no reexports outside barrels rule (enforced)", () => {
   const temporaryDirectories: string[] = [];
