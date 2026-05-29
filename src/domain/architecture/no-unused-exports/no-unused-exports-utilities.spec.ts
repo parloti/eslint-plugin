@@ -363,6 +363,60 @@ const collectPublicApiFixtureUsages = () =>
   });
 
 /**
+ * Builds one temporary project where the only consumer uses the export as a
+ * shorthand property value through a multi-level barrel chain.
+ * @returns Collected usages for the `feature` value export.
+ * @example
+ * ```typescript
+ * const usages = collectShorthandPropertyFixtureUsages();
+ * ```
+ */
+const collectShorthandPropertyFixtureUsages = () =>
+  withTemporaryDirectory("no-unused-shorthand-", (temporaryRoot) => {
+    const sourceDirectory = path.join(temporaryRoot, "src");
+    mkdirSync(sourceDirectory, { recursive: true });
+
+    const featureFile = path.join(sourceDirectory, "feature.ts");
+    const barrelFile = path.join(sourceDirectory, "barrel.ts");
+    const consumerFile = path.join(sourceDirectory, "consumer.ts");
+
+    writeFileSync(
+      featureFile,
+      [
+        "function buildFeature(x: string): string { return x; }",
+        "export { buildFeature };",
+      ].join("\n") + "\n",
+    );
+    writeFileSync(barrelFile, "export { buildFeature } from './feature';\n");
+    writeFileSync(
+      consumerFile,
+      [
+        "import { buildFeature } from './barrel';",
+        "function configure(opts: { buildFeature: (x: string) => string }): void { void opts; }",
+        "configure({ buildFeature });",
+      ].join("\n") + "\n",
+    );
+
+    const program = ts.createProgram([featureFile, barrelFile, consumerFile], {
+      module: ts.ModuleKind.ESNext,
+      moduleResolution: ts.ModuleResolutionKind.Bundler,
+      target: ts.ScriptTarget.ESNext,
+    });
+
+    return collectCrossFileUsages(
+      program,
+      featureFile,
+      getOptions([]),
+      temporaryRoot,
+      {
+        exportedName: "buildFeature",
+        exportKind: "value",
+        node: { type: "ExportNamedDeclaration" } as never,
+      },
+    );
+  });
+
+/**
  * Builds one temporary project whose only consumer uses `typeof` on the export.
  * @returns Collected usages for the `feature` value export.
  * @example
@@ -602,6 +656,14 @@ describe("no-unused-exports utilities", () => {
   it("treats `typeof` references as concrete value usage", () => {
     // Act
     const actualUsages = collectTypeofValueFixtureUsages();
+
+    // Assert
+    expect(actualUsages).toStrictEqual([{ isTestFile: false }]);
+  });
+
+  it("detects value export consumed as a shorthand property through a barrel chain", () => {
+    // Act
+    const actualUsages = collectShorthandPropertyFixtureUsages();
 
     // Assert
     expect(actualUsages).toStrictEqual([{ isTestFile: false }]);

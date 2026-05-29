@@ -666,7 +666,13 @@ const collectConcreteUsagesFromSourceFile = (
       return;
     }
 
-    const candidateSymbol = checker.getSymbolAtLocation(node);
+    const isShorthandName =
+      ts.isShorthandPropertyAssignment(node.parent) &&
+      node.parent.name === node;
+
+    const candidateSymbol = isShorthandName
+      ? checker.getShorthandAssignmentValueSymbol(node.parent)
+      : checker.getSymbolAtLocation(node);
 
     if (candidateSymbol === void 0) {
       ts.forEachChild(node, visitNode);
