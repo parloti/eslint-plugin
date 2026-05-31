@@ -88,9 +88,9 @@ const noUnusedExportsRule: Rule.RuleModule = {
     },
     messages: {
       unusedExport:
-        "Export '{{exportedName}}' is never consumed by any file in the project.",
+        "Export '{{exportedName}}' is never consumed by any file in the project; make it private by removing the export.",
       usedOnlyInTests:
-        "Export '{{exportedName}}' is consumed only by test files.",
+        "Export '{{exportedName}}' is consumed only by test files; move it to the test file or a test utilities folder.",
     },
     schema: [
       {

@@ -19,6 +19,7 @@ describe("enforce-aaa-structure e2e", () => {
         "});",
       ].join("\n"),
       errors: [
+        { messageId: "codeBeforeArrange" },
         { messageId: "invalidOrder" },
         { messageId: "outOfOrderSection" },
       ],
@@ -40,7 +41,10 @@ describe("enforce-aaa-structure e2e", () => {
         "  expect(nextResult).toBe(2);",
         "});",
       ].join("\n"),
-      errors: [{ messageId: "duplicateSection" }],
+      errors: [
+        { messageId: "duplicateSection" },
+        { messageId: "outOfOrderSection" },
+      ],
       filename: "example.spec.ts",
     },
   ])("rejects invalid AAA ordering %#", (testCase) => {
