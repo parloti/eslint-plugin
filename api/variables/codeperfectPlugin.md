@@ -8,7 +8,7 @@
 
 > `const` **codeperfectPlugin**: `object`
 
-Defined in: [infrastructure/codeperfect-plugin.ts:45](https://github.com/parloti/eslint-plugin/blob/0d675eb3bb1ee5ac73356c1f49fc0566e17dfaf4/src/infrastructure/codeperfect-plugin.ts#L45)
+Defined in: [infrastructure/codeperfect-plugin.ts:47](https://github.com/parloti/eslint-plugin/blob/693a45a7471af6c9c9e11e72f1793f9eb8515e9d/src/infrastructure/codeperfect-plugin.ts#L47)
 
 ESLint plugin object exported by the package.
 
@@ -61,6 +61,10 @@ ESLint plugin object exported by the package.
 #### rules.no-reexports-outside-barrels
 
 > `readonly` **no-reexports-outside-barrels**: `RuleModule` = `noReexportsOutsideBarrelsRule`
+
+#### rules.no-unsafe-vitest-mock-factory-cast
+
+> `readonly` **no-unsafe-vitest-mock-factory-cast**: `RuleModule` = `noUnsafeVitestMockFactoryCastRule`
 
 #### rules.no-unused-exports
 
