@@ -15,6 +15,7 @@ export {
 export {
   assertActualExpectedNamesRule,
   enforceAaaStructureRule,
+  noUnsafeVitestMockFactoryCastRule,
   preferViMockedImportRule,
   requireActResultCaptureRule,
   requireTestCompanionRule,

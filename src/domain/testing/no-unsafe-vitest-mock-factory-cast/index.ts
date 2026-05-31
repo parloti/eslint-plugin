@@ -1,0 +1,1 @@
+export { noUnsafeVitestMockFactoryCastRule } from "./rule";

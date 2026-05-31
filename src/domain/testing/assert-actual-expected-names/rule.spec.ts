@@ -2,6 +2,9 @@ import type { Rule } from "eslint";
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import type * as AnalyzerModule from "../aaa/analyzer.analysis";
+import type * as AnalyzerAssertionsModule from "../aaa/analyzer.assertions.helpers";
+
 /** Mocked AAA module shape used by the assertion-name rule tests. */
 interface AssertActualExpectedNamesAnalysisModule {
   /** Mocked analyzer result. */
@@ -169,11 +172,13 @@ describe("assert-actual-expected-names rule", () => {
     };
     vi.doMock(
       import("../aaa/analyzer.analysis"),
-      (): never => createAnalysisModule() as never,
+      createMockProxy<typeof AnalyzerModule>(createAnalysisModule()),
     );
     vi.doMock(
       import("../aaa/analyzer.assertions.helpers"),
-      (): never => createAssertionsModule() as never,
+      createMockProxy<typeof AnalyzerAssertionsModule>(
+        createAssertionsModule(),
+      ),
     );
   });
 

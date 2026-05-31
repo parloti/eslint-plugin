@@ -2,6 +2,9 @@ import type { Rule } from "eslint";
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import type * as AnalyzerModule from "../aaa/analyzer.analysis";
+import type * as AnalyzerAnalysisModule from "../aaa/analyzer.analysis.helpers";
+
 /** Mocked top-level Act statement shape used by test helpers. */
 interface MockActStatement {
   /** Statement node exposed to the rule under test. */
@@ -165,11 +168,13 @@ describe("single-act-statement rule", () => {
     activeAaaState = { actStatements: [], analysis: void 0, count: 0 };
     vi.doMock(
       import("../aaa/analyzer.analysis"),
-      (): never => createAnalysisModule() as never,
+      createMockProxy<typeof AnalyzerModule>(createAnalysisModule()),
     );
     vi.doMock(
       import("../aaa/analyzer.analysis.helpers"),
-      (): never => createAnalysisHelpersModule() as never,
+      createMockProxy<typeof AnalyzerAnalysisModule>(
+        createAnalysisHelpersModule(),
+      ),
     );
   });
 

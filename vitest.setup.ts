@@ -13,9 +13,7 @@ beforeEach(() => {
  * ```
  */
 type DeepPartial<T> = T extends object
-  ? {
-      [P in keyof T]?: DeepPartial<T[P]>;
-    }
+  ? { [P in keyof T]?: DeepPartial<T[P]> }
   : T;
 
 /**
@@ -25,8 +23,8 @@ type DeepPartial<T> = T extends object
  * @returns A proxy object that behaves like the target object with the specified overrides.
  * @example
  * ```typescript
- * vi.mock(
- *   ...createMockProxy(import("../aaa/analyzer.assertions.helpers"), {
+ * vi.mock(import("../aaa/analyzer.assertions.helpers"),
+ *   createMockProxy({
  *     hasAssertion: (node: NodeFlags) => hasFlag(node, "containsAssertion"),
  *     isValidAssertStatement: (node: NodeFlags) => hasFlag(node, "isValidAssert"),
  *   }),

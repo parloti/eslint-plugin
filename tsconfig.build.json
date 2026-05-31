@@ -12,7 +12,7 @@
     "rootDir": "src",
 
     // Projects
-    "tsBuildInfoFile": "dist/.tsbuildinfo"
+    "tsBuildInfoFile": "temp/.tsbuildinfo"
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts", "*.d.ts"],
   "exclude": [

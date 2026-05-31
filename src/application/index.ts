@@ -8,6 +8,7 @@ export {
   noInterfaceMemberDocumentationRule,
   noMultipleDeclaratorsRule,
   noReexportsOutsideBarrelsRule,
+  noUnsafeVitestMockFactoryCastRule,
   noUnusedExportsRule,
   preferInterfaceTypesRule,
   preferViMockedImportRule,

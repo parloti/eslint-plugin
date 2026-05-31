@@ -2,6 +2,9 @@ import type { Rule } from "eslint";
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import type * as AnalyzerModule from "../aaa/analyzer.analysis";
+import type * as AnalyzerClassificationModule from "../aaa/analyzer.classification.helpers";
+
 /** Minimal expression-statement node used by synthetic fixtures. */
 interface ExpressionStatementNode {
   /** Wrapped expression node. */
@@ -187,11 +190,13 @@ describe("require-act-result-capture rule", () => {
     activeCaptureState = { analysis: void 0, capturableNodes: new Set() };
     vi.doMock(
       import("../aaa/analyzer.analysis"),
-      (): never => createAnalysisModule() as never,
+      createMockProxy<typeof AnalyzerModule>(createAnalysisModule()),
     );
     vi.doMock(
       import("../aaa/analyzer.classification.helpers"),
-      (): never => createClassificationModule() as never,
+      createMockProxy<typeof AnalyzerClassificationModule>(
+        createClassificationModule(),
+      ),
     );
   });
 

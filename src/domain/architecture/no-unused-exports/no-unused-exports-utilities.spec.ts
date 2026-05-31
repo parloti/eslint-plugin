@@ -537,6 +537,41 @@ describe("no-unused-exports utilities", () => {
     ]);
   });
 
+  it("ignores malformed declaration candidates while collecting local names", () => {
+    // Arrange
+    const malformedBody = [
+      {
+        declaration: {
+          id: { name: "broken" },
+        },
+        source: void 0,
+        specifiers: [],
+        type: "ExportNamedDeclaration",
+      },
+      {
+        declarations: [void 0],
+        kind: "const",
+        type: "VariableDeclaration",
+      },
+    ] as unknown as AST.Program["body"];
+
+    // Act
+    const actualExportedElements = collectExportedElements(malformedBody).map(
+      (element) => ({
+        exportedName: element.exportedName,
+        exportKind: element.exportKind,
+      }),
+    );
+
+    // Assert
+    expect(actualExportedElements).toStrictEqual([
+      {
+        exportedName: "broken",
+        exportKind: "value",
+      },
+    ]);
+  });
+
   it("collects exported names from pattern-based declarations", () => {
     // Arrange
     const program = parseProgram(

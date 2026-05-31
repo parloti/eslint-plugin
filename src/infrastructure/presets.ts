@@ -48,6 +48,7 @@ const aaaRuleNames = [
 const testingRuleNames = [
   "assert-actual-expected-names",
   "enforce-aaa-structure",
+  "no-unsafe-vitest-mock-factory-cast",
   "prefer-vi-mocked-import",
   "require-act-result-capture",
   "require-test-companion",
@@ -66,6 +67,7 @@ const allRuleNames = [
   "no-multiple-declarators",
   "no-reexports-outside-barrels",
   "no-unused-exports",
+  "no-unsafe-vitest-mock-factory-cast",
   "prefer-interface-types",
   "prefer-vi-mocked-import",
   "require-act-result-capture",

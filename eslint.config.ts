@@ -44,4 +44,5 @@ const eslintConfig = defineConfig(
     ...plugin.configs["tests-recommended"],
   },
 );
+
 export default eslintConfig;
