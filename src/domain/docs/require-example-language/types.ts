@@ -28,9 +28,6 @@ interface Example {
 
 /** Type definition for rule data. */
 type Problem =
-  | "contentOutsideFence"
-  | "emptyExample"
-  | "missingFence"
-  | "missingLanguage";
+  "contentOutsideFence" | "emptyExample" | "missingFence" | "missingLanguage";
 
 export type { Comment, Example, Problem };

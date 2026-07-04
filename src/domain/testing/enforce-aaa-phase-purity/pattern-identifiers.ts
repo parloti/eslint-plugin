@@ -20,9 +20,7 @@ function collectArrayPatternIdentifiers(
   identifiers: Set<string>,
 ): void {
   const elements = (pattern as ESTree.ArrayPattern).elements as (
-    | ESTree.Pattern
-    | null
-    | undefined
+    ESTree.Pattern | null | undefined
   )[];
 
   for (const element of elements) {

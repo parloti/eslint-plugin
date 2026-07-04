@@ -12,8 +12,7 @@ interface MockFactoryMatch {
 
   /** Second argument to the Vitest mock call. */
   mockFactoryNode:
-    | TSESTree.ArrowFunctionExpression
-    | TSESTree.FunctionExpression;
+    TSESTree.ArrowFunctionExpression | TSESTree.FunctionExpression;
 
   /** First argument to the Vitest mock call. */
   mockSpecifierNode: TSESTree.Expression;

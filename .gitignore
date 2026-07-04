@@ -53,8 +53,10 @@ temp/
 .eslintcache
 coverage/
 .vscode-test/
+
 # Angular build cache
 .angular/
+
 # TypeScript
 *.tsbuildinfo
 
@@ -70,6 +72,7 @@ Thumbs.db
 # ---------------------------------------------------------
 # Angular
 # ---------------------------------------------------------
+
 # Angular generated files
 .angular/cache/
 .angular/cache-loader/
@@ -87,6 +90,7 @@ playwright-report/
 test-results/
 blob-report/
 playwright/.cache/
+
 # Screenshots / videos from failed tests
 test-results/**/*.png
 test-results/**/*.webm

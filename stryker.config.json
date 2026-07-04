@@ -6,7 +6,7 @@
   "reporters": ["progress", "clear-text", "html", "json"],
   "testRunner": "vitest",
   "thresholds": {
-    "break": 10,
+    "break": 15,
     "high": 80,
     "low": 60
   }

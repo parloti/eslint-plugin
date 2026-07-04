@@ -14,10 +14,7 @@ interface ApplyFixInput {
   hasOtherExamples?: boolean;
   /** Problem code that determines which fix branch runs. */
   problem:
-    | "contentOutsideFence"
-    | "emptyExample"
-    | "missingFence"
-    | "missingLanguage";
+    "contentOutsideFence" | "emptyExample" | "missingFence" | "missingLanguage";
   /** Original source text segment to patch. */
   sourceText: string;
 }

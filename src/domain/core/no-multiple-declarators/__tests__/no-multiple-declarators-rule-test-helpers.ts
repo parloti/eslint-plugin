@@ -185,8 +185,7 @@ const createVariableDeclaration = ({
 const runRule = (context: Rule.RuleContext, node: MockNode): void => {
   const listeners = noMultipleDeclaratorsRule.create(context);
   const listener = listeners.VariableDeclaration as
-    | ((value: Rule.Node) => void)
-    | undefined;
+    ((value: Rule.Node) => void) | undefined;
 
   listener?.(node as unknown as Rule.Node);
 };

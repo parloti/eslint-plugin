@@ -190,8 +190,7 @@ const runListener = (
 ): void => {
   const listeners = preferInterfaceTypesRule.create(context);
   const listener = listeners[listenerName] as
-    | ((node: Rule.Node) => void)
-    | undefined;
+    ((node: Rule.Node) => void) | undefined;
 
   listener?.(node as unknown as Rule.Node);
 };

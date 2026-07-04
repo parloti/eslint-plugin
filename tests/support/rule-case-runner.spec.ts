@@ -8,8 +8,7 @@ import { runRuleCase } from "./index";
 const demoRule: Rule.RuleModule = {
   create: (context) => {
     const firstOption = context.options[0] as
-      | Record<string, unknown>
-      | undefined;
+      Record<string, unknown> | undefined;
     const identifierFromOption = firstOption?.["identifier"];
     const identifier =
       typeof identifierFromOption === "string" ? identifierFromOption : "bad";

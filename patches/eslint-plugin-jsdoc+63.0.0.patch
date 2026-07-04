@@ -1,0 +1,33 @@
+diff --git a/node_modules/eslint-plugin-jsdoc/dist/rules/requireExample.cjs b/node_modules/eslint-plugin-jsdoc/dist/rules/requireExample.cjs
+index fc1de69..595a066 100644
+--- a/node_modules/eslint-plugin-jsdoc/dist/rules/requireExample.cjs
++++ b/node_modules/eslint-plugin-jsdoc/dist/rules/requireExample.cjs
+@@ -31,7 +31,10 @@ var _default = exports.default = (0, _iterateJsdoc.default)(({
+     }
+     utils.reportJSDoc(`Missing JSDoc @${targetTagName} declaration.`, null, () => {
+       if (enableFixer) {
+-        utils.addTag(targetTagName);
++        if (jsdoc.source.length === 1) {
++          utils.makeMultiline();
++        }
++        utils.addTag(targetTagName, jsdoc.source.length - 1);
+       }
+     });
+     return;
+diff --git a/node_modules/eslint-plugin-jsdoc/src/rules/requireExample.js b/node_modules/eslint-plugin-jsdoc/src/rules/requireExample.js
+index 3d8669b..e964683 100644
+--- a/node_modules/eslint-plugin-jsdoc/src/rules/requireExample.js
++++ b/node_modules/eslint-plugin-jsdoc/src/rules/requireExample.js
+@@ -32,7 +32,11 @@ export default iterateJsdoc(({
+ 
+     utils.reportJSDoc(`Missing JSDoc @${targetTagName} declaration.`, null, () => {
+       if (enableFixer) {
+-        utils.addTag(targetTagName);
++        if (jsdoc.source.length === 1) {
++          utils.makeMultiline();
++        }
++
++        utils.addTag(targetTagName, jsdoc.source.length - 1);
+       }
+     });
+ 

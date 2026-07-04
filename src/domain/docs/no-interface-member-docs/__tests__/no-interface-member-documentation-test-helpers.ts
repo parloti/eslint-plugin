@@ -186,8 +186,7 @@ const runFunctionListener = (
 ): void => {
   const listeners = noInterfaceMemberDocumentationRule.create(context);
   const listener = listeners.FunctionDeclaration as
-    | ((node: Rule.Node) => void)
-    | undefined;
+    ((node: Rule.Node) => void) | undefined;
 
   listener?.(node);
 };
