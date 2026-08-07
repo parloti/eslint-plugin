@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type * as AnalyzerModule from "../aaa/analyzer.analysis";
 import type * as AnalyzerClassificationModule from "../aaa/analyzer.classification.helpers";
+import type { TestBlockAnalysis } from "../aaa/types";
 
 /** Minimal expression-statement node used by synthetic fixtures. */
 interface ExpressionStatementNode {
@@ -24,7 +25,7 @@ interface IdentifierNode {
 /** Mocked analysis module shape used by the act-result rule tests. */
 interface RequireActResultCaptureAnalysisModule {
   /** Mocked analyzer result. */
-  analyzeTestBlock: () => unknown;
+  analyzeTestBlock: () => TestBlockAnalysis | undefined;
 }
 
 /** Mocked classification helper module shape used by the act-result rule tests. */
@@ -100,7 +101,8 @@ const createCallStatement = (
  */
 function createAnalysisModule(): RequireActResultCaptureAnalysisModule {
   return {
-    analyzeTestBlock: (): unknown => activeCaptureState.analysis,
+    analyzeTestBlock: (): TestBlockAnalysis | undefined =>
+      activeCaptureState.analysis as TestBlockAnalysis | undefined,
   };
 }
 

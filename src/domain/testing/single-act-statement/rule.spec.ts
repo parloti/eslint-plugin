@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type * as AnalyzerModule from "../aaa/analyzer.analysis";
 import type * as AnalyzerAnalysisModule from "../aaa/analyzer.analysis.helpers";
+import type { TestBlockAnalysis } from "../aaa/types";
 
 /** Mocked top-level Act statement shape used by test helpers. */
 interface MockActStatement {
@@ -38,13 +39,13 @@ interface SingleActAnalysisHelpersModule {
   countActStatements: () => number;
 
   /** Mocked Act statement selector. */
-  getActTopLevelStatements: () => readonly MockActStatement[];
+  getActTopLevelStatements: () => TestBlockAnalysis["statements"];
 }
 
 /** Mocked analysis module shape used by the rule tests. */
 interface SingleActAnalysisModule {
   /** Mocked analyzer result. */
-  analyzeTestBlock: () => unknown;
+  analyzeTestBlock: () => TestBlockAnalysis | undefined;
 }
 
 /** Imported rule module shape used by these tests. */
@@ -67,8 +68,8 @@ let activeAaaState: SingleActAaaMockState;
 function createAnalysisHelpersModule(): SingleActAnalysisHelpersModule {
   return {
     countActStatements: (): number => activeAaaState.count,
-    getActTopLevelStatements: (): readonly MockActStatement[] =>
-      activeAaaState.actStatements,
+    getActTopLevelStatements: (): TestBlockAnalysis["statements"] =>
+      activeAaaState.actStatements as unknown as TestBlockAnalysis["statements"],
   };
 }
 
@@ -82,7 +83,8 @@ function createAnalysisHelpersModule(): SingleActAnalysisHelpersModule {
  */
 function createAnalysisModule(): SingleActAnalysisModule {
   return {
-    analyzeTestBlock: (): unknown => activeAaaState.analysis,
+    analyzeTestBlock: (): TestBlockAnalysis | undefined =>
+      activeAaaState.analysis as TestBlockAnalysis | undefined,
   };
 }
 

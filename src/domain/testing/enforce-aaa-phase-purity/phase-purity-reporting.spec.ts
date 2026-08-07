@@ -45,7 +45,7 @@ interface NodeFlags {
   isValidAssert?: boolean;
 
   /** Statement node type for fixture analysis. */
-  type: "ExpressionStatement";
+  type: string;
 }
 
 /** Supported AAA section names in the fixture payload. */

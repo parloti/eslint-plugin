@@ -1,29 +1,34 @@
 import type { Rule } from "eslint";
+import type * as ESTree from "estree";
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type * as AnalyzerModule from "../aaa/analyzer.analysis";
 import type * as AnalyzerAssertionsModule from "../aaa/analyzer.assertions.helpers";
+import type { LocatedNode, TestBlockAnalysis } from "../aaa/types";
 
 /** Mocked AAA module shape used by the assertion-name rule tests. */
 interface AssertActualExpectedNamesAnalysisModule {
   /** Mocked analyzer result. */
-  analyzeTestBlock: () => unknown;
+  analyzeTestBlock: () => TestBlockAnalysis | undefined;
 }
 
 /** Mocked assertion helper module shape used by the assertion-name rule tests. */
 interface AssertActualExpectedNamesAssertionsModule {
   /** Assert-scope declared identifiers. */
-  getAssertDeclaredIdentifiers: () => Map<string, Rule.Node>;
+  getAssertDeclaredIdentifiers: () => Map<
+    string,
+    LocatedNode<ESTree.Identifier>
+  >;
 
   /** Assertion identifier lookup. */
-  getAssertionIdentifiers: (node: unknown) => AssertionIdentifier;
+  getAssertionIdentifiers: (node: unknown) => AssertionIdentifiers;
 
   /** Assertion predicate. */
   hasAssertion: (node: unknown) => boolean;
 
   /** Prefix check helper. */
-  usesPrefix: (name: string, prefix: string) => boolean;
+  usesPrefix: (name: string, prefix: "actual" | "expected") => boolean;
 }
 
 /** Imported rule module shape used by these tests. */
@@ -39,6 +44,15 @@ interface AssertionIdentifier {
 
   /** Expected-value variable name when present. */
   expected?: string;
+}
+
+/** Assertion identifier names exposed by the mocked helper module. */
+interface AssertionIdentifiers {
+  /** Actual-value variable name when present. */
+  actual: string | undefined;
+
+  /** Expected-value variable name when present. */
+  expected: string | undefined;
 }
 
 /** Mocked AAA analysis input used to load the rule. */
@@ -99,7 +113,8 @@ const createContext = (): RuleContextState => {
  */
 function createAnalysisModule(): AssertActualExpectedNamesAnalysisModule {
   return {
-    analyzeTestBlock: (): unknown => activeLoadRuleInput.analysis,
+    analyzeTestBlock: (): TestBlockAnalysis | undefined =>
+      activeLoadRuleInput.analysis as TestBlockAnalysis | undefined,
   };
 }
 
@@ -113,13 +128,23 @@ function createAnalysisModule(): AssertActualExpectedNamesAnalysisModule {
  */
 function createAssertionsModule(): AssertActualExpectedNamesAssertionsModule {
   return {
-    getAssertDeclaredIdentifiers: (): Map<string, Rule.Node> =>
-      activeLoadRuleInput.declaredIdentifiers,
-    getAssertionIdentifiers: (node: unknown): AssertionIdentifier =>
-      activeLoadRuleInput.assertionIdentifiers.get(node) ?? {},
+    getAssertDeclaredIdentifiers: (): Map<
+      string,
+      LocatedNode<ESTree.Identifier>
+    > =>
+      activeLoadRuleInput.declaredIdentifiers as unknown as Map<
+        string,
+        LocatedNode<ESTree.Identifier>
+      >,
+    getAssertionIdentifiers: (node: unknown): AssertionIdentifiers => {
+      const stored = activeLoadRuleInput.assertionIdentifiers.get(node);
+      return stored === void 0
+        ? { actual: void 0, expected: void 0 }
+        : { actual: stored.actual, expected: stored.expected };
+    },
     hasAssertion: (node: unknown): boolean =>
       activeLoadRuleInput.assertionNodes.has(node),
-    usesPrefix: (name: string, prefix: string): boolean =>
+    usesPrefix: (name: string, prefix: "actual" | "expected"): boolean =>
       name.startsWith(prefix),
   };
 }
