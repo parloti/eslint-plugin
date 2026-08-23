@@ -262,4 +262,38 @@ describe("single-line-jsdoc rule", () => {
     expect(reports).toHaveLength(1);
     expect(reports[0]?.messageId).toBe("singleLine");
   });
+
+  it("reports when getNodeByRangeIndex is not a function", () => {
+    // Arrange
+    const comment = createComment(documentCommentValue, sourceText, {
+      endLine: 3,
+    });
+    const { context, reports } = createContext([comment], void 0, {
+      getTokenAfter: () => ({ range: [0, 1] }),
+    });
+
+    // Act
+    singleLineJsdocRule.create(context);
+
+    // Assert
+    expect(reports).toHaveLength(1);
+    expect(reports[0]?.messageId).toBe("singleLine");
+  });
+
+  it("reports when getTokenAfter is not a function", () => {
+    // Arrange
+    const comment = createComment(documentCommentValue, sourceText, {
+      endLine: 3,
+    });
+    const { context, reports } = createContext([comment], void 0, {
+      getNodeByRangeIndex: () => ({ type: "FunctionDeclaration" }),
+    });
+
+    // Act
+    singleLineJsdocRule.create(context);
+
+    // Assert
+    expect(reports).toHaveLength(1);
+    expect(reports[0]?.messageId).toBe("singleLine");
+  });
 });

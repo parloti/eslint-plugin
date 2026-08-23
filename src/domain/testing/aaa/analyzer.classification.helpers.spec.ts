@@ -211,4 +211,64 @@ describe("aAA analyzer classification helpers", () => {
       capturableActResult: false,
     });
   });
+
+  it("detects mutations with delete operator and non-delete unary expressions", () => {
+    // Arrange
+    const deleteStatement = {
+      expression: {
+        argument: { name: "obj", type: "Identifier" },
+        operator: "delete",
+        type: "UnaryExpression",
+      },
+      type: "ExpressionStatement",
+    } as unknown as ESTree.Statement;
+    const typeofStatement = {
+      expression: {
+        argument: { name: "value", type: "Identifier" },
+        operator: "typeof",
+        type: "UnaryExpression",
+      },
+      type: "ExpressionStatement",
+    } as unknown as ESTree.Statement;
+
+    // Act
+    const actual = {
+      deleteMutation: hasMutation(deleteStatement),
+      typeofMutation: hasMutation(typeofStatement),
+    };
+
+    // Assert
+    expect(actual).toStrictEqual({
+      deleteMutation: true,
+      typeofMutation: false,
+    });
+  });
+
+  it("handles non-expression statements for meaningful act check", () => {
+    // Arrange
+    const ifStatement = {
+      test: { name: "condition", type: "Identifier" },
+      type: "IfStatement",
+    } as unknown as ESTree.Statement;
+
+    // Act
+    const actual = isMeaningfulActStatement(ifStatement);
+
+    // Assert
+    expect(actual).toBe(false);
+  });
+
+  it("handles non-callable expressions for utility-like check", () => {
+    // Arrange
+    const literalStatement = {
+      expression: { type: "Literal", value: 42 },
+      type: "ExpressionStatement",
+    } as unknown as ESTree.Statement;
+
+    // Act
+    const actual = isSetupLikeStatement(literalStatement);
+
+    // Assert
+    expect(actual).toBe(false);
+  });
 });

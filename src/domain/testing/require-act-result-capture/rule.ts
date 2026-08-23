@@ -1,6 +1,9 @@
 import type { Rule } from "eslint";
 import type * as ESTree from "estree";
 
+import { ESLintUtils } from "@typescript-eslint/utils";
+import * as ts from "typescript";
+
 import { analyzeTestBlock } from "../aaa/analyzer.analysis";
 import { hasCapturableActResult } from "../aaa/analyzer.classification.helpers";
 
@@ -126,6 +129,40 @@ function isRuleCreateCall(expression: ESTree.CallExpression): boolean {
   return objectName !== void 0 && objectName.endsWith("Rule");
 }
 
+/**
+ * Checks whether a call's TypeScript return type is void.
+ * @param context Rule context that may expose TypeScript parser services.
+ * @param statement Act statement to inspect.
+ * @returns True when the resolved return type is void; otherwise false.
+ * @example
+ * ```typescript
+ * returnsVoid({} as Rule.RuleContext, {} as ESTree.Statement);
+ * ```
+ */
+function returnsVoid(
+  context: Rule.RuleContext,
+  statement: ESTree.Statement,
+): boolean {
+  if (
+    statement.type !== "ExpressionStatement" ||
+    statement.expression.type !== "CallExpression"
+  ) {
+    return false;
+  }
+
+  try {
+    const services = ESLintUtils.getParserServices(context as never);
+    const typeNode = services.esTreeNodeToTSNodeMap.get(
+      statement.expression as never,
+    );
+    const type = services.program.getTypeChecker().getTypeAtLocation(typeNode);
+
+    return (type.flags & ts.TypeFlags.Void) !== 0;
+  } catch {
+    return false;
+  }
+}
+
 /** Requires Act-phase expressions to capture non-void results before asserting. */
 const requireActResultCaptureRule: Rule.RuleModule = {
   create(context: Rule.RuleContext): Rule.RuleListener {
@@ -141,7 +178,8 @@ const requireActResultCaptureRule: Rule.RuleModule = {
             statement.phases.includes("Act") &&
             !statement.phases.includes("Assert") &&
             !isHelperDrivenAct(statement.node) &&
-            hasCapturableActResult(statement.node)
+            hasCapturableActResult(statement.node) &&
+            !returnsVoid(context, statement.node)
           ) {
             context.report({
               messageId: "captureActResult",
