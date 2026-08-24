@@ -8,6 +8,6 @@
 
 > `const` **assertActualExpectedNamesRule**: `Rule.RuleModule`
 
-Defined in: [domain/testing/assert-actual-expected-names/rule.ts:174](https://github.com/parloti/eslint-plugin/blob/e2903e359a4d46f75f4dc6ca08dd0f534b9a3cfc/src/domain/testing/assert-actual-expected-names/rule.ts#L174)
+Defined in: [domain/testing/assert-actual-expected-names/rule.ts:174](https://github.com/parloti/eslint-plugin/blob/24ff5b8840faa22d7de30835bf463a2afba051e9/src/domain/testing/assert-actual-expected-names/rule.ts#L174)
 
 Enforces actual/expected-style prefixes for assert-phase comparison variables.
