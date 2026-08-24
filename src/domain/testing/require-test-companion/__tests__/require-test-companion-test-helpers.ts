@@ -223,7 +223,7 @@ const runRule = (
  * ```
  */
 const cleanupTemporaryDirectories = (): void => {
-  for (const directory of temporaryDirectories.splice(0)) {
+  for (const directory of temporaryDirectories) {
     rmSync(directory, { force: true, recursive: true });
   }
 };

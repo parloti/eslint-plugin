@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { Declaration } from "./types";
 
+import { runFix } from "./__tests__/prefer-vi-mocked-import-rule-test-helpers";
 import { collectBindings } from "./match-bindings";
 
 describe("prefer-vi-mocked-import match-bindings", () => {
@@ -106,5 +107,42 @@ describe("prefer-vi-mocked-import match-bindings", () => {
 
     // Assert
     expect(actualResult).toStrictEqual([]);
+  });
+});
+
+describe("prefer-vi-mocked-import rule (binding eligibility)", () => {
+  it("does not report when the initializer is not vi.fn()", () => {
+    // Arrange
+    const input = [
+      "const installDevelopmentDependencies = 123;",
+      'vi.mock(import("./dependencies"), () => ({ installDevelopmentDependencies }));',
+      "installDevelopmentDependencies.mockResolvedValue(void 0);",
+      "",
+    ].join("\n");
+
+    // Act
+    const actual = runFix(input);
+
+    // Assert
+    expect(actual.messages).toStrictEqual([]);
+    expect(actual.output).toBe(input);
+  });
+
+  it("does not report when the factory property key is computed", () => {
+    // Arrange
+    const input = [
+      'const key = "installDevelopmentDependencies";',
+      "const installDevelopmentDependencies = vi.fn();",
+      'vi.mock(import("./dependencies"), () => ({ [key]: installDevelopmentDependencies }));',
+      "installDevelopmentDependencies.mockResolvedValue(void 0);",
+      "",
+    ].join("\n");
+
+    // Act
+    const actual = runFix(input);
+
+    // Assert
+    expect(actual.messages).toStrictEqual([]);
+    expect(actual.output).toBe(input);
   });
 });

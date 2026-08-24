@@ -39,7 +39,9 @@ function addInsertStatement(
   insertGroups: Map<string, InsertGroup>,
   plan: CombinedImportPlan,
 ): void {
-  const sortedNames = [...plan.names].toSorted();
+  const sortedNames = [...plan.names].toSorted((left, right) =>
+    left === right ? 0 : left < right ? -1 : 1,
+  );
 
   if (sortedNames.length === 0 || plan.update !== void 0) {
     return;
@@ -97,17 +99,20 @@ function buildInsertGroupFixes(
   fixer: Rule.RuleFixer,
   newline: "\n" | "\r\n",
 ): Rule.Fix[] {
-  return [...insertGroups.values()].map((group) =>
-    group.afterRange === void 0
-      ? fixer.insertTextBeforeRange(
-          [0, 0],
-          `${group.statements.join(newline)}${newline}${newline}`,
-        )
-      : fixer.insertTextAfterRange(
-          group.afterRange,
-          `${newline}${group.statements.join(newline)}`,
-        ),
-  );
+  return insertGroups
+    .values()
+    .map((group) =>
+      group.afterRange === void 0
+        ? fixer.insertTextBeforeRange(
+            [0, 0],
+            `${group.statements.join(newline)}${newline}${newline}`,
+          )
+        : fixer.insertTextAfterRange(
+            group.afterRange,
+            `${newline}${group.statements.join(newline)}`,
+          ),
+    )
+    .toArray();
 }
 
 /**

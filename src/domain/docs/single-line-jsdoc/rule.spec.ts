@@ -127,7 +127,7 @@ const createContext = (
         "messageId" in descriptor ? descriptor.messageId : void 0;
       reports.push({
         fix: descriptor.fix,
-        ...(messageId === void 0 ? {} : { messageId }),
+        ...(messageId !== void 0 && { messageId }),
       });
     },
     sourceCode,
@@ -148,11 +148,12 @@ describe("single-line-jsdoc rule", () => {
       endLine: 3,
     });
     const { context, reports } = createContext([comment]);
+    const fixer = createFixer();
 
     // Act
     const actualFixText =
       (singleLineJsdocRule.create(context),
-      String(getFixText(reports[0]?.fix?.(createFixer()) ?? void 0)));
+      String(getFixText(reports[0]?.fix?.(fixer) ?? void 0)));
 
     // Assert
     expect(reports).toHaveLength(1);
@@ -226,13 +227,13 @@ describe("single-line-jsdoc rule", () => {
     });
     const { context, reports } = createContext([comment], void 0, {
       getNodeByRangeIndex: () => ({
-        ...(nodeShape.declarations === void 0
-          ? {}
-          : { declarations: nodeShape.declarations }),
-        ...(nodeShape.declaration === void 0
-          ? {}
-          : { declaration: nodeShape.declaration }),
-        ...(nodeShape.value === void 0 ? {} : { value: nodeShape.value }),
+        ...(nodeShape.declarations !== void 0 && {
+          declarations: nodeShape.declarations,
+        }),
+        ...(nodeShape.declaration !== void 0 && {
+          declaration: nodeShape.declaration,
+        }),
+        ...(nodeShape.value !== void 0 && { value: nodeShape.value }),
         type: nodeShape.nodeType,
       }),
       getTokenAfter: () => ({ range: [0, 1] }),

@@ -164,7 +164,7 @@ describe("require-test-companion rule ignore patterns", () => {
     // Arrange
     const filePath = createTemporaryFile("tmp", "feature.ts");
     const options: RequireTestCompanionOptions = {
-      enforceIn: "   ",
+      enforceIn: " ".repeat(3),
       ignorePatterns: [],
     };
 

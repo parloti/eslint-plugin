@@ -281,9 +281,11 @@ describe("aAA analyzer assertion helpers", () => {
     ].join("\n");
 
     // Act
-    const actualIdentifiers = [
-      ...getAssertDeclaredIdentifiers(analyzeSource(sourceText)).keys(),
-    ];
+    const actualIdentifiers = getAssertDeclaredIdentifiers(
+      analyzeSource(sourceText),
+    )
+      .keys()
+      .toArray();
 
     // Assert
     expect(actualIdentifiers).toStrictEqual(["actualResult", "expectedValue"]);

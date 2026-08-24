@@ -144,19 +144,17 @@ const asSourceDeclaration = (
 
 /** ESLint rule that forbids import/export module specifiers with explicit file extensions. */
 const noImportExportExtensionsRule: Rule.RuleModule = {
-  create(context: Rule.RuleContext): Rule.RuleListener {
-    return {
-      Program(node: ESTree.Program): void {
-        for (const statement of node.body) {
-          const declaration = asSourceDeclaration(statement);
+  create: (context: Rule.RuleContext): Rule.RuleListener => ({
+    Program(node: ESTree.Program): void {
+      for (const statement of node.body) {
+        const declaration = asSourceDeclaration(statement);
 
-          if (declaration !== void 0) {
-            reportWhenSourceHasExtension(context, declaration);
-          }
+        if (declaration !== void 0) {
+          reportWhenSourceHasExtension(context, declaration);
         }
-      },
-    };
-  },
+      }
+    },
+  }),
   meta: {
     docs: {
       description:

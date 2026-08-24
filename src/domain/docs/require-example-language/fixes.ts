@@ -126,14 +126,14 @@ function buildMissingFenceFix(example: Example): string {
 function buildMissingLanguageFix(original: string): string | undefined {
   const lineBreak = original.includes("\r\n") ? "\r\n" : "\n";
   const lines = original.split(/\r?\n/u);
-  let inFence = false;
+  let isInFence = false;
 
   const updatedLines = lines.map((line) => {
     const { inFence: nextInFence, line: nextLine } = applyFenceLanguage({
-      inFence,
+      inFence: isInFence,
       line,
     });
-    inFence = nextInFence;
+    isInFence = nextInFence;
     return nextLine;
   });
 

@@ -183,13 +183,15 @@ function isUtilityConstructor(
 ): boolean {
   return (
     expression.type === "NewExpression" &&
-    (calleeName === "Error" ||
-      calleeName === "Map" ||
-      calleeName === "Set" ||
-      calleeName === "SourceCode" ||
-      calleeName === "ESLint" ||
-      calleeName === "WeakMap" ||
-      calleeName === "WeakSet")
+    [
+      "Error",
+      "ESLint",
+      "Map",
+      "Set",
+      "SourceCode",
+      "WeakMap",
+      "WeakSet",
+    ].includes(calleeName)
   );
 }
 

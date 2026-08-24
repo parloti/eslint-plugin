@@ -20,6 +20,25 @@ interface ApplyFixInput {
 }
 
 /**
+ * Creates an Example fixture positioned at the origin.
+ * @param content Example content value.
+ * @param prefix Comment prefix preceding the example.
+ * @returns Example fixture with zeroed offsets.
+ * @example
+ * ```typescript
+ * const example = createExample("value", " * ");
+ * ```
+ */
+const createExample = (content: string, prefix: string): Example => ({
+  content,
+  endIndex: 0,
+  endOffset: 0,
+  lineIndex: 0,
+  prefix,
+  startOffset: 0,
+});
+
+/**
  * Applies a createFixer callback and returns the replacement text.
  * @param context Fixture context used to build the fix callback.
  * @returns Replacement text emitted by the fixer when available.
@@ -67,14 +86,7 @@ const applyFix = (context: ApplyFixInput): string | undefined => {
 describe("require-example-language fixes", () => {
   it("builds missing fence fixes with blank lines", () => {
     // Arrange
-    const example: Example = {
-      content: "first\n\nsecond",
-      endIndex: 0,
-      endOffset: 0,
-      lineIndex: 0,
-      prefix: " * ",
-      startOffset: 0,
-    };
+    const example = createExample("first\n\nsecond", " * ");
 
     // Act
     const actualFixed = applyFix({
@@ -90,14 +102,7 @@ describe("require-example-language fixes", () => {
 
   it("builds missing fence fixes when content is empty", () => {
     // Arrange
-    const example: Example = {
-      content: "",
-      endIndex: 0,
-      endOffset: 0,
-      lineIndex: 0,
-      prefix: " * ",
-      startOffset: 0,
-    };
+    const example = createExample("", " * ");
 
     // Act
     const actualFixed = applyFix({
@@ -116,14 +121,7 @@ describe("require-example-language fixes", () => {
 
     // Act
     const actualUpdated = applyFix({
-      example: {
-        content: "",
-        endIndex: 0,
-        endOffset: 0,
-        lineIndex: 0,
-        prefix: "* ",
-        startOffset: 0,
-      },
+      example: createExample("", "* "),
       problem: "missingLanguage",
       sourceText: original,
     });
@@ -139,14 +137,7 @@ describe("require-example-language fixes", () => {
 
     // Act
     const actualUpdated = applyFix({
-      example: {
-        content: "",
-        endIndex: 0,
-        endOffset: 0,
-        lineIndex: 0,
-        prefix: "",
-        startOffset: 0,
-      },
+      example: createExample("", ""),
       problem: "missingLanguage",
       sourceText: original,
     });
@@ -161,14 +152,7 @@ describe("require-example-language fixes", () => {
 
     // Act
     const actualUpdated = applyFix({
-      example: {
-        content: "",
-        endIndex: 0,
-        endOffset: 0,
-        lineIndex: 0,
-        prefix: "* ",
-        startOffset: 0,
-      },
+      example: createExample("", "* "),
       problem: "missingLanguage",
       sourceText: original,
     });
@@ -183,14 +167,7 @@ describe("require-example-language fixes", () => {
 
     // Act
     const actualUpdated = applyFix({
-      example: {
-        content: "",
-        endIndex: 0,
-        endOffset: 0,
-        lineIndex: 0,
-        prefix: "* ",
-        startOffset: 0,
-      },
+      example: createExample("", "* "),
       problem: "missingLanguage",
       sourceText: original,
     });
@@ -201,15 +178,10 @@ describe("require-example-language fixes", () => {
 
   it("normalizes inline and prefixed lines for missing fences", () => {
     // Arrange
-    const example: Example = {
-      content:
-        'Demonstrates log info with representative values.\n * logInfo("message");',
-      endIndex: 0,
-      endOffset: 0,
-      lineIndex: 0,
-      prefix: " * ",
-      startOffset: 0,
-    };
+    const example = createExample(
+      'Demonstrates log info with representative values.\n * logInfo("message");',
+      " * ",
+    );
 
     // Act
     const actualFixed = applyFix({
@@ -232,14 +204,7 @@ describe("require-example-language fixes", () => {
 
     // Act
     const actualFixed = applyFix({
-      example: {
-        content: sourceText,
-        endIndex: 0,
-        endOffset: 0,
-        lineIndex: 0,
-        prefix: "",
-        startOffset: 0,
-      },
+      example: createExample(sourceText, ""),
       problem: "contentOutsideFence",
       sourceText,
     });
@@ -254,14 +219,7 @@ describe("require-example-language fixes", () => {
 
     // Act
     const actualFixed = applyFix({
-      example: {
-        content: "",
-        endIndex: 0,
-        endOffset: 0,
-        lineIndex: 0,
-        prefix: "* ",
-        startOffset: 0,
-      },
+      example: createExample("", "* "),
       hasOtherExamples: true,
       problem: "emptyExample",
       sourceText,
@@ -277,14 +235,7 @@ describe("require-example-language fixes", () => {
 
     // Act
     const actualHasTrailingWhitespace = applyFix({
-      example: {
-        content: "value",
-        endIndex: 0,
-        endOffset: 0,
-        lineIndex: 0,
-        prefix: "* ",
-        startOffset: 0,
-      },
+      example: createExample("value", "* "),
       problem: "missingFence",
       sourceText,
     })?.endsWith("\n   ");
@@ -299,14 +250,7 @@ describe("require-example-language fixes", () => {
 
     // Act
     const actualFixed = applyFix({
-      example: {
-        content: "",
-        endIndex: 0,
-        endOffset: 0,
-        lineIndex: 0,
-        prefix: "* ",
-        startOffset: 0,
-      },
+      example: createExample("", "* "),
       problem: "emptyExample",
       sourceText,
     });

@@ -124,11 +124,8 @@ function hasEvaluatedAssertionActual(
  */
 function isAssertionCall(node: ESTree.CallExpression): boolean {
   if (node.callee.type === "Identifier") {
-    return (
-      node.callee.name === "expect" ||
-      node.callee.name === "assert" ||
-      node.callee.name === "assertType" ||
-      node.callee.name === "expectTypeOf"
+    return ["assert", "assertType", "expect", "expectTypeOf"].includes(
+      node.callee.name,
     );
   }
 

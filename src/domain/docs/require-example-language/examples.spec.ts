@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { checkExampleContent, getExamples } from "./examples";
+import { checkExampleContent } from "./examples";
+import { getExamples } from "./examples-collect";
 
 describe("require-example-language content checks", () => {
   it("captures inline example content", () => {

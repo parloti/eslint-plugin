@@ -65,7 +65,7 @@ const mockProxyFactory =
           return void 0;
         }
 
-        if (property in object) {
+        if (Object.hasOwn(object, property)) {
           return object[property as keyof TModule];
         }
 
@@ -92,7 +92,7 @@ const mockClassInstanceFactory = <T extends object>(
 ): T =>
   new Proxy(overrides as T, {
     get(target, property): T[keyof T] | undefined {
-      if (property in target) {
+      if (Object.hasOwn(target, property)) {
         return target[property as keyof T];
       }
 
@@ -118,7 +118,7 @@ const mockClassInstanceFactory = <T extends object>(
 const mockClassFactory = <TInstance extends object>(
   overrides: DeepPartial<TInstance>,
 ): new (...arguments_: unknown[]) => TInstance => {
-  // eslint-disable-next-line @typescript-eslint/no-extraneous-class
+  // eslint-disable-next-line @typescript-eslint/no-extraneous-class -- This is propositally an empty class that is used to create a mock class instance.
   return class {
     constructor() {
       return mockClassInstance(overrides);
@@ -126,20 +126,22 @@ const mockClassFactory = <TInstance extends object>(
   } as new (...arguments_: unknown[]) => TInstance;
 };
 
-Object.defineProperty(globalThis, "createMockProxy", {
-  configurable: false,
-  value: mockProxyFactory,
-  writable: false,
-});
-Object.defineProperty(globalThis, "mockClassInstance", {
-  configurable: false,
-  value: mockClassInstanceFactory,
-  writable: false,
-});
-Object.defineProperty(globalThis, "mockClass", {
-  configurable: false,
-  value: mockClassFactory,
-  writable: false,
+Object.defineProperties(globalThis, {
+  createMockProxy: {
+    configurable: false,
+    value: mockProxyFactory,
+    writable: false,
+  },
+  mockClass: {
+    configurable: false,
+    value: mockClassFactory,
+    writable: false,
+  },
+  mockClassInstance: {
+    configurable: false,
+    value: mockClassInstanceFactory,
+    writable: false,
+  },
 });
 
 declare global {

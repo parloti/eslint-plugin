@@ -16,7 +16,7 @@ describe("barrel file utilities", () => {
   const temporaryDirectories: string[] = [];
 
   afterEach(() => {
-    for (const directory of temporaryDirectories.splice(0)) {
+    for (const directory of temporaryDirectories) {
       rmSync(directory, { force: true, recursive: true });
     }
   });

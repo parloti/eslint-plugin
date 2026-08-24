@@ -210,13 +210,12 @@ const barrelFilesExportsOnlyRule: Rule.RuleModule = {
    * const listeners = barrelFilesExportsOnlyRule.create(context);
    * ```
    */
-  create(context: Rule.RuleContext): Rule.RuleListener {
-    return buildListenerForFile(
+  create: (context: Rule.RuleContext): Rule.RuleListener =>
+    buildListenerForFile(
       context,
       context.filename,
       getOptions(context.options),
-    );
-  },
+    ),
   meta: {
     defaultOptions: [{ allowedBarrelNames: ["index"] }],
     docs: {

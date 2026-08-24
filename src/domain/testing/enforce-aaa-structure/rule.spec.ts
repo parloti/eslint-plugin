@@ -43,33 +43,39 @@ function runFix(code: string): ReturnType<Linter["verifyAndFix"]> {
   );
 }
 
+/**
+ * Builds the matcher requiring every advertised rule message to be a string.
+ * @returns Object-containing matcher for the rule messages map.
+ * @example
+ * ```typescript
+ * const matcher = createExpectedMessagesMatcher();
+ * void matcher;
+ * ```
+ */
+const createExpectedMessagesMatcher = (): unknown =>
+  expect.objectContaining(
+    Object.fromEntries(
+      [
+        "duplicateSection",
+        "invalidOrder",
+        "missingSections",
+        "emptySection",
+        "assertionOutsideAssert",
+      ].map((messageId): [string, unknown] => [messageId, expect.any(String)]),
+    ),
+  );
+
 describe("enforce-aaa-structure rule", () => {
   it("defines metadata, messages, and fix support", () => {
     // Arrange
     const fixable = enforceAaaStructureRule.meta?.fixable;
-    const expectedMessageIds = [
-      "duplicateSection",
-      "invalidOrder",
-      "missingSections",
-      "emptySection",
-      "assertionOutsideAssert",
-    ];
 
     // Act
     const actualMessages = enforceAaaStructureRule.meta?.messages;
 
     // Assert
     expect(fixable).toBe("code");
-    expect(actualMessages).toStrictEqual(
-      expect.objectContaining(
-        Object.fromEntries(
-          expectedMessageIds.map((messageId) => [
-            messageId,
-            expect.any(String),
-          ]),
-        ),
-      ),
-    );
+    expect(actualMessages).toStrictEqual(createExpectedMessagesMatcher());
   });
 
   it("reports duplicate and out-of-order sections", () => {

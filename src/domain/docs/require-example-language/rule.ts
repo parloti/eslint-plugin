@@ -1,6 +1,6 @@
 import type { Rule } from "eslint";
 
-import { getExamples } from "./examples";
+import { getExamples } from "./examples-collect";
 import { reportExample } from "./reporting";
 
 /**
@@ -11,14 +11,16 @@ const requireExampleLanguageRule: Rule.RuleModule = {
     const { sourceCode } = context;
 
     for (const comment of sourceCode.getAllComments()) {
-      if (comment.type === "Block" && comment.value.startsWith("*")) {
-        const examples = getExamples(comment.value);
+      if (!(comment.type === "Block" && comment.value.startsWith("*"))) {
+        continue;
+      }
 
-        const hasOtherExamples = examples.length > 1;
+      const examples = getExamples(comment.value);
 
-        for (const example of examples) {
-          reportExample({ comment, context, example, hasOtherExamples });
-        }
+      const hasOtherExamples = examples.length > 1;
+
+      for (const example of examples) {
+        reportExample({ comment, context, example, hasOtherExamples });
       }
     }
 

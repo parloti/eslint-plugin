@@ -110,7 +110,9 @@ describe("aAA analyzer assertions helpers", () => {
         },
         type: "ChainExpression",
       } as never),
-      declaredIdentifiers: [...getAssertDeclaredIdentifiers(analysis).keys()],
+      declaredIdentifiers: getAssertDeclaredIdentifiers(analysis)
+        .keys()
+        .toArray(),
       statementExpression: getStatementExpression(variableStatement),
       usesPrefixExact: usesPrefix("actual", "actual"),
       usesPrefixPrefixed: usesPrefix("expectedValue", "expected"),

@@ -172,8 +172,8 @@ const getComparisonDeclaredIdentifiers = (
 
 /** Enforces actual/expected-style prefixes for assert-phase comparison variables. */
 const assertActualExpectedNamesRule: Rule.RuleModule = {
-  create(context: Rule.RuleContext): Rule.RuleListener {
-    return {
+  create: (context: Rule.RuleContext): Rule.RuleListener =>
+    ({
       CallExpression(node): void {
         const analysis = analyzeTestBlock(context, node);
         if (analysis === void 0) {
@@ -197,8 +197,7 @@ const assertActualExpectedNamesRule: Rule.RuleModule = {
           }
         }
       },
-    } satisfies Rule.RuleListener;
-  },
+    }) satisfies Rule.RuleListener,
   meta: {
     docs: {
       description:

@@ -49,12 +49,10 @@ const buildListenerForFile = (
             messageId: "reexportNotAllowed",
             node: statement,
           });
-        } else if (hasImportedExport(statement, importedNames)) {
-          context.report({
-            messageId: "reexportedImport",
-            node: statement,
-          });
-        } else if (isImportedDefaultExport) {
+        } else if (
+          isImportedDefaultExport ||
+          hasImportedExport(statement, importedNames)
+        ) {
           context.report({
             messageId: "reexportedImport",
             node: statement,
@@ -73,13 +71,12 @@ const buildListenerForFile = (
  * ```
  */
 const noReexportsOutsideBarrelsRule: Rule.RuleModule = {
-  create(context: Rule.RuleContext): Rule.RuleListener {
-    return buildListenerForFile(
+  create: (context: Rule.RuleContext): Rule.RuleListener =>
+    buildListenerForFile(
       context,
       context.filename,
       getOptions(context.options),
-    );
-  },
+    ),
   meta: {
     defaultOptions: [{ allowedBarrelNames: ["index"] }],
     docs: {

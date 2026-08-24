@@ -1,40 +1,20 @@
 import type { Rule } from "eslint";
 import type * as ESTree from "estree";
 
+import type { MatchSeed } from "./match-seeds";
 import type { RuleMatch } from "./types";
 
 import { collectBindings } from "./match-bindings";
+import { hasUnsafeImportCollisions } from "./match-collisions";
 import { collectDeclarations } from "./match-declarations";
-import {
-  getFactoryReturnObject,
-  getModuleSpecifier,
-  getNewline,
-  hasRange,
-} from "./match-helpers";
+import { getNewline } from "./match-helpers";
 import { resolveImportPlan } from "./match-imports";
 import {
   areLocalsSafeToInline,
   buildAllowedRanges,
   collectMemberRewrites,
 } from "./match-rewrites";
-
-/** Type definition for rule data. */
-interface MatchSeed {
-  /** Returned object expression from the mock factory. */
-  factoryObject: ESTree.ObjectExpression;
-
-  /** Expression statement containing `vi.mock` or `vi.doMock`. */
-  mockStatement: ESTree.ExpressionStatement;
-
-  /** Module path string extracted from the first mock argument. */
-  moduleSpecifier: string;
-
-  /** Original first argument node, including `range`, for fixer use. */
-  specifierExpression: ESTree.Expression & {
-    /** Source range for the mock specifier expression. */
-    range: [number, number];
-  };
-}
+import { collectSeeds } from "./match-seeds";
 
 /**
  * Builds a full rule match from seed data.
@@ -118,183 +98,6 @@ function collectMatches(context: Rule.RuleContext): RuleMatch[] {
 }
 
 /**
- * Adds identifier names from a binding pattern.
- * @param pattern Binding pattern.
- * @param names Output binding name set.
- * @example
- * ```typescript
- * const names = new Set<string>();
- * collectPatternNames({ name: "x", type: "Identifier" }, names);
- * ```
- */
-function collectPatternNames(
-  pattern: ESTree.Pattern,
-  names: Set<string>,
-): void {
-  switch (pattern.type) {
-    case "ArrayPattern": {
-      for (const element of pattern.elements) {
-        if (element !== null) {
-          collectPatternNames(element, names);
-        }
-      }
-      return;
-    }
-
-    case "AssignmentPattern": {
-      collectPatternNames(pattern.left, names);
-      return;
-    }
-
-    case "Identifier": {
-      names.add(pattern.name);
-      return;
-    }
-
-    case "ObjectPattern": {
-      for (const property of pattern.properties) {
-        if (property.type === "RestElement") {
-          collectPatternNames(property.argument, names);
-        }
-        if (property.type === "Property") {
-          collectPatternNames(property.value, names);
-        }
-      }
-      return;
-    }
-
-    case "RestElement": {
-      collectPatternNames(pattern.argument, names);
-      return;
-    }
-  }
-}
-
-/**
- * Collects seed data for every supported mock statement in the file.
- * @param program Program node.
- * @returns Match seeds.
- * @example
- * ```typescript
- * const seeds = collectSeeds({ body: [], sourceType: "module", type: "Program" } as never);
- * void seeds;
- * ```
- */
-function collectSeeds(program: ESTree.Program): MatchSeed[] {
-  if (!Array.isArray(program.body)) {
-    return [];
-  }
-
-  return program.body.flatMap((statement) => {
-    const expression = getMockCallExpression(statement);
-
-    if (expression === void 0) {
-      return [];
-    }
-
-    const callArguments = getMockCallArguments(expression);
-
-    if (callArguments === void 0) {
-      return [];
-    }
-
-    const seed = createSeed(
-      statement as ESTree.ExpressionStatement,
-      callArguments[0],
-      callArguments[1],
-    );
-
-    return seed === void 0 ? [] : [seed];
-  });
-}
-
-/**
- * Adds top-level binding names from a statement.
- * @param statement Top-level statement.
- * @param names Output binding name set.
- * @example
- * ```typescript
- * const names = new Set<string>();
- * collectStatementBindingNames({ type: "EmptyStatement" } as never, names);
- * ```
- */
-function collectStatementBindingNames(
-  statement: ESTree.Program["body"][number],
-  names: Set<string>,
-): void {
-  if (statement.type === "ImportDeclaration") {
-    for (const specifier of statement.specifiers) {
-      names.add(specifier.local.name);
-    }
-    return;
-  }
-
-  if (statement.type === "VariableDeclaration") {
-    for (const declaration of statement.declarations) {
-      collectPatternNames(declaration.id, names);
-    }
-    return;
-  }
-
-  if (statement.type === "FunctionDeclaration") {
-    names.add(statement.id.name);
-    return;
-  }
-
-  if (statement.type === "ClassDeclaration") {
-    names.add(statement.id.name);
-  }
-}
-
-/**
- * Collects top-level bound identifier names.
- * @param program Program node.
- * @returns Top-level binding names.
- * @example
- * ```typescript
- * const names = collectTopLevelBoundNames({ body: [], sourceType: "module", type: "Program" } as never);
- * void names;
- * ```
- */
-function collectTopLevelBoundNames(program: ESTree.Program): Set<string> {
-  const names = new Set<string>();
-
-  for (const statement of program.body) {
-    collectStatementBindingNames(statement, names);
-  }
-
-  return names;
-}
-
-/**
- * Creates seed data from validated call arguments.
- * @param mockStatement Matched `vi.mock` statement.
- * @param specifierExpression First argument expression.
- * @param factoryExpression Factory callback expression.
- * @returns Match seed when arguments are supported.
- * @example
- * ```typescript
- * const seed = createSeed({ expression: { arguments: [], type: "CallExpression" }, type: "ExpressionStatement" } as never, { type: "Literal", value: "./x" } as never, { body: { properties: [], type: "ObjectExpression" }, type: "ArrowFunctionExpression" } as never);
- * void seed;
- * ```
- */
-function createSeed(
-  mockStatement: ESTree.ExpressionStatement,
-  specifierExpression: ESTree.Expression,
-  factoryExpression: ESTree.Expression,
-): MatchSeed | undefined {
-  if (!hasRange(specifierExpression)) {
-    return void 0;
-  }
-
-  const moduleSpecifier = getModuleSpecifier(specifierExpression);
-  const factoryObject = getFactoryReturnObject(factoryExpression);
-  return moduleSpecifier === void 0 || factoryObject === void 0
-    ? void 0
-    : { factoryObject, mockStatement, moduleSpecifier, specifierExpression };
-}
-
-/**
  * Returns sorted unique import names from bindings.
  * @param bindings Bindings list.
  * @returns Sorted import names.
@@ -305,142 +108,9 @@ function createSeed(
  * ```
  */
 function getImportNames(bindings: RuleMatch["bindings"]): string[] {
-  return [
-    ...new Set(bindings.map((binding) => binding.exportedName)),
-  ].toSorted();
-}
-
-/**
- * Returns mock call arguments when both arguments are supported expressions.
- * @param expression Call expression node.
- * @returns First and second call arguments.
- * @example
- * ```typescript
- * const args = getMockCallArguments({ arguments: [], type: "CallExpression" } as never);
- * void args;
- * ```
- */
-function getMockCallArguments(
-  expression: ESTree.CallExpression,
-): [ESTree.Expression, ESTree.Expression] | undefined {
-  const [firstArgument, secondArgument] = expression.arguments;
-  if (firstArgument === void 0 || secondArgument === void 0) {
-    return void 0;
-  }
-  if (
-    firstArgument.type === "SpreadElement" ||
-    secondArgument.type === "SpreadElement"
-  ) {
-    return void 0;
-  }
-
-  return [firstArgument, secondArgument];
-}
-
-/**
- * Returns the call expression for a supported mock statement.
- * @param statement Candidate statement.
- * @returns Supported mock call expression when present.
- * @example
- * ```typescript
- * const expression = getMockCallExpression({ type: "EmptyStatement" } as never);
- * void expression;
- * ```
- */
-function getMockCallExpression(
-  statement: ESTree.Program["body"][number],
-): ESTree.CallExpression | undefined {
-  if (statement.type !== "ExpressionStatement") {
-    return void 0;
-  }
-
-  const { expression } = statement;
-  if (
-    expression.type !== "CallExpression" ||
-    expression.callee.type !== "MemberExpression"
-  ) {
-    return void 0;
-  }
-
-  const { object, property } = expression.callee;
-  return object.type === "Identifier" &&
-    object.name === "vi" &&
-    property.type === "Identifier" &&
-    (property.name === "mock" || property.name === "doMock")
-    ? expression
-    : void 0;
-}
-
-/**
- * Returns true when import generation for this match could create an unsafe top-level collision.
- * @param program Program node.
- * @param moduleSpecifier Module specifier used by the mock.
- * @param bindings Candidate bindings.
- * @param declarations Known declarations by local name.
- * @returns True when the matcher should skip this candidate.
- * @example
- * ```typescript
- * const unsafe = hasUnsafeImportCollisions({ body: [], sourceType: "module", type: "Program" } as never, "./mod", []);
- * void unsafe;
- * ```
- */
-function hasUnsafeImportCollisions(
-  program: ESTree.Program,
-  moduleSpecifier: string,
-  bindings: RuleMatch["bindings"],
-  declarations: RuleMatch["declarations"],
-): boolean {
-  const requestedExports = new Set(
-    bindings.map((binding) => binding.exportedName),
+  return [...new Set(bindings.map((binding) => binding.exportedName))].toSorted(
+    (left, right) => (left === right ? 0 : left < right ? -1 : 1),
   );
-
-  const topLevelBoundNames = collectTopLevelBoundNames(program);
-  const removableLocalNames = new Set(
-    bindings
-      .map((binding) => binding.localName)
-      .filter((localName) => declarations.has(localName)),
-  );
-  const safelyBoundByTargetImport = new Set<string>();
-
-  for (const statement of program.body) {
-    if (
-      statement.type !== "ImportDeclaration" ||
-      statement.source.value !== moduleSpecifier
-    ) {
-      continue;
-    }
-
-    for (const specifier of statement.specifiers) {
-      if (specifier.type !== "ImportSpecifier") {
-        continue;
-      }
-      if (specifier.imported.type !== "Identifier") {
-        return true;
-      }
-
-      const importedName = specifier.imported.name;
-      const localName = specifier.local.name;
-      if (importedName !== localName && requestedExports.has(importedName)) {
-        return true;
-      }
-
-      if (importedName === localName) {
-        safelyBoundByTargetImport.add(importedName);
-      }
-    }
-  }
-
-  for (const exportedName of requestedExports) {
-    if (
-      topLevelBoundNames.has(exportedName) &&
-      !safelyBoundByTargetImport.has(exportedName) &&
-      !removableLocalNames.has(exportedName)
-    ) {
-      return true;
-    }
-  }
-
-  return false;
 }
 
 /**

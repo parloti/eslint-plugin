@@ -4,6 +4,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { requireExampleLanguageRule } from "./rule";
 
+/** Holder for the mocked example helpers delegated to by the factories. */
+interface ActiveMocks {
+  /** Mocked example collector. */
+  getExamples: GetExamplesMock;
+  /** Mocked example reporter. */
+  reportExample: ReportExampleMock;
+}
+
 /** Example entry returned by the mocked collector. */
 interface ExampleRecord {
   /** Example content text. */
@@ -61,17 +69,27 @@ interface ReportingScenario {
   sourceCode: SourceCode;
 }
 
-/** Imported rule module shape used in tests. */
-interface RequireExampleLanguageModule {
-  /** Rule under test. */
-  requireExampleLanguageRule: Rule.RuleModule;
-}
+/**
+ * Creates fresh default mocked example helpers.
+ * @returns Collector mock yielding no examples plus a no-op reporter mock.
+ * @example
+ * ```typescript
+ * const mocks = createDefaultMocks();
+ * ```
+ */
+const createDefaultMocks = (): ActiveMocks => ({
+  getExamples: vi.fn((commentValue: string): ExampleRecord[] => {
+    void commentValue;
 
-/** Active mocked example collector. */
-let activeGetExamples: GetExamplesMock;
+    return [];
+  }),
+  reportExample: vi.fn((context: unknown): void => {
+    void context;
+  }),
+});
 
-/** Active mocked example reporter. */
-let activeReportExample: ReportExampleMock;
+/** Active mocked example helpers delegated to by the module factories. */
+const activeMocks = createDefaultMocks();
 
 /**
  * Creates the mocked examples module.
@@ -84,7 +102,7 @@ let activeReportExample: ReportExampleMock;
 function createExamplesModule(): ExamplesModule {
   return {
     getExamples: (commentValue: string): ExampleRecord[] =>
-      activeGetExamples(commentValue),
+      activeMocks.getExamples(commentValue),
   };
 }
 
@@ -99,7 +117,7 @@ function createExamplesModule(): ExamplesModule {
 function createReportingModule(): ReportingModule {
   return {
     reportExample: (context): void => {
-      activeReportExample(context);
+      activeMocks.reportExample(context);
     },
   };
 }
@@ -117,9 +135,9 @@ function createReportingModule(): ReportingModule {
 const loadMockedRule = async (
   getExamples: GetExamplesMock,
   reportExample: ReportExampleMock,
-): Promise<RequireExampleLanguageModule> => {
-  activeGetExamples = getExamples;
-  activeReportExample = reportExample;
+): Promise<typeof import("./rule")> => {
+  activeMocks.getExamples = getExamples;
+  activeMocks.reportExample = reportExample;
 
   return import("./rule");
 };
@@ -132,8 +150,7 @@ const loadMockedRule = async (
  * @returns Promise resolved after the rule is created.
  * @example
  * ```typescript
- * const listeners = await runMockedRule({ getAllComments: () => [] } as SourceCode, vi.fn(), vi.fn());
- * void listeners;
+ * const listeners = await runMockedRule(sourceCode, vi.fn(), vi.fn());
  * ```
  */
 const runMockedRule = async (
@@ -161,7 +178,6 @@ const runMockedRule = async (
  * @example
  * ```typescript
  * const scenario = createReportingScenario();
- * void scenario;
  * ```
  */
 function createReportingScenario(): ReportingScenario {
@@ -209,16 +225,8 @@ function createReportingScenario(): ReportingScenario {
 
 describe("require example language rule", () => {
   beforeEach(() => {
-    activeGetExamples = vi.fn<(commentValue: string) => ExampleRecord[]>(
-      (commentValue) => {
-        void commentValue;
-        return [];
-      },
-    );
-    activeReportExample = vi.fn<(context: unknown) => void>((context) => {
-      void context;
-    });
-    vi.doMock(import("./examples"), createExamplesModule);
+    Object.assign(activeMocks, createDefaultMocks());
+    vi.doMock(import("./examples-collect"), createExamplesModule);
     vi.doMock(import("./reporting"), createReportingModule);
   });
 

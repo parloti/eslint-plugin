@@ -24,7 +24,9 @@ function buildImportFixes(match: RuleMatch, fixer: Rule.RuleFixer): Rule.Fix[] {
     return [];
   }
 
-  const sortedNames = [...names].toSorted();
+  const sortedNames = [...names].toSorted((left, right) =>
+    left === right ? 0 : left < right ? -1 : 1,
+  );
   const updateFix = buildImportUpdateFix(match, sortedNames, fixer);
 
   return updateFix === void 0
@@ -97,7 +99,7 @@ function buildImportUpdateFix(
   const { defaultImportName, existingNamedImports, range } = update;
   const mergedNames = [
     ...new Set([...sortedNames, ...existingNamedImports]),
-  ].toSorted();
+  ].toSorted((left, right) => (left === right ? 0 : left < right ? -1 : 1));
   const statementText = buildImportStatement(
     moduleSpecifier,
     defaultImportName,

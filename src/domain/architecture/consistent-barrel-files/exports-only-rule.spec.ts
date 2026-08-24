@@ -24,7 +24,7 @@ describe("barrel files exports-only rule (enforced)", () => {
     createTemporaryRunner(temporaryDirectories);
 
   afterEach(() => {
-    for (const directory of temporaryDirectories.splice(0)) {
+    for (const directory of temporaryDirectories) {
       rmSync(directory, { force: true, recursive: true });
     }
   });
@@ -223,7 +223,7 @@ describe("barrel files exports-only rule (skips)", () => {
   const { runTemporaryFeature } = createTemporaryRunner(temporaryDirectories);
 
   afterEach(() => {
-    for (const directory of temporaryDirectories.splice(0)) {
+    for (const directory of temporaryDirectories) {
       rmSync(directory, { force: true, recursive: true });
     }
   });

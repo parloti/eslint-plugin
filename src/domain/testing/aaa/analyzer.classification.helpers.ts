@@ -33,10 +33,10 @@ import { visitNode } from "./analyzer.super.helpers";
  * ```
  */
 function hasAsyncLogic(statement: ESTree.Statement): boolean {
-  let foundAsyncLogic = false;
+  let wasAsyncLogicFound = false;
   visitStatementWithoutDeferredBodies(statement, (node) => {
     if (node.type === "AwaitExpression") {
-      foundAsyncLogic = true;
+      wasAsyncLogicFound = true;
       return;
     }
     if (
@@ -45,17 +45,17 @@ function hasAsyncLogic(statement: ESTree.Statement): boolean {
       node.callee.property.type === "Identifier" &&
       ["catch", "finally", "then"].includes(node.callee.property.name)
     ) {
-      foundAsyncLogic = true;
+      wasAsyncLogicFound = true;
       return;
     }
     if (
       node.type === "NewExpression" &&
       getExpressionName(node.callee) === "Promise"
     ) {
-      foundAsyncLogic = true;
+      wasAsyncLogicFound = true;
     }
   });
-  return foundAsyncLogic;
+  return wasAsyncLogicFound;
 }
 
 /**
@@ -68,13 +68,13 @@ function hasAsyncLogic(statement: ESTree.Statement): boolean {
  * ```
  */
 function hasAwait(statement: ESTree.Statement): boolean {
-  let foundAwait = false;
+  let wasAwaitFound = false;
   visitStatementWithoutDeferredBodies(statement, (node) => {
     if (node.type === "AwaitExpression") {
-      foundAwait = true;
+      wasAwaitFound = true;
     }
   });
-  return foundAwait;
+  return wasAwaitFound;
 }
 
 /**
@@ -135,15 +135,15 @@ function hasCapturableActResult(statement: ESTree.Statement): boolean {
  * ```
  */
 function hasMutation(statement: ESTree.Statement): boolean {
-  let foundMutation = false;
+  let wasMutationFound = false;
   visitNode(statement, (node) => {
     if (
-      node.type === "AssignmentExpression" ||
-      node.type === "UpdateExpression" ||
-      node.type === "UnaryExpression"
+      ["AssignmentExpression", "UnaryExpression", "UpdateExpression"].includes(
+        node.type,
+      )
     ) {
       if (node.type !== "UnaryExpression" || node.operator === "delete") {
-        foundMutation = true;
+        wasMutationFound = true;
       }
       return;
     }
@@ -153,10 +153,10 @@ function hasMutation(statement: ESTree.Statement): boolean {
       node.callee.property.type === "Identifier" &&
       arrayMutationMethods.has(node.callee.property.name)
     ) {
-      foundMutation = true;
+      wasMutationFound = true;
     }
   });
-  return foundMutation;
+  return wasMutationFound;
 }
 
 /**

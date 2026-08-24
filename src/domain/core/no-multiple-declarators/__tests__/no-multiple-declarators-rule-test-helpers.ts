@@ -85,7 +85,7 @@ const createContext = (
 
       return sourceText.slice(node.range[0], node.range[1]);
     },
-    ...(options?.omitText === true ? {} : { text: sourceText }),
+    ...(options?.omitText !== true && { text: sourceText }),
   };
   const context: Rule.RuleContext = {
     id: "no-multiple-declarators",
@@ -190,5 +190,43 @@ const runRule = (context: Rule.RuleContext, node: MockNode): void => {
   listener?.(node as unknown as Rule.Node);
 };
 
-export { createContext, createVariableDeclaration, runRule };
+/**
+ * Builds a replacement-text reader for the first captured report fix.
+ * @param reports Reports captured from the rule run.
+ * @returns Function returning the generated replacement text when a fix exists.
+ * @example
+ * ```typescript
+ * const getReplacement = createReplacementReader(reports);
+ * ```
+ */
+const createReplacementReader = (
+  reports: readonly ReportEntry[],
+): (() => string | undefined) => {
+  const fixer = {
+    replaceTextRange: (_range: Range, text: string) => ({ text }),
+  } as never;
+
+  return () => {
+    const reportFix = reports[0]?.fix;
+
+    if (typeof reportFix !== "function") {
+      return void 0;
+    }
+
+    const fixResult = reportFix(fixer);
+
+    if (!fixResult || Array.isArray(fixResult) || !("text" in fixResult)) {
+      return void 0;
+    }
+
+    return fixResult.text;
+  };
+};
+
+export {
+  createContext,
+  createReplacementReader,
+  createVariableDeclaration,
+  runRule,
+};
 export type { MockNode };

@@ -75,7 +75,7 @@ describe("consistent-barrel-files rule", () => {
   const defaultOptions: ConsistentBarrelFilesOptions = {};
 
   afterEach((): void => {
-    for (const directory of temporaryDirectories.splice(0)) {
+    for (const directory of temporaryDirectories) {
       rmSync(directory, { force: true, recursive: true });
     }
   });

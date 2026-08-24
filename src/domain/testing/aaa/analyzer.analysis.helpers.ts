@@ -245,15 +245,20 @@ function getSupportedTestCall(
 function getTestRootName(
   callee: ESTree.CallExpression["callee"],
 ): string | undefined {
-  if (callee.type === "CallExpression") {
-    return getTestRootName(callee.callee);
+  let current: ESTree.CallExpression["callee"] = callee;
+
+  while (
+    current.type === "CallExpression" ||
+    (current.type === "MemberExpression" && current.object.type !== "Super")
+  ) {
+    current =
+      current.type === "CallExpression" ? current.callee : current.object;
   }
-  if (callee.type === "Identifier") {
-    return callee.name;
+
+  if (current.type === "Identifier") {
+    return current.name;
   }
-  if (callee.type === "MemberExpression" && callee.object.type !== "Super") {
-    return getTestRootName(callee.object);
-  }
+
   return void 0;
 }
 

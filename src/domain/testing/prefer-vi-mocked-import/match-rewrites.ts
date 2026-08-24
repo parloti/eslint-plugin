@@ -19,10 +19,12 @@ function addDeclarationIdRange(
   allowedRanges: Set<string>,
   declaration: Declaration | undefined,
 ): void {
-  if (declaration !== void 0) {
-    const rangeKey = `${declaration.declarationIdRange[0].toFixed(0)}:${declaration.declarationIdRange[1].toFixed(0)}`;
-    allowedRanges.add(rangeKey);
+  if (declaration === void 0) {
+    return;
   }
+
+  const rangeKey = `${declaration.declarationIdRange[0].toFixed(0)}:${declaration.declarationIdRange[1].toFixed(0)}`;
+  allowedRanges.add(rangeKey);
 }
 
 /**

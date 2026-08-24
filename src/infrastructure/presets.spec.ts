@@ -26,7 +26,9 @@ interface RulesConfig {
  * ```
  */
 function getRuleKeys(config: RulesConfig): string[] {
-  return Object.keys(config.rules ?? {}).toSorted();
+  return Object.keys(config.rules ?? {}).toSorted((left, right) =>
+    left === right ? 0 : left < right ? -1 : 1,
+  );
 }
 
 describe("ready-to-use presets", () => {
@@ -42,8 +44,9 @@ describe("ready-to-use presets", () => {
     ];
 
     // Act
-    const expectedPlugins = Array.from({ length: actualPlugins.length }).fill(
-      codeperfectPlugin,
+    const expectedPlugins = Array.from(
+      { length: actualPlugins.length },
+      () => codeperfectPlugin,
     );
 
     // Assert

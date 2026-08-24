@@ -33,9 +33,9 @@ interface RunMockedRuleOptions {
   /** Whether getTypeScriptProgram should return a program. */
   hasTypeScriptProgram?: boolean;
   /** Whether the mocked file should be treated as lintable. */
-  lintable?: boolean;
+  isLintable?: boolean;
   /** Whether the mocked file should be treated as public API. */
-  publicApiFile?: boolean;
+  isPublicApiFile?: boolean;
 }
 
 /**
@@ -103,8 +103,8 @@ const runMockedRule = async (
 
   const hasExportedElements = options?.hasExportedElements ?? true;
   const hasTypeScriptProgram = options?.hasTypeScriptProgram ?? true;
-  const lintable = options?.lintable ?? true;
-  const publicApiFile = options?.publicApiFile ?? false;
+  const isLintable = options?.isLintable ?? true;
+  const isPublicApiFile = options?.isPublicApiFile ?? false;
   const reports: ReportDescriptorWithMessageId[] = [];
 
   vi.doMock(import("./no-unused-exports-options"), async () => {
@@ -118,8 +118,8 @@ const runMockedRule = async (
         publicApiFiles: ["**/index.ts"],
         testFilePatterns: ["**/*.spec.ts"],
       }),
-      isLintableFilename: () => lintable,
-      isPublicApiFile: () => publicApiFile,
+      isLintableFilename: () => isLintable,
+      isPublicApiFile: () => isPublicApiFile,
     };
   });
 
@@ -170,7 +170,9 @@ const runMockedRule = async (
 
   const { noUnusedExportsRule: mockedRule } = await import("./rule");
   const context = {
-    filename: publicApiFile ? "C:/repo/src/index.ts" : "C:/repo/src/feature.ts",
+    filename: isPublicApiFile
+      ? "C:/repo/src/index.ts"
+      : "C:/repo/src/feature.ts",
     options: [],
     report: (descriptor: ReportDescriptorWithMessageId) => {
       reports.push(descriptor);
@@ -194,7 +196,9 @@ describe("no-unused-exports rule", () => {
     // Act
     const actualResult = {
       description: metadata?.docs?.description,
-      messages: Object.keys(metadata?.messages ?? {}).toSorted(),
+      messages: Object.keys(metadata?.messages ?? {}).toSorted((a, b) =>
+        a.localeCompare(b),
+      ),
       schemaIsArray: Array.isArray(metadata?.schema),
       type: metadata?.type,
     };
@@ -250,7 +254,7 @@ describe("no-unused-exports rule", () => {
 
   it("returns an empty listener when the file is a public API file", async () => {
     // Act
-    const actual = await runMockedRule("unused", { publicApiFile: true });
+    const actual = await runMockedRule("unused", { isPublicApiFile: true });
 
     // Assert
     expect(actual.listener).toStrictEqual({});

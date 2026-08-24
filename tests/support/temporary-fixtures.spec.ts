@@ -9,7 +9,7 @@ describe(createTemporaryFixtureManager, () => {
   const managers: ReturnType<typeof createTemporaryFixtureManager>[] = [];
 
   afterEach(() => {
-    for (const manager of managers.splice(0)) {
+    for (const manager of managers) {
       manager.cleanupTemporaryDirectories();
     }
   });

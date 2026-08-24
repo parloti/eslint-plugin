@@ -23,9 +23,8 @@ function parseFenceLineWithoutGroups(
       currentValue: string,
     ): null | RegExpExecArray {
       if (
-        this.source ===
-          "^(?<leading>\\s*\\*?\\s*)```(?<lang>[^\\s`]+)?[ \\t]*$" &&
-        currentValue === value
+        currentValue === value &&
+        this.source === "^(?<leading>\\s*\\*?\\s*)```(?<lang>[^\\s`]+)?[ \\t]*$"
       ) {
         return Object.assign([value], {
           index: 0,

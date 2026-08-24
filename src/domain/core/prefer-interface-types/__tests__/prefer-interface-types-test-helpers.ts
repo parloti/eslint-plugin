@@ -195,6 +195,27 @@ const runListener = (
   listener?.(node as unknown as Rule.Node);
 };
 
+/**
+ * Runs one listener case and returns the collected reports.
+ * @param node Node to run through the listener.
+ * @param listenerName Listener key to execute.
+ * @returns Reports collected from the rule context.
+ * @example
+ * ```typescript
+ * const reports = runListenerCase(createFunctionNode({}));
+ * ```
+ */
+const runListenerCase = (
+  node?: MockNode,
+  listenerName: PreferInterfaceTypesListener = "FunctionDeclaration",
+): ReportEntry[] => {
+  const { context, reports } = createContext();
+
+  runListener(context, node, listenerName);
+
+  return reports;
+};
+
 export {
   createBareParameter,
   createContext,
@@ -204,4 +225,5 @@ export {
   createRestParameter,
   createTypeAnnotation,
   runListener,
+  runListenerCase,
 };

@@ -48,7 +48,9 @@ function collectFixtureIdentifiers(): string[] {
     identifiers,
   );
 
-  return [...identifiers].toSorted();
+  return [...identifiers].toSorted((left, right) =>
+    left === right ? 0 : left < right ? -1 : 1,
+  );
 }
 
 /**

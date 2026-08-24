@@ -125,9 +125,8 @@ function buildMissingSectionFixes(
     return [];
   }
 
-  return [...buildAnchorMap(anchors, missingSections).entries()].map(
-    ([offset, phases]) =>
-      buildMissingSectionFix({ analysis, fixer, offset, phases }),
+  return [...buildAnchorMap(anchors, missingSections)].map(([offset, phases]) =>
+    buildMissingSectionFix({ analysis, fixer, offset, phases }),
   );
 }
 

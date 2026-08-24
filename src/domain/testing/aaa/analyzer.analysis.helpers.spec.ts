@@ -25,16 +25,18 @@ function getIndentationAtOffset(sourceText: string, offset: number): string {
   return linePrefix.slice(0, linePrefix.length - trimmedPrefix.length);
 }
 
+/** Blank comment text used by the section-phase parsing test. */
+const blankCommentText = " ".repeat(3);
+
 describe("aAA analyzer analysis helpers", () => {
   it("parses only valid AAA section comments", () => {
     // Arrange
-    const blankComment = "   ";
     const invalidComment = "Arrange & Cleanup";
     const validComment = "Arrange & Assert";
 
     // Act
     const actual = {
-      blank: getSectionPhases(blankComment),
+      blank: getSectionPhases(blankCommentText),
       invalid: getSectionPhases(invalidComment),
       valid: getSectionPhases(validComment),
     };
@@ -95,6 +97,6 @@ describe("aAA analyzer analysis helpers", () => {
       { comment: { id: 1 }, phase: "Act" },
       { comment: { id: 2 }, phase: "Assert" },
     ]);
-    expect(actual.indentation).toBe("    ");
+    expect(actual.indentation).toBe(" ".repeat(4));
   });
 });

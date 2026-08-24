@@ -1,200 +1,22 @@
 import type { Rule } from "eslint";
-import type * as ESTree from "estree";
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type * as AnalyzerModule from "../aaa/analyzer.analysis";
 import type * as AnalyzerAssertionsModule from "../aaa/analyzer.assertions.helpers";
-import type { LocatedNode, TestBlockAnalysis } from "../aaa/types";
+import type { LoadRuleInput } from "./__tests__/rule-test-helpers";
 
-/** Mocked AAA module shape used by the assertion-name rule tests. */
-interface AssertActualExpectedNamesAnalysisModule {
-  /** Mocked analyzer result. */
-  analyzeTestBlock: () => TestBlockAnalysis | undefined;
-}
-
-/** Mocked assertion helper module shape used by the assertion-name rule tests. */
-interface AssertActualExpectedNamesAssertionsModule {
-  /** Assert-scope declared identifiers. */
-  getAssertDeclaredIdentifiers: () => Map<
-    string,
-    LocatedNode<ESTree.Identifier>
-  >;
-
-  /** Assertion identifier lookup. */
-  getAssertionIdentifiers: (node: unknown) => AssertionIdentifiers;
-
-  /** Assertion predicate. */
-  hasAssertion: (node: unknown) => boolean;
-
-  /** Prefix check helper. */
-  usesPrefix: (name: string, prefix: "actual" | "expected") => boolean;
-}
-
-/** Imported rule module shape used by these tests. */
-interface AssertActualExpectedNamesModule {
-  /** Rule under test. */
-  assertActualExpectedNamesRule: Rule.RuleModule;
-}
-
-/** Captured assertion identifier names for one assertion node. */
-interface AssertionIdentifier {
-  /** Actual-value variable name when present. */
-  actual?: string;
-
-  /** Expected-value variable name when present. */
-  expected?: string;
-}
-
-/** Assertion identifier names exposed by the mocked helper module. */
-interface AssertionIdentifiers {
-  /** Actual-value variable name when present. */
-  actual: string | undefined;
-
-  /** Expected-value variable name when present. */
-  expected: string | undefined;
-}
-
-/** Mocked AAA analysis input used to load the rule. */
-interface LoadRuleInput {
-  /** Parsed test-block analysis. */
-  analysis: unknown;
-
-  /** Assertion identifier lookup keyed by assertion node. */
-  assertionIdentifiers: Map<unknown, AssertionIdentifier>;
-
-  /** Set of nodes treated as assertions. */
-  assertionNodes: ReadonlySet<unknown>;
-
-  /** Declared identifiers available inside Assert. */
-  declaredIdentifiers: Map<string, Rule.Node>;
-}
-
-/** Captured rule context and emitted reports. */
-interface RuleContextState {
-  /** Mock ESLint rule context. */
-  context: Rule.RuleContext;
-
-  /** Reports emitted during rule execution. */
-  reports: Rule.ReportDescriptor[];
-}
-
-/** Active AAA assertion analysis state used by the module mock. */
-let activeLoadRuleInput: LoadRuleInput;
-
-/**
- * Builds a mock ESLint context that records emitted reports.
- * @returns Captured context state.
- * @example
- * ```typescript
- * const state = createContext();
- * ```
- */
-const createContext = (): RuleContextState => {
-  const reports: Rule.ReportDescriptor[] = [];
-
-  return {
-    context: {
-      report: (descriptor: Rule.ReportDescriptor): void => {
-        reports.push(descriptor);
-      },
-    } as unknown as Rule.RuleContext,
-    reports,
-  };
-};
-
-/**
- * Creates the mocked analysis module for the assertion-name rule tests.
- * @returns Mocked analyzer helper.
- * @example
- * ```typescript
- * const mockedAnalysis = createAnalysisModule();
- * ```
- */
-function createAnalysisModule(): AssertActualExpectedNamesAnalysisModule {
-  return {
-    analyzeTestBlock: (): TestBlockAnalysis | undefined =>
-      activeLoadRuleInput.analysis as TestBlockAnalysis | undefined,
-  };
-}
-
-/**
- * Creates the mocked assertion helper module for the assertion-name rule tests.
- * @returns Mocked assertion helpers.
- * @example
- * ```typescript
- * const mockedAssertions = createAssertionsModule();
- * ```
- */
-function createAssertionsModule(): AssertActualExpectedNamesAssertionsModule {
-  return {
-    getAssertDeclaredIdentifiers: (): Map<
-      string,
-      LocatedNode<ESTree.Identifier>
-    > =>
-      activeLoadRuleInput.declaredIdentifiers as unknown as Map<
-        string,
-        LocatedNode<ESTree.Identifier>
-      >,
-    getAssertionIdentifiers: (node: unknown): AssertionIdentifiers => {
-      const stored = activeLoadRuleInput.assertionIdentifiers.get(node);
-      return stored === void 0
-        ? { actual: void 0, expected: void 0 }
-        : { actual: stored.actual, expected: stored.expected };
-    },
-    hasAssertion: (node: unknown): boolean =>
-      activeLoadRuleInput.assertionNodes.has(node),
-    usesPrefix: (name: string, prefix: "actual" | "expected"): boolean =>
-      name.startsWith(prefix),
-  };
-}
-
-/**
- * Loads the rule with mocked AAA identifier analysis.
- * @param input Mocked analysis state.
- * @returns Imported rule module.
- * @example
- * ```typescript
- * const module = await loadRule({ analysis: void 0, assertionIdentifiers: new Map(), assertionNodes: new Set(), declaredIdentifiers: new Map() });
- * ```
- */
-const loadRule = async (
-  input: LoadRuleInput,
-): Promise<AssertActualExpectedNamesModule> => {
-  activeLoadRuleInput = input;
-
-  return import("./rule");
-};
-
-/**
- * Runs the rule against one synthetic call expression.
- * @param input Mocked analysis state.
- * @returns Reports emitted by the rule.
- * @example
- * ```typescript
- * const reports = await runRule({ analysis: void 0, assertionIdentifiers: new Map(), assertionNodes: new Set(), declaredIdentifiers: new Map() });
- * ```
- */
-const runRule = async (
-  input: LoadRuleInput,
-): Promise<Rule.ReportDescriptor[]> => {
-  const { assertActualExpectedNamesRule } = await loadRule(input);
-  const { context, reports } = createContext();
-  const listener = assertActualExpectedNamesRule.create(context).CallExpression;
-
-  listener?.({ type: "CallExpression" } as never);
-
-  return reports;
-};
+import {
+  createAnalysisModule,
+  createAssertionsModule,
+  loadRule,
+  resetRuleMockState,
+  runRule,
+} from "./__tests__/rule-test-helpers";
 
 describe("assert-actual-expected-names rule", () => {
   beforeEach(() => {
-    activeLoadRuleInput = {
-      analysis: void 0,
-      assertionIdentifiers: new Map(),
-      assertionNodes: new Set(),
-      declaredIdentifiers: new Map(),
-    };
+    resetRuleMockState();
     vi.doMock(
       import("../aaa/analyzer.analysis"),
       createMockProxy<typeof AnalyzerModule>(createAnalysisModule()),
@@ -217,19 +39,17 @@ describe("assert-actual-expected-names rule", () => {
     } satisfies LoadRuleInput;
 
     // Act
-    const result = await loadRule(input).then((actual) => ({
-      actual,
-      descriptionIncludesAssertPhase:
-        actual.assertActualExpectedNamesRule.meta?.docs?.description?.includes(
-          "Assert-phase",
-        ) ?? false,
-    }));
+    const actual = await loadRule(input);
 
     // Assert
+    expect(actual.assertActualExpectedNamesRule.meta?.messages).toHaveProperty(
+      "missingPrefix",
+    );
     expect(
-      result.actual.assertActualExpectedNamesRule.meta?.messages,
-    ).toHaveProperty("missingPrefix");
-    expect(result.descriptionIncludesAssertPhase).toBe(true);
+      actual.assertActualExpectedNamesRule.meta?.docs?.description?.includes(
+        "Assert-phase",
+      ) ?? false,
+    ).toBe(true);
   });
 
   it("skips unsupported test blocks", async () => {
@@ -250,9 +70,9 @@ describe("assert-actual-expected-names rule", () => {
 
   it("reports each missing prefix only once", async () => {
     // Arrange
-    const firstAssertion = { type: "ExpressionStatement" } as Rule.Node;
-    const repeatedAssertion = { type: "ExpressionStatement" } as Rule.Node;
-    const ignoredAssertion = { type: "ExpressionStatement" } as Rule.Node;
+    const firstAssertion = { type: "ExpressionStatement" } as never;
+    const repeatedAssertion = { type: "ExpressionStatement" } as never;
+    const ignoredAssertion = { type: "ExpressionStatement" } as never;
     const actualNode = { name: "result", type: "Identifier" } as Rule.Node;
     const expectedNode = { name: "value", type: "Identifier" } as Rule.Node;
     const analysis = {
@@ -300,7 +120,7 @@ describe("assert-actual-expected-names rule", () => {
 
   it("reports missing actual prefix for Act declarations used in Assert", async () => {
     // Arrange
-    const assertion = { type: "ExpressionStatement" } as Rule.Node;
+    const assertion = { type: "ExpressionStatement" } as never;
     const actDeclaration = {
       declarations: [
         {
@@ -308,7 +128,7 @@ describe("assert-actual-expected-names rule", () => {
         },
       ],
       type: "VariableDeclaration",
-    } as Rule.Node;
+    } as never;
     const resultNode = { name: "result", type: "Identifier" } as Rule.Node;
     const expectedNode = {
       name: "expectedValue",
@@ -344,7 +164,7 @@ describe("assert-actual-expected-names rule", () => {
 
   it("reports only missing expected prefix when actual is already prefixed", async () => {
     // Arrange
-    const assertion = { type: "ExpressionStatement" } as Rule.Node;
+    const assertion = { type: "ExpressionStatement" } as never;
     const actDeclaration = {
       declarations: [
         {
@@ -352,7 +172,7 @@ describe("assert-actual-expected-names rule", () => {
         },
       ],
       type: "VariableDeclaration",
-    } as Rule.Node;
+    } as never;
     const expectedNode = { name: "value", type: "Identifier" } as Rule.Node;
     const analysis = {
       statements: [
@@ -384,7 +204,7 @@ describe("assert-actual-expected-names rule", () => {
 
   it("ignores Act declarations that do not declare Identifier bindings", async () => {
     // Arrange
-    const assertion = { type: "ExpressionStatement" } as Rule.Node;
+    const assertion = { type: "ExpressionStatement" } as never;
     const actDeclaration = {
       declarations: [
         {
@@ -395,7 +215,7 @@ describe("assert-actual-expected-names rule", () => {
         },
       ],
       type: "VariableDeclaration",
-    } as unknown as Rule.Node;
+    } as unknown as never;
     const expectedNode = {
       name: "expectedValue",
       type: "Identifier",

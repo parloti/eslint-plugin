@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { runFix } from "./__tests__/prefer-vi-mocked-import-rule-test-helpers";
 import { resolveImportPlan } from "./match-imports";
 
 describe("prefer-vi-mocked-import match-imports", () => {
@@ -113,5 +114,52 @@ describe("prefer-vi-mocked-import match-imports", () => {
       moduleSpecifier: "./mod",
       names: ["a"],
     });
+  });
+});
+
+describe("prefer-vi-mocked-import rule (import planning)", () => {
+  it("inserts the import after existing imports and handles longhand properties", () => {
+    // Arrange
+    const input = [
+      'import { something } from "./other";',
+      "",
+      "const installDevelopmentDependencies = vi.fn();",
+      'vi.mock(import("./dependencies"), () => ({ installDevelopmentDependencies: installDevelopmentDependencies }));',
+      "installDevelopmentDependencies.mockResolvedValue(void 0);",
+      "",
+    ].join("\n");
+
+    // Act
+    const { output } = runFix(input);
+
+    // Assert
+    expect(output).toBe(
+      [
+        'import { something } from "./other";',
+        'import { installDevelopmentDependencies } from "./dependencies";',
+        "",
+        'vi.mock(import("./dependencies"), () => ({ installDevelopmentDependencies: vi.fn() }));',
+        "vi.mocked(installDevelopmentDependencies).mockResolvedValue(void 0);",
+        "",
+      ].join("\n"),
+    );
+  });
+
+  it("does not report when existing same-module import uses alias", () => {
+    // Arrange
+    const input = [
+      'import { d as dependencyMock } from "./mod";',
+      "const c = vi.fn();",
+      'vi.mock(import("./mod"), () => ({ d: c }));',
+      "c.mockResolvedValue(void 0);",
+      "",
+    ].join("\n");
+
+    // Act
+    const actual = runFix(input);
+
+    // Assert
+    expect(actual.messages).toStrictEqual([]);
+    expect(actual.output).toBe(input);
   });
 });

@@ -82,7 +82,7 @@ describe("consistent-barrel-files listeners", (): void => {
   const temporaryDirectories: string[] = [];
 
   afterEach((): void => {
-    for (const directory of temporaryDirectories.splice(0)) {
+    for (const directory of temporaryDirectories) {
       rmSync(directory, { force: true, recursive: true });
     }
   });

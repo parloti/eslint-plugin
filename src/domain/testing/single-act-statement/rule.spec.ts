@@ -6,6 +6,12 @@ import type * as AnalyzerModule from "../aaa/analyzer.analysis";
 import type * as AnalyzerAnalysisModule from "../aaa/analyzer.analysis.helpers";
 import type { TestBlockAnalysis } from "../aaa/types";
 
+/** Holder for the active AAA analysis state used by the module mock. */
+interface ActiveAaaStateHolder {
+  /** Mock state applied to the currently running test. */
+  current: SingleActAaaMockState;
+}
+
 /** Mocked top-level Act statement shape used by test helpers. */
 interface MockActStatement {
   /** Statement node exposed to the rule under test. */
@@ -54,8 +60,10 @@ interface SingleActStatementModule {
   singleActStatementRule: Rule.RuleModule;
 }
 
-/** Active AAA analysis state used by the module mock. */
-let activeAaaState: SingleActAaaMockState;
+/** Holder for the active AAA analysis state used by the module mock. */
+const activeAaaStateHolder: ActiveAaaStateHolder = {
+  current: { actStatements: [], analysis: void 0, count: 0 },
+};
 
 /**
  * Creates the mocked analysis-helper module for the single-act rule tests.
@@ -67,9 +75,10 @@ let activeAaaState: SingleActAaaMockState;
  */
 function createAnalysisHelpersModule(): SingleActAnalysisHelpersModule {
   return {
-    countActStatements: (): number => activeAaaState.count,
+    countActStatements: (): number => activeAaaStateHolder.current.count,
     getActTopLevelStatements: (): TestBlockAnalysis["statements"] =>
-      activeAaaState.actStatements as unknown as TestBlockAnalysis["statements"],
+      activeAaaStateHolder.current
+        .actStatements as unknown as TestBlockAnalysis["statements"],
   };
 }
 
@@ -84,7 +93,7 @@ function createAnalysisHelpersModule(): SingleActAnalysisHelpersModule {
 function createAnalysisModule(): SingleActAnalysisModule {
   return {
     analyzeTestBlock: (): TestBlockAnalysis | undefined =>
-      activeAaaState.analysis as TestBlockAnalysis | undefined,
+      activeAaaStateHolder.current.analysis as TestBlockAnalysis | undefined,
   };
 }
 
@@ -125,7 +134,7 @@ const loadRule = async (
   actStatementCount: number,
   actStatements: readonly MockActStatement[] = [],
 ): Promise<SingleActStatementModule> => {
-  activeAaaState = {
+  activeAaaStateHolder.current = {
     actStatements,
     analysis,
     count: actStatementCount,
@@ -167,7 +176,11 @@ const runRule = async (
 
 describe("single-act-statement rule", () => {
   beforeEach(() => {
-    activeAaaState = { actStatements: [], analysis: void 0, count: 0 };
+    activeAaaStateHolder.current = {
+      actStatements: [],
+      analysis: void 0,
+      count: 0,
+    };
     vi.doMock(
       import("../aaa/analyzer.analysis"),
       createMockProxy<typeof AnalyzerModule>(createAnalysisModule()),
@@ -185,19 +198,17 @@ describe("single-act-statement rule", () => {
     const expectedDescriptionFragment = "single top-level statement";
 
     // Act
-    const result = await loadRule(void 0, 0).then((actual) => ({
-      actual,
-      descriptionIncludesFragment:
-        actual.singleActStatementRule.meta?.docs?.description?.includes(
-          expectedDescriptionFragment,
-        ) ?? false,
-    }));
+    const actual = await loadRule(void 0, 0);
 
     // Assert
-    expect(result.actual.singleActStatementRule.meta?.messages).toHaveProperty(
+    expect(actual.singleActStatementRule.meta?.messages).toHaveProperty(
       "multipleActStatements",
     );
-    expect(result.descriptionIncludesFragment).toBe(true);
+    expect(
+      actual.singleActStatementRule.meta?.docs?.description?.includes(
+        expectedDescriptionFragment,
+      ) ?? false,
+    ).toBe(true);
   });
 
   it("skips unsupported test blocks", async () => {

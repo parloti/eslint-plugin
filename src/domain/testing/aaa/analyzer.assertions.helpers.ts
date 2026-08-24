@@ -141,13 +141,13 @@ function getStatementExpression(
  * ```
  */
 function hasAssertion(statement: ESTree.Statement): boolean {
-  let foundAssertion = false;
+  let isAssertionFound = false;
   visitNode(statement, (node) => {
     if (node.type === "CallExpression" && isAssertionCall(node)) {
-      foundAssertion = true;
+      isAssertionFound = true;
     }
   });
-  return foundAssertion;
+  return isAssertionFound;
 }
 
 /**
@@ -212,13 +212,17 @@ function isValidAssertStatement(statement: ESTree.Statement): boolean {
 function unwrapExpression(
   expression: ESTree.Expression | undefined,
 ): ESTree.Expression | undefined {
-  if (expression?.type === "ChainExpression") {
-    return unwrapExpression(expression.expression);
+  let current = expression;
+
+  while (current?.type === "ChainExpression") {
+    current = current.expression;
   }
-  if (expression?.type === "AwaitExpression") {
-    return expression.argument;
+
+  if (current?.type === "AwaitExpression") {
+    return current.argument;
   }
-  return expression;
+
+  return current;
 }
 
 /**

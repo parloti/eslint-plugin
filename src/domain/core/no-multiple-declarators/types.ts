@@ -105,7 +105,7 @@ function isRange(value: unknown): value is Range {
   return (
     Array.isArray(value) &&
     value.length === 2 &&
-    value.every((part) => Number.isInteger(part) && part >= 0) &&
+    value.every((part) => Number.isSafeInteger(part) && part >= 0) &&
     value[0] <= value[1]
   );
 }

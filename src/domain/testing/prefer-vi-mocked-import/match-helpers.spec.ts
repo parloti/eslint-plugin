@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { runFix } from "./__tests__/prefer-vi-mocked-import-rule-test-helpers";
 import {
   getFactoryReturnObject,
   getModuleSpecifier,
@@ -115,5 +116,55 @@ describe("prefer-vi-mocked-import match-helpers", () => {
 
     // Assert
     expect(actualIsViCall).toBe(false);
+  });
+});
+
+describe("prefer-vi-mocked-import rule (newline and factory shapes)", () => {
+  it("supports block-bodied mock factories", () => {
+    // Arrange
+    const input = [
+      "const installDevelopmentDependencies = vi.fn();",
+      'vi.mock(import("./dependencies"), () => { return { installDevelopmentDependencies }; });',
+      "installDevelopmentDependencies.mockResolvedValue(void 0);",
+      "",
+    ].join("\n");
+
+    // Act
+    const { output } = runFix(input);
+
+    // Assert
+    expect(output).toBe(
+      [
+        'import { installDevelopmentDependencies } from "./dependencies";',
+        "",
+        'vi.mock(import("./dependencies"), () => { return { installDevelopmentDependencies: vi.fn() }; });',
+        "vi.mocked(installDevelopmentDependencies).mockResolvedValue(void 0);",
+        "",
+      ].join("\n"),
+    );
+  });
+
+  it("preserves CRLF line endings", () => {
+    // Arrange
+    const input = [
+      "const installDevelopmentDependencies = vi.fn();",
+      'vi.mock(import("./dependencies"), () => ({ installDevelopmentDependencies }));',
+      "installDevelopmentDependencies.mockResolvedValue(void 0);",
+      "",
+    ].join("\r\n");
+
+    // Act
+    const { output } = runFix(input);
+
+    // Assert
+    expect(output).toBe(
+      [
+        'import { installDevelopmentDependencies } from "./dependencies";',
+        "",
+        'vi.mock(import("./dependencies"), () => ({ installDevelopmentDependencies: vi.fn() }));',
+        "vi.mocked(installDevelopmentDependencies).mockResolvedValue(void 0);",
+        "",
+      ].join("\r\n"),
+    );
   });
 });

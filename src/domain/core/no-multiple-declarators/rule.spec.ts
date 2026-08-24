@@ -4,6 +4,7 @@ import type { MockNode } from "./__tests__/no-multiple-declarators-rule-test-hel
 
 import {
   createContext,
+  createReplacementReader,
   createVariableDeclaration,
   runRule,
 } from "./__tests__/no-multiple-declarators-rule-test-helpers";
@@ -162,22 +163,7 @@ describe("no-multiple-declarators rule", () => {
       statementText: sourceText,
     });
     const { context, reports } = createContext(sourceText);
-    const fixer = {
-      replaceTextRange: (_range: [number, number], text: string) => ({ text }),
-    } as never;
-    const getReplacement = (): string | undefined => {
-      const reportFix = reports[0]?.fix;
-      if (typeof reportFix !== "function") {
-        return undefined;
-      }
-
-      const fixResult = reportFix(fixer);
-      if (!fixResult || Array.isArray(fixResult) || !("text" in fixResult)) {
-        return undefined;
-      }
-
-      return fixResult.text;
-    };
+    const getReplacement = createReplacementReader(reports);
 
     // Act
     const actualReplacement = (runRule(context, declaration), getReplacement());
@@ -196,22 +182,7 @@ describe("no-multiple-declarators rule", () => {
       statementText: "const first = 1, second = 2;",
     });
     const { context, reports } = createContext(sourceText);
-    const fixer = {
-      replaceTextRange: (_range: [number, number], text: string) => ({ text }),
-    } as never;
-    const getReplacement = (): string | undefined => {
-      const reportFix = reports[0]?.fix;
-      if (typeof reportFix !== "function") {
-        return undefined;
-      }
-
-      const fixResult = reportFix(fixer);
-      if (!fixResult || Array.isArray(fixResult) || !("text" in fixResult)) {
-        return undefined;
-      }
-
-      return fixResult.text;
-    };
+    const getReplacement = createReplacementReader(reports);
 
     // Act
     const actualReplacement = (runRule(context, declaration), getReplacement());
@@ -230,22 +201,7 @@ describe("no-multiple-declarators rule", () => {
       statementText: sourceText,
     });
     const { context, reports } = createContext(sourceText, { omitText: true });
-    const fixer = {
-      replaceTextRange: (_range: [number, number], text: string) => ({ text }),
-    } as never;
-    const getReplacement = (): string | undefined => {
-      const reportFix = reports[0]?.fix;
-      if (typeof reportFix !== "function") {
-        return undefined;
-      }
-
-      const fixResult = reportFix(fixer);
-      if (!fixResult || Array.isArray(fixResult) || !("text" in fixResult)) {
-        return undefined;
-      }
-
-      return fixResult.text;
-    };
+    const getReplacement = createReplacementReader(reports);
 
     // Act
     const actualReplacement = (runRule(context, declaration), getReplacement());

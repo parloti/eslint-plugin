@@ -5,8 +5,8 @@ import { collectMatches } from "./match";
 
 /** Enforce inline `vi.fn()` mocks inside `vi.mock`/`vi.doMock` factories. */
 const preferViMockedImportRule: Rule.RuleModule = {
-  create(context: Rule.RuleContext): Rule.RuleListener {
-    return {
+  create: (context: Rule.RuleContext): Rule.RuleListener =>
+    ({
       Program: (): void => {
         const matches = collectMatches(context);
 
@@ -26,8 +26,7 @@ const preferViMockedImportRule: Rule.RuleModule = {
           });
         }
       },
-    } satisfies Rule.RuleListener;
-  },
+    }) satisfies Rule.RuleListener,
   meta: {
     docs: {
       description:

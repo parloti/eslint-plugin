@@ -166,7 +166,7 @@ const runRuleCase = (
   return {
     diagnostics,
     messageIds,
-    ...(output === void 0 ? {} : { output }),
+    ...(output !== void 0 && { output }),
   };
 };
 

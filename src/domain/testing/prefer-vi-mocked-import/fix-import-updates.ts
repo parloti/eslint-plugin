@@ -34,11 +34,14 @@ function buildCombinedUpdateFixes(
   combinedPlans: Map<string, CombinedImportPlanLike>,
   fixer: Rule.RuleFixer,
 ): Rule.Fix[] {
-  return [...combinedPlans.values()].flatMap((plan) => {
-    const updateFix = toCombinedUpdateFix(plan, fixer);
+  return combinedPlans
+    .values()
+    .flatMap((plan) => {
+      const updateFix = toCombinedUpdateFix(plan, fixer);
 
-    return updateFix === void 0 ? [] : [updateFix];
-  });
+      return updateFix === void 0 ? [] : [updateFix];
+    })
+    .toArray();
 }
 
 /**
@@ -65,7 +68,7 @@ function toCombinedUpdateFix(
   const { defaultImportName, existingNamedImports, range } = update;
   const mergedNames = [
     ...new Set([...names, ...existingNamedImports]),
-  ].toSorted();
+  ].toSorted((left, right) => (left === right ? 0 : left < right ? -1 : 1));
   const statementText = buildImportStatement(
     moduleSpecifier,
     defaultImportName,

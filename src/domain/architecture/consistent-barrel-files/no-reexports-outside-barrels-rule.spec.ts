@@ -29,10 +29,36 @@ describe("no reexports outside barrels rule (enforced)", () => {
     createTemporaryRunner(temporaryDirectories);
 
   afterEach(() => {
-    for (const directory of temporaryDirectories.splice(0)) {
+    for (const directory of temporaryDirectories) {
       rmSync(directory, { force: true, recursive: true });
     }
   });
+
+  const importedFeatureSpecifiers = [createImportSpecifier("feature")];
+  const importedFeatureDeclaration = createImportDeclaration(
+    importedFeatureSpecifiers,
+  );
+  const exportedFeatureSpecifiers = [createExportSpecifier("feature")];
+  const exportedFeatureDeclaration = createExportWithoutSource(
+    exportedFeatureSpecifiers,
+  );
+  const importedFeatureBody = createBody(
+    importedFeatureDeclaration,
+    exportedFeatureDeclaration,
+  );
+  const importedDefaultSpecifiers = [createImportDefaultSpecifier("feature")];
+  const importedDefaultDeclaration = createImportDeclaration(
+    importedDefaultSpecifiers,
+  );
+  const defaultExportedImportBody = createBody(
+    importedDefaultDeclaration,
+    createExportDefaultIdentifier("feature"),
+  );
+  const localExportSpecifiers = [createExportSpecifier("local")];
+  const localExportDeclaration = createExportWithoutSource(
+    localExportSpecifiers,
+  );
+  const localExportsBody = createBody(localExportDeclaration);
 
   it("uses default options for detection", () => {
     // Arrange
@@ -75,20 +101,8 @@ describe("no reexports outside barrels rule (enforced)", () => {
   });
 
   it.each([
-    [
-      "exporting imported specifiers",
-      createBody(
-        createImportDeclaration([createImportSpecifier("feature")]),
-        createExportWithoutSource([createExportSpecifier("feature")]),
-      ),
-    ],
-    [
-      "default export of imported identifiers",
-      createBody(
-        createImportDeclaration([createImportDefaultSpecifier("feature")]),
-        createExportDefaultIdentifier("feature"),
-      ),
-    ],
+    ["exporting imported specifiers", importedFeatureBody],
+    ["default export of imported identifiers", defaultExportedImportBody],
   ])("reports on %s", (_label, body) => {
     // Act
     const actualReports = runTemporaryFeature(body, defaultOptions);
@@ -103,10 +117,7 @@ describe("no reexports outside barrels rule (enforced)", () => {
       "local exports with declarations",
       createBody(createExportWithDeclaration()),
     ],
-    [
-      "exports without imports",
-      createBody(createExportWithoutSource([createExportSpecifier("local")])),
-    ],
+    ["exports without imports", localExportsBody],
   ])("allows %s", (_label, body) => {
     // Act
     const actualReports = runTemporaryFeature(body, defaultOptions);
@@ -122,7 +133,7 @@ describe("no reexports outside barrels rule (skips)", () => {
   const { runTemporaryIndex } = createTemporaryRunner(temporaryDirectories);
 
   afterEach(() => {
-    for (const directory of temporaryDirectories.splice(0)) {
+    for (const directory of temporaryDirectories) {
       rmSync(directory, { force: true, recursive: true });
     }
   });

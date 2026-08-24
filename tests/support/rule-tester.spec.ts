@@ -135,8 +135,8 @@ describe("rule-tester helpers", () => {
 
     // Act
     const actual = await (async () => {
-      const createRuleTesterModule = await import("./rule-tester");
-      const ruleTester = createRuleTesterModule.createRuleTester();
+      const ruleTesterModule = await import("./rule-tester");
+      const ruleTester = ruleTesterModule.createRuleTester();
       ruleTester.run("demo-rule", demoRule, tests);
 
       return {};

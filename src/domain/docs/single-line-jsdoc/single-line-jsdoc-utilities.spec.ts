@@ -55,7 +55,7 @@ describe("single-line-jsdoc utilities", () => {
   it("defaults max line length for non-finite and non-positive values", () => {
     // Arrange
     const invalidValues = [
-      [{ maxLineLength: Number.NaN }],
+      [{ maxLineLength: NaN }],
       [{ maxLineLength: 0 }],
       [{ maxLineLength: -10 }],
     ];

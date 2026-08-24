@@ -8,8 +8,8 @@ import {
 
 /** Requires the Act phase to contain a single top-level statement. */
 const singleActStatementRule: Rule.RuleModule = {
-  create(context: Rule.RuleContext): Rule.RuleListener {
-    return {
+  create: (context: Rule.RuleContext): Rule.RuleListener =>
+    ({
       CallExpression(node): void {
         const analysis = analyzeTestBlock(context, node);
         if (analysis === void 0) {
@@ -30,8 +30,7 @@ const singleActStatementRule: Rule.RuleModule = {
           node: firstExcessActStatement ?? analysis.callExpression,
         });
       },
-    } satisfies Rule.RuleListener;
-  },
+    }) satisfies Rule.RuleListener,
   meta: {
     docs: {
       description:

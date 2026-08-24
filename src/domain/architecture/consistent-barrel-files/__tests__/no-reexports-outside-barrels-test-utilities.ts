@@ -124,7 +124,7 @@ const runRule = (
     filename,
     reports,
     sourceCode,
-    ...(options === void 0 ? {} : { options }),
+    ...(options !== void 0 && { options }),
   });
   const listeners = noReexportsOutsideBarrelsRule.create(context);
   const programListener = listeners.Program;
@@ -165,7 +165,7 @@ const createTemporaryRunner = (
       body,
       filename: "feature.ts",
       root: "tmp",
-      ...(options === void 0 ? {} : { options }),
+      ...(options !== void 0 && { options }),
     });
 
   const runTemporaryIndex = (
@@ -176,7 +176,7 @@ const createTemporaryRunner = (
       body,
       filename: "index.ts",
       root: "tmp",
-      ...(options === void 0 ? {} : { options }),
+      ...(options !== void 0 && { options }),
     });
 
   return { runDefaultFeature, runTemporaryFeature, runTemporaryIndex };

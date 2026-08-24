@@ -49,7 +49,7 @@ describe("no-unused-exports options", () => {
     // Arrange
     const rawOptions = [
       {
-        publicApiFiles: ["   ", 123],
+        publicApiFiles: [" ".repeat(3), 123],
         testFilePatterns: [void 0],
       },
     ];
@@ -178,15 +178,15 @@ describe("no-unused-exports options", () => {
 
   it("uses the provided repository root for pattern matching", () => {
     // Arrange
-    const repositoryRoot = path.join(cwd(), "tmp-fixture-root");
-    const sourceIndexPath = path.join(repositoryRoot, "src", "index.ts");
-    const testPath = path.join(repositoryRoot, "tests", "feature.spec.ts");
+    const repoRoot = path.join(cwd(), "tmp-fixture-root");
+    const sourceIndexPath = path.join(repoRoot, "src", "index.ts");
+    const testPath = path.join(repoRoot, "tests", "feature.spec.ts");
     const state = getOptions([]);
 
     // Act
     const actualResult = {
-      publicApiFile: isPublicApiFile(sourceIndexPath, state, repositoryRoot),
-      testFile: isTestFile(testPath, state, repositoryRoot),
+      publicApiFile: isPublicApiFile(sourceIndexPath, state, repoRoot),
+      testFile: isTestFile(testPath, state, repoRoot),
     };
 
     // Assert

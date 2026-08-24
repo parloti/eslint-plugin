@@ -12,11 +12,11 @@ import { visitNode } from "./analyzer.super.helpers";
  * ```
  */
 function isDeferredFunctionNode(node: ESTree.Node): boolean {
-  return (
-    node.type === "ArrowFunctionExpression" ||
-    node.type === "FunctionDeclaration" ||
-    node.type === "FunctionExpression"
-  );
+  return [
+    "ArrowFunctionExpression",
+    "FunctionDeclaration",
+    "FunctionExpression",
+  ].includes(node.type);
 }
 
 /**

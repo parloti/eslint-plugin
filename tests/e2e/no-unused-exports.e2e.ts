@@ -6,6 +6,13 @@ import { afterAll, describe, expect, it } from "vitest";
 
 import { noUnusedExportsRule } from "../../src";
 import { createTemporaryFixtureManager } from "../support";
+import {
+  customPublicApiFilesOptions,
+  productionFeatureUsageSource,
+  temporaryProjectTsconfig,
+  testOnlyFeatureUsageSource,
+  testOnlyReexportUsageSource,
+} from "../support/no-unused-exports-fixtures";
 
 /** One fixture-backed lint run input. */
 interface LintFixtureRun {
@@ -81,23 +88,7 @@ const createTypedRuleEslint = (
 const runFixtureLint = async (run: LintFixtureRun): Promise<string[]> => {
   const fixtureManager = createTemporaryFixtureManager();
   const fixtureSet = fixtureManager.createFixtureSet(
-    {
-      ...run.files,
-      "tsconfig.json": JSON.stringify(
-        {
-          compilerOptions: {
-            module: "esnext",
-            moduleResolution: "bundler",
-            noEmit: true,
-            strict: true,
-            target: "esnext",
-          },
-          include: ["**/*.ts"],
-        },
-        void 0,
-        2,
-      ),
-    },
+    { ...run.files, "tsconfig.json": temporaryProjectTsconfig },
     "tmp",
   );
 
@@ -126,10 +117,7 @@ describe("no-unused-exports e2e", () => {
     // Arrange
     const run = {
       files: {
-        "src/consumer.ts": [
-          'import { feature } from "./feature";',
-          "console.log(feature);",
-        ].join("\n"),
+        "src/consumer.ts": productionFeatureUsageSource,
         "src/feature.ts": "export const feature = 1;",
       },
       targetRelativePath: "src/feature.ts",
@@ -146,10 +134,7 @@ describe("no-unused-exports e2e", () => {
     // Arrange
     const run = {
       files: {
-        "src/feature.spec.ts": [
-          'import { feature } from "./feature";',
-          "void feature;",
-        ].join("\n"),
+        "src/feature.spec.ts": testOnlyFeatureUsageSource,
         "src/feature.ts": "export const feature = 1;",
       },
       targetRelativePath: "src/feature.ts",
@@ -219,7 +204,7 @@ describe("no-unused-exports e2e", () => {
         "src/feature.ts": "export const feature = 1;",
         "src/public-api.ts": 'export { feature } from "./feature";',
       },
-      ruleOptions: [{ publicApiFiles: ["**/src/public-api.ts"] }],
+      ruleOptions: [customPublicApiFilesOptions],
       targetRelativePath: "src/feature.ts",
     };
 
@@ -235,10 +220,7 @@ describe("no-unused-exports e2e", () => {
     const run = {
       files: {
         "src/feature.ts": "export const feature = 1;",
-        "src/reexport.spec.ts": [
-          'import { feature } from "./reexport";',
-          "void feature;",
-        ].join("\n"),
+        "src/reexport.spec.ts": testOnlyReexportUsageSource,
         "src/reexport.ts": 'export { feature } from "./feature";',
       },
       targetRelativePath: "src/reexport.ts",
@@ -273,10 +255,7 @@ describe("no-unused-exports e2e", () => {
     const run = {
       files: {
         "src/feature.ts": "export const feature = 1;",
-        "src/reexport-consumer.ts": [
-          'import { feature } from "./reexport";',
-          "void feature;",
-        ].join("\n"),
+        "src/reexport-consumer.ts": testOnlyReexportUsageSource,
         "src/reexport.ts": 'export { feature } from "./feature";',
       },
       targetRelativePath: "src/feature.ts",

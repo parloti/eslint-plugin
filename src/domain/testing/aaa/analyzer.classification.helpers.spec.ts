@@ -214,7 +214,7 @@ describe("aAA analyzer classification helpers", () => {
 
   it("detects mutations with delete operator and non-delete unary expressions", () => {
     // Arrange
-    const deleteStatement = {
+    const deletionStatement = {
       expression: {
         argument: { name: "obj", type: "Identifier" },
         operator: "delete",
@@ -233,7 +233,7 @@ describe("aAA analyzer classification helpers", () => {
 
     // Act
     const actual = {
-      deleteMutation: hasMutation(deleteStatement),
+      deleteMutation: hasMutation(deletionStatement),
       typeofMutation: hasMutation(typeofStatement),
     };
 

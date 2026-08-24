@@ -27,7 +27,9 @@ describe("codeperfect plugin", () => {
     ];
 
     // Act
-    const actualRuleNames = Object.keys(codeperfectPlugin.rules).toSorted();
+    const actualRuleNames = Object.keys(codeperfectPlugin.rules).toSorted(
+      (left, right) => (left === right ? 0 : left < right ? -1 : 1),
+    );
 
     // Assert
     expect(actualRuleNames).toStrictEqual(expectedRuleNames);

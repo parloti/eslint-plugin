@@ -194,7 +194,7 @@ function getUniqueStatementRanges(match: RuleMatch): Range[] {
     }
   }
 
-  return [...rangeMap.values()];
+  return rangeMap.values().toArray();
 }
 
 export { buildFixes };

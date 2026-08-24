@@ -165,8 +165,8 @@ function returnsVoid(
 
 /** Requires Act-phase expressions to capture non-void results before asserting. */
 const requireActResultCaptureRule: Rule.RuleModule = {
-  create(context: Rule.RuleContext): Rule.RuleListener {
-    return {
+  create: (context: Rule.RuleContext): Rule.RuleListener =>
+    ({
       CallExpression(node): void {
         const analysis = analyzeTestBlock(context, node);
         if (analysis === void 0) {
@@ -188,8 +188,7 @@ const requireActResultCaptureRule: Rule.RuleModule = {
           }
         }
       },
-    } satisfies Rule.RuleListener;
-  },
+    }) satisfies Rule.RuleListener,
   meta: {
     docs: {
       description:

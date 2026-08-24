@@ -7,14 +7,13 @@ import { getOptions } from "./require-test-companion-options";
 
 /** ESLint rule enforcing 1:1 test companions for TypeScript files. */
 const requireTestCompanionRule: Rule.RuleModule = {
-  create(context: Rule.RuleContext): Rule.RuleListener {
-    return buildListenerForFilename(
+  create: (context: Rule.RuleContext): Rule.RuleListener =>
+    buildListenerForFilename(
       context,
       context.filename,
       getOptions(context.options),
       typeof context.cwd === "string" ? context.cwd : cwd(),
-    );
-  },
+    ),
   meta: {
     defaultOptions: [
       {

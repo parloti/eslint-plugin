@@ -50,7 +50,7 @@ const createFixer = (): Parameters<Rule.ReportFixer>[0] => ({
  * ```
  */
 const isFixIterable = (fixResult: FixResult): fixResult is Iterable<Rule.Fix> =>
-  Symbol.iterator in fixResult;
+  Object.hasOwn(fixResult, Symbol.iterator);
 
 /**
  * Gets getFixText.

@@ -34,7 +34,7 @@ const stripJsdocLine = (line: string): string =>
  * ```
  */
 const stripDefaultValue = (rawName: string): string => {
-  const [head = ""] = rawName.split("=");
+  const [head = ""] = rawName.split("=", 1);
 
   return head;
 };
