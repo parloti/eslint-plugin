@@ -53,4 +53,4 @@ class Application {
 
 The rule checks function declarations and variables initialized with arrow functions or function expressions. It requires an exact parameter-to-argument match, including matching rest/spread parameters.
 
-It does not inspect object or class methods, asynchronous functions, self-recursion, literal receiver method calls, destructured or defaulted parameters, or wrappers that transform arguments or contain additional statements. The rule has no autofix because deleting a wrapper can change module and public API contracts.
+It does not inspect object or class methods, asynchronous functions, self-recursion, method calls whose receiver is not a plain named reference (for example type assertions, literals, or call results), destructured or defaulted parameters, or wrappers that transform arguments or contain additional statements. The rule has no autofix because deleting a wrapper can change module and public API contracts.

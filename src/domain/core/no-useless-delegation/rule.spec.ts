@@ -90,4 +90,18 @@ describe("no-useless-delegation rule", () => {
     // Assert
     expect(actual).toStrictEqual([]);
   });
+
+  it.each([
+    "function run(value) { return (plugins as readonly string[]).includes(value); }",
+    "function run(value) { return (registry satisfies Registry).get(value); }",
+    "function run(value) { return config!.method(value); }",
+    "function run(value) { return load().method(value); }",
+    "function run(value) { return this.method(value); }",
+  ])("does not report method calls on a non-named receiver: %s", (code) => {
+    // Act
+    const actual = lint(code);
+
+    // Assert
+    expect(actual).toStrictEqual([]);
+  });
 });

@@ -154,17 +154,15 @@ const forwardsParameter = (
 };
 
 /**
- * Determines whether a call invokes a method on a literal value.
- * @param callee Call target to inspect.
- * @returns Whether the target is a member access on a literal receiver.
+ * Determines whether a node is a plain named reference.
+ * @param node Candidate receiver node to inspect.
+ * @returns Whether the node is a plain identifier reference.
  * @example
  * ```typescript
- * const isLiteralCall = isLiteralMemberCall(callee);
+ * const isNamed = isNamedReceiver({ type: "Identifier" });
  * ```
  */
-const isLiteralMemberCall = (callee: Node): boolean =>
-  callee.type === "MemberExpression" &&
-  asNode(callee["object"])?.type === "Literal";
+const isNamedReceiver = (node?: Node): boolean => node?.type === "Identifier";
 
 /**
  * Determines whether a function does nothing except directly call another function.
@@ -190,7 +188,12 @@ const isUselessDelegation = (
     parameters === void 0 ||
     arguments_ === void 0 ||
     callee === void 0 ||
-    isLiteralMemberCall(callee) ||
+    // A method call is only a replaceable delegation when its receiver is a
+    // plain named reference (e.g. `service.run`). Expression receivers such
+    // as type assertions, calls, or literals cannot be inlined at the call
+    // site, so the wrapper is not useless.
+    (callee.type === "MemberExpression" &&
+      !isNamedReceiver(asNode(callee["object"]))) ||
     getIdentifierName(callee) === functionName ||
     arguments_.length !== parameters.length
   ) {

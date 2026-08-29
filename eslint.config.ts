@@ -28,13 +28,6 @@ const eslintConfig = defineConfig(
     },
   },
   {
-    files: ["src/index.ts"],
-    name: "Package entrypoint barrel",
-    rules: {
-      "boundaries/dependencies": "off",
-    },
-  },
-  {
     name: "Node.js tool",
     rules: { "import-x/no-nodejs-modules": "off" },
   },
