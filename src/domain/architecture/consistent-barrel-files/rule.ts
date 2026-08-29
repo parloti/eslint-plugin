@@ -1,10 +1,8 @@
 import type { Rule } from "eslint";
 
+import { isLintableModuleFile } from "./barrel-file-utilities";
 import { buildListenerForFile } from "./consistent-barrel-files-listeners";
-import {
-  getOptions,
-  isLintableFilename,
-} from "./consistent-barrel-files-options";
+import { getOptions } from "./consistent-barrel-files-options";
 
 /**
  * ESLint rule requiring consistent barrel file usage by folder.
@@ -17,7 +15,7 @@ const consistentBarrelFilesRule: Rule.RuleModule = {
   create(context: Rule.RuleContext): Rule.RuleListener {
     const { filename, options } = context;
 
-    if (!isLintableFilename(filename)) {
+    if (!isLintableModuleFile(filename)) {
       return {};
     }
 

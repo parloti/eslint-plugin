@@ -68,7 +68,7 @@ const summarizeCustomRuleContract = (
 describe("custom rule registry", () => {
   it("covers every package-owned rule with metadata", () => {
     // Arrange
-    const expectedRuleCount = 17;
+    const expectedRuleCount = 18;
 
     // Act
     const actualRuleSummaries = customRules.map((ruleEntry) =>
@@ -167,6 +167,16 @@ describe("custom rule registry", () => {
         schemaIsArray: true,
         type: "suggestion",
         url: getCustomRuleDocumentationUrl("no-multiple-declarators"),
+      },
+      {
+        createType: "function",
+        description:
+          "Disallow named functions that only delegate directly to another call.",
+        hasMessages: true,
+        ruleName: "no-useless-delegation",
+        schemaIsArray: true,
+        type: "suggestion",
+        url: getCustomRuleDocumentationUrl("no-useless-delegation"),
       },
       {
         createType: "function",

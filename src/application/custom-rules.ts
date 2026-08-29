@@ -11,6 +11,7 @@ import {
   noMultipleDeclaratorsRule,
   noReexportsOutsideBarrelsRule,
   noUnusedExportsRule,
+  noUselessDelegationRule,
   preferInterfaceTypesRule,
   preferViMockedImportRule,
   requireActResultCaptureRule,
@@ -66,6 +67,10 @@ const customRules = [
   {
     rule: noMultipleDeclaratorsRule,
     ruleName: "no-multiple-declarators",
+  },
+  {
+    rule: noUselessDelegationRule,
+    ruleName: "no-useless-delegation",
   },
   {
     rule: preferInterfaceTypesRule,

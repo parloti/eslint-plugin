@@ -10,6 +10,7 @@ export {
   noReexportsOutsideBarrelsRule,
   noUnsafeVitestMockFactoryCastRule,
   noUnusedExportsRule,
+  noUselessDelegationRule,
   preferInterfaceTypesRule,
   preferViMockedImportRule,
   requireActResultCaptureRule,

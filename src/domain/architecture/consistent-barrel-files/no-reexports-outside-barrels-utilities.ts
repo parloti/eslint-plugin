@@ -41,18 +41,6 @@ const getOptions = (
 };
 
 /**
- * Checks whether the filename is valid for linting.
- * @param filename Absolute filename.
- * @returns True when the filename is lintable.
- * @example
- * ```typescript
- * const ok = isLintableFilename("/repo/src/index.ts");
- * ```
- */
-const isLintableFilename = (filename: string): boolean =>
-  isLintableModuleFile(filename);
-
-/**
  * Determines whether a file should be linted by this rule.
  * @param filename Absolute filename.
  * @param options Normalized rule options.
@@ -66,7 +54,9 @@ const shouldLintFile = (
   filename: string,
   options: NoReexportsOutsideBarrelsState,
 ): boolean => {
-  return isLintableFilename(filename) && options.allowedBarrelNames.length > 0;
+  return (
+    isLintableModuleFile(filename) && options.allowedBarrelNames.length > 0
+  );
 };
 
 /**

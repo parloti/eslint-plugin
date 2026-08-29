@@ -6,7 +6,11 @@ export {
   noReexportsOutsideBarrelsRule,
   noUnusedExportsRule,
 } from "./architecture";
-export { noMultipleDeclaratorsRule, preferInterfaceTypesRule } from "./core";
+export {
+  noMultipleDeclaratorsRule,
+  noUselessDelegationRule,
+  preferInterfaceTypesRule,
+} from "./core";
 export {
   noInterfaceMemberDocumentationRule,
   requireExampleLanguageRule,

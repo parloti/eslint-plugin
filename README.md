@@ -100,8 +100,10 @@ void preferInterfaceTypesRule;
 - `codeperfect/no-import-export-aliases`
 - `codeperfect/no-import-export-extensions`
 - `codeperfect/no-interface-member-docs`
+- `codeperfect/no-multiple-declarators`
 - `codeperfect/no-reexports-outside-barrels`
 - `codeperfect/no-unused-exports`
+- `codeperfect/no-useless-delegation`
 - `codeperfect/prefer-interface-types`
 - `codeperfect/prefer-vi-mocked-import`
 - `codeperfect/require-act-result-capture`

@@ -9,6 +9,7 @@ export {
   noMultipleDeclaratorsRule,
   noReexportsOutsideBarrelsRule,
   noUnusedExportsRule,
+  noUselessDelegationRule,
   preferInterfaceTypesRule,
   preferViMockedImportRule,
   requireActResultCaptureRule,

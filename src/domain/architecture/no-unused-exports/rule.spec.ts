@@ -123,32 +123,13 @@ const runMockedRule = async (
     };
   });
 
-  vi.doMock(import("./no-unused-exports-utilities"), async () => {
+  vi.doMock(import("./no-unused-exports-declaration-utilities"), async () => {
     const actual = await vi.importActual<
-      typeof import("./no-unused-exports-utilities")
-    >("./no-unused-exports-utilities");
+      typeof import("./no-unused-exports-declaration-utilities")
+    >("./no-unused-exports-declaration-utilities");
 
     return {
       ...actual,
-      classifyExportUsage: () => classification,
-      collectCrossFileUsages: (
-        _program: unknown,
-        _sourceFilename: unknown,
-        _state: unknown,
-        _repoRoot: unknown,
-        _exportedElement: unknown,
-      ) => {
-        void _program;
-        void _sourceFilename;
-        void _state;
-        void _repoRoot;
-        void _exportedElement;
-        return [
-          {
-            isTestFile: classification === "test-only",
-          },
-        ];
-      },
       collectExportedElements: () =>
         hasExportedElements
           ? [
@@ -159,12 +140,38 @@ const runMockedRule = async (
               },
             ]
           : [],
+    };
+  });
+
+  vi.doMock(import("./no-unused-exports-identifier-utilities"), async () => {
+    const actual = await vi.importActual<
+      typeof import("./no-unused-exports-identifier-utilities")
+    >("./no-unused-exports-identifier-utilities");
+
+    return {
+      ...actual,
       getTypeScriptProgram: () =>
         hasTypeScriptProgram
           ? ({
               getCurrentDirectory: () => "C:/repo",
             } as never)
           : void 0,
+    };
+  });
+
+  vi.doMock(import("./no-unused-exports-usage-utilities"), async () => {
+    const actual = await vi.importActual<
+      typeof import("./no-unused-exports-usage-utilities")
+    >("./no-unused-exports-usage-utilities");
+
+    return {
+      ...actual,
+      classifyExportUsage: () => classification,
+      collectCrossFileUsages: () => [
+        {
+          isTestFile: classification === "test-only",
+        },
+      ],
     };
   });
 

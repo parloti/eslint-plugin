@@ -1,0 +1,1 @@
+export { noUselessDelegationRule } from "./rule";

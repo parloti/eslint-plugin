@@ -29,6 +29,7 @@ const architectureRuleNames = [
 /** Rule names grouped into the core preset. */
 const coreRuleNames = [
   "no-multiple-declarators",
+  "no-useless-delegation",
   "prefer-interface-types",
 ] as const satisfies readonly CodeperfectRuleName[];
 
@@ -65,6 +66,7 @@ const allRuleNames = [
   "no-import-export-extensions",
   "no-interface-member-docs",
   "no-multiple-declarators",
+  "no-useless-delegation",
   "no-reexports-outside-barrels",
   "no-unused-exports",
   "no-unsafe-vitest-mock-factory-cast",

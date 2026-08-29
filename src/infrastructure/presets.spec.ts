@@ -67,6 +67,7 @@ describe("ready-to-use presets", () => {
       "codeperfect/no-reexports-outside-barrels",
       "codeperfect/no-unsafe-vitest-mock-factory-cast",
       "codeperfect/no-unused-exports",
+      "codeperfect/no-useless-delegation",
       "codeperfect/prefer-interface-types",
       "codeperfect/prefer-vi-mocked-import",
       "codeperfect/require-act-result-capture",
@@ -105,6 +106,7 @@ describe("ready-to-use presets", () => {
     // Arrange
     const expectedRuleKeys = [
       "codeperfect/no-multiple-declarators",
+      "codeperfect/no-useless-delegation",
       "codeperfect/prefer-interface-types",
     ];
 

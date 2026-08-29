@@ -50,18 +50,6 @@ const getOptions = (
 };
 
 /**
- * Determines whether a filename is eligible for linting.
- * @param filename Filename to inspect.
- * @returns True when the filename is a lintable module file.
- * @example
- * ```typescript
- * const lintable = isLintableFilename(`${cwd()}/src/index.ts`);
- * ```
- */
-const isLintableFilename = (filename: string): boolean =>
-  isLintableModuleFile(filename);
-
-/**
  * Checks whether a path is nested inside a src directory.
  * @param filename Filename to inspect.
  * @returns True when the file path contains a src path segment.
@@ -89,11 +77,11 @@ const isInSourceDirectory = (filename: string): boolean => {
  */
 const shouldLintFile = (filename: string, allowedNames: string[]): boolean => {
   return (
-    isLintableFilename(filename) &&
+    isLintableModuleFile(filename) &&
     isInSourceDirectory(filename) &&
     allowedNames.length > 0
   );
 };
 
-export { getOptions, isLintableFilename, shouldLintFile };
+export { getOptions, shouldLintFile };
 export type { ConsistentBarrelFilesState };

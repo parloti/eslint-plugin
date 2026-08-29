@@ -2,6 +2,8 @@ import type { Rule } from "eslint";
 
 import path from "node:path";
 
+import { collectExportedElements } from "./no-unused-exports-declaration-utilities";
+import { getTypeScriptProgram } from "./no-unused-exports-identifier-utilities";
 import {
   DEFAULT_PUBLIC_API_FILES,
   DEFAULT_TEST_FILE_PATTERNS,
@@ -12,9 +14,7 @@ import {
 import {
   classifyExportUsage,
   collectCrossFileUsages,
-  collectExportedElements,
-  getTypeScriptProgram,
-} from "./no-unused-exports-utilities";
+} from "./no-unused-exports-usage-utilities";
 
 /** ESLint rule flagging exports unused in production code. */
 const noUnusedExportsRule: Rule.RuleModule = {

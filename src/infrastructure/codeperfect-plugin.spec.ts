@@ -17,6 +17,7 @@ describe("codeperfect plugin", () => {
       "no-reexports-outside-barrels",
       "no-unsafe-vitest-mock-factory-cast",
       "no-unused-exports",
+      "no-useless-delegation",
       "prefer-interface-types",
       "prefer-vi-mocked-import",
       "require-act-result-capture",

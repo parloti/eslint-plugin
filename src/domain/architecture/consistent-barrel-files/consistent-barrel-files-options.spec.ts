@@ -1,11 +1,8 @@
 import { cwd } from "node:process";
 import { describe, expect, it } from "vitest";
 
-import {
-  getOptions,
-  isLintableFilename,
-  shouldLintFile,
-} from "./consistent-barrel-files-options";
+import { isLintableModuleFile } from "./barrel-file-utilities";
+import { getOptions, shouldLintFile } from "./consistent-barrel-files-options";
 
 describe("consistent-barrel-files options", () => {
   it("builds default options", () => {
@@ -25,8 +22,8 @@ describe("consistent-barrel-files options", () => {
 
     // Act
     const result = {
-      emptyFilename: isLintableFilename(""),
-      lintableFilename: isLintableFilename(filename),
+      emptyFilename: isLintableModuleFile(""),
+      lintableFilename: isLintableModuleFile(filename),
     };
 
     // Assert
