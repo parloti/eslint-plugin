@@ -17,7 +17,10 @@ const codePerfect = await config({
 /** Combined ESLint configuration for the workspace manager project. */
 const eslintConfig = defineConfig(
   codePerfect,
-  all,
+  {
+    ...all,
+    files: ["**/*.ts"],
+  },
   {
     files: ["**/*.ts"],
     rules: {

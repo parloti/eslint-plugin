@@ -31,6 +31,7 @@
 
     // Language and Environment
     "experimentalDecorators": true,
+    "target": "esnext",
 
     // Compiler Diagnostics
 
@@ -46,5 +47,5 @@
 
     // Watch Options
   },
-  "exclude": ["dist", "coverage", "node_modules"]
+  "exclude": ["dist", "coverage", "node_modules", "temp"]
 }

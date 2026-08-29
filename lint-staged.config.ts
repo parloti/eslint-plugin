@@ -1,10 +1,20 @@
 import type { Configuration } from "lint-staged";
 
 export default {
-  "!*.{css,scss,sass,htm,html,js,ts}": "npm run prettier:write --if-present",
-  "*.{css,scss,sass}": [
-    "npm run prettier:write --if-present",
-    "npm run stylelint:fix --if-present",
+  "!*.{css,scss,sass,htm,html,js,ts}": [
+    "npx --yes prettier --ignore-unknown --write",
+    [],
   ],
-  "*.{htm,html,js,ts}": "npm run lint:fix --if-present",
+  "*.{css,scss,sass}": [
+    "npx --yes prettier --ignore-unknown --write",
+    [],
+    "npx --yes stylelint --max-warnings=0 --fix ",
+    [],
+  ],
+  "*.{htm,html,js,ts}": [
+    "npx --yes prettier --ignore-unknown --write",
+    [],
+    "npx --yes eslint --no-warn-ignored --fix",
+    [],
+  ],
 } satisfies Configuration;
