@@ -78,14 +78,10 @@ interface ReportingScenario {
  * ```
  */
 const createDefaultMocks = (): ActiveMocks => ({
-  getExamples: vi.fn((commentValue: string): ExampleRecord[] => {
-    void commentValue;
-
-    return [];
-  }),
-  reportExample: vi.fn((context: unknown): void => {
-    void context;
-  }),
+  getExamples: vi.fn<(commentValue: string) => ExampleRecord[]>(
+    (): ExampleRecord[] => [],
+  ),
+  reportExample: vi.fn<(context: unknown) => void>((): undefined => undefined),
 });
 
 /** Active mocked example helpers delegated to by the module factories. */
@@ -163,8 +159,8 @@ const runMockedRule = async (
     reportExample,
   );
   const context = {
-    report(descriptor: Rule.ReportDescriptor): void {
-      void descriptor;
+    report(): void {
+      return void 0;
     },
     sourceCode,
   } as unknown as Rule.RuleContext;
@@ -188,32 +184,27 @@ function createReportingScenario(): ReportingScenario {
 
   return {
     blockComment,
-    getExamples: vi.fn<(commentValue: string) => ExampleRecord[]>(
-      (commentValue) => {
-        void commentValue;
-        return [
-          {
-            content: "first()",
-            endIndex: 0,
-            endOffset: 8,
-            lineIndex: 0,
-            prefix: " * ",
-            startOffset: 0,
-          },
-          {
-            content: "second()",
-            endIndex: 1,
-            endOffset: 17,
-            lineIndex: 1,
-            prefix: " * ",
-            startOffset: 9,
-          },
-        ];
-      },
-    ),
-    reportExample: vi.fn<(context: unknown) => void>((context) => {
-      void context;
+    getExamples: vi.fn<(commentValue: string) => ExampleRecord[]>(() => {
+      return [
+        {
+          content: "first()",
+          endIndex: 0,
+          endOffset: 8,
+          lineIndex: 0,
+          prefix: " * ",
+          startOffset: 0,
+        },
+        {
+          content: "second()",
+          endIndex: 1,
+          endOffset: 17,
+          lineIndex: 1,
+          prefix: " * ",
+          startOffset: 9,
+        },
+      ];
     }),
+    reportExample: vi.fn<(context: unknown) => void>(),
     sourceCode: {
       getAllComments: () => [
         { type: "Line", value: " @example ignored()" },

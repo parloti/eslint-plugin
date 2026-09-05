@@ -117,11 +117,15 @@ const reportMemberDocumentation = (
   for (const tag of memberTags) {
     const removalRange = buildRemovalRange(commentStart, commentText, tag.line);
 
+    const fix = (fixer: Rule.RuleFixer): Rule.Fix =>
+      fixer.removeRange(removalRange);
+
     context.report({
       data: { parameterName: tag.fullName },
-      fix: (fixer: Rule.RuleFixer): Rule.Fix => fixer.removeRange(removalRange),
+      fix,
       messageId: "interfaceMemberDoc",
       node,
+      suggest: [{ fix, messageId: "removeMemberDoc" }],
     });
   }
 };
@@ -277,9 +281,12 @@ const noInterfaceMemberDocumentationRule: Rule.RuleModule = {
       url: "https://github.com/parloti/eslint-plugin/blob/main/docs/rules/no-interface-member-docs.md",
     },
     fixable: "code",
+    hasSuggestions: true,
     messages: {
       interfaceMemberDoc:
         "Document interface members on the interface instead of using @param for {{parameterName}}.",
+      removeMemberDoc:
+        "Remove the @param tag documenting this interface member.",
     },
     schema: [],
     type: "problem",

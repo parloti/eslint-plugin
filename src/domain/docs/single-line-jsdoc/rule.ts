@@ -39,8 +39,6 @@ interface SourceCodeAccess {
     options?: TokenAfterOptions,
   ) => null | TokenWithOptionalRange;
 }
-/** Type alias for comment nodes provided by ESLint. */
-type SourceComment = Comment;
 /** Options used when fetching tokens after comments. */
 interface TokenAfterOptions {
   /** Whether to include comment tokens. */
@@ -69,12 +67,12 @@ interface VariableDeclarationEntry {
  * @returns Token range metadata when available.
  * @example
  * ```typescript
- * getTokenAfterRange({} as SourceCodeAccess, {} as SourceComment);
+ * getTokenAfterRange({} as SourceCodeAccess, {} as Comment);
  * ```
  */
 const getTokenAfterRange = (
   sourceCode: SourceCodeAccess,
-  comment: SourceComment,
+  comment: Comment,
 ): TokenWithRange | undefined => {
   if (typeof sourceCode.getTokenAfter !== "function") {
     return void 0;
@@ -233,12 +231,12 @@ const isFunctionLikeNode = (node: MaybeNode): boolean => {
  * @returns True when the comment targets a function-like node.
  * @example
  * ```typescript
- * shouldSkipForFunction({} as Rule.RuleContext, {} as SourceComment);
+ * shouldSkipForFunction({} as Rule.RuleContext, {} as Comment);
  * ```
  */
 const shouldSkipForFunction = (
   context: Rule.RuleContext,
-  comment: SourceComment,
+  comment: Comment,
 ): boolean => {
   const sourceCode = context.sourceCode as SourceCodeAccess;
   if (typeof sourceCode.getNodeByRangeIndex !== "function") {
@@ -278,7 +276,9 @@ export const singleLineJsdocRule: Rule.RuleModule = {
       url: "https://github.com/parloti/eslint-plugin/blob/main/docs/rules/single-line-jsdoc.md",
     },
     fixable: "code",
+    hasSuggestions: true,
     messages: {
+      collapseToSingleLine: "Collapse this JSDoc comment to a single line.",
       singleLine: "Use a single-line JSDoc comment when it fits on one line.",
     },
     schema: [

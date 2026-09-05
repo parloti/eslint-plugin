@@ -293,6 +293,7 @@ export {
   createImportDeclaration,
   createImportDefaultSpecifier,
   createImportSpecifier,
+  createLiteral,
   createProgram,
   createRepoDirectory,
 };

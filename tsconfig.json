@@ -1,4 +1,8 @@
 {
+  "compilerOptions": {
+    "noEmit": true,
+    "noEmitOnError": true
+  },
   "extends": "./tsconfig.base.json",
   "include": ["**/*.ts", "**/*.d.ts"]
 }

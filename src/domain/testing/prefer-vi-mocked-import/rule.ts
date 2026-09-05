@@ -15,14 +15,19 @@ const preferViMockedImportRule: Rule.RuleModule = {
         }
 
         for (const [index, match] of matches.entries()) {
+          const fix =
+            index === 0
+              ? (fixer: Rule.RuleFixer): Rule.Fix[] =>
+                  buildFixes(matches, fixer)
+              : void 0;
+
           context.report({
-            fix:
-              index === 0
-                ? (fixer: Rule.RuleFixer): Rule.Fix[] =>
-                    buildFixes(matches, fixer)
-                : void 0,
+            ...(fix !== void 0 && { fix }),
             messageId: "preferViMockedImport",
             node: match.node,
+            ...(fix !== void 0 && {
+              suggest: [{ fix, messageId: "inlineViMockedImport" }],
+            }),
           });
         }
       },
@@ -35,7 +40,10 @@ const preferViMockedImportRule: Rule.RuleModule = {
       url: "https://github.com/parloti/eslint-plugin/blob/main/docs/rules/prefer-vi-mocked-import.md",
     },
     fixable: "code",
+    hasSuggestions: true,
     messages: {
+      inlineViMockedImport:
+        "Inline the vi.fn mocks and use vi.mocked(...) for calls.",
       preferViMockedImport:
         "Inline vi.fn mocks in the vi.mock/vi.doMock factory and use vi.mocked(...) for calls.",
     },

@@ -17,26 +17,28 @@ type FixResult = Exclude<ReturnType<Rule.ReportFixer>, null>;
  * createFixer();
  * ```
  */
-const createFixer = (): Parameters<Rule.ReportFixer>[0] => ({
+const createFixer = (): Rule.RuleFixer => ({
   insertTextAfter: (syntaxElement, text): Rule.Fix => {
-    void syntaxElement;
-    return { range: [0, 0], text };
+    const [, endOffset] = syntaxElement.range ?? [0, 0];
+
+    return { range: [endOffset, endOffset], text };
   },
   insertTextAfterRange: (range, text): Rule.Fix => ({ range, text }),
   insertTextBefore: (syntaxElement, text): Rule.Fix => {
-    void syntaxElement;
-    return { range: [0, 0], text };
+    const [startOffset] = syntaxElement.range ?? [0, 0];
+
+    return { range: [startOffset, startOffset], text };
   },
   insertTextBeforeRange: (range, text): Rule.Fix => ({ range, text }),
-  remove: (syntaxElement): Rule.Fix => {
-    void syntaxElement;
-    return { range: [0, 0], text: "" };
-  },
+  remove: (syntaxElement): Rule.Fix => ({
+    range: syntaxElement.range ?? [0, 0],
+    text: "",
+  }),
   removeRange: (range): Rule.Fix => ({ range, text: "" }),
-  replaceText: (syntaxElement, text): Rule.Fix => {
-    void syntaxElement;
-    return { range: [0, 0], text };
-  },
+  replaceText: (syntaxElement, text): Rule.Fix => ({
+    range: syntaxElement.range ?? [0, 0],
+    text,
+  }),
   replaceTextRange: (range, text): Rule.Fix => ({ range, text }),
 });
 

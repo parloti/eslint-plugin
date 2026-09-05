@@ -176,10 +176,13 @@ const reportIfSingleLine = (
     return;
   }
 
+  const fix = createFix(range, singleLineText);
+
   context.report({
-    fix: createFix(range, singleLineText),
+    fix,
     loc,
     messageId: "singleLine",
+    suggest: [{ fix, messageId: "collapseToSingleLine" }],
   });
 };
 

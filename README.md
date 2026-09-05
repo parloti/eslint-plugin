@@ -102,6 +102,7 @@ void preferInterfaceTypesRule;
 - `codeperfect/no-interface-member-docs`
 - `codeperfect/no-multiple-declarators`
 - `codeperfect/no-reexports-outside-barrels`
+- `codeperfect/no-unsafe-vitest-mock-factory-cast`
 - `codeperfect/no-unused-exports`
 - `codeperfect/no-useless-delegation`
 - `codeperfect/prefer-interface-types`

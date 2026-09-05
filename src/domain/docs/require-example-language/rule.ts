@@ -34,7 +34,11 @@ const requireExampleLanguageRule: Rule.RuleModule = {
       url: "https://github.com/parloti/eslint-plugin/blob/main/docs/rules/require-example-language.md",
     },
     fixable: "code",
+    hasSuggestions: true,
     messages: {
+      addFence:
+        "Wrap the @example content in a fenced code block with a language.",
+      addLanguage: "Add a language to the @example fenced code block.",
       contentOutsideFence:
         "@example content must be fully inside fenced code blocks.",
       emptyExample: "@example must include example content.",
@@ -42,6 +46,9 @@ const requireExampleLanguageRule: Rule.RuleModule = {
         "@example must include a fenced code block with a language (e.g. ```typescript).",
       missingLanguage:
         "@example fenced code blocks must specify a language (e.g. ```typescript).",
+      removeEmptyExample: "Remove the empty @example tag.",
+      wrapExampleContentInFence:
+        "Wrap the @example content inside a fenced code block.",
     },
     schema: [],
     type: "problem",

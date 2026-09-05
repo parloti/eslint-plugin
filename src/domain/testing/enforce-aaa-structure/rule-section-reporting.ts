@@ -1,7 +1,7 @@
 import type { Rule } from "eslint";
 
 import type { getFlattenedSections } from "../aaa/analyzer.analysis.helpers";
-import type { SectionComment, TestBlockAnalysis } from "../aaa/types";
+import type { TestBlockAnalysis } from "../aaa/types";
 
 import {
   aaaPhaseOrder,
@@ -16,18 +16,6 @@ type FlattenedSection = ReturnType<typeof getFlattenedSections>[number];
 
 /** Union of valid AAA phase labels emitted for flattened sections. */
 type FlattenedSectionPhase = FlattenedSection["phase"];
-
-/** Composite input for reporting one AAA section issue. */
-interface ReportSectionIssueInput {
-  /** Active ESLint rule context. */
-  context: Rule.RuleContext;
-
-  /** Message identifier to report for the section. */
-  messageId: "duplicateSection" | "invalidOrder";
-
-  /** Section comment and phase metadata under inspection. */
-  section: FlattenedSection;
-}
 
 /** Composite input for advancing the AAA section ordering state. */
 interface UpdateSectionOrderInput {
@@ -61,23 +49,33 @@ function reportBlankLineSeparators(
 
   for (const sectionComment of getPhaseBoundaryComments(analysis)) {
     if (
-      sectionComment.comment !== firstSectionComment &&
-      !hasBlankLineBeforeComment(analysis.sourceText, sectionComment.comment)
+      sectionComment.comment === firstSectionComment ||
+      hasBlankLineBeforeComment(analysis.sourceText, sectionComment.comment)
     ) {
-      context.report({
-        data: { section: sectionComment.phases.join(" & ") },
-        fix: (fixer) =>
-          fixer.insertTextBeforeRange(
-            getLineStartRange(
-              analysis.sourceText,
-              sectionComment.comment.loc.start.line,
-            ),
-            analysis.newline,
-          ),
-        messageId: "blankLineBeforeSection",
-        node: sectionComment.comment,
-      });
+      continue;
     }
+
+    const fix = (fixer: Rule.RuleFixer): Rule.Fix =>
+      fixer.insertTextBeforeRange(
+        getLineStartRange(
+          analysis.sourceText,
+          sectionComment.comment.loc.start.line,
+        ),
+        analysis.newline,
+      );
+
+    context.report({
+      data: { section: sectionComment.phases.join(" & ") },
+      fix,
+      messageId: "blankLineBeforeSection",
+      node: sectionComment.comment,
+      suggest: [
+        {
+          fix,
+          messageId: "addBlankLineBeforeSection",
+        },
+      ],
+    });
   }
 }
 
@@ -150,37 +148,6 @@ function reportEmptySections(
 }
 
 /**
- * Reports a single out-of-order section pair.
- * @param context ESLint rule context.
- * @param previous Previous section comment.
- * @param current Current section comment.
- * @example
- * ```typescript
- * reportIfOutOfOrder({ report() {} } as never, { comment: {} as never, phases: [] }, { comment: {} as never, phases: [] });
- * ```
- */
-function reportIfOutOfOrder(
-  context: Rule.RuleContext,
-  previous: SectionComment,
-  current: SectionComment,
-): void {
-  const maxPreviousOrder = Math.max(
-    ...previous.phases.map((phase) => aaaPhaseOrder[phase]),
-  );
-  const minCurrentOrder = Math.min(
-    ...current.phases.map((phase) => aaaPhaseOrder[phase]),
-  );
-
-  if (minCurrentOrder <= maxPreviousOrder) {
-    context.report({
-      data: { section: current.phases.join(" & ") },
-      messageId: "outOfOrderSection",
-      node: current.comment,
-    });
-  }
-}
-
-/**
  * Reports any AAA section markers that are missing from a supported test block.
  * @param context ESLint rule context.
  * @param analysis Parsed test-block analysis.
@@ -209,15 +176,20 @@ function reportMissingSections(
     return;
   }
 
+  const fix =
+    analysis.bodyLineCount >= 3
+      ? (fixer: Rule.RuleFixer): Rule.Fix[] =>
+          buildMissingSectionFixes(analysis, missingSections, fixer)
+      : void 0;
+
   context.report({
     data: { sections: missingSections.join(", ") },
-    fix:
-      analysis.bodyLineCount >= 3
-        ? (fixer: Rule.RuleFixer): Rule.Fix[] =>
-            buildMissingSectionFixes(analysis, missingSections, fixer)
-        : void 0,
+    ...(fix !== void 0 && { fix }),
     messageId: "missingSections",
     node: analysis.callExpression,
+    ...(fix !== void 0 && {
+      suggest: [{ fix, messageId: "addMissingSections" }],
+    }),
   });
 }
 
@@ -234,34 +206,30 @@ function reportOutOfOrderSections(
   context: Rule.RuleContext,
   analysis: TestBlockAnalysis,
 ): void {
-  const comments = analysis.sectionComments;
-  const lastIndex = comments.length - 1;
+  for (let index = 0; index < analysis.sectionComments.length - 1; index += 1) {
+    const previous = analysis.sectionComments[index];
+    const current = analysis.sectionComments[index + 1];
 
-  for (let index = 0; index < lastIndex; index += 1) {
-    const previous = comments[index];
-    const current = comments[index + 1];
+    if (previous === void 0 || current === void 0) {
+      continue;
+    }
 
-    if (previous && current) reportIfOutOfOrder(context, previous, current);
+    const maxPreviousOrder = Math.max(
+      ...previous.phases.map((phase) => aaaPhaseOrder[phase]),
+    );
+    const minCurrentOrder = Math.min(
+      ...current.phases.map((phase) => aaaPhaseOrder[phase]),
+    );
+
+    if (minCurrentOrder <= maxPreviousOrder) {
+      context.report({
+        data: { section: current.phases.join(" & ") },
+        messageId: "outOfOrderSection",
+        node: current.comment,
+      });
+    }
   }
 }
-
-/**
- * Reports a duplicate or out-of-order AAA section comment.
- * @param input Composite reporting input for the current section.
- * @example
- * ```typescript
- * reportSectionIssue({ context: {} as Rule.RuleContext, messageId: "duplicateSection", section: {} as never });
- * ```
- */
-const reportSectionIssue = (input: ReportSectionIssueInput): void => {
-  const { context, messageId, section } = input;
-
-  context.report({
-    data: { section: section.phase },
-    messageId,
-    node: section.comment,
-  });
-};
 
 /**
  * Tracks the current AAA ordering state for one flattened section.
@@ -276,13 +244,21 @@ const updateSectionOrder = (input: UpdateSectionOrderInput): number => {
   const { context, lastPhaseOrder, section, seenPhases } = input;
 
   if (seenPhases.has(section.phase)) {
-    reportSectionIssue({ context, messageId: "duplicateSection", section });
+    context.report({
+      data: { section: section.phase },
+      messageId: "duplicateSection",
+      node: section.comment,
+    });
     return lastPhaseOrder;
   }
 
   const currentPhaseOrder = aaaPhaseOrder[section.phase];
   if (currentPhaseOrder < lastPhaseOrder) {
-    reportSectionIssue({ context, messageId: "invalidOrder", section });
+    context.report({
+      data: { section: section.phase },
+      messageId: "invalidOrder",
+      node: section.comment,
+    });
   }
 
   seenPhases.add(section.phase);

@@ -116,17 +116,28 @@ function buildReportDescriptor(
       : (fixer: Rule.RuleFixer): Iterable<Rule.Fix> | Rule.Fix =>
           fix(fixer) ?? [];
   const loc = getReportLocation(comment, example);
+  const suggest =
+    reportFix === void 0
+      ? void 0
+      : [
+          {
+            fix: reportFix,
+            messageId: getSuggestionMessageId(problem),
+          },
+        ];
 
   if (loc !== void 0) {
     return {
-      fix: reportFix,
+      ...(reportFix !== void 0 && { fix: reportFix }),
+      ...(suggest !== void 0 && { suggest }),
       loc,
       messageId: problem,
     };
   }
 
   return {
-    fix: reportFix,
+    ...(reportFix !== void 0 && { fix: reportFix }),
+    ...(suggest !== void 0 && { suggest }),
     messageId: problem,
     node: sourceCode.ast,
   };
@@ -218,6 +229,32 @@ function getReportLocation(
     end: { column: 1, line },
     start: { column: 0, line },
   };
+}
+
+/**
+ * Resolves the suggestion message id that corresponds to a problem.
+ * @param problem Problem message id emitted for the example.
+ * @returns Suggestion message id for the matching fix.
+ * @example
+ * ```typescript
+ * const messageId = getSuggestionMessageId("missingLanguage");
+ * ```
+ */
+function getSuggestionMessageId(problem: Problem): string {
+  switch (problem) {
+    case "contentOutsideFence": {
+      return "wrapExampleContentInFence";
+    }
+    case "emptyExample": {
+      return "removeEmptyExample";
+    }
+    case "missingFence": {
+      return "addFence";
+    }
+    case "missingLanguage": {
+      return "addLanguage";
+    }
+  }
 }
 
 /**

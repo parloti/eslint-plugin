@@ -25,15 +25,6 @@ type LocatedNode<TNode extends ESTree.Node = ESTree.Node> = TNode & {
   range: [number, number];
 };
 
-/** Section comment and the AAA phases it declares. */
-interface SectionComment {
-  /** Located line comment used as the section marker. */
-  comment: LocatedComment;
-
-  /** Phases declared by the section marker. */
-  phases: AaaPhase[];
-}
-
 /** Raw source comment nodes returned by ESLint. */
 type SourceComment = ReturnType<
   Rule.RuleContext["sourceCode"]["getAllComments"]
@@ -66,7 +57,12 @@ interface TestBlockAnalysis {
   newline: "\n" | "\r\n";
 
   /** Ordered AAA section comments within the callback body. */
-  sectionComments: SectionComment[];
+  sectionComments: {
+    /** Located line comment used as the section marker. */
+    comment: LocatedComment;
+    /** Phases declared by the section marker. */
+    phases: AaaPhase[];
+  }[];
 
   /** Full source text for the analyzed file. */
   sourceText: string;
@@ -79,7 +75,6 @@ export type {
   AaaPhase,
   LocatedComment,
   LocatedNode,
-  SectionComment,
   SourceComment,
   TestBlockAnalysis,
 };

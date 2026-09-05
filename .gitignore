@@ -53,6 +53,7 @@ temp/
 .eslintcache
 coverage/
 .vscode-test/
+.stylelintcache
 
 # Angular build cache
 .angular/

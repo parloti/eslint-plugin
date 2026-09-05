@@ -52,9 +52,13 @@ const enforceAaaStructureRule: Rule.RuleModule = {
       "Require explicit AAA markers, enforce section order and uniqueness, and keep setup, action, and assertions in their intended phases.",
     ),
     fixable: "code",
+    hasSuggestions: true,
     messages: {
       actionInArrange:
         "Keep the function under test out of Arrange; reserve Arrange for setup only.",
+      addBlankLineBeforeSection:
+        "Insert a blank line before the // {{section}} section comment.",
+      addMissingSections: "Add the missing AAA section comments: {{sections}}.",
       assertionOutsideAssert:
         "Move assertions into the // Assert section so test logic does not leak earlier.",
       asyncInArrange: "Do not trigger async behavior in Arrange.",

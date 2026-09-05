@@ -41,25 +41,8 @@ const eslintConfig = defineConfig(
   },
   {
     files: ["**/*.ts"],
-    name: "unicorn conflicts",
     rules: {
-      "unicorn/comment-content": "off",
-      "unicorn/consistent-arrow-return-style": "off",
-      "unicorn/consistent-boolean-name": "off",
-      "unicorn/consistent-class-member-order": "off",
-      "unicorn/filename-case": [
-        "error",
-        { case: "kebabCase", ignore: ["^__tests__$"] },
-      ],
-      "unicorn/no-non-function-verb-prefix": "off",
-      "unicorn/prefer-iterator-concat": "off",
-    },
-  },
-  {
-    files: ["**/*.spec.ts"],
-    name: "codeperfect/assert-actual-expected-names precedence",
-    rules: {
-      "unicorn/consistent-boolean-name": ["error", { ignore: ["^actual"] }],
+      "eslint-plugin/require-meta-has-suggestions": "off",
     },
   },
 );

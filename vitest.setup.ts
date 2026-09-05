@@ -134,18 +134,18 @@ const mockClassFactory = <TInstance extends object>(
 
 Object.defineProperties(globalThis, {
   createMockProxy: {
-    configurable: false,
+    configurable: true,
     value: mockProxyFactory,
     writable: false,
   },
-  mockClass: { configurable: false, value: mockClassFactory, writable: false },
+  mockClass: { configurable: true, value: mockClassFactory, writable: false },
   mockClassInstance: {
-    configurable: false,
+    configurable: true,
     value: mockClassInstanceFactory,
     writable: false,
   },
   safeMock: {
-    configurable: false,
+    configurable: true,
     value: mockClassInstanceFactory,
     writable: false,
   },

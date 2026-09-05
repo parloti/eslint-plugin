@@ -123,23 +123,6 @@ function collectRestPatternIdentifiers(
 }
 
 /**
- * Ignores pattern kinds that do not declare identifiers.
- * @param pattern Pattern to ignore.
- * @param identifiers Identifier set left unchanged.
- * @example
- * ```typescript
- * collectUnsupportedPatternIdentifiers({ object: { name: "value", type: "Identifier" }, property: { name: "member", type: "Identifier" }, computed: false, optional: false, type: "MemberExpression" }, new Set<string>());
- * ```
- */
-function collectUnsupportedPatternIdentifiers(
-  pattern: ESTree.Pattern,
-  identifiers: Set<string>,
-): void {
-  void pattern;
-  void identifiers;
-}
-
-/**
  * Gets the identifier collector for one supported pattern kind.
  * @param pattern Pattern whose collector is needed.
  * @returns Collector for the pattern, when one exists.
@@ -162,9 +145,6 @@ function getPatternIdentifierCollector(
     case "Identifier": {
       return collectIdentifierPatternIdentifiers;
     }
-    case "MemberExpression": {
-      return collectUnsupportedPatternIdentifiers;
-    }
     case "ObjectPattern": {
       return collectObjectPatternIdentifiers;
     }
@@ -172,7 +152,7 @@ function getPatternIdentifierCollector(
       return collectRestPatternIdentifiers;
     }
     default: {
-      return collectUnsupportedPatternIdentifiers;
+      return (): void => void 0;
     }
   }
 }

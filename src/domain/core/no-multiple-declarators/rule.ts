@@ -75,6 +75,9 @@ const reportVariableDeclaration = (
     ...(fix !== void 0 && { fix }),
     messageId: "singleDeclarator",
     node: node as unknown as Rule.Node,
+    ...(fix !== void 0 && {
+      suggest: [{ fix, messageId: "splitDeclaration" }],
+    }),
   });
 };
 
@@ -93,9 +96,12 @@ const noMultipleDeclaratorsRule: Rule.RuleModule = {
       url: "https://github.com/parloti/eslint-plugin/blob/main/docs/rules/no-multiple-declarators.md",
     },
     fixable: "code",
+    hasSuggestions: true,
     messages: {
       singleDeclarator:
         "Declare exactly one variable per declaration statement.",
+      splitDeclaration:
+        "Split this declaration into separate single-variable statements.",
     },
     schema: [],
     type: "suggestion",
