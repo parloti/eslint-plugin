@@ -173,11 +173,35 @@ function isMeaningfulActStatement(statement: ESTree.Statement): boolean {
   if (expression === void 0) {
     return false;
   }
-  return (
-    isActionExpression(expression) &&
-    !isUtilityLikeExpression(expression) &&
-    !hasAssertion(statement)
-  );
+  if (hasAssertion(statement)) {
+    return false;
+  }
+  if (isActionExpression(expression)) {
+    if (
+      statement.type === "VariableDeclaration" &&
+      expression.type === "NewExpression"
+    ) {
+      return false;
+    }
+    return !isUtilityLikeExpression(expression);
+  }
+  if (
+    statement.type !== "VariableDeclaration" ||
+    expression.type !== "ObjectExpression"
+  ) {
+    return false;
+  }
+
+  let hasMeaningfulAction = false;
+  visitStatementWithoutDeferredBodies(statement, (node) => {
+    if (
+      (node.type === "CallExpression" || node.type === "NewExpression") &&
+      !isUtilityLikeExpression(node)
+    ) {
+      hasMeaningfulAction = true;
+    }
+  });
+  return hasMeaningfulAction;
 }
 
 /**
@@ -218,6 +242,12 @@ function isSetupLikeStatement(statement: ESTree.Statement): boolean {
         return true;
       }
       const init = unwrapExpression(declaration.init);
+      if (init === void 0) {
+        return true;
+      }
+      if (init.type === "NewExpression") {
+        return true;
+      }
       return !isActionExpression(init) || isUtilityLikeExpression(init);
     });
   }

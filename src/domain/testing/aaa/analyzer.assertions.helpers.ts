@@ -9,6 +9,7 @@ import {
   hasEvaluatedAssertionActual,
   isAssertionCall,
 } from "./analyzer.assertions.operands";
+import { getExpressionName } from "./analyzer.super";
 import { visitNode } from "./analyzer.super.helpers";
 
 /** Identifier names extracted from an assertion statement. */
@@ -171,6 +172,32 @@ function isActionExpression(
 }
 
 /**
+ * Checks whether an assertion actual is a local collection query.
+ * @param expression Assertion actual expression.
+ * @returns True when the expression is a local collection query.
+ * @example
+ * ```typescript
+ * isAssertionLocalExpression({} as ESTree.Expression);
+ * ```
+ */
+function isAssertionLocalExpression(
+  expression: ESTree.Expression | undefined,
+): boolean {
+  const methodName =
+    expression?.type === "CallExpression" &&
+    expression.callee.type === "MemberExpression"
+      ? getExpressionName(expression.callee)
+      : void 0;
+
+  return (
+    methodName !== void 0 &&
+    ["every", "filter", "find", "get", "includes", "map", "some"].includes(
+      methodName,
+    )
+  );
+}
+
+/**
  * Checks Assert statement validity.
  * @param statement Input statement value.
  * @returns Return value output.
@@ -183,9 +210,18 @@ function isValidAssertStatement(statement: ESTree.Statement): boolean {
   if (hasAssertion(statement)) {
     const assertionExpression = getAssertionExpression(statement);
 
+    if (assertionExpression === void 0) {
+      return true;
+    }
+
+    const operands =
+      getExpectOperands(assertionExpression) ??
+      getAssertOperands(assertionExpression);
+    const actual = operands?.actual;
+
     return (
-      assertionExpression === void 0 ||
-      !hasEvaluatedAssertionActual(assertionExpression, isActionExpression)
+      !hasEvaluatedAssertionActual(assertionExpression, isActionExpression) ||
+      isAssertionLocalExpression(actual)
     );
   }
   if (statement.type !== "VariableDeclaration") {

@@ -24,6 +24,7 @@ Within the `// Act` section, the rule inspects:
 - function calls
 - method calls
 - constructor calls (`new ...`)
+- awaited calls, using the awaited return type to distinguish `Promise<void>` from meaningful results
 
 ### Required behavior
 
@@ -63,6 +64,8 @@ Examples:
 - rule listeners (`create(...)`)
 - event-style handlers
 - registration APIs
+
+Constructor-created fixtures and conventional setup values such as `Context`, `Fixture`, `Mock`, and `Options` are classified as Arrange setup by the shared analyzer and are not reported as uncaptured Act results.
 
 ### Disallowed patterns
 

@@ -17,24 +17,31 @@ const arrayMutationMethods = new Set([
 
 /** Names that usually signal Arrange-oriented helper calls. */
 const setupLikeNames =
-  /^(?:arrange|build|create|fixture|get|given|make|mock|parse|seed|setup|spy|stub|write)/u;
+  /^(?:arrange|build|create|fixture|get|given|make|mock|parse|seed|setup|spy|stub|write)|(?:Context|Fixture|Mock|Options)$/u;
 
 /** Call names that should be treated as utility operations instead of Act steps. */
 const utilityMethodNames = new Set([
   "advanceTimersByTime",
   "clearAllMocks",
   "debug",
+  "every",
+  "filter",
+  "find",
   "fn",
+  "includes",
   "info",
   "join",
   "log",
+  "map",
   "mockImplementation",
   "mockRejectedValue",
   "mockResolvedValue",
   "mockReturnValue",
   "push",
+  "repeat",
   "resetAllMocks",
   "resolve",
+  "some",
   "useFakeTimers",
   "warn",
 ]);
@@ -223,7 +230,7 @@ function isUtilityNamespaceCall(
   return (
     expression.callee.type === "MemberExpression" &&
     expression.callee.object.type === "Identifier" &&
-    ["console", "vi"].includes(expression.callee.object.name)
+    ["console", "fs", "vi"].includes(expression.callee.object.name)
   );
 }
 

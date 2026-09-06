@@ -145,19 +145,24 @@ function returnsVoid(
 ): boolean {
   if (
     statement.type !== "ExpressionStatement" ||
-    statement.expression.type !== "CallExpression"
+    !["AwaitExpression", "CallExpression"].includes(statement.expression.type)
   ) {
     return false;
   }
 
   try {
     const services = ESLintUtils.getParserServices(context as never);
+    const expression = statement.expression;
     const typeNode = services.esTreeNodeToTSNodeMap.get(
-      statement.expression as never,
+      (expression.type === "AwaitExpression"
+        ? expression.argument
+        : expression) as never,
     );
-    const type = services.program.getTypeChecker().getTypeAtLocation(typeNode);
+    const checker = services.program.getTypeChecker();
+    const type = checker.getTypeAtLocation(typeNode);
+    const awaitedType = checker.getAwaitedType(type);
 
-    return (type.flags & ts.TypeFlags.Void) !== 0;
+    return ((awaitedType ?? type).flags & ts.TypeFlags.Void) !== 0;
   } catch {
     return false;
   }

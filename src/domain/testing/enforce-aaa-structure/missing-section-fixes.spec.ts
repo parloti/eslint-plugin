@@ -22,13 +22,13 @@ describe("enforce-aaa-structure missing-section-fixes", () => {
       "const arrange = createArrange();",
       "expect(actualResult).toBe(expectedResult);",
     ].join("\n");
-    const secondStatementStart = sourceText.indexOf("\n") + 1;
     const analysis = {
       newline: "\n",
+      sectionComments: [],
       sourceText,
       statements: [
         { node: { range: [0, 31] } },
-        { node: { range: [secondStatementStart, sourceText.length] } },
+        { node: { range: [sourceText.indexOf("\n") + 1, sourceText.length] } },
       ],
     } as never;
     const fixer = {
@@ -48,10 +48,7 @@ describe("enforce-aaa-structure missing-section-fixes", () => {
     // Assert
     expect(actualFixes).toStrictEqual([
       { range: [0, 0], text: "// Arrange\n" },
-      {
-        range: [secondStatementStart, secondStatementStart],
-        text: "\n// Act & Assert\n",
-      },
+      { range: [33, 33], text: "// Act & Assert\n" },
     ]);
   });
 
@@ -66,7 +63,12 @@ describe("enforce-aaa-structure missing-section-fixes", () => {
 
     // Act
     const actualFixes = buildMissingSectionFixes(
-      { newline: "\n", sourceText: "", statements: [] } as never,
+      {
+        newline: "\n",
+        sectionComments: [],
+        sourceText: "",
+        statements: [],
+      } as never,
       ["Arrange"],
       fixer,
     );
@@ -89,6 +91,7 @@ describe("enforce-aaa-structure missing-section-fixes", () => {
     const actualFixes = buildMissingSectionFixes(
       {
         newline: "\n",
+        sectionComments: [],
         sourceText,
         statements: [
           { node: { range: [0, 8] } },
@@ -119,6 +122,7 @@ describe("enforce-aaa-structure missing-section-fixes", () => {
     const actualFixes = buildMissingSectionFixes(
       {
         newline: "\n",
+        sectionComments: [],
         sourceText,
         statements: [{ node: { range: [1, sourceText.length] } }],
       } as never,
@@ -143,6 +147,7 @@ describe("enforce-aaa-structure missing-section-fixes", () => {
     const actualFixes = buildMissingSectionFixes(
       {
         newline: "\n",
+        sectionComments: [],
         sourceText: "run();",
         statements: [void 0 as never, { node: { range: [0, 6] } }],
       } as never,
@@ -152,5 +157,79 @@ describe("enforce-aaa-structure missing-section-fixes", () => {
 
     // Assert
     expect(actualFixes).toStrictEqual([]);
+  });
+
+  it("uses existing statement anchors for each missing phase", () => {
+    // Arrange
+    const sourceText = ["  arrange();", "  act();", "  assert();"].join("\n");
+    const fixer = {
+      insertTextBeforeRange: (range: [number, number], text: string) => ({
+        range,
+        text,
+      }),
+    } as Rule.RuleFixer;
+
+    // Act
+    const actualFixes = buildMissingSectionFixes(
+      {
+        newline: "\n",
+        sectionComments: [{ value: " Arrange" }],
+        sourceText,
+        statements: [
+          { node: { range: [0, 12] } },
+          { node: { range: [13, 21] } },
+          { node: { range: [22, sourceText.length] } },
+        ],
+      } as never,
+      ["Assert", "Act", "Arrange"],
+      fixer,
+    );
+
+    // Assert
+    expect(actualFixes).toStrictEqual([
+      { range: [22, 22], text: "\n  // Assert\n" },
+      { range: [13, 13], text: "\n  // Act\n" },
+      { range: [0, 0], text: "  // Arrange\n" },
+    ]);
+  });
+
+  it("groups phases sharing an anchor and returns no fixes without anchor statements", () => {
+    // Arrange
+    const fixer = {
+      insertTextBeforeRange: (range: [number, number], text: string) => ({
+        range,
+        text,
+      }),
+    } as Rule.RuleFixer;
+
+    // Act
+    const actual = {
+      groupedFixes: buildMissingSectionFixes(
+        {
+          newline: "\n",
+          sectionComments: [{ value: " Arrange" }],
+          sourceText: "  run();",
+          statements: [{ node: { range: [0, 8] } }],
+        } as never,
+        ["Assert", "Act", "Arrange"],
+        fixer,
+      ),
+      missingAnchorFixes: buildMissingSectionFixes(
+        {
+          newline: "\n",
+          sectionComments: [{ value: " Arrange" }],
+          sourceText: "",
+          statements: [],
+        } as never,
+        ["Arrange"],
+        fixer,
+      ),
+    };
+
+    // Assert
+    expect(actual.groupedFixes).toStrictEqual([
+      { range: [0, 0], text: "  // Arrange & Act & Assert\n" },
+    ]);
+    expect(actual.missingAnchorFixes).toStrictEqual([]);
   });
 });

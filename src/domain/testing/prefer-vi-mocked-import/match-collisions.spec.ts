@@ -52,4 +52,81 @@ describe("prefer-vi-mocked-import rule (collision safety)", () => {
     expect(actual.messages).toStrictEqual([]);
     expect(actual.output).toBe(input);
   });
+
+  it("does not report when the target module already imports the export under an alias", () => {
+    // Arrange
+    const input = [
+      'import { d as existing } from "./mod";',
+      "const c = vi.fn();",
+      'vi.mock(import("./mod"), () => ({ d: c }));',
+      "c.mockResolvedValue(void 0);",
+      "",
+    ].join("\n");
+
+    // Act
+    const actual = runFix(input);
+
+    // Assert
+    expect(actual.messages).toStrictEqual([]);
+    expect(actual.output).toBe(input);
+  });
+
+  it("allows namespace imports from the target module", () => {
+    // Arrange
+    const input = [
+      'import * as mod from "./mod";',
+      "const c = vi.fn();",
+      'vi.mock(import("./mod"), () => ({ d: c }));',
+      "c.mockResolvedValue(void 0);",
+      "",
+    ].join("\n");
+
+    // Act
+    const actual = runFix(input);
+
+    // Assert
+    expect(actual.output).toContain('import { d } from "./mod";');
+    expect(actual.messages).toStrictEqual([]);
+  });
+
+  it("rejects string-named target imports as unsafe", () => {
+    // Arrange
+    const input = [
+      'import { "d" as existing } from "./mod";',
+      "const c = vi.fn();",
+      'vi.mock(import("./mod"), () => ({ d: c }));',
+      "c.mockResolvedValue(void 0);",
+      "",
+    ].join("\n");
+
+    // Act
+    const actual = runFix(input);
+
+    // Assert
+    expect(actual.messages).toStrictEqual([]);
+    expect(actual.output).toBe(input);
+  });
+
+  it("collects names from nested top-level binding patterns before checking collisions", () => {
+    // Arrange
+    const input = [
+      "const [first, , ...remaining] = values;",
+      "const [withDefault = fallback] = defaults;",
+      "const { property: nested, ...rest } = objectValue;",
+      "const [d] = conflictingValues;",
+      "function helper() {}",
+      "class Fixture {}",
+      "const c = vi.fn();",
+      'vi.mock(import("./mod"), () => ({ d: c }));',
+      "c.mockResolvedValue(void 0);",
+      "",
+    ].join("\n");
+
+    // Act
+    const actual = runFix(input);
+
+    // Assert
+    expect(actual.messages).toStrictEqual([]);
+    expect(actual.output).toBe(input);
+  });
 });

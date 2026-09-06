@@ -231,6 +231,7 @@ function shouldInsertLeadingBlankLine(
   previousLine: string,
 ): boolean {
   return (
+    phases.length === 1 &&
     phases.some((phase) => phase !== "Arrange") &&
     previousLine.trim().length > 0
   );

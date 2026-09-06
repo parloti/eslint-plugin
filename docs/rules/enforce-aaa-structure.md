@@ -15,6 +15,8 @@ AAA tests are easier to follow when each phase appears once and in a predictable
 
 The rule also protects section quality by requiring meaningful section content, preserving section boundaries with blank-line separators, and reporting phase-purity violations when setup, action, and assertion behavior leaks across sections.
 
+The analyzer recognizes conventional setup factories by name, including suffixes such as `Context`, `Fixture`, `Mock`, and `Options`. Constructor-created fixtures and filesystem setup calls such as `fs.mkdirSync` are treated as Arrange operations. Collection queries used to derive assertion-local values are not treated as additional SUT actions.
+
 ## Rule Details
 
 The rule applies to tests that use AAA comments:
@@ -195,3 +197,5 @@ it("allows tests without AAA comments", () => {
   expect(result).toBe(1);
 });
 ```
+
+When an unmarked test is autofixed, the rule adds one `// Arrange & Act & Assert` marker at the start of the test. Tests with existing markers are not rearranged automatically because their phase boundaries require local judgment.
