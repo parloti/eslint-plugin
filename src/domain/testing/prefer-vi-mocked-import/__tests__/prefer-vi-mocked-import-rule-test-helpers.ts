@@ -37,14 +37,10 @@ const runFix = (code: string): FixRunResult => {
         },
         plugins: {
           codeperfect: {
-            rules: {
-              "prefer-vi-mocked-import": preferViMockedImportRule,
-            },
+            rules: { "prefer-vi-mocked-import": preferViMockedImportRule },
           },
         },
-        rules: {
-          "codeperfect/prefer-vi-mocked-import": "error",
-        },
+        rules: { "codeperfect/prefer-vi-mocked-import": "error" },
       },
     ],
     { filename: "example.spec.ts" },

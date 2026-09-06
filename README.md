@@ -52,13 +52,8 @@ import codeperfectPlugin from "@codeperfect/eslint-plugin";
 
 export default defineConfig({
   files: ["**/*.ts"],
-  languageOptions: {
-    parser,
-    sourceType: "module",
-  },
-  plugins: {
-    codeperfect: codeperfectPlugin,
-  },
+  languageOptions: { parser, sourceType: "module" },
+  plugins: { codeperfect: codeperfectPlugin },
   rules: {
     "codeperfect/prefer-interface-types": "error",
     "codeperfect/require-example-language": "error",

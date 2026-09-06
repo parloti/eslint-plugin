@@ -104,10 +104,7 @@ describe("single-line-jsdoc utilities", () => {
       reportIfSingleLine(
         context,
         {
-          loc: {
-            end: { column: 0, line: 3 },
-            start: { column: 79, line: 1 },
-          },
+          loc: { end: { column: 0, line: 3 }, start: { column: 79, line: 1 } },
           range: [0, 10],
           type: "Block",
           value:
@@ -117,12 +114,7 @@ describe("single-line-jsdoc utilities", () => {
       );
       reportIfSingleLine(
         context,
-        {
-          loc: void 0,
-          range: [0, 10],
-          type: "Block",
-          value: "*\n * ok\n ",
-        },
+        { loc: void 0, range: [0, 10], type: "Block", value: "*\n * ok\n " },
         80,
       );
 

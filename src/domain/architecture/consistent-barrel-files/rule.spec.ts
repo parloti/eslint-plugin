@@ -41,10 +41,7 @@ const runRule = (
     cwd: cwd(),
     filename,
     id: "consistent-barrel-files",
-    languageOptions: {
-      ecmaVersion: "latest",
-      sourceType: "module",
-    },
+    languageOptions: { ecmaVersion: "latest", sourceType: "module" },
     options: options === void 0 ? [] : [options],
     parserOptions: {},
     parserPath: void 0,

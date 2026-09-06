@@ -47,9 +47,7 @@ const codeperfectRules = {
 
 /** ESLint plugin object exported by the package. */
 const codeperfectPlugin = {
-  meta: {
-    name: "@codeperfect/eslint-plugin",
-  },
+  meta: { name: "@codeperfect/eslint-plugin" },
   rules: codeperfectRules,
 } satisfies NonNullable<Linter.Config["plugins"]>[string];
 

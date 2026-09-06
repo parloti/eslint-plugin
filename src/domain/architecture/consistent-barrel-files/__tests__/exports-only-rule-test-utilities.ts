@@ -85,10 +85,7 @@ const createRuleContext = (
     cwd: cwd(),
     filename: parameters.filename,
     id: "barrel-files-exports-only",
-    languageOptions: {
-      ecmaVersion: "latest",
-      sourceType: "module",
-    },
+    languageOptions: { ecmaVersion: "latest", sourceType: "module" },
     options: parameters.options,
     parserOptions: {},
     parserPath: void 0,
@@ -119,12 +116,7 @@ const runRule = (
 ): RuleReport[] => {
   const reports: RuleReport[] = [];
   const sourceCode = new SourceCode("", createProgram(body));
-  const context = createRuleContext({
-    filename,
-    options,
-    reports,
-    sourceCode,
-  });
+  const context = createRuleContext({ filename, options, reports, sourceCode });
   const listeners = barrelFilesExportsOnlyRule.create(context);
   const programListener = listeners.Program;
 

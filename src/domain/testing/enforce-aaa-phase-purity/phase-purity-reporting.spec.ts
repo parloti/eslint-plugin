@@ -139,17 +139,11 @@ describe("enforce-aaa-phase-purity phase-purity-reporting", () => {
     // Arrange
     const analysis = createAnalysis([
       {
-        node: {
-          containsAssertion: true,
-          type: "ExpressionStatement",
-        },
+        node: { containsAssertion: true, type: "ExpressionStatement" },
         phases: ["Arrange", "Act"],
       },
       {
-        node: {
-          containsMutation: true,
-          type: "ExpressionStatement",
-        },
+        node: { containsMutation: true, type: "ExpressionStatement" },
         phases: ["Act", "Assert"],
       },
       {

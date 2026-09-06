@@ -141,9 +141,7 @@ describe("no reexports outside barrels rule (skips)", () => {
   it("skips barrel files", () => {
     // Arrange
     const body = createBody(createExportAll());
-    const options = {
-      allowedBarrelNames: ["index"],
-    };
+    const options = { allowedBarrelNames: ["index"] };
 
     // Act
     const actualReports = runTemporaryIndex(body, options);

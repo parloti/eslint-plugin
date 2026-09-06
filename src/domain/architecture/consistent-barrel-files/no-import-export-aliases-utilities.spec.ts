@@ -114,10 +114,7 @@ describe("no-import-export-aliases rule (declaration bindings)", () => {
     const variableDeclaration = {
       declarations: [
         {
-          id: {
-            properties: [],
-            type: "ObjectPattern",
-          },
+          id: { properties: [], type: "ObjectPattern" },
           init: { raw: "source", type: "Identifier" },
           type: "VariableDeclarator",
         },
@@ -144,10 +141,7 @@ describe("no-import-export-aliases rule (declaration bindings)", () => {
     const malformedPatternDeclaration = {
       declarations: [
         {
-          id: {
-            type: "Literal",
-            value: "A",
-          },
+          id: { type: "Literal", value: "A" },
           init: { name: "values", type: "Identifier" },
           type: "VariableDeclarator",
         },

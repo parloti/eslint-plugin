@@ -116,11 +116,7 @@ describe("prefer-vi-mocked-import match-declarations", () => {
     const program = createMockDeclarationProgram([35, 45], [48, 55], [29, 57]);
     const sourceCode = {
       getCommentsBefore: () => [
-        {
-          range: [0, 28],
-          type: "Block",
-          value: "* Mocked utility. ",
-        },
+        { range: [0, 28], type: "Block", value: "* Mocked utility. " },
       ],
       text: "/** Mocked utility. */\nconst dependency = vi.fn();\n",
     } as never;
@@ -173,11 +169,7 @@ describe("prefer-vi-mocked-import match-declarations", () => {
     const program = createMockDeclarationProgram([36, 46], [49, 56], [30, 58]);
     const sourceCode = {
       getCommentsBefore: () => [
-        {
-          range: [0, 28],
-          type: "Block",
-          value: "* Mocked utility. ",
-        },
+        { range: [0, 28], type: "Block", value: "* Mocked utility. " },
       ],
       text: "/** Mocked utility. */\n\nconst dependency = vi.fn();\n",
     } as never;
@@ -196,11 +188,7 @@ describe("prefer-vi-mocked-import match-declarations", () => {
     const program = createMockDeclarationProgram([40, 50], [53, 60], [34, 62]);
     const sourceCode = {
       getCommentsBefore: () => [
-        {
-          range: [0, 28],
-          type: "Block",
-          value: "* Mocked utility. ",
-        },
+        { range: [0, 28], type: "Block", value: "* Mocked utility. " },
       ],
       text: "/** Mocked utility. */ code\nconst dependency = vi.fn();\n",
     } as never;
@@ -219,15 +207,9 @@ describe("prefer-vi-mocked-import match-declarations", () => {
     const program = createMockDeclarationProgram([35, 45], [48, 55], [29, 57]);
     const sourceCode = {
       getCommentsBefore: () => [
-        {
-          range: [0, 28],
-          type: "Block",
-          value: "* Mocked utility. ",
-        },
+        { range: [0, 28], type: "Block", value: "* Mocked utility. " },
       ],
-      text: {
-        slice: () => void 0,
-      },
+      text: { slice: () => void 0 },
     } as never;
 
     // Act

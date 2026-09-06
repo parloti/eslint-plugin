@@ -159,14 +159,7 @@ const reportWhenSourceHasExtension = (
     ...(fix !== void 0 && { fix }),
     messageId: "unexpectedExtension",
     node: sourceLiteral,
-    ...(fix !== void 0 && {
-      suggest: [
-        {
-          fix,
-          messageId: "removeExtension",
-        },
-      ],
-    }),
+    ...(fix !== void 0 && { suggest: [{ fix, messageId: "removeExtension" }] }),
   });
 };
 

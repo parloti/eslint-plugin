@@ -79,9 +79,7 @@ describe("no-unused-exports cross-file usages", () => {
       MIXED_CONSUMER_FIXTURE_FILES,
       (temporaryRoot, program, resolvePath) => {
         const state = getOptions([
-          {
-            testFilePatterns: ["tests/**/*.ts", "**/*.spec.ts"],
-          },
+          { testFilePatterns: ["tests/**/*.ts", "**/*.spec.ts"] },
         ]);
 
         // Act

@@ -128,10 +128,7 @@ const createTemporaryPair = (
 const createProgramAst = (): AST.Program => ({
   body: [],
   comments: [],
-  loc: {
-    end: { column: 0, line: 1 },
-    start: { column: 0, line: 1 },
-  },
+  loc: { end: { column: 0, line: 1 }, start: { column: 0, line: 1 } },
   range: [0, 0],
   sourceType: "module",
   tokens: [],
@@ -158,10 +155,7 @@ const createRuleContext = (
     cwd: cwd(),
     filename,
     id: "require-test-companion",
-    languageOptions: {
-      ecmaVersion: "latest",
-      sourceType: "module",
-    },
+    languageOptions: { ecmaVersion: "latest", sourceType: "module" },
     options: [],
     parserOptions: {},
     parserPath: void 0,

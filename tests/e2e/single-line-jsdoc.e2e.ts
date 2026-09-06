@@ -27,12 +27,8 @@ describe("single-line-jsdoc e2e", () => {
   });
 
   it.each([
-    {
-      code: ["/** doc */", "const value = 1;"].join("\n"),
-    },
-    {
-      code: ["/**", " * doc", " */", "function demo(): void {}"].join("\n"),
-    },
+    { code: ["/** doc */", "const value = 1;"].join("\n") },
+    { code: ["/**", " * doc", " */", "function demo(): void {}"].join("\n") },
     {
       code: [
         "/**",

@@ -110,9 +110,7 @@ const collectValueFixtureUsages = () =>
     VALUE_FIXTURE_FILES,
     (temporaryRoot, program, resolvePath) => {
       const state = getOptions([
-        {
-          testFilePatterns: ["tests/**/*.ts", "**/*.spec.ts"],
-        },
+        { testFilePatterns: ["tests/**/*.ts", "**/*.spec.ts"] },
       ]);
 
       return collectCrossFileUsages(
@@ -139,9 +137,7 @@ const collectTypeFixtureUsages = () =>
     TYPE_FIXTURE_FILES,
     (temporaryRoot, program, resolvePath) => {
       const state = getOptions([
-        {
-          testFilePatterns: ["tests/**/*.ts", "**/*.spec.ts"],
-        },
+        { testFilePatterns: ["tests/**/*.ts", "**/*.spec.ts"] },
       ]);
 
       return collectCrossFileUsages(

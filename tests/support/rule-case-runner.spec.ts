@@ -29,17 +29,11 @@ const demoRule: Rule.RuleModule = {
   },
   meta: {
     fixable: "code",
-    messages: {
-      match: "match",
-    },
+    messages: { match: "match" },
     schema: [
       {
         additionalProperties: false,
-        properties: {
-          identifier: {
-            type: "string",
-          },
-        },
+        properties: { identifier: { type: "string" } },
         type: "object",
       },
     ],
@@ -50,9 +44,7 @@ const demoRule: Rule.RuleModule = {
 describe(runRuleCase, () => {
   it("runs a case with the default filename and no autofix output", () => {
     // Arrange
-    const testCase = {
-      code: "const bad = 1;",
-    };
+    const testCase = { code: "const bad = 1;" };
 
     // Act
     const result = runRuleCase("demo-rule", demoRule, testCase);
@@ -67,9 +59,7 @@ describe(runRuleCase, () => {
     const testCase = {
       code: "const worse = 1;",
       filename: "custom.spec.ts",
-      languageOptions: {
-        sourceType: "script" as const,
-      },
+      languageOptions: { sourceType: "script" as const },
       options: [{ identifier: "worse" }],
       output: "const good = 1;",
     };

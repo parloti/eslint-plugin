@@ -99,10 +99,7 @@ const createAnalysis = (
   ({
     callExpression: { type: "CallExpression" },
     sectionComments: sectionPhases.map(
-      (phase) =>
-        ({
-          phases: [phase],
-        }) satisfies SectionCommentFixture,
+      (phase) => ({ phases: [phase] }) satisfies SectionCommentFixture,
     ),
     statements,
   }) as never;

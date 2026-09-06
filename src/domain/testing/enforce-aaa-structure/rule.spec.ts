@@ -22,21 +22,13 @@ function runFix(code: string): ReturnType<Linter["verifyAndFix"]> {
     [
       {
         files: ["**/*.ts"],
-        languageOptions: {
-          ecmaVersion: 2022,
-          parser,
-          sourceType: "module",
-        },
+        languageOptions: { ecmaVersion: 2022, parser, sourceType: "module" },
         plugins: {
           codeperfect: {
-            rules: {
-              "enforce-aaa-structure": enforceAaaStructureRule,
-            },
+            rules: { "enforce-aaa-structure": enforceAaaStructureRule },
           },
         },
-        rules: {
-          "codeperfect/enforce-aaa-structure": "error",
-        },
+        rules: { "codeperfect/enforce-aaa-structure": "error" },
       },
     ],
     { filename: "example.spec.ts" },

@@ -127,11 +127,7 @@ const createContext = (
 const createComment = (commentValue: string, sourceText: string): Comment => {
   const end = sourceText.indexOf("*/") + 2;
 
-  return {
-    range: [0, end],
-    type: "Block",
-    value: commentValue,
-  };
+  return { range: [0, end], type: "Block", value: commentValue };
 };
 
 /**
@@ -166,9 +162,7 @@ const createFunctionNode = (
 const createParameter = (type: string): unknown => ({
   name: "context",
   type: "Identifier",
-  typeAnnotation: {
-    typeAnnotation: { type },
-  },
+  typeAnnotation: { typeAnnotation: { type } },
 });
 
 /**

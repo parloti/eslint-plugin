@@ -49,10 +49,7 @@ const createRecordingContext = (): ReportedMessageIds => {
 const createStatementFixture = (
   phases: string[],
 ): TestBlockAnalysis["statements"][number] =>
-  ({
-    node: { type: "ExpressionStatement" },
-    phases,
-  }) as never;
+  ({ node: { type: "ExpressionStatement" }, phases }) as never;
 
 /**
  * Creates a phase-purity state with sensible defaults.

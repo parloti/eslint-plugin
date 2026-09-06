@@ -50,10 +50,7 @@ const collectImportAliasCandidates = (
       specifier.imported.type === "Identifier" &&
       specifier.local.name !== specifier.imported.name
     ) {
-      candidates.push({
-        originalName: specifier.imported.name,
-        specifier,
-      });
+      candidates.push({ originalName: specifier.imported.name, specifier });
     }
   }
 
@@ -86,10 +83,7 @@ const collectExportAliasCandidates = (
       specifier.exported.type === "Identifier" &&
       specifier.local.name !== specifier.exported.name
     ) {
-      candidates.push({
-        originalName: specifier.local.name,
-        specifier,
-      });
+      candidates.push({ originalName: specifier.local.name, specifier });
     }
   }
 

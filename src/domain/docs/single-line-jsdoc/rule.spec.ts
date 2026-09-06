@@ -88,10 +88,7 @@ const createComment = (
 ): Comment => ({
   loc: {
     end: { column: 0, line: options.endLine },
-    start: {
-      column: options.startColumn ?? 0,
-      line: options.startLine ?? 1,
-    },
+    start: { column: options.startColumn ?? 0, line: options.startLine ?? 1 },
   },
   range: [0, sourceText.length],
   type: "Block",

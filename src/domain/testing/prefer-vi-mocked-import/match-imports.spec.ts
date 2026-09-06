@@ -23,10 +23,7 @@ describe("prefer-vi-mocked-import match-imports", () => {
           range: [0, 25],
           source: { type: "Literal", value: "./mod" },
           specifiers: [
-            {
-              local: { name: "mod" },
-              type: "ImportNamespaceSpecifier",
-            },
+            { local: { name: "mod" }, type: "ImportNamespaceSpecifier" },
           ],
           type: "ImportDeclaration",
         },
@@ -54,10 +51,7 @@ describe("prefer-vi-mocked-import match-imports", () => {
           range: [0, 30],
           source: { type: "Literal", value: "./mod" },
           specifiers: [
-            {
-              local: { name: "mod" },
-              type: "ImportDefaultSpecifier",
-            },
+            { local: { name: "mod" }, type: "ImportDefaultSpecifier" },
             {
               imported: { name: "existing", type: "Identifier" },
               type: "ImportSpecifier",

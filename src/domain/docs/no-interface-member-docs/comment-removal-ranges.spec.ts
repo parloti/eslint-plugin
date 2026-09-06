@@ -47,12 +47,7 @@ describe("comment utilities removal ranges", () => {
   it("handles removal ranges without a line break", () => {
     // Arrange
     const commentText = "first\nsecond";
-    const line = {
-      end: 12,
-      lineBreakLength: 0,
-      start: 6,
-      text: "second",
-    };
+    const line = { end: 12, lineBreakLength: 0, start: 6, text: "second" };
 
     // Act
     const range = buildRemovalRange(0, commentText, line);
@@ -65,12 +60,7 @@ describe("comment utilities removal ranges", () => {
   it("handles removal ranges with CRLF line breaks", () => {
     // Arrange
     const commentText = "first\r\nsecond";
-    const line = {
-      end: 13,
-      lineBreakLength: 0,
-      start: 7,
-      text: "second",
-    };
+    const line = { end: 13, lineBreakLength: 0, start: 7, text: "second" };
 
     // Act
     const actualRange = buildRemovalRange(0, commentText, line);
@@ -82,12 +72,7 @@ describe("comment utilities removal ranges", () => {
   it("handles removal ranges without a prior line break", () => {
     // Arrange
     const commentText = "first second";
-    const line = {
-      end: 12,
-      lineBreakLength: 0,
-      start: 6,
-      text: "second",
-    };
+    const line = { end: 12, lineBreakLength: 0, start: 6, text: "second" };
 
     // Act
     const actualRange = buildRemovalRange(0, commentText, line);
@@ -99,12 +84,7 @@ describe("comment utilities removal ranges", () => {
   it("handles removal ranges at the start of text", () => {
     // Arrange
     const commentText = "abc";
-    const line = {
-      end: 3,
-      lineBreakLength: 0,
-      start: 0,
-      text: "abc",
-    };
+    const line = { end: 3, lineBreakLength: 0, start: 0, text: "abc" };
 
     // Act
     const actualRange = buildRemovalRange(0, commentText, line);

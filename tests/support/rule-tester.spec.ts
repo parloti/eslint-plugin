@@ -6,13 +6,7 @@ import { describe, expect, it, vi } from "vitest";
 /** Demo rule used by helper-level RuleTester assertions. */
 const demoRule: Rule.RuleModule = {
   create: () => ({}),
-  meta: {
-    messages: {
-      match: "match",
-    },
-    schema: [],
-    type: "problem",
-  },
+  meta: { messages: { match: "match" }, schema: [], type: "problem" },
 };
 
 /** Optional overrides used by the mocked `vitest` module factory. */
@@ -111,12 +105,7 @@ describe("rule-tester helpers", () => {
       describe: describeSpy.mock.calls.length,
       it: itSpy.mock.calls.length,
       itOnly: itOnlySpy.mock.calls.length,
-    }).toStrictEqual({
-      afterAll: 1,
-      describe: 1,
-      it: 1,
-      itOnly: 1,
-    });
+    }).toStrictEqual({ afterAll: 1, describe: 1, it: 1, itOnly: 1 });
   });
 
   it("creates a RuleTester with the project parser and delegates run calls", async () => {
@@ -128,10 +117,7 @@ describe("rule-tester helpers", () => {
       });
     vi.doMock(import("vitest"), () => createVitestModuleMock({}));
 
-    const tests = {
-      invalid: [],
-      valid: [],
-    };
+    const tests = { invalid: [], valid: [] };
 
     // Act
     const actual = await (async () => {
@@ -175,16 +161,11 @@ describe("rule-tester helpers", () => {
           });
           generatedFixturePath = fixtureSet.getFilePath("feature.ts");
 
-          return {
-            invalid: [],
-            valid: [],
-          };
+          return { invalid: [], valid: [] };
         },
       );
 
-      return {
-        generatedFixturePath,
-      };
+      return { generatedFixturePath };
     })();
 
     // Assert

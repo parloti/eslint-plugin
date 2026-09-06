@@ -47,10 +47,7 @@ const runRule = (body: ESTree.Program["body"]): RuleReport[] => {
     cwd: "/repo",
     filename: "/repo/src/feature.ts",
     id: "no-import-export-aliases",
-    languageOptions: {
-      ecmaVersion: "latest",
-      sourceType: "module",
-    },
+    languageOptions: { ecmaVersion: "latest", sourceType: "module" },
     options: [],
     parserOptions: {},
     parserPath: void 0,

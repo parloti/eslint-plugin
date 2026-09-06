@@ -145,10 +145,7 @@ const getParameterInfo = (node: unknown): ParameterInfo | undefined => {
 
   return typeAnnotation === void 0
     ? { name: identifier.name }
-    : {
-        name: identifier.name,
-        typeAnnotation,
-      };
+    : { name: identifier.name, typeAnnotation };
 };
 
 /**

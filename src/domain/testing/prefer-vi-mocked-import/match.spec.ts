@@ -25,12 +25,7 @@ interface TestContext {
  * ```
  */
 function createContext(ast: unknown): TestContext {
-  return {
-    sourceCode: {
-      ast,
-      text: "",
-    },
-  };
+  return { sourceCode: { ast, text: "" } };
 }
 
 describe("prefer-vi-mocked-import match", () => {

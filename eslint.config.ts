@@ -17,33 +17,17 @@ const codePerfect = await config({
 /** Combined ESLint configuration for the workspace manager project. */
 const eslintConfig = defineConfig(
   codePerfect,
-  {
-    ...all,
-    files: ["**/*.ts"],
-  },
-  {
-    files: ["**/*.ts"],
-    rules: {
-      "import-x/no-internal-modules": "off",
-    },
-  },
-  {
-    name: "Node.js tool",
-    rules: { "import-x/no-nodejs-modules": "off" },
-  },
-  {
-    files: ["src/domain/**/*rule.ts"],
-    ...plugin.configs["rules-recommended"],
-  },
+  { ...all, files: ["**/*.ts"] },
+  { files: ["**/*.ts"], rules: { "import-x/no-internal-modules": "off" } },
+  { name: "Node.js tool", rules: { "import-x/no-nodejs-modules": "off" } },
+  { files: ["src/domain/**/*rule.ts"], ...plugin.configs["rules-recommended"] },
   {
     files: ["src/domain/**/*rule.spec.ts"],
     ...plugin.configs["tests-recommended"],
   },
   {
     files: ["**/*.ts"],
-    rules: {
-      "eslint-plugin/require-meta-has-suggestions": "off",
-    },
+    rules: { "eslint-plugin/require-meta-has-suggestions": "off" },
   },
 );
 

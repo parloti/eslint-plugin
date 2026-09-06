@@ -61,15 +61,9 @@ const createTypedRuleEslint = (
           },
         },
         plugins: {
-          codeperfect: {
-            rules: {
-              "no-unused-exports": noUnusedExportsRule,
-            },
-          },
+          codeperfect: { rules: { "no-unused-exports": noUnusedExportsRule } },
         },
-        rules: {
-          "codeperfect/no-unused-exports": ruleEntry,
-        },
+        rules: { "codeperfect/no-unused-exports": ruleEntry },
       },
     ],
     overrideConfigFile: true,
@@ -150,9 +144,7 @@ describe("no-unused-exports e2e", () => {
   it("reports fully unused exports", async () => {
     // Arrange
     const run = {
-      files: {
-        "src/feature.ts": "export const orphan = 1;",
-      },
+      files: { "src/feature.ts": "export const orphan = 1;" },
       targetRelativePath: "src/feature.ts",
     };
 
@@ -166,9 +158,7 @@ describe("no-unused-exports e2e", () => {
   it("skips configured public API files", async () => {
     // Arrange
     const run = {
-      files: {
-        "src/index.ts": "export const barrel = 1;",
-      },
+      files: { "src/index.ts": "export const barrel = 1;" },
       targetRelativePath: "src/index.ts",
     };
 

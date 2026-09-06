@@ -112,11 +112,7 @@ RuleTester.itOnly = registerItOnly;
  */
 const createRuleTester = (): EndToEndRuleTester => {
   const ruleTester = new RuleTester({
-    languageOptions: {
-      ecmaVersion: 2022,
-      parser,
-      sourceType: "module",
-    },
+    languageOptions: { ecmaVersion: 2022, parser, sourceType: "module" },
   });
 
   return {

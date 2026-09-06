@@ -7,12 +7,7 @@ export default defineConfig({
       enabled: true,
       exclude: ["**/index.ts", "**/*.types.ts"],
       include: ["src/**/*.ts", "tests/support/**/*.ts"],
-      thresholds: {
-        branches: 95,
-        functions: 95,
-        lines: 95,
-        statements: 95,
-      },
+      thresholds: { branches: 95, functions: 95, lines: 95, statements: 95 },
     },
     include: ["src/**/*.spec.ts", "tests/support/**/*.spec.ts"],
     mockReset: true,

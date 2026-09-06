@@ -33,10 +33,7 @@ describe("require-test-companion test helpers", () => {
     );
 
     // Act
-    const result = {
-      sourcePath,
-      testPath,
-    };
+    const result = { sourcePath, testPath };
 
     // Assert
     expect(result.sourcePath).toContain("feature.ts");

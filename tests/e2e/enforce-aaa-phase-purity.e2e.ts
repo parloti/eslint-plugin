@@ -42,21 +42,13 @@ function runRule(code: string): (string | undefined)[] {
       [
         {
           files: ["**/*.ts"],
-          languageOptions: {
-            ecmaVersion: 2022,
-            parser,
-            sourceType: "module",
-          },
+          languageOptions: { ecmaVersion: 2022, parser, sourceType: "module" },
           plugins: {
             codeperfect: {
-              rules: {
-                "enforce-aaa-structure": enforceAaaStructureRule,
-              },
+              rules: { "enforce-aaa-structure": enforceAaaStructureRule },
             },
           },
-          rules: {
-            "codeperfect/enforce-aaa-structure": "error",
-          },
+          rules: { "codeperfect/enforce-aaa-structure": "error" },
         },
       ],
       "example.spec.ts",

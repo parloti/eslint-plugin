@@ -23,11 +23,7 @@ const aaaFilename = "example.spec.ts";
 const aaaConfig: Linter.Config[] = [
   {
     files: ["**/*.ts"],
-    languageOptions: {
-      ecmaVersion: 2022,
-      parser,
-      sourceType: "module",
-    },
+    languageOptions: { ecmaVersion: 2022, parser, sourceType: "module" },
     plugins: {
       codeperfect: {
         rules: {

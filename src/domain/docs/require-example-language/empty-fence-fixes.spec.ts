@@ -46,10 +46,7 @@ describe("empty fence fixes", () => {
   it("parses fence lines with language", () => {
     // Arrange
     const line = " * ```typescript";
-    const expected = {
-      language: "typescript",
-      leading: " * ",
-    };
+    const expected = { language: "typescript", leading: " * " };
 
     // Act
     const actual = parseFenceLine(line);
@@ -97,10 +94,7 @@ describe("empty fence fixes", () => {
   it("parses fence lines without a language", () => {
     // Arrange
     const line = " * ```";
-    const expected = {
-      language: "",
-      leading: " * ",
-    };
+    const expected = { language: "", leading: " * " };
 
     // Act
     const actual = parseFenceLine(line);
@@ -117,10 +111,7 @@ describe("empty fence fixes", () => {
     const actualParsedFence = parseFenceLineWithoutGroups(line);
 
     // Assert
-    expect(actualParsedFence).toStrictEqual({
-      language: "",
-      leading: "",
-    });
+    expect(actualParsedFence).toStrictEqual({ language: "", leading: "" });
   });
 
   it("keeps unclosed fences with content", () => {

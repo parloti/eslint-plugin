@@ -122,11 +122,7 @@ const parseParameterTagLine = (
     return void 0;
   }
 
-  return {
-    basename: member.basename,
-    fullName: normalized,
-    line,
-  };
+  return { basename: member.basename, fullName: normalized, line };
 };
 
 export { parseParameterTagLine };

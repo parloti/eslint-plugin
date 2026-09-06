@@ -210,11 +210,7 @@ function buildExampleFromParts(context: ExampleFromPartsContext): Example {
   const { bodyLines, commentValue, endOffset, header, startOffset } = context;
   const content = buildExampleContent({ body: bodyLines.join("\n"), header });
   const full = commentValue.slice(startOffset, endOffset);
-  const lineMeta = getLineMeta({
-    commentValue,
-    full,
-    startOffset,
-  });
+  const lineMeta = getLineMeta({ commentValue, full, startOffset });
 
   return {
     content: content.trim(),

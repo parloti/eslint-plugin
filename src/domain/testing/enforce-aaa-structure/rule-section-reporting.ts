@@ -69,12 +69,7 @@ function reportBlankLineSeparators(
       fix,
       messageId: "blankLineBeforeSection",
       node: sectionComment.comment,
-      suggest: [
-        {
-          fix,
-          messageId: "addBlankLineBeforeSection",
-        },
-      ],
+      suggest: [{ fix, messageId: "addBlankLineBeforeSection" }],
     });
   }
 }

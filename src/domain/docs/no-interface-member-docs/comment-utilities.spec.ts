@@ -172,10 +172,7 @@ describe("comment utilities text", () => {
   it("returns an empty string when comment range is missing", () => {
     // Arrange
     const sourceText = "/**\n * ok\n */\nfunction demo() {}";
-    const comment = {
-      type: "Block",
-      value: "*\n * ok\n ",
-    } as Comment;
+    const comment = { type: "Block", value: "*\n * ok\n " } as Comment;
     const sourceCode = createSourceCode(sourceText, [comment]);
 
     // Act

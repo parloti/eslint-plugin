@@ -122,11 +122,7 @@ describe("assert-actual-expected-names rule", () => {
     // Arrange
     const assertion = { type: "ExpressionStatement" } as never;
     const actDeclaration = {
-      declarations: [
-        {
-          id: { name: "result", type: "Identifier" },
-        },
-      ],
+      declarations: [{ id: { name: "result", type: "Identifier" } }],
       type: "VariableDeclaration",
     } as never;
     const resultNode = { name: "result", type: "Identifier" } as Rule.Node;
@@ -166,11 +162,7 @@ describe("assert-actual-expected-names rule", () => {
     // Arrange
     const assertion = { type: "ExpressionStatement" } as never;
     const actDeclaration = {
-      declarations: [
-        {
-          id: { name: "actualResult", type: "Identifier" },
-        },
-      ],
+      declarations: [{ id: { name: "actualResult", type: "Identifier" } }],
       type: "VariableDeclaration",
     } as never;
     const expectedNode = { name: "value", type: "Identifier" } as Rule.Node;
@@ -206,14 +198,7 @@ describe("assert-actual-expected-names rule", () => {
     // Arrange
     const assertion = { type: "ExpressionStatement" } as never;
     const actDeclaration = {
-      declarations: [
-        {
-          id: {
-            properties: [],
-            type: "ObjectPattern",
-          },
-        },
-      ],
+      declarations: [{ id: { properties: [], type: "ObjectPattern" } }],
       type: "VariableDeclaration",
     } as unknown as never;
     const expectedNode = {

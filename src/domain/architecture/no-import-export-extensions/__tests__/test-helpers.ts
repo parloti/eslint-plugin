@@ -88,10 +88,7 @@ const runRule = (body: ESTree.Program["body"]): RuleReport[] => {
     cwd: "/repo",
     filename: "/repo/src/feature.ts",
     id: "no-import-export-extensions",
-    languageOptions: {
-      ecmaVersion: "latest",
-      sourceType: "module",
-    },
+    languageOptions: { ecmaVersion: "latest", sourceType: "module" },
     options: [],
     parserOptions: {},
     parserPath: void 0,
@@ -100,11 +97,7 @@ const runRule = (body: ESTree.Program["body"]): RuleReport[] => {
       const { messageId } = report as ReportDescriptorWithMessageId;
       const { suggest } = report as ReportDescriptorWithSuggest;
       const fix = "fix" in report ? (report.fix as RuleReport["fix"]) : void 0;
-      reports.push({
-        fix,
-        messageId,
-        suggest,
-      });
+      reports.push({ fix, messageId, suggest });
     },
     settings: {},
     sourceCode,

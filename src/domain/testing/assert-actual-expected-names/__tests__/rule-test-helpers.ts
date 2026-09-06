@@ -82,9 +82,7 @@ interface RuleMockState {
 }
 
 /** Shared mutable state for the assertion-name rule test mocks. */
-const ruleMockState: RuleMockState = {
-  activeLoadRuleInput: void 0,
-};
+const ruleMockState: RuleMockState = { activeLoadRuleInput: void 0 };
 
 /**
  * Creates the mocked analysis module for the assertion-name rule tests.

@@ -130,13 +130,8 @@ describe("no-unused-exports declaration utilities", () => {
         specifiers: [],
         type: "ExportNamedDeclaration",
       },
-      {
-        declarations: [void 0],
-        type: "VariableDeclaration",
-      },
-      {
-        type: "VariableDeclaration",
-      },
+      { declarations: [void 0], type: "VariableDeclaration" },
+      { type: "VariableDeclaration" },
     ] as unknown as AST.Program["body"];
 
     // Act

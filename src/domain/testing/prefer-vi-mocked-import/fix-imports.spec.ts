@@ -46,10 +46,7 @@ describe("prefer-vi-mocked-import fix-imports", () => {
     // Arrange
     const matches = [
       {
-        importPlan: {
-          moduleSpecifier: "./alpha",
-          names: ["beta"],
-        },
+        importPlan: { moduleSpecifier: "./alpha", names: ["beta"] },
         moduleSpecifier: "./alpha",
         newline: "\n",
       },
@@ -63,10 +60,7 @@ describe("prefer-vi-mocked-import fix-imports", () => {
         newline: "\n",
       },
       {
-        importPlan: {
-          moduleSpecifier: "./delta",
-          names: ["zeta"],
-        },
+        importPlan: { moduleSpecifier: "./delta", names: ["zeta"] },
         moduleSpecifier: "./delta",
         newline: "\n",
       },
@@ -74,10 +68,7 @@ describe("prefer-vi-mocked-import fix-imports", () => {
         importPlan: {
           moduleSpecifier: "./delta",
           names: ["eta"],
-          update: {
-            existingNamedImports: ["theta"],
-            range: [30, 40],
-          },
+          update: { existingNamedImports: ["theta"], range: [30, 40] },
         },
         moduleSpecifier: "./delta",
         newline: "\n",
@@ -179,10 +170,7 @@ describe("prefer-vi-mocked-import fix-imports", () => {
         importPlan: {
           moduleSpecifier: "./delta",
           names: ["eta"],
-          update: {
-            existingNamedImports: ["theta"],
-            range: [30, 40],
-          },
+          update: { existingNamedImports: ["theta"], range: [30, 40] },
         },
         moduleSpecifier: "./delta",
         newline: "\n",

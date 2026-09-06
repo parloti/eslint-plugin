@@ -40,10 +40,7 @@ const requireTestCompanionRule: Rule.RuleModule = {
             description:
               "Glob patterns that define where test files must have matching source companions.",
             oneOf: [
-              {
-                description: "A single glob pattern.",
-                type: "string",
-              },
+              { description: "A single glob pattern.", type: "string" },
               {
                 description: "A list of glob patterns.",
                 items: { type: "string" },
@@ -56,10 +53,7 @@ const requireTestCompanionRule: Rule.RuleModule = {
             description:
               "Glob patterns that should be excluded from test-to-source companion checks.",
             oneOf: [
-              {
-                description: "A single ignore glob pattern.",
-                type: "string",
-              },
+              { description: "A single ignore glob pattern.", type: "string" },
               {
                 description: "A list of ignore glob patterns.",
                 items: { type: "string" },
@@ -72,10 +66,7 @@ const requireTestCompanionRule: Rule.RuleModule = {
             description:
               "Filename suffixes that are recognized as valid test companions.",
             oneOf: [
-              {
-                description: "A single test filename suffix.",
-                type: "string",
-              },
+              { description: "A single test filename suffix.", type: "string" },
               {
                 description: "A list of test filename suffixes.",
                 items: { type: "string" },

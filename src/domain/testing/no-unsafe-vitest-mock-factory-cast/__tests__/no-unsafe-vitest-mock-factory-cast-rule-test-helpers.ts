@@ -43,9 +43,7 @@ const runFix = (code: string): FixRunResult => {
             },
           },
         },
-        rules: {
-          "codeperfect/no-unsafe-vitest-mock-factory-cast": "error",
-        },
+        rules: { "codeperfect/no-unsafe-vitest-mock-factory-cast": "error" },
       },
     ],
     { filename: "example.spec.ts" },

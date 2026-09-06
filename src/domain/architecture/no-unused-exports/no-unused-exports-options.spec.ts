@@ -48,10 +48,7 @@ describe("no-unused-exports options", () => {
   it("falls back to defaults when custom arrays normalize to empty", () => {
     // Arrange
     const rawOptions = [
-      {
-        publicApiFiles: [" ".repeat(3), 123],
-        testFilePatterns: [void 0],
-      },
+      { publicApiFiles: [" ".repeat(3), 123], testFilePatterns: [void 0] },
     ];
 
     // Act
@@ -111,10 +108,7 @@ describe("no-unused-exports options", () => {
     };
 
     // Assert
-    expect(actualResult).toStrictEqual({
-      publicApiFile: true,
-      testFile: true,
-    });
+    expect(actualResult).toStrictEqual({ publicApiFile: true, testFile: true });
   });
 
   it("returns false for non-matching public API and test patterns", () => {
@@ -190,10 +184,7 @@ describe("no-unused-exports options", () => {
     };
 
     // Assert
-    expect(actualResult).toStrictEqual({
-      publicApiFile: true,
-      testFile: true,
-    });
+    expect(actualResult).toStrictEqual({ publicApiFile: true, testFile: true });
   });
 
   it("returns false when the repository root is not absolute", () => {
@@ -217,10 +208,7 @@ describe("no-unused-exports options", () => {
   it("returns false when the configured pattern list is empty", () => {
     // Arrange
     const sourceIndexPath = path.join(cwd(), "src", "index.ts");
-    const state = {
-      publicApiFiles: [],
-      testFilePatterns: [],
-    };
+    const state = { publicApiFiles: [], testFilePatterns: [] };
 
     // Act
     const actualResult = {

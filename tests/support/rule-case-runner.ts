@@ -97,13 +97,7 @@ const createRuleConfig = (
     {
       files: ["**/*.ts"],
       languageOptions,
-      plugins: {
-        codeperfect: {
-          rules: {
-            [ruleName]: rule,
-          },
-        },
-      },
+      plugins: { codeperfect: { rules: { [ruleName]: rule } } },
       rules: {
         [`codeperfect/${ruleName}`]: ["error", ...(testCase.options ?? [])],
       },
@@ -163,11 +157,7 @@ const runRuleCase = (
     messageIds.push(message.messageId);
   }
 
-  return {
-    diagnostics,
-    messageIds,
-    ...(output !== void 0 && { output }),
-  };
+  return { diagnostics, messageIds, ...(output !== void 0 && { output }) };
 };
 
 export { runRuleCase };

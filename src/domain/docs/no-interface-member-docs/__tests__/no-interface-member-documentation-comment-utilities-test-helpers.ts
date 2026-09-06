@@ -148,11 +148,7 @@ const createSingleJsdocContext = (): SingleJsdocContext => {
  */
 const createNonJsdocContext = (): JsdocLookupContext => {
   const sourceText = "// line\nfunction demo() {}";
-  const comment = {
-    range: [0, 7],
-    type: "Line",
-    value: " line",
-  } as Comment;
+  const comment = { range: [0, 7], type: "Line", value: " line" } as Comment;
 
   return {
     node: createFunctionNode(sourceText),
@@ -170,10 +166,7 @@ const createNonJsdocContext = (): JsdocLookupContext => {
  */
 const createRangeMissingContext = (): JsdocLookupContext => {
   const sourceText = "function demo() {}";
-  const comment = {
-    type: "Block",
-    value: "*\n * ok\n ",
-  } as Comment;
+  const comment = { type: "Block", value: "*\n * ok\n " } as Comment;
 
   return {
     node: createFunctionNode(sourceText),

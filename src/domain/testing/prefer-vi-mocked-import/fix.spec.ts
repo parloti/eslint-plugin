@@ -67,17 +67,8 @@ function createMatch(): RuleMatch {
         },
       ],
     ]),
-    importPlan: {
-      insert: {},
-      moduleSpecifier: "./mod",
-      names: ["a"],
-    },
-    memberRewrites: [
-      {
-        exportedName: "a",
-        localObjectRange: [10, 11],
-      },
-    ],
+    importPlan: { insert: {}, moduleSpecifier: "./mod", names: ["a"] },
+    memberRewrites: [{ exportedName: "a", localObjectRange: [10, 11] }],
     mockSpecifierIsImportExpression: false,
     mockSpecifierRange: [20, 27],
     moduleSpecifier: "./mod",

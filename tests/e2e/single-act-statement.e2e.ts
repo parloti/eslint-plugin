@@ -66,11 +66,7 @@ describe("single-act-statement e2e", () => {
       errors: [{ messageId: "multipleActStatements" }],
       filename: "example.spec.ts",
       languageOptions: {
-        parserOptions: {
-          ecmaFeatures: {
-            globalReturn: true,
-          },
-        },
+        parserOptions: { ecmaFeatures: { globalReturn: true } },
       },
     };
 

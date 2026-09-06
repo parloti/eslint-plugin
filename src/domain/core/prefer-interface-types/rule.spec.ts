@@ -203,10 +203,7 @@ describe("prefer interface types rule", () => {
   it("skips parameters without type annotations", () => {
     // Arrange & Act
     const actualReports = runListenerCase(
-      createFunctionNode({
-        params: [createBareParameter()],
-        returnType: {},
-      }),
+      createFunctionNode({ params: [createBareParameter()], returnType: {} }),
     );
 
     // Assert

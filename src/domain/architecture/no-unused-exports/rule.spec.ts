@@ -59,21 +59,9 @@ const runRuleCase = (
   const config = [
     {
       files: ["**/*.ts"],
-      languageOptions: {
-        ecmaVersion: 2022,
-        parser,
-        sourceType: "module",
-      },
-      plugins: {
-        codeperfect: {
-          rules: {
-            [ruleName]: rule,
-          },
-        },
-      },
-      rules: {
-        [`codeperfect/${ruleName}`]: "error",
-      },
+      languageOptions: { ecmaVersion: 2022, parser, sourceType: "module" },
+      plugins: { codeperfect: { rules: { [ruleName]: rule } } },
+      rules: { [`codeperfect/${ruleName}`]: "error" },
     },
   ] as Parameters<typeof linter.verify>[1];
 
@@ -152,9 +140,7 @@ const runMockedRule = async (
       ...actual,
       getTypeScriptProgram: () =>
         hasTypeScriptProgram
-          ? ({
-              getCurrentDirectory: () => "C:/repo",
-            } as never)
+          ? ({ getCurrentDirectory: () => "C:/repo" } as never)
           : void 0,
     };
   });
@@ -168,9 +154,7 @@ const runMockedRule = async (
       ...actual,
       classifyExportUsage: () => classification,
       collectCrossFileUsages: () => [
-        {
-          isTestFile: classification === "test-only",
-        },
+        { isTestFile: classification === "test-only" },
       ],
     };
   });
@@ -222,9 +206,7 @@ describe("no-unused-exports rule", () => {
 
   it("does not report when parser services are unavailable", () => {
     // Arrange
-    const testCase = {
-      code: "export const value = 1;",
-    };
+    const testCase = { code: "export const value = 1;" };
 
     // Act
     const actualResult = runRuleCase(

@@ -63,10 +63,7 @@ const createBareParameter = (): ParameterNode => ({
  * ```
  */
 const createFunctionNode = (parameters: unknown[]): Rule.Node =>
-  ({
-    params: parameters,
-    type: "FunctionDeclaration",
-  }) as Rule.Node;
+  ({ params: parameters, type: "FunctionDeclaration" }) as Rule.Node;
 
 describe("parameter utilities", () => {
   it("collects parameter type annotations", () => {

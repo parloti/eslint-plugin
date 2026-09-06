@@ -86,10 +86,7 @@ const createRuleContext = (
     cwd: cwd(),
     filename: parameters.filename,
     id: "no-reexports-outside-barrels",
-    languageOptions: {
-      ecmaVersion: "latest",
-      sourceType: "module",
-    },
+    languageOptions: { ecmaVersion: "latest", sourceType: "module" },
     options: parameters.options === void 0 ? [] : [parameters.options],
     parserOptions: {},
     parserPath: void 0,

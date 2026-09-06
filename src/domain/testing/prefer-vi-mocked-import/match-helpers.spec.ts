@@ -28,9 +28,7 @@ describe("prefer-vi-mocked-import match-helpers", () => {
 
   it("returns undefined when factory is not an arrow function", () => {
     // Arrange
-    const factory = {
-      type: "Identifier",
-    } as never;
+    const factory = { type: "Identifier" } as never;
 
     // Act
     const actualFactoryReturnObject = getFactoryReturnObject(factory);
@@ -44,10 +42,7 @@ describe("prefer-vi-mocked-import match-helpers", () => {
     const factory = {
       body: {
         body: [
-          {
-            argument: { type: "Literal", value: 1 },
-            type: "ReturnStatement",
-          },
+          { argument: { type: "Literal", value: 1 }, type: "ReturnStatement" },
         ],
         type: "BlockStatement",
       },
@@ -77,10 +72,7 @@ describe("prefer-vi-mocked-import match-helpers", () => {
 
   it("returns undefined for unsupported module argument expressions", () => {
     // Arrange
-    const argument = {
-      name: "x",
-      type: "Identifier",
-    } as never;
+    const argument = { name: "x", type: "Identifier" } as never;
 
     // Act
     const actualModuleSpecifier = getModuleSpecifier(argument);
@@ -91,10 +83,7 @@ describe("prefer-vi-mocked-import match-helpers", () => {
 
   it("detects string specifier from plain literals", () => {
     // Arrange
-    const argument = {
-      type: "Literal",
-      value: "./x",
-    } as never;
+    const argument = { type: "Literal", value: "./x" } as never;
 
     // Act
     const actualModuleSpecifier = getModuleSpecifier(argument);

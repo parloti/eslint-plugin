@@ -74,7 +74,7 @@
     "linting"
   ],
   "dependencies": {
-    "@typescript-eslint/utils": "^8.68.0",
+    "@typescript-eslint/utils": "^8.69.0",
     "minimatch": "^10.2.6"
   },
   "devDependencies": {
@@ -88,7 +88,7 @@
     "@stryker-mutator/vitest-runner": "^10.0.0",
     "@stylistic/eslint-plugin": "^5.10.0",
     "@types/lodash-es": "^4.17.12",
-    "@types/node": "^26.4.0",
+    "@types/node": "^26.4.1",
     "@typescript-eslint/rule-tester": "^8.69.0",
     "@vitest/coverage-v8": "^4.1.11",
     "@vitest/eslint-plugin": "^1.6.27",
@@ -101,7 +101,7 @@
     "eslint-plugin-import-x": "^4.17.1",
     "eslint-plugin-jasmine": "^4.2.2",
     "eslint-plugin-jest": "^29.16.6",
-    "eslint-plugin-jsdoc": "^64.3.5",
+    "eslint-plugin-jsdoc": "^64.3.6",
     "eslint-plugin-perfectionist": "^5.11.0",
     "eslint-plugin-prettier": "^5.5.6",
     "eslint-plugin-rxjs-x": "^1.0.6",

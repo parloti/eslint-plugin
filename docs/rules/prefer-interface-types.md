@@ -96,10 +96,7 @@ const demo = (...values: DemoInput[]): DemoInput => values[0]!;
 ```
 
 ```typescript
-type SaveUserInput = {
-  id: string;
-  name: string;
-};
+type SaveUserInput = { id: string; name: string };
 
 function saveUser(user: SaveUserInput): void {}
 ```

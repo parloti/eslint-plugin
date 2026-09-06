@@ -45,18 +45,12 @@ const buildListenerForFile = (
           importedNames.has(statement.declaration.name);
 
         if (isExportFrom) {
-          context.report({
-            messageId: "reexportNotAllowed",
-            node: statement,
-          });
+          context.report({ messageId: "reexportNotAllowed", node: statement });
         } else if (
           isImportedDefaultExport ||
           hasImportedExport(statement, importedNames)
         ) {
-          context.report({
-            messageId: "reexportedImport",
-            node: statement,
-          });
+          context.report({ messageId: "reexportedImport", node: statement });
         }
       }
     },

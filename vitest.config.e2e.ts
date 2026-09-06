@@ -7,12 +7,7 @@ export default defineConfig({
       enabled: true,
       exclude: ["**/index.ts", "**/*.types.ts", "**/*.spec.ts"],
       include: ["src/**/*.ts"],
-      thresholds: {
-        branches: 15,
-        functions: 15,
-        lines: 15,
-        statements: 15,
-      },
+      thresholds: { branches: 15, functions: 15, lines: 15, statements: 15 },
     },
     include: ["tests/e2e/**/*.e2e.ts"],
     mockReset: true,

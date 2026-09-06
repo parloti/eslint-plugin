@@ -90,10 +90,7 @@ const createIdentifier = (name: string): IdentifierNode => ({
  */
 const createCallStatement = (
   expression: Record<string, unknown>,
-): ExpressionStatementNode => ({
-  expression,
-  type: "ExpressionStatement",
-});
+): ExpressionStatementNode => ({ expression, type: "ExpressionStatement" });
 
 /**
  * Creates the mocked analysis module for the act-result rule tests.

@@ -58,10 +58,7 @@ describe("aAA analyzer assertions helpers", () => {
                 id: { name: "assertedValue", type: "Identifier" },
                 type: "VariableDeclarator",
               },
-              {
-                id: { type: "ObjectPattern" },
-                type: "VariableDeclarator",
-              },
+              { id: { type: "ObjectPattern" }, type: "VariableDeclarator" },
             ],
             type: "VariableDeclaration",
           },
@@ -122,15 +119,9 @@ describe("aAA analyzer assertions helpers", () => {
     expect(actual).toStrictEqual({
       actionCall: true,
       actionNew: true,
-      awaitedChain: {
-        name: "value",
-        type: "Identifier",
-      },
+      awaitedChain: { name: "value", type: "Identifier" },
       declaredIdentifiers: ["assertedValue"],
-      statementExpression: {
-        name: "capturedResult",
-        type: "Identifier",
-      },
+      statementExpression: { name: "capturedResult", type: "Identifier" },
       usesPrefixExact: true,
       usesPrefixPrefixed: true,
     });
@@ -176,10 +167,7 @@ describe("aAA analyzer assertions helpers", () => {
       invalidAssertion: false,
       noAssertion: false,
       nonAction: false,
-      nonExpressionStatement: {
-        actual: void 0,
-        expected: void 0,
-      },
+      nonExpressionStatement: { actual: void 0, expected: void 0 },
       nonStatementExpression: void 0,
       plainStatement: false,
       shortPrefix: false,

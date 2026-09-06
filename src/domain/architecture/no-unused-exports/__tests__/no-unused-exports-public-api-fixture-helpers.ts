@@ -45,9 +45,7 @@ const collectForwardingOnlyFixtureUsages = () =>
     FORWARDING_ONLY_FIXTURE_FILES,
     (temporaryRoot, program, resolvePath) => {
       const state = getOptions([
-        {
-          publicApiFiles: ["src/index.ts", "src/other-index.ts"],
-        },
+        { publicApiFiles: ["src/index.ts", "src/other-index.ts"] },
       ]);
 
       return collectCrossFileUsages(
@@ -103,11 +101,7 @@ const collectEmptyPublicApiFixtureUsages = () =>
     "no-unused-empty-public-api-",
     EMPTY_PUBLIC_API_FIXTURE_FILES,
     (temporaryRoot, program, resolvePath) => {
-      const state = getOptions([
-        {
-          publicApiFiles: ["src/empty.ts"],
-        },
-      ]);
+      const state = getOptions([{ publicApiFiles: ["src/empty.ts"] }]);
 
       return collectCrossFileUsages(
         program,
@@ -132,11 +126,7 @@ const collectOtherPublicApiFixtureUsages = () =>
     "no-unused-other-public-api-",
     OTHER_PUBLIC_API_FIXTURE_FILES,
     (temporaryRoot, program, resolvePath) => {
-      const state = getOptions([
-        {
-          publicApiFiles: ["src/index.ts"],
-        },
-      ]);
+      const state = getOptions([{ publicApiFiles: ["src/index.ts"] }]);
 
       return collectCrossFileUsages(
         program,

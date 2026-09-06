@@ -92,9 +92,7 @@ function createPreset(
   ruleNames: readonly CodeperfectRuleName[],
 ): CodeperfectPreset {
   return {
-    plugins: {
-      codeperfect: codeperfectPlugin,
-    },
+    plugins: { codeperfect: codeperfectPlugin },
     rules: createRules(ruleNames),
   };
 }

@@ -72,10 +72,7 @@ describe("barrel-files-exports-only e2e", () => {
   });
 
   it.each([
-    {
-      code: "",
-      filename: emptyBarrel.getFilePath("index.ts"),
-    },
+    { code: "", filename: emptyBarrel.getFilePath("index.ts") },
     {
       code: [
         'export * from "./feature";',

@@ -41,14 +41,8 @@ describe("no-import-export-extensions e2e", () => {
   );
 
   it.each([
-    {
-      code: 'import { A } from "./feature";',
-      filename: "src/feature.ts",
-    },
-    {
-      code: 'export { A } from "./feature";',
-      filename: "src/feature.ts",
-    },
+    { code: 'import { A } from "./feature";', filename: "src/feature.ts" },
+    { code: 'export { A } from "./feature";', filename: "src/feature.ts" },
     {
       code: 'import { readFileSync } from "node:fs";',
       filename: "src/feature.ts",

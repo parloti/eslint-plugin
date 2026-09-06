@@ -23,12 +23,7 @@ const getCommentLines = (commentText: string): CommentLine[] => {
         ? 1
         : 0;
 
-    results.push({
-      end: lineEnd,
-      lineBreakLength,
-      start: offset,
-      text: line,
-    });
+    results.push({ end: lineEnd, lineBreakLength, start: offset, text: line });
 
     offset = lineEnd + lineBreakLength;
   }

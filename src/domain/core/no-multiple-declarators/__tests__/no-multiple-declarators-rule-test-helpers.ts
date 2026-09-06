@@ -95,11 +95,7 @@ const createContext = (
         "messageId" in descriptor ? descriptor.messageId : void 0;
       const node = "node" in descriptor ? descriptor.node : void 0;
 
-      reports.push({
-        fix: descriptor.fix,
-        messageId,
-        nodeType: node?.type,
-      });
+      reports.push({ fix: descriptor.fix, messageId, nodeType: node?.type });
     },
     sourceCode,
   } as unknown as Rule.RuleContext;
@@ -141,10 +137,7 @@ const createVariableDeclaration = ({
   const declarations = declaratorTexts.map((declaratorText) => {
     const start = sourceText.indexOf(declaratorText, searchStart);
     const range: Range = [start, start + declaratorText.length];
-    const declaration: MockNode = {
-      range,
-      type: "VariableDeclarator",
-    };
+    const declaration: MockNode = { range, type: "VariableDeclarator" };
     const [, rangeEnd] = range;
 
     searchStart = rangeEnd;

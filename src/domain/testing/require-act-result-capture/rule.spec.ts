@@ -117,10 +117,7 @@ describe("require-act-result-capture rule", () => {
 
     // Assert
     expect(actual).toStrictEqual([
-      {
-        messageId: "captureActResult",
-        node: capturableStatement,
-      },
+      { messageId: "captureActResult", node: capturableStatement },
     ]);
   });
 
@@ -163,10 +160,7 @@ describe("require-act-result-capture rule", () => {
 
     // Assert
     expect(actual).toStrictEqual([
-      {
-        messageId: "captureActResult",
-        node: reportMetricsStatement,
-      },
+      { messageId: "captureActResult", node: reportMetricsStatement },
     ]);
   });
 

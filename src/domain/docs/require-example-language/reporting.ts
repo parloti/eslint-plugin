@@ -119,12 +119,7 @@ function buildReportDescriptor(
   const suggest =
     reportFix === void 0
       ? void 0
-      : [
-          {
-            fix: reportFix,
-            messageId: getSuggestionMessageId(problem),
-          },
-        ];
+      : [{ fix: reportFix, messageId: getSuggestionMessageId(problem) }];
 
   if (loc !== void 0) {
     return {
@@ -225,10 +220,7 @@ function getReportLocation(
     return void 0;
   }
 
-  return {
-    end: { column: 1, line },
-    start: { column: 0, line },
-  };
+  return { end: { column: 1, line }, start: { column: 0, line } };
 }
 
 /**

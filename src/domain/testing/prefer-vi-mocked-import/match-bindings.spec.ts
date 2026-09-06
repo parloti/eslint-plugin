@@ -57,10 +57,7 @@ describe("prefer-vi-mocked-import match-bindings", () => {
     // Arrange
     const bindings = {
       properties: [
-        {
-          argument: { name: "a", type: "Identifier" },
-          type: "SpreadElement",
-        },
+        { argument: { name: "a", type: "Identifier" }, type: "SpreadElement" },
       ],
       type: "ObjectExpression",
     } as never;

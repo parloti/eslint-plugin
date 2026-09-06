@@ -71,11 +71,7 @@ function createUpdatePlan(
       ? baseUpdate
       : { ...baseUpdate, defaultImportName };
 
-  return {
-    moduleSpecifier,
-    names,
-    update,
-  };
+  return { moduleSpecifier, names, update };
 }
 
 /**

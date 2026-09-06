@@ -5,9 +5,5 @@
   "incremental": true,
   "reporters": ["progress", "clear-text", "html", "json"],
   "testRunner": "vitest",
-  "thresholds": {
-    "break": 15,
-    "high": 80,
-    "low": 60
-  }
+  "thresholds": { "break": 15, "high": 80, "low": 60 }
 }
