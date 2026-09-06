@@ -8,6 +8,6 @@
 
 > `const` **noUselessDelegationRule**: `Rule.RuleModule`
 
-Defined in: [domain/core/no-useless-delegation/rule.ts:236](https://github.com/parloti/eslint-plugin/blob/8f0a759c6e2299a6cebba994f3a61245f50d9764/src/domain/core/no-useless-delegation/rule.ts#L236)
+Defined in: [domain/core/no-useless-delegation/rule.ts:239](https://github.com/parloti/eslint-plugin/blob/e546dffaf93e4ae565713a35a08a3023995915ef/src/domain/core/no-useless-delegation/rule.ts#L239)
 
 ESLint rule implementation for functions that only forward their arguments.

@@ -8,7 +8,7 @@
 
 > `const` **codeperfectPlugin**: `object`
 
-Defined in: [infrastructure/codeperfect-plugin.ts:49](https://github.com/parloti/eslint-plugin/blob/8f0a759c6e2299a6cebba994f3a61245f50d9764/src/infrastructure/codeperfect-plugin.ts#L49)
+Defined in: [infrastructure/codeperfect-plugin.ts:49](https://github.com/parloti/eslint-plugin/blob/e546dffaf93e4ae565713a35a08a3023995915ef/src/infrastructure/codeperfect-plugin.ts#L49)
 
 ESLint plugin object exported by the package.
 

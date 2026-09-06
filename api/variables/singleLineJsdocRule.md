@@ -8,6 +8,6 @@
 
 > `const` **singleLineJsdocRule**: `Rule.RuleModule`
 
-Defined in: [domain/docs/single-line-jsdoc/rule.ts:259](https://github.com/parloti/eslint-plugin/blob/8f0a759c6e2299a6cebba994f3a61245f50d9764/src/domain/docs/single-line-jsdoc/rule.ts#L259)
+Defined in: [domain/docs/single-line-jsdoc/rule.ts:257](https://github.com/parloti/eslint-plugin/blob/e546dffaf93e4ae565713a35a08a3023995915ef/src/domain/docs/single-line-jsdoc/rule.ts#L257)
 
 Rule module enforcing single-line JSDoc when it fits.
