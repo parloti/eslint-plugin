@@ -1,6 +1,7 @@
 {
   "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
   "checkers": ["typescript"],
+  "ignorePatterns": ["coverage/**", "dist/**", "node_modules/**", "reports/**"],
   "ignoreStatic": true,
   "incremental": true,
   "reporters": ["progress", "clear-text", "html", "json"],

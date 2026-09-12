@@ -13,12 +13,15 @@
     "noUnusedParameters": true,
 
     // Modules
+    "module": "esnext",
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
+    "rootDir": "${configDir}/src",
     "types": ["node"],
 
     // Emit
-    "noEmit": false,
+    "noEmitOnError": true,
+    "outDir": "${configDir}/dist",
 
     // JavaScript Support
 
@@ -37,6 +40,8 @@
     // Compiler Diagnostics
 
     // Projects
+    "composite": true,
+    "tsBuildInfoFile": "${configDir}/temp/.tsbuildinfo",
 
     // Output Formatting
     "noErrorTruncation": true,
@@ -48,5 +53,12 @@
 
     // Watch Options
   },
-  "exclude": ["dist", "coverage", "node_modules", "temp"]
+  "exclude": [
+    "${configDir}/dist",
+    "${configDir}/coverage",
+    "${configDir}/node_modules",
+    "${configDir}/temp",
+    "${configDir}/apps",
+    "${configDir}/packages"
+  ]
 }
