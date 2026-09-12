@@ -150,6 +150,25 @@ describe("enforce-aaa-phase-purity e2e", () => {
       ].join("\n"),
       filename: "example.spec.ts",
     },
+    {
+      code: [
+        'it("allows assertion-local projections", () => {',
+        "  // Act",
+        "  const reportDescriptor = run();",
+        "",
+        "  // Assert",
+        "  const actualSuggestions = reportDescriptor?.suggest as",
+        "    | Rule.SuggestionReportDescriptor[]",
+        "    | undefined;",
+        '  expect(reportDescriptor).toMatchObject({ messageId: "emptyExample" });',
+        "  expect(actualSuggestions).toHaveLength(1);",
+        "  expect(actualSuggestions).toMatchObject([",
+        '    { messageId: "removeEmptyExample" },',
+        "  ]);",
+        "});",
+      ].join("\n"),
+      filename: "example.spec.ts",
+    },
   ])("accepts pure AAA phases %#", (testCase) => {
     // Arrange
     const ruleName = "enforce-aaa-phase-purity";

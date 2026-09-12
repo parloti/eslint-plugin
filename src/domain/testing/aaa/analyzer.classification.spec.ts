@@ -132,6 +132,25 @@ describe("aaa analyzer statement classification", () => {
     });
   });
 
+  it("allows assertion-local projections without allowing actions", () => {
+    // Arrange
+    const assertionLocalProjection = getFirstFunctionBodyStatement(
+      "const actualSuggestions = reportDescriptor?.suggest as Rule.SuggestionReportDescriptor[] | undefined;",
+    );
+    const assertionLocalAction = getFirstFunctionBodyStatement(
+      "const actualSuggestions = getSuggestions(reportDescriptor);",
+    );
+
+    // Act
+    const actual = {
+      action: isValidAssertStatement(assertionLocalAction),
+      projection: isValidAssertStatement(assertionLocalProjection),
+    };
+
+    // Assert
+    expect(actual).toStrictEqual({ action: false, projection: true });
+  });
+
   it("classifies wrapped and declared assertion variants", () => {
     // Arrange
     const declaredAssertionStatement = getFirstFunctionBodyStatement(

@@ -95,6 +95,8 @@ Invalid:
 - Setup must remain in Arrange
 - The primary interaction belongs in Act
 - Assertions belong in Assert
+- Read-only assertion-local declarations may narrow, alias, or project values produced by Act
+- Assertion-local declarations must not call functions, construct values, await work, or mutate state
 - Mutations and setup work after Act are reported
 - Await usage outside Act is reported
 
@@ -161,6 +163,23 @@ it("keeps a standard AAA flow", () => {
 
   // Assert
   expect(actual).toBe(1);
+});
+```
+
+```typescript
+it("allows assertion-local projections", () => {
+  // Act
+  const reportDescriptor = run();
+
+  // Assert
+  const actualSuggestions = reportDescriptor?.suggest as
+    Rule.SuggestionReportDescriptor[] | undefined;
+
+  expect(reportDescriptor).toMatchObject({ messageId: "emptyExample" });
+  expect(actualSuggestions).toHaveLength(1);
+  expect(actualSuggestions).toMatchObject([
+    { messageId: "removeEmptyExample" },
+  ]);
 });
 ```
 
