@@ -3,6 +3,16 @@ import type { Rule } from "eslint";
 import { preferInterfaceTypesRule } from "../rule";
 
 /** Type definition for rule data. */
+/** Reports observed immediately before and after Program:exit. */
+interface DeferredReportState {
+  /** Reports emitted after the deferred exit listener runs. */
+  afterExit: ReportEntry[];
+
+  /** Reports emitted before the deferred exit listener runs. */
+  beforeExit: ReportEntry[];
+}
+
+/** Type definition for rule data. */
 interface MockNode {
   /** Index signature value map. */
   [key: string]: unknown;
@@ -25,6 +35,9 @@ type PreferInterfaceTypesListener =
 
 /** Type definition for rule data. */
 interface ReportDescriptorDetails {
+  /** Autofix callback attached to the report. */
+  fix?: Rule.ReportDescriptor["fix"];
+
   /** MessageId field value. */
   messageId?: string;
 
@@ -34,6 +47,9 @@ interface ReportDescriptorDetails {
 
 /** Type definition for rule data. */
 interface ReportEntry {
+  /** Whether the report owns an autofix. */
+  hasFix: boolean;
+
   /** MessageId helper value. */
   messageId: string | undefined;
 
@@ -41,7 +57,6 @@ interface ReportEntry {
   nodeType: string | undefined;
 }
 
-/** Type definition for rule data. */
 interface RuleContextState {
   /** Context field value. */
   context: Rule.RuleContext;
@@ -79,11 +94,16 @@ const createContext = (): RuleContextState => {
     id: "prefer-interface-types",
     options: [],
     report: (descriptor: Rule.ReportDescriptor): void => {
-      const { messageId, node } = descriptor as ReportDescriptorDetails;
-      const reportEntry: ReportEntry = { messageId, nodeType: node?.type };
+      const { fix, messageId, node } = descriptor as ReportDescriptorDetails;
+      const reportEntry: ReportEntry = {
+        hasFix: fix !== void 0,
+        messageId,
+        nodeType: node?.type,
+      };
 
       reports.push(reportEntry);
     },
+    sourceCode: { ast: { body: [] }, getText: (): string => "", text: "" },
   } as unknown as Rule.RuleContext;
 
   return { context, reports };
@@ -193,6 +213,9 @@ const runListener = (
     ((node: Rule.Node) => void) | undefined;
 
   listener?.(node as unknown as Rule.Node);
+  const exitListener = listeners["Program:exit"] as (() => void) | undefined;
+
+  exitListener?.();
 };
 
 /**
@@ -216,6 +239,29 @@ const runListenerCase = (
   return reports;
 };
 
+/**
+ * Runs one listener while capturing the deferred Program:exit boundary.
+ * @param node Node to run through the function listener.
+ * @returns Reports observed before and after Program:exit.
+ * @example
+ * ```typescript
+ * const reports = runDeferredListenerCase(createFunctionNode({}));
+ * ```
+ */
+const runDeferredListenerCase = (node: MockNode): DeferredReportState => {
+  const { context, reports } = createContext();
+  const listeners = preferInterfaceTypesRule.create(context);
+  const listener = listeners.FunctionDeclaration as
+    ((value: Rule.Node) => void) | undefined;
+  const exitListener = listeners["Program:exit"] as (() => void) | undefined;
+
+  listener?.(node as unknown as Rule.Node);
+  const beforeExit = [...reports];
+  exitListener?.();
+
+  return { afterExit: reports, beforeExit };
+};
+
 export {
   createBareParameter,
   createContext,
@@ -224,6 +270,7 @@ export {
   createParameterProperty,
   createRestParameter,
   createTypeAnnotation,
+  runDeferredListenerCase,
   runListener,
   runListenerCase,
 };

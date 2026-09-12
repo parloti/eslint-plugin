@@ -4,7 +4,16 @@ import type {
   TypeAnnotationNode,
   VariableDeclaratorNode,
 } from "./rule-utilities";
+import type { InlineTypeMatch } from "./types";
 
+import { createAggregateFix } from "./autofix";
+import { collectScopeNames } from "./declaration-names";
+import {
+  allocateNames,
+  getParameterBaseName,
+  getReturnBaseName,
+  getVariableBaseName,
+} from "./naming";
 import {
   getInlineObjectTypeLiteral,
   getParameters,
@@ -14,26 +23,25 @@ import {
 
 /**
  * Reports an inline object type annotation.
- * @param context Rule execution context.
+ * @param matches Deferred match collection.
  * @param typeAnnotation Type annotation node to report.
+ * @param baseName Preferred generated name before normalization.
  * @example
  * ```typescript
  * reportTypeLiteral(context, typeAnnotation);
  * ```
  */
-const reportTypeLiteral = (
-  context: Rule.RuleContext,
+const collectTypeLiteral = (
+  matches: InlineTypeMatch[],
   typeAnnotation: TypeAnnotationNode,
+  baseName: string,
 ): void => {
-  context.report({
-    messageId: "preferNamedObject",
-    node: typeAnnotation as unknown as Rule.Node,
-  });
+  matches.push({ baseName, node: typeAnnotation });
 };
 
 /**
  * Checks function-like nodes for inline object types.
- * @param context Rule execution context.
+ * @param matches Deferred match collection.
  * @param node Function-like node to check.
  * @example
  * ```typescript
@@ -41,7 +49,7 @@ const reportTypeLiteral = (
  * ```
  */
 const checkFunctionLike = (
-  context: Rule.RuleContext,
+  matches: InlineTypeMatch[],
   node: Rule.Node,
 ): void => {
   for (const parameter of getParameters(node)) {
@@ -50,7 +58,11 @@ const checkFunctionLike = (
     );
 
     if (inlineObjectType !== void 0) {
-      reportTypeLiteral(context, inlineObjectType);
+      collectTypeLiteral(
+        matches,
+        inlineObjectType,
+        getParameterBaseName(parameter),
+      );
     }
   }
 
@@ -59,13 +71,17 @@ const checkFunctionLike = (
   );
 
   if (inlineReturnObjectType !== void 0) {
-    reportTypeLiteral(context, inlineReturnObjectType);
+    collectTypeLiteral(
+      matches,
+      inlineReturnObjectType,
+      getReturnBaseName(node),
+    );
   }
 };
 
 /**
  * Checks variable declarators for inline object types.
- * @param context Rule execution context.
+ * @param matches Deferred match collection.
  * @param node Variable declarator to check.
  * @example
  * ```typescript
@@ -73,7 +89,7 @@ const checkFunctionLike = (
  * ```
  */
 const checkVariableDeclarator = (
-  context: Rule.RuleContext,
+  matches: InlineTypeMatch[],
   node: Rule.Node,
 ): void => {
   const typedNode = node as VariableDeclaratorNode;
@@ -83,7 +99,7 @@ const checkVariableDeclarator = (
   );
 
   if (inlineObjectType !== void 0) {
-    reportTypeLiteral(context, inlineObjectType);
+    collectTypeLiteral(matches, inlineObjectType, getVariableBaseName(node));
   }
 };
 
@@ -99,6 +115,8 @@ const preferInterfaceTypesRule: Rule.RuleModule = {
    * ```
    */
   create(context: Rule.RuleContext): Rule.RuleListener {
+    const matches: InlineTypeMatch[] = [];
+
     /**
      * Checks function-like nodes for inline object types.
      * @param node Function-like node to inspect.
@@ -108,7 +126,7 @@ const preferInterfaceTypesRule: Rule.RuleModule = {
      * ```
      */
     const functionLikeListener = (node: Rule.Node): void => {
-      checkFunctionLike(context, node);
+      checkFunctionLike(matches, node);
     };
 
     /**
@@ -120,13 +138,41 @@ const preferInterfaceTypesRule: Rule.RuleModule = {
      * ```
      */
     const variableDeclaratorListener = (node: Rule.Node): void => {
-      checkVariableDeclarator(context, node);
+      checkVariableDeclarator(matches, node);
+    };
+
+    /**
+     * Reports all collected findings and owns the single aggregate fix.
+     * @example
+     * ```typescript
+     * programExitListener();
+     * ```
+     */
+    const programExitListener = (): void => {
+      const statements = context.sourceCode.ast.body;
+      const scopeManager = context.sourceCode.scopeManager as
+        import("./types").ScopeManager | undefined;
+      const namedMatches = allocateNames(
+        matches,
+        statements,
+        collectScopeNames(scopeManager),
+      );
+      const aggregateFix = createAggregateFix(context, namedMatches);
+
+      for (const [index, match] of namedMatches.entries()) {
+        context.report({
+          ...(index === 0 && aggregateFix !== void 0 && { fix: aggregateFix }),
+          messageId: "preferNamedObject",
+          node: match.node as unknown as Rule.Node,
+        });
+      }
     };
 
     return {
       ArrowFunctionExpression: functionLikeListener,
       FunctionDeclaration: functionLikeListener,
       FunctionExpression: functionLikeListener,
+      "Program:exit": programExitListener,
       TSCallSignatureDeclaration: functionLikeListener,
       TSConstructSignatureDeclaration: functionLikeListener,
       TSDeclareFunction: functionLikeListener,
@@ -142,6 +188,7 @@ const preferInterfaceTypesRule: Rule.RuleModule = {
       recommended: false,
       url: "https://github.com/parloti/eslint-plugin/blob/main/docs/rules/prefer-interface-types.md",
     },
+    fixable: "code",
     messages: {
       preferNamedObject:
         "Use a named interface or type alias instead of an inline object type.",

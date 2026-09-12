@@ -33,6 +33,9 @@ interface TypeAnnotationContainer {
 
 /** Type definition for type annotation nodes inspected by this rule. */
 interface TypeAnnotationNode {
+  /** Source range used for safe autofix replacement. */
+  range?: [number, number];
+
   /** Type field value. */
   type: string;
 

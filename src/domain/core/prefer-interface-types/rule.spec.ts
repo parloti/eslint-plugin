@@ -7,6 +7,7 @@ import {
   createParameterProperty,
   createRestParameter,
   createTypeAnnotation,
+  runDeferredListenerCase,
   runListenerCase,
 } from "./__tests__/prefer-interface-types-test-helpers";
 import { preferInterfaceTypesRule } from "./rule";
@@ -38,6 +39,7 @@ const listenerKeys: PreferInterfaceTypesListener[] = [
 
 /** Report shape emitted for one inline object type annotation. */
 const EXPECTED_INLINE_OBJECT_REPORT = {
+  hasFix: false,
   messageId: "preferNamedObject",
   nodeType: "TSTypeLiteral",
 };
@@ -46,12 +48,14 @@ describe("prefer interface types rule", () => {
   it("exposes metadata", () => {
     // Arrange
     const ruleType = preferInterfaceTypesRule.meta?.type;
+    const fixable = preferInterfaceTypesRule.meta?.fixable;
 
     // Act
     const actualCreateType = typeof preferInterfaceTypesRule.create;
 
     // Assert
     expect(ruleType).toBe("suggestion");
+    expect(fixable).toBe("code");
     expect(actualCreateType).toBe("function");
   });
 
@@ -63,6 +67,20 @@ describe("prefer interface types rule", () => {
 
     // Assert
     expect(actualReports).toStrictEqual([EXPECTED_INLINE_OBJECT_REPORT]);
+  });
+
+  it("defers diagnostics until Program:exit", () => {
+    // Arrange
+    const node = createFunctionNode({
+      params: [createParameter("TSTypeLiteral")],
+    });
+
+    // Act
+    const actual = runDeferredListenerCase(node);
+
+    // Assert
+    expect(actual.beforeExit).toStrictEqual([]);
+    expect(actual.afterExit).toStrictEqual([EXPECTED_INLINE_OBJECT_REPORT]);
   });
 
   it("reports inline object type annotations on rest parameters", () => {
