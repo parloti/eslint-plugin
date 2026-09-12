@@ -15,6 +15,8 @@ AAA tests are easier to follow when each phase appears once and in a predictable
 
 The rule also protects section quality by requiring meaningful section content, preserving section boundaries with blank-line separators, and reporting phase-purity violations when setup, action, and assertion behavior leaks across sections.
 
+The analyzer recognizes conventional setup factories by name, including suffixes such as `Context`, `Fixture`, `Mock`, and `Options`. Constructor-created fixtures and filesystem setup calls such as `fs.mkdirSync` are treated as Arrange operations. Collection queries used to derive assertion-local values are not treated as additional SUT actions.
+
 ## Rule Details
 
 The rule applies to tests that use AAA comments:
@@ -93,6 +95,8 @@ Invalid:
 - Setup must remain in Arrange
 - The primary interaction belongs in Act
 - Assertions belong in Assert
+- Read-only assertion-local declarations may narrow, alias, or project values produced by Act
+- Assertion-local declarations must not call functions, construct values, await work, or mutate state
 - Mutations and setup work after Act are reported
 - Await usage outside Act is reported
 
@@ -163,6 +167,23 @@ it("keeps a standard AAA flow", () => {
 ```
 
 ```typescript
+it("allows assertion-local projections", () => {
+  // Act
+  const reportDescriptor = run();
+
+  // Assert
+  const actualSuggestions = reportDescriptor?.suggest as
+    Rule.SuggestionReportDescriptor[] | undefined;
+
+  expect(reportDescriptor).toMatchObject({ messageId: "emptyExample" });
+  expect(actualSuggestions).toHaveLength(1);
+  expect(actualSuggestions).toMatchObject([
+    { messageId: "removeEmptyExample" },
+  ]);
+});
+```
+
+```typescript
 it("allows arrange and act combination", () => {
   // Arrange & Act
   const actual = run(1);
@@ -195,3 +216,5 @@ it("allows tests without AAA comments", () => {
   expect(result).toBe(1);
 });
 ```
+
+When an unmarked test is autofixed, the rule adds one `// Arrange & Act & Assert` marker at the start of the test. Tests with existing markers are not rearranged automatically because their phase boundaries require local judgment.

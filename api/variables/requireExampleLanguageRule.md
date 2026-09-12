@@ -8,6 +8,6 @@
 
 > `const` **requireExampleLanguageRule**: `Rule.RuleModule`
 
-Defined in: [domain/docs/require-example-language/rule.ts:9](https://github.com/parloti/eslint-plugin/blob/e546dffaf93e4ae565713a35a08a3023995915ef/src/domain/docs/require-example-language/rule.ts#L9)
+Defined in: [domain/docs/require-example-language/rule.ts:9](https://github.com/parloti/eslint-plugin/blob/3568ef37d49f91c570d3ad380b7308b29e1ad686/src/domain/docs/require-example-language/rule.ts#L9)
 
 ESLint rule requiring @example tags to use fenced code blocks with a language.

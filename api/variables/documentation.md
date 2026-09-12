@@ -8,6 +8,6 @@
 
 > `const` **documentation**: [`CodeperfectPreset`](../type-aliases/CodeperfectPreset.md)
 
-Defined in: [infrastructure/presets.ts:129](https://github.com/parloti/eslint-plugin/blob/e546dffaf93e4ae565713a35a08a3023995915ef/src/infrastructure/presets.ts#L129)
+Defined in: [infrastructure/presets.ts:127](https://github.com/parloti/eslint-plugin/blob/3568ef37d49f91c570d3ad380b7308b29e1ad686/src/infrastructure/presets.ts#L127)
 
 Preset that enables documentation rules.
