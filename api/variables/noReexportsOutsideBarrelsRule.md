@@ -8,7 +8,7 @@
 
 > `const` **noReexportsOutsideBarrelsRule**: `Rule.RuleModule`
 
-Defined in: [domain/architecture/consistent-barrel-files/no-reexports-outside-barrels-rule.ts:67](https://github.com/parloti/eslint-plugin/blob/3568ef37d49f91c570d3ad380b7308b29e1ad686/src/domain/architecture/consistent-barrel-files/no-reexports-outside-barrels-rule.ts#L67)
+Defined in: [domain/architecture/consistent-barrel-files/no-reexports-outside-barrels-rule.ts:67](https://github.com/parloti/eslint-plugin/blob/b9a82c7b885a6edbda4417f7b50a2babe1b8f5d8/src/domain/architecture/consistent-barrel-files/no-reexports-outside-barrels-rule.ts#L67)
 
 ESLint rule preventing re-exports outside barrel files.
 
