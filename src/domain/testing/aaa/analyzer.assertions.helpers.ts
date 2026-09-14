@@ -127,7 +127,7 @@ function getStatementExpression(
     statement.declarations.length === 1
   ) {
     const [declaration] = statement.declarations;
-    return declaration?.init as ESTree.Expression | undefined;
+    return declaration?.init ?? void 0;
   }
   return void 0;
 }

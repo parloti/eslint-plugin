@@ -179,4 +179,33 @@ describe("enforce-aaa-structure rule", () => {
     // Assert
     expect(actualMessageIds).toContain("codeBeforeArrange");
   });
+
+  it("handles an uninitialized declaration in an Act try block", () => {
+    // Arrange
+    const code = [
+      'it("falls back after the action", () => {',
+      "  // Arrange",
+      "  const fallback = () => undefined;",
+      "",
+      "  // Act",
+      "  let result: string;",
+      "  try {",
+      "    result = run();",
+      "  } finally {",
+      "    fallback();",
+      "  }",
+      "",
+      "  // Assert",
+      '  expect(result).toBe("completed");',
+      "});",
+    ].join("\n");
+
+    // Act
+    const actual = runFix(code);
+
+    // Assert
+    expect(actual.messages).not.toContainEqual(
+      expect.objectContaining({ fatal: true }),
+    );
+  });
 });
