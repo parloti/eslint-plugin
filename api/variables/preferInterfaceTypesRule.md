@@ -8,6 +8,6 @@
 
 > `const` **preferInterfaceTypesRule**: `Rule.RuleModule`
 
-Defined in: [domain/core/prefer-interface-types/rule.ts:107](https://github.com/parloti/eslint-plugin/blob/2e530c24a27d0927066a24d1f22863568bdedd4b/src/domain/core/prefer-interface-types/rule.ts#L107)
+Defined in: [domain/core/prefer-interface-types/rule.ts:107](https://github.com/parloti/eslint-plugin/blob/699bba5da985149b4392dda0bf69a2bc3f5489ee/src/domain/core/prefer-interface-types/rule.ts#L107)
 
 ESLint rule requiring named interface/type aliases for object types.

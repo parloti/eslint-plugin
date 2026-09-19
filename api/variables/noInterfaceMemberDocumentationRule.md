@@ -8,6 +8,6 @@
 
 > `const` **noInterfaceMemberDocumentationRule**: `Rule.RuleModule`
 
-Defined in: [domain/docs/no-interface-member-docs/rule.ts:257](https://github.com/parloti/eslint-plugin/blob/2e530c24a27d0927066a24d1f22863568bdedd4b/src/domain/docs/no-interface-member-docs/rule.ts#L257)
+Defined in: [domain/docs/no-interface-member-docs/rule.ts:257](https://github.com/parloti/eslint-plugin/blob/699bba5da985149b4392dda0bf69a2bc3f5489ee/src/domain/docs/no-interface-member-docs/rule.ts#L257)
 
 ESLint rule disallowing interface member documentation in `@param` tags.
