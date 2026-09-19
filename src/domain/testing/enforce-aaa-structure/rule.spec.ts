@@ -130,6 +130,29 @@ describe("enforce-aaa-structure rule", () => {
     );
   });
 
+  it("does not add missing markers to a test that already has an AAA marker", () => {
+    // Arrange
+    const code = [
+      'it("keeps partial AAA layouts for manual correction", () => {',
+      "  const input = 1;",
+      "",
+      "  // Act",
+      "  const actualResult = run(input);",
+      "",
+      "  expect(actualResult).toBe(1);",
+      "});",
+    ].join("\n");
+
+    // Act
+    const result = runFix(code);
+
+    // Assert
+    expect(result.output).toBe(code);
+    expect(result.messages).toContainEqual(
+      expect.objectContaining({ messageId: "missingSections" }),
+    );
+  });
+
   it("reports purity violations while keeping message IDs distinct", () => {
     // Arrange
     const code = [

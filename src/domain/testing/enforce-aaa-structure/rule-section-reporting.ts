@@ -172,7 +172,7 @@ function reportMissingSections(
   }
 
   const fix =
-    analysis.bodyLineCount >= 3
+    analysis.sectionComments.length === 0 && analysis.bodyLineCount >= 3
       ? (fixer: Rule.RuleFixer): Rule.Fix[] =>
           buildMissingSectionFixes(analysis, missingSections, fixer)
       : void 0;
