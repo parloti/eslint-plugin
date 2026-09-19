@@ -8,6 +8,6 @@
 
 > `const` **noMultipleDeclaratorsRule**: `Rule.RuleModule`
 
-Defined in: [domain/core/no-multiple-declarators/rule.ts:85](https://github.com/parloti/eslint-plugin/blob/b9a82c7b885a6edbda4417f7b50a2babe1b8f5d8/src/domain/core/no-multiple-declarators/rule.ts#L85)
+Defined in: [domain/core/no-multiple-declarators/rule.ts:85](https://github.com/parloti/eslint-plugin/blob/2e530c24a27d0927066a24d1f22863568bdedd4b/src/domain/core/no-multiple-declarators/rule.ts#L85)
 
 ESLint rule implementation for single-declarator variable statements.
