@@ -8,13 +8,5 @@
     "inlineSources": true
   },
   "include": ["src/**/*.ts"],
-  "exclude": [
-    "**/*.spec.ts",
-    "**/*.e2e.ts",
-    "**/*.test.ts",
-    "src/**/__tests__/**",
-    "dist",
-    "coverage",
-    "node_modules"
-  ]
+  "exclude": ["**/*.spec.ts", "src/**/__tests__/**"]
 }

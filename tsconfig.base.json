@@ -13,11 +13,8 @@
     "noUnusedParameters": true,
 
     // Modules
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "resolveJsonModule": true,
+    "module": "preserve",
     "rootDir": "${configDir}/src",
-    "types": ["node"],
 
     // Emit
     "noEmitOnError": true,
@@ -36,12 +33,12 @@
     // Language and Environment
     "experimentalDecorators": true,
     "target": "esnext",
+    "types": ["node"],
 
     // Compiler Diagnostics
 
     // Projects
     "composite": true,
-    "tsBuildInfoFile": "${configDir}/temp/.tsbuildinfo",
 
     // Output Formatting
     "noErrorTruncation": true,
@@ -57,8 +54,6 @@
     "${configDir}/dist",
     "${configDir}/coverage",
     "${configDir}/node_modules",
-    "${configDir}/temp",
-    "${configDir}/apps",
-    "${configDir}/packages"
+    "${configDir}/temp"
   ]
 }
