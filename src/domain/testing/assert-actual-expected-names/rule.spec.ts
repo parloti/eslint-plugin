@@ -19,13 +19,13 @@ describe("assert-actual-expected-names rule", () => {
     resetRuleMockState();
     vi.doMock(
       import("../aaa/analyzer.analysis"),
-      createMockProxy<typeof AnalyzerModule>(createAnalysisModule()),
+      (): typeof AnalyzerModule =>
+        createAnalysisModule() as unknown as typeof AnalyzerModule,
     );
     vi.doMock(
       import("../aaa/analyzer.assertions.helpers"),
-      createMockProxy<typeof AnalyzerAssertionsModule>(
-        createAssertionsModule(),
-      ),
+      (): typeof AnalyzerAssertionsModule =>
+        createAssertionsModule() as unknown as typeof AnalyzerAssertionsModule,
     );
   });
 

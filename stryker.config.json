@@ -1,6 +1,19 @@
 {
   "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
   "checkers": ["typescript"],
+  "dryRunTimeoutMinutes": 20,
+  "ignorePatterns": [
+    "**/.angular/",
+    "**/.stryker-tmp/",
+    "**/.user-data/",
+    "**/coverage/",
+    "**/dist/",
+    "**/docs/api/",
+    "**/reports/",
+    "**/temp/",
+    "**/test-results/",
+    "**/tmp/"
+  ],
   "ignoreStatic": true,
   "incremental": true,
   "reporters": ["progress", "clear-text", "html", "json"],

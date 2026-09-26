@@ -21,13 +21,13 @@ describe("require-act-result-capture rule", () => {
     };
     vi.doMock(
       import("../aaa/analyzer.analysis"),
-      createMockProxy<typeof AnalyzerModule>(createAnalysisModule()),
+      (): typeof AnalyzerModule =>
+        createAnalysisModule() as unknown as typeof AnalyzerModule,
     );
     vi.doMock(
       import("../aaa/analyzer.classification.helpers"),
-      createMockProxy<typeof AnalyzerClassificationModule>(
-        createClassificationModule(),
-      ),
+      (): typeof AnalyzerClassificationModule =>
+        createClassificationModule() as unknown as typeof AnalyzerClassificationModule,
     );
   });
 

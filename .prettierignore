@@ -1,8 +1,10 @@
 **/.angular/
 **/.stryker-tmp/
+**/.user-data/
 **/coverage/
 **/dist/
-**/docs/api/*
+**/docs/api/
 **/reports/
+**/temp/
 **/test-results/
-**/.user-data/
+**/tmp/

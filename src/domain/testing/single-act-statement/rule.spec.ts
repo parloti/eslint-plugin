@@ -183,13 +183,13 @@ describe("single-act-statement rule", () => {
     };
     vi.doMock(
       import("../aaa/analyzer.analysis"),
-      createMockProxy<typeof AnalyzerModule>(createAnalysisModule()),
+      (): typeof AnalyzerModule =>
+        createAnalysisModule() as unknown as typeof AnalyzerModule,
     );
     vi.doMock(
       import("../aaa/analyzer.analysis.helpers"),
-      createMockProxy<typeof AnalyzerAnalysisModule>(
-        createAnalysisHelpersModule(),
-      ),
+      (): typeof AnalyzerAnalysisModule =>
+        createAnalysisHelpersModule() as unknown as typeof AnalyzerAnalysisModule,
     );
   });
 

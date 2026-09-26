@@ -18,11 +18,11 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
-/test-run*.txt
-/validate-run*.txt
-/lint-run*.txt
-/eslint-run*.txt
-/typecheck-run*.txt
+test-run*.txt
+validate-run*.txt
+lint-run*.txt
+eslint-run*.txt
+typecheck-run*.txt
 logs
 
 # ---------------------------------------------------------
@@ -133,10 +133,5 @@ Desktop.ini
 # ---------------------------------------------------------
 # User data and runtime data
 # ---------------------------------------------------------
-**/.user-data
-**/.runtime-data
-
-# ---------------------------------------------------------
-# Custom patterns
-# ---------------------------------------------------------
-.vscode/
+.user-data/
+.runtime-data/

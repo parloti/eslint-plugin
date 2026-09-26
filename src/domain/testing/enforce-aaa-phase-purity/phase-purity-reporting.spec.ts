@@ -14,29 +14,32 @@ import { reportPhasePurityViolations } from "./phase-purity-reporting";
 
 vi.mock(
   import("../aaa/analyzer.assertions.helpers"),
-  createMockProxy<typeof AnalyzerAsserionsHelpersModule>({
-    hasAssertion: (node: NodeFlags) => hasFlag(node, "containsAssertion"),
-    isValidAssertStatement: (node: NodeFlags) => hasFlag(node, "isValidAssert"),
-  }),
+  (): typeof AnalyzerAsserionsHelpersModule =>
+    ({
+      hasAssertion: (node: NodeFlags) => hasFlag(node, "containsAssertion"),
+      isValidAssertStatement: (node: NodeFlags) =>
+        hasFlag(node, "isValidAssert"),
+    }) as unknown as typeof AnalyzerAsserionsHelpersModule,
 );
 
 vi.mock(
   import("../aaa/analyzer.classification.helpers"),
-  createMockProxy<typeof AnalyzerClassificationHelpers>({
-    hasAsyncLogic: (node: NodeFlags) => hasFlag(node, "containsAsyncLogic"),
-    hasAwait: (node: NodeFlags) => hasFlag(node, "containsAwait"),
-    hasCapturableActResult: (node: NodeFlags) =>
-      hasFlag(node, "hasCapturableActResult"),
-    hasMutation: (node: NodeFlags) => hasFlag(node, "containsMutation"),
-    isMeaningfulActStatement: (node: NodeFlags) =>
-      hasFlag(node, "isMeaningfulAct"),
-    isSetupLikeStatement: (node: NodeFlags) => hasFlag(node, "isSetupLike"),
-  }),
+  (): typeof AnalyzerClassificationHelpers =>
+    ({
+      hasAsyncLogic: (node: NodeFlags) => hasFlag(node, "containsAsyncLogic"),
+      hasAwait: (node: NodeFlags) => hasFlag(node, "containsAwait"),
+      hasCapturableActResult: (node: NodeFlags) =>
+        hasFlag(node, "hasCapturableActResult"),
+      hasMutation: (node: NodeFlags) => hasFlag(node, "containsMutation"),
+      isMeaningfulActStatement: (node: NodeFlags) =>
+        hasFlag(node, "isMeaningfulAct"),
+      isSetupLikeStatement: (node: NodeFlags) => hasFlag(node, "isSetupLike"),
+    }) as unknown as typeof AnalyzerClassificationHelpers,
 );
 
 vi.mock(
   import("./phase-purity-identifiers"),
-  createMockProxy<typeof PhasePurityIdentifiersModule>({
+  (): typeof PhasePurityIdentifiersModule => ({
     getAssertReferencedIdentifiers: () => new Set<string>(),
     isActResultAsserted: (_assertReferences: Set<string>, node: NodeFlags) =>
       hasFlag(node, "isActResultAsserted"),

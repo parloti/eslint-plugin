@@ -7,7 +7,6 @@
     "src/**/*.spec.ts",
     "src/**/__tests__/**/*.ts",
     "tests/support/**/*.ts",
-    "tests/support/**/*.spec.ts",
-    "vitest.setup.ts"
+    "tests/support/**/*.spec.ts"
   ]
 }
