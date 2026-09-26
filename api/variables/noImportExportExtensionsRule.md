@@ -8,6 +8,6 @@
 
 > `const` **noImportExportExtensionsRule**: `Rule.RuleModule`
 
-Defined in: [domain/architecture/no-import-export-extensions/no-import-export-extensions-rule.ts:198](https://github.com/parloti/eslint-plugin/blob/699bba5da985149b4392dda0bf69a2bc3f5489ee/src/domain/architecture/no-import-export-extensions/no-import-export-extensions-rule.ts#L198)
+Defined in: [domain/architecture/no-import-export-extensions/no-import-export-extensions-rule.ts:190](https://github.com/parloti/eslint-plugin/blob/07106ba3dca12583bf9372810c4684eb52761e0d/src/domain/architecture/no-import-export-extensions/no-import-export-extensions-rule.ts#L190)
 
 ESLint rule that forbids import/export module specifiers with explicit file extensions.

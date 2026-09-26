@@ -8,7 +8,7 @@
 
 > `const` **consistentBarrelFilesRule**: `Rule.RuleModule`
 
-Defined in: [domain/architecture/consistent-barrel-files/rule.ts:14](https://github.com/parloti/eslint-plugin/blob/699bba5da985149b4392dda0bf69a2bc3f5489ee/src/domain/architecture/consistent-barrel-files/rule.ts#L14)
+Defined in: [domain/architecture/consistent-barrel-files/rule.ts:14](https://github.com/parloti/eslint-plugin/blob/07106ba3dca12583bf9372810c4684eb52761e0d/src/domain/architecture/consistent-barrel-files/rule.ts#L14)
 
 ESLint rule requiring consistent barrel file usage by folder.
 
