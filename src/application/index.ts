@@ -8,7 +8,6 @@ export {
   noInterfaceMemberDocumentationRule,
   noMultipleDeclaratorsRule,
   noReexportsOutsideBarrelsRule,
-  noUnsafeVitestMockFactoryCastRule,
   noUnusedExportsRule,
   noUselessDelegationRule,
   preferInterfaceTypesRule,
