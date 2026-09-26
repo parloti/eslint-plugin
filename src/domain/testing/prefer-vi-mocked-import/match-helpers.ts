@@ -119,10 +119,10 @@ function hasRange(node: ESTree.Node): node is RangeNode {
  * ```
  */
 function isViFunctionCall(expression: ESTree.Expression | null): boolean {
-  if (expression?.type !== "CallExpression") {
-    return false;
-  }
-  if (expression.callee.type !== "MemberExpression") {
+  if (
+    expression?.type !== "CallExpression" ||
+    expression.callee.type !== "MemberExpression"
+  ) {
     return false;
   }
 

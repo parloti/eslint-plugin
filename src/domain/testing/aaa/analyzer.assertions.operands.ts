@@ -53,9 +53,10 @@ function getExpectOperands(
     expression.callee.name === "expect"
   ) {
     const [actual] = expression.arguments;
-    return actual?.type === "SpreadElement"
-      ? { actual: void 0, expected: void 0 }
-      : { actual, expected: void 0 };
+    return {
+      actual: actual?.type === "SpreadElement" ? void 0 : actual,
+      expected: void 0,
+    };
   }
 
   if (
@@ -123,27 +124,15 @@ function hasEvaluatedAssertionActual(
  * ```
  */
 function isAssertionCall(node: ESTree.CallExpression): boolean {
-  if (node.callee.type === "Identifier") {
-    return ["assert", "assertType", "expect", "expectTypeOf"].includes(
-      node.callee.name,
-    );
-  }
-
-  if (node.callee.type !== "MemberExpression") {
-    return false;
-  }
-
-  if (
-    node.callee.object.type === "Identifier" &&
-    node.callee.object.name === "assert"
-  ) {
-    return true;
-  }
-
-  return (
-    node.callee.object.type === "CallExpression" &&
-    isAssertionCall(node.callee.object)
-  );
+  return node.callee.type === "Identifier"
+    ? ["assert", "assertType", "expect", "expectTypeOf"].includes(
+        node.callee.name,
+      )
+    : node.callee.type === "MemberExpression" &&
+        ((node.callee.object.type === "Identifier" &&
+          node.callee.object.name === "assert") ||
+          (node.callee.object.type === "CallExpression" &&
+            isAssertionCall(node.callee.object)));
 }
 
 export {

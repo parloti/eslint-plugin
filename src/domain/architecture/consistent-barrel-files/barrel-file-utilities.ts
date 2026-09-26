@@ -76,11 +76,9 @@ const getRepoRelativePath = (filename: string): string | undefined => {
 
   const relativePath = path.relative(cwd(), filename);
 
-  if (relativePath.startsWith("..") || path.isAbsolute(relativePath)) {
-    return void 0;
-  }
-
-  return relativePath.split(path.sep).join("/");
+  return relativePath.startsWith("..") || path.isAbsolute(relativePath)
+    ? void 0
+    : relativePath.split(path.sep).join("/");
 };
 
 /**

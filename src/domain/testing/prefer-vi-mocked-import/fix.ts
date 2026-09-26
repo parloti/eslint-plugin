@@ -169,9 +169,10 @@ function extendRangeToLineBreak(
 ): Range {
   const [start, end] = statementRange;
   const nextLineFeedIndex = sourceText.indexOf("\n", end);
-  return nextLineFeedIndex === -1
-    ? [start, sourceText.length]
-    : [start, nextLineFeedIndex + 1];
+  return [
+    start,
+    nextLineFeedIndex === -1 ? sourceText.length : nextLineFeedIndex + 1,
+  ];
 }
 
 /**
@@ -188,10 +189,12 @@ function getUniqueStatementRanges(match: RuleMatch): Range[] {
   const rangeMap = new Map<string, Range>();
   for (const binding of match.bindings) {
     const declaration = match.declarations.get(binding.localName);
-    if (declaration !== void 0) {
-      const key = `${declaration.statementRange[0].toFixed(0)}:${declaration.statementRange[1].toFixed(0)}`;
-      rangeMap.set(key, declaration.statementRange);
+    if (declaration === void 0) {
+      continue;
     }
+
+    const key = `${declaration.statementRange[0].toFixed(0)}:${declaration.statementRange[1].toFixed(0)}`;
+    rangeMap.set(key, declaration.statementRange);
   }
 
   return rangeMap.values().toArray();

@@ -38,15 +38,13 @@ const createDeclarationFix = (
   }
 
   const rangedDeclarations = getRangedDeclarations(declarations);
-  if (rangedDeclarations === void 0) {
-    return void 0;
-  }
-
-  return (fixer: Rule.RuleFixer): Rule.Fix =>
-    fixer.replaceTextRange(
-      node.range,
-      buildReplacement(node, rangedDeclarations, sourceCode),
-    );
+  return rangedDeclarations === void 0
+    ? void 0
+    : (fixer: Rule.RuleFixer): Rule.Fix =>
+        fixer.replaceTextRange(
+          node.range,
+          buildReplacement(node, rangedDeclarations, sourceCode),
+        );
 };
 
 /**

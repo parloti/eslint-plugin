@@ -72,11 +72,9 @@ const getNestedTypeAnnotation = (
     return getTypeAnnotationNode(node.left);
   }
 
-  if (node.parameter !== void 0) {
-    return getTypeAnnotationNode(node.parameter);
-  }
-
-  return void 0;
+  return node.parameter === void 0
+    ? void 0
+    : getTypeAnnotationNode(node.parameter);
 };
 
 /**
@@ -98,11 +96,9 @@ const getTypeAnnotationNode = (
   const directTypeAnnotation = (node as TypeAnnotationContainer).typeAnnotation
     ?.typeAnnotation;
 
-  if (directTypeAnnotation !== void 0) {
-    return directTypeAnnotation;
-  }
-
-  return getNestedTypeAnnotation(node);
+  return directTypeAnnotation === void 0
+    ? getNestedTypeAnnotation(node)
+    : directTypeAnnotation;
 };
 
 /**

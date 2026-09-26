@@ -215,11 +215,7 @@ function updateFenceState(
   state: EmptyFenceState,
   line: string,
 ): EmptyFenceState {
-  if (state.inFence) {
-    return closeFence(state, line);
-  }
-
-  return openFence(state, line);
+  return state.inFence ? closeFence(state, line) : openFence(state, line);
 }
 
 export { parseFenceLine, removeEmptyFences };

@@ -170,20 +170,15 @@ function hasMutation(statement: ESTree.Statement): boolean {
  */
 function isMeaningfulActStatement(statement: ESTree.Statement): boolean {
   const expression = getStatementExpression(statement);
-  if (expression === void 0) {
-    return false;
-  }
-  if (hasAssertion(statement)) {
+  if (expression === void 0 || hasAssertion(statement)) {
     return false;
   }
   if (isActionExpression(expression)) {
-    if (
+    const isPlainConstruction =
       statement.type === "VariableDeclaration" &&
-      expression.type === "NewExpression"
-    ) {
-      return false;
-    }
-    return !isUtilityLikeExpression(expression);
+      expression.type === "NewExpression";
+
+    return !isPlainConstruction && !isUtilityLikeExpression(expression);
   }
   if (
     statement.type !== "VariableDeclaration" ||
@@ -242,13 +237,12 @@ function isSetupLikeStatement(statement: ESTree.Statement): boolean {
         return true;
       }
       const init = unwrapExpression(declaration.init);
-      if (init === void 0) {
-        return true;
-      }
-      if (init.type === "NewExpression") {
-        return true;
-      }
-      return !isActionExpression(init) || isUtilityLikeExpression(init);
+      return (
+        init === void 0 ||
+        init.type === "NewExpression" ||
+        !isActionExpression(init) ||
+        isUtilityLikeExpression(init)
+      );
     });
   }
   const expression = getStatementExpression(statement);
@@ -272,10 +266,8 @@ function isUtilityLikeExpression(
     return false;
   }
   const calleeName = getExpressionName(unwrappedExpression.callee);
-  if (calleeName === void 0) {
-    return false;
-  }
   return (
+    calleeName !== void 0 &&
     !isRuleCreateInvocation(unwrappedExpression) &&
     (isUtilityConstructor(unwrappedExpression, calleeName) ||
       isUtilityNamedCall(calleeName) ||

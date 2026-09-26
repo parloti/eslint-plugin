@@ -121,13 +121,11 @@ function buildMissingSectionFixes(
 ): Rule.Fix[] {
   const anchors = getSectionAnchors(analysis);
 
-  if (anchors === void 0) {
-    return [];
-  }
-
-  return [...buildAnchorMap(anchors, missingSections)].map(([offset, phases]) =>
-    buildMissingSectionFix({ analysis, fixer, offset, phases }),
-  );
+  return anchors === void 0
+    ? []
+    : [...buildAnchorMap(anchors, missingSections)].map(([offset, phases]) =>
+        buildMissingSectionFix({ analysis, fixer, offset, phases }),
+      );
 }
 
 /**

@@ -118,11 +118,9 @@ const parseParameterTagLine = (
 
   const member = getMemberName(normalized);
 
-  if (member === void 0) {
-    return void 0;
-  }
-
-  return { basename: member.basename, fullName: normalized, line };
+  return member === void 0
+    ? void 0
+    : { basename: member.basename, fullName: normalized, line };
 };
 
 export { parseParameterTagLine };

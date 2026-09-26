@@ -58,19 +58,17 @@ function buildImportInsertFixes(
   );
   const { afterRange } = match.importPlan.insert ?? {};
 
-  return afterRange === void 0
-    ? [
-        fixer.insertTextBeforeRange(
+  return [
+    afterRange === void 0
+      ? fixer.insertTextBeforeRange(
           [0, 0],
           `${statementText}${match.newline}${match.newline}`,
-        ),
-      ]
-    : [
-        fixer.insertTextAfterRange(
+        )
+      : fixer.insertTextAfterRange(
           afterRange,
           `${match.newline}${statementText}`,
         ),
-      ];
+  ];
 }
 
 /**

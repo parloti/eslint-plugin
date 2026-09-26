@@ -93,23 +93,17 @@ const isTypeOnlyDeclaration = (value: unknown): boolean => {
 const isTypeOnlyExport = (candidate: TypeOnlyExportCandidate): boolean => {
   const specifiers = candidate.specifiers;
 
-  if (!Array.isArray(specifiers) || specifiers.length === 0) {
-    return false;
-  }
-
-  if (candidate.exportKind === "type") {
-    return true;
-  }
-
-  return specifiers.every((specifier) => {
-    if (specifier === null || typeof specifier !== "object") {
-      return false;
-    }
-
-    return (
-      (specifier as TypeOnlyExportSpecifierCandidate).exportKind === "type"
-    );
-  });
+  return (
+    Array.isArray(specifiers) &&
+    specifiers.length > 0 &&
+    (candidate.exportKind === "type" ||
+      specifiers.every(
+        (specifier) =>
+          specifier !== null &&
+          typeof specifier === "object" &&
+          (specifier as TypeOnlyExportSpecifierCandidate).exportKind === "type",
+      ))
+  );
 };
 
 /**
@@ -140,11 +134,7 @@ const isAllowedBarrelStatement = (
 
   const source = statement.source ?? void 0;
 
-  if (source === void 0) {
-    return isTypeOnlyExport(statement);
-  }
-
-  return true;
+  return source !== void 0 || isTypeOnlyExport(statement);
 };
 
 /**

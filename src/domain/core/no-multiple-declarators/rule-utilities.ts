@@ -71,15 +71,11 @@ const getLineSeparator = (sourceText: string): string =>
 const isLoopInitializer = (node: VariableDeclarationNode): boolean => {
   const { parent } = node;
 
-  if (parent?.type === "ForStatement") {
-    return (parent as ForStatementNode).init === node;
-  }
-
-  if (parent !== void 0 && loopParentTypes.has(parent.type)) {
-    return (parent as ForInOrOfStatementNode).left === node;
-  }
-
-  return false;
+  return parent?.type === "ForStatement"
+    ? (parent as ForStatementNode).init === node
+    : parent !== void 0 &&
+        loopParentTypes.has(parent.type) &&
+        (parent as ForInOrOfStatementNode).left === node;
 };
 
 /**
@@ -227,22 +223,17 @@ const canFix = (
   declarations: readonly VariableDeclaratorNode[],
   sourceText: string,
 ): boolean => {
-  if (!hasFixData(node)) {
-    return false;
-  }
+  const isFixable =
+    hasFixData(node) &&
+    hasFixableDeclarationKind(node) &&
+    !isTypeScriptAmbientDeclaration(node);
 
-  if (
-    !hasFixableDeclarationKind(node) ||
-    isTypeScriptAmbientDeclaration(node)
-  ) {
-    return false;
-  }
-
-  if (isLoopInitializer(node) || isWrappedExport(node)) {
-    return false;
-  }
-
-  return !hasSeparatorComment(declarations, sourceText);
+  return (
+    isFixable &&
+    !isLoopInitializer(node) &&
+    !isWrappedExport(node) &&
+    !hasSeparatorComment(declarations, sourceText)
+  );
 };
 
 /**

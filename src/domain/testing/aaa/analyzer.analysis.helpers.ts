@@ -255,11 +255,7 @@ function getTestRootName(
       current.type === "CallExpression" ? current.callee : current.object;
   }
 
-  if (current.type === "Identifier") {
-    return current.name;
-  }
-
-  return void 0;
+  return current.type === "Identifier" ? current.name : void 0;
 }
 
 /**

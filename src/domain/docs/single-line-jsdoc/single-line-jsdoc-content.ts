@@ -68,17 +68,10 @@ const getContentLines = (commentValue: string): string[] => {
  * shouldSkipContent();
  * ```
  */
-const shouldSkipContent = (lines: string[]): boolean => {
-  if (lines.length === 0) {
-    return true;
-  }
-
-  if (lines.some((line) => line.length === 0)) {
-    return true;
-  }
-
-  return lines.some((line) => line.startsWith("@"));
-};
+const shouldSkipContent = (lines: string[]): boolean =>
+  lines.length === 0 ||
+  lines.some((line) => line.length === 0) ||
+  lines.some((line) => line.startsWith("@"));
 
 /**
  * Defines collapseContent.
@@ -108,11 +101,7 @@ const getCollapsedContent = (comment: Comment): string | undefined => {
     return void 0;
   }
 
-  if (contentLines.length !== 1) {
-    return void 0;
-  }
-
-  return collapseContent(contentLines);
+  return contentLines.length === 1 ? collapseContent(contentLines) : void 0;
 };
 
 export { getCollapsedContent };

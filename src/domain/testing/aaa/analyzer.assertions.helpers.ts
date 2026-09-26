@@ -224,16 +224,14 @@ function isValidAssertStatement(statement: ESTree.Statement): boolean {
       isAssertionLocalExpression(actual)
     );
   }
-  if (statement.type !== "VariableDeclaration") {
-    return false;
-  }
-
-  return statement.declarations.every((declaration) => {
-    if (declaration.init === null) {
-      return true;
-    }
-    return !isActionExpression(unwrapExpression(declaration.init));
-  });
+  return (
+    statement.type === "VariableDeclaration" &&
+    statement.declarations.every(
+      (declaration) =>
+        declaration.init === null ||
+        !isActionExpression(unwrapExpression(declaration.init)),
+    )
+  );
 }
 
 /**
@@ -254,11 +252,7 @@ function unwrapExpression(
     current = current.expression;
   }
 
-  if (current?.type === "AwaitExpression") {
-    return current.argument;
-  }
-
-  return current;
+  return current?.type === "AwaitExpression" ? current.argument : current;
 }
 
 /**

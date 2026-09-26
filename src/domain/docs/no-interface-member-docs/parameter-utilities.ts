@@ -90,11 +90,9 @@ const resolveParameterNode = (node: unknown): unknown => {
     return container.parameter;
   }
 
-  if (container.type === "AssignmentPattern" && container.left !== void 0) {
-    return container.left;
-  }
-
-  return node;
+  return container.type === "AssignmentPattern" && container.left !== void 0
+    ? container.left
+    : node;
 };
 
 /**
@@ -118,11 +116,9 @@ const getParameterIdentifier = (
   const identifier = resolved as IdentifierNode;
   const { name } = identifier;
 
-  if (typeof name !== "string" || identifier.type !== "Identifier") {
-    return void 0;
-  }
-
-  return { ...identifier, name };
+  return typeof name !== "string" || identifier.type !== "Identifier"
+    ? void 0
+    : { ...identifier, name };
 };
 
 /**

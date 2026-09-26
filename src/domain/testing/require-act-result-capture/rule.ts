@@ -31,14 +31,10 @@ function getMemberObjectName(
     return object.name;
   }
 
-  if (
-    object.type === "MemberExpression" &&
+  return object.type === "MemberExpression" &&
     object.property.type === "Identifier"
-  ) {
-    return object.property.name;
-  }
-
-  return void 0;
+    ? object.property.name
+    : void 0;
 }
 
 /**
@@ -77,14 +73,11 @@ function isHelperDrivenAct(statement: ESTree.Statement): boolean {
   }
 
   const { expression } = statement;
-  if (expression.type !== "CallExpression") {
-    return false;
-  }
-
   return (
-    isContextReportCall(expression) ||
-    isNamedHelperCall(expression) ||
-    isRuleCreateCall(expression)
+    expression.type === "CallExpression" &&
+    (isContextReportCall(expression) ||
+      isNamedHelperCall(expression) ||
+      isRuleCreateCall(expression))
   );
 }
 

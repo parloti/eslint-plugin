@@ -127,11 +127,9 @@ const getExportedSymbol = (
     .getExportsOfModule(moduleSymbol)
     .find((symbol) => symbol.getName() === exportedName);
 
-  if (exportedSymbol === void 0) {
-    return void 0;
-  }
-
-  return resolveCanonicalSymbol(exportedSymbol, checker);
+  return exportedSymbol === void 0
+    ? void 0
+    : resolveCanonicalSymbol(exportedSymbol, checker);
 };
 
 /**

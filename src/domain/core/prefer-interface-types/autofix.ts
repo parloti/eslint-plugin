@@ -29,12 +29,12 @@ function containsContextualThis(value: unknown): boolean {
 
   const node = value as Record<string, unknown>;
 
-  if (node["type"] === "TSThisType" || node["type"] === "ThisExpression") {
-    return true;
-  }
-
-  return Object.entries(node).some(
-    ([key, child]) => key !== "parent" && containsContextualThis(child),
+  return (
+    node["type"] === "TSThisType" ||
+    node["type"] === "ThisExpression" ||
+    Object.entries(node).some(
+      ([key, child]) => key !== "parent" && containsContextualThis(child),
+    )
   );
 }
 

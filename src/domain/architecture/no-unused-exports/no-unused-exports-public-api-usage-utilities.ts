@@ -43,15 +43,11 @@ const collectPublicApiExposureUsages = (
     const normalizedPublicApiFilename =
       toComparableAbsolutePath(publicApiFilename);
 
-    if (normalizedPublicApiFilename === normalizedSourceFilename) {
-      continue;
-    }
-
-    if (!isPublicApiFile(publicApiFilename, state, normalizedRepoRoot)) {
-      continue;
-    }
-
-    if (!sourceFileExportsSymbol(sourceFile, checker, targetSymbol)) {
+    if (
+      normalizedPublicApiFilename === normalizedSourceFilename ||
+      !isPublicApiFile(publicApiFilename, state, normalizedRepoRoot) ||
+      !sourceFileExportsSymbol(sourceFile, checker, targetSymbol)
+    ) {
       continue;
     }
 

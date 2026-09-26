@@ -216,11 +216,9 @@ function getReportLocation(
       ? comment.loc.start.line + example.lineIndex
       : void 0;
 
-  if (line === void 0) {
-    return void 0;
-  }
-
-  return { end: { column: 1, line }, start: { column: 0, line } };
+  return line === void 0
+    ? void 0
+    : { end: { column: 1, line }, start: { column: 0, line } };
 }
 
 /**

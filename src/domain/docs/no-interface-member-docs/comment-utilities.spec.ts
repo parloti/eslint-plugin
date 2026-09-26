@@ -136,7 +136,7 @@ describe("comment utilities jsdoc lookup", () => {
         get: () => {
           readCount += 1;
 
-          return readCount === 1 ? [0, stableEnd] : [0, void 0];
+          return [0, readCount === 1 ? stableEnd : void 0];
         },
       });
 

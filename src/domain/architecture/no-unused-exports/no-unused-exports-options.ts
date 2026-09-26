@@ -123,11 +123,9 @@ const toRepoRelativePosixPath = (
 
   const relativePath = path.relative(repoRoot, filename);
 
-  if (relativePath.startsWith("..") || path.isAbsolute(relativePath)) {
-    return void 0;
-  }
-
-  return relativePath.split(path.sep).join("/");
+  return relativePath.startsWith("..") || path.isAbsolute(relativePath)
+    ? void 0
+    : relativePath.split(path.sep).join("/");
 };
 
 /**
@@ -148,12 +146,9 @@ const matchesAnyPattern = (
 ): boolean => {
   const relativePath = toRepoRelativePosixPath(filename, repoRoot);
 
-  if (relativePath === void 0 || patterns.length === 0) {
-    return false;
-  }
-
-  return patterns.some((pattern) =>
-    minimatch(relativePath, pattern, { dot: true }),
+  return (
+    relativePath !== void 0 &&
+    patterns.some((pattern) => minimatch(relativePath, pattern, { dot: true }))
   );
 };
 

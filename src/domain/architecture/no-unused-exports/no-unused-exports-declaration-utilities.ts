@@ -215,18 +215,20 @@ const addSpecifierExportElements = (
 
     const exportedName = getExportSpecifierName(specifier);
 
-    if (exportedName !== void 0) {
-      const statementExportKind = readStringProperty(statement, "exportKind");
-      const specifierExportKind = readStringProperty(specifier, "exportKind");
-      const isTypeOnlyExport =
-        statementExportKind === "type" || specifierExportKind === "type";
-
-      exportedElements.push({
-        exportedName,
-        exportKind: isTypeOnlyExport ? "type" : localDeclaration.kind,
-        node: localDeclaration.node,
-      });
+    if (exportedName === void 0) {
+      continue;
     }
+
+    const statementExportKind = readStringProperty(statement, "exportKind");
+    const specifierExportKind = readStringProperty(specifier, "exportKind");
+    const isTypeOnlyExport =
+      statementExportKind === "type" || specifierExportKind === "type";
+
+    exportedElements.push({
+      exportedName,
+      exportKind: isTypeOnlyExport ? "type" : localDeclaration.kind,
+      node: localDeclaration.node,
+    });
   }
 };
 

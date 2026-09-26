@@ -44,19 +44,15 @@ const collectPatternIdentifierNames = (node: unknown): string[] => {
   }
 
   if (patternType === "ObjectPattern") {
-    const properties = readArrayProperty(pattern, "properties");
+    const properties = readArrayProperty(pattern, "properties") ?? [];
 
-    return properties === void 0
-      ? []
-      : properties.flatMap((property) => {
-          if (readStringProperty(property, "type") === "RestElement") {
-            return collectPatternIdentifierNames(
-              asRecord(property)?.["argument"],
-            );
-          }
-
-          return collectPatternIdentifierNames(asRecord(property)?.["value"]);
-        });
+    return properties.flatMap((property) =>
+      collectPatternIdentifierNames(
+        readStringProperty(property, "type") === "RestElement"
+          ? asRecord(property)?.["argument"]
+          : asRecord(property)?.["value"],
+      ),
+    );
   }
 
   return [];

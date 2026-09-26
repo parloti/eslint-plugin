@@ -107,14 +107,10 @@ function getMockCallArguments(
   if (firstArgument === void 0 || secondArgument === void 0) {
     return void 0;
   }
-  if (
-    firstArgument.type === "SpreadElement" ||
+  return firstArgument.type === "SpreadElement" ||
     secondArgument.type === "SpreadElement"
-  ) {
-    return void 0;
-  }
-
-  return [firstArgument, secondArgument];
+    ? void 0
+    : [firstArgument, secondArgument];
 }
 
 /**

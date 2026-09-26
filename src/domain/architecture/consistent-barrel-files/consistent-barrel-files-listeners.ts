@@ -29,14 +29,10 @@ const buildListenerForDirectory = (
     options.allowedNamesSet,
   );
 
-  if (
-    !directoryState.hasNonBarrelModuleFile ||
+  return !directoryState.hasNonBarrelModuleFile ||
     directoryState.hasAllowedBarrelFile
-  ) {
-    return {};
-  }
-
-  return buildMissingListener(context, options.allowedNames);
+    ? {}
+    : buildMissingListener(context, options.allowedNames);
 };
 
 /**
@@ -61,17 +57,13 @@ const buildForbiddenListener = (
     options.allowedNamesSet,
   );
 
-  if (
-    !directoryState.hasNonBarrelModuleFile ||
+  return !directoryState.hasNonBarrelModuleFile ||
     directoryState.primaryAllowedBarrelFile === void 0
-  ) {
-    return {};
-  }
-
-  return buildForbiddenListenerFromName(
-    context,
-    directoryState.primaryAllowedBarrelFile,
-  );
+    ? {}
+    : buildForbiddenListenerFromName(
+        context,
+        directoryState.primaryAllowedBarrelFile,
+      );
 };
 
 /**
@@ -146,11 +138,9 @@ const buildListenerForFile = (
     return {};
   }
 
-  if (!enforce) {
-    return buildForbiddenListener(context, filename, options);
-  }
-
-  return buildListenerForDirectory(context, filename, options);
+  return enforce
+    ? buildListenerForDirectory(context, filename, options)
+    : buildForbiddenListener(context, filename, options);
 };
 
 export { buildListenerForFile };

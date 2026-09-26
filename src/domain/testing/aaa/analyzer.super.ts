@@ -83,14 +83,10 @@ function getExpressionName(
     return expression.name;
   }
 
-  if (
-    expression.type === "MemberExpression" &&
+  return expression.type === "MemberExpression" &&
     expression.property.type === "Identifier"
-  ) {
-    return expression.property.name;
-  }
-
-  return void 0;
+    ? expression.property.name
+    : void 0;
 }
 
 /**

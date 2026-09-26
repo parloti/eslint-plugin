@@ -15,11 +15,9 @@ const consistentBarrelFilesRule: Rule.RuleModule = {
   create(context: Rule.RuleContext): Rule.RuleListener {
     const { filename, options } = context;
 
-    if (!isLintableModuleFile(filename)) {
-      return {};
-    }
-
-    return buildListenerForFile(context, filename, getOptions(options));
+    return isLintableModuleFile(filename)
+      ? buildListenerForFile(context, filename, getOptions(options))
+      : {};
   },
   meta: {
     defaultOptions: [{ allowedNames: ["index"], enforce: true }],

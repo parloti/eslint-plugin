@@ -159,11 +159,9 @@ function createFixer(
   return (fixer: Rule.RuleFixer): Rule.Fix | undefined => {
     const updated = getUpdatedExampleText(context);
 
-    if (updated === void 0) {
-      return void 0;
-    }
-
-    return fixer.replaceTextRange([absoluteStart, absoluteEnd], updated);
+    return updated === void 0
+      ? void 0
+      : fixer.replaceTextRange([absoluteStart, absoluteEnd], updated);
   };
 }
 
@@ -265,11 +263,7 @@ function resolveEmptyExampleFix(
     return "";
   }
 
-  if (original.includes("```")) {
-    return void 0;
-  }
-
-  return buildMissingFenceFix(example);
+  return original.includes("```") ? void 0 : buildMissingFenceFix(example);
 }
 
 /**
@@ -284,11 +278,9 @@ function resolveEmptyExampleFix(
 function stripContentPrefix(context: StripContentPrefixContext): string {
   const { line, prefix } = context;
 
-  if (line.startsWith(prefix)) {
-    return line.slice(prefix.length);
-  }
-
-  return line.replace(/^\s*\*\s?/u, "");
+  return line.startsWith(prefix)
+    ? line.slice(prefix.length)
+    : line.replace(/^\s*\*\s?/u, "");
 }
 
 export { createFixer };

@@ -143,14 +143,10 @@ const forwardsParameter = (
   argument: Node,
   parameter: DelegatedParameter,
 ): boolean => {
-  if (parameter.isRest) {
-    return (
-      argument.type === "SpreadElement" &&
-      getIdentifierName(asNode(argument["argument"])) === parameter.name
-    );
-  }
-
-  return getIdentifierName(argument) === parameter.name;
+  return parameter.isRest
+    ? argument.type === "SpreadElement" &&
+        getIdentifierName(asNode(argument["argument"])) === parameter.name
+    : getIdentifierName(argument) === parameter.name;
 };
 
 /**

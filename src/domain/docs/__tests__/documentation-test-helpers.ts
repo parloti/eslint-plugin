@@ -67,11 +67,7 @@ const getFixText = (fixResult?: FixResult): string | undefined => {
   if (fixResult === void 0) {
     return void 0;
   }
-  if (isFixIterable(fixResult)) {
-    return [...fixResult][0]?.text;
-  }
-
-  return fixResult.text;
+  return isFixIterable(fixResult) ? [...fixResult][0]?.text : fixResult.text;
 };
 
 /**

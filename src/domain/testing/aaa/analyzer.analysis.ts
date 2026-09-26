@@ -123,11 +123,12 @@ function isInsideTopLevelStatement(
     const statementStartLine = statement.loc?.start.line;
     const statementEndLine = statement.loc?.end.line;
 
-    if (statementStartLine === void 0 || statementEndLine === void 0) {
-      return false;
-    }
-
-    return commentLine >= statementStartLine && commentLine <= statementEndLine;
+    return (
+      statementStartLine !== void 0 &&
+      statementEndLine !== void 0 &&
+      commentLine >= statementStartLine &&
+      commentLine <= statementEndLine
+    );
   });
 }
 

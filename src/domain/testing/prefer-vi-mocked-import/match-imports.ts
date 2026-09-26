@@ -35,9 +35,11 @@ function createInsertPlan(
   names: string[],
   afterRange: Range | undefined,
 ): ImportPlan {
-  return afterRange === void 0
-    ? { insert: {}, moduleSpecifier, names }
-    : { insert: { afterRange }, moduleSpecifier, names };
+  return {
+    insert: afterRange === void 0 ? {} : { afterRange },
+    moduleSpecifier,
+    names,
+  };
 }
 
 /**

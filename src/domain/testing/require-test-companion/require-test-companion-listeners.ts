@@ -102,19 +102,12 @@ const shouldLintFile = (
 ): boolean => {
   const { enforceIn, ignorePatterns } = options;
 
-  if (!isLintableFilename(filename)) {
-    return false;
-  }
-
-  if (!isTypeScriptFile(filename)) {
-    return false;
-  }
-
-  if (!isPathMatch(filename, enforceIn, baseDirectory)) {
-    return false;
-  }
-
-  return !isPathMatch(filename, ignorePatterns, baseDirectory);
+  return (
+    isLintableFilename(filename) &&
+    isTypeScriptFile(filename) &&
+    isPathMatch(filename, enforceIn, baseDirectory) &&
+    !isPathMatch(filename, ignorePatterns, baseDirectory)
+  );
 };
 
 /**

@@ -46,11 +46,9 @@ const normalizeMaxLineLength = (options: readonly unknown[]): number => {
 const isMultilineComment = (comment: Comment): boolean => {
   const { loc, value } = comment;
 
-  if (loc === null || loc === void 0) {
-    return /\r|\n/u.test(value);
-  }
-
-  return loc.start.line !== loc.end.line;
+  return loc === null || loc === void 0
+    ? /\r|\n/u.test(value)
+    : loc.start.line !== loc.end.line;
 };
 
 /**
@@ -106,11 +104,7 @@ const isJsdocComment = (comment: Comment): boolean =>
 const getStartColumn = (comment: Comment): number | undefined => {
   const { loc } = comment;
 
-  if (loc === null || loc === void 0) {
-    return void 0;
-  }
-
-  return loc.start.column;
+  return loc === null || loc === void 0 ? void 0 : loc.start.column;
 };
 
 /**

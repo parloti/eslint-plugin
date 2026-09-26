@@ -154,12 +154,12 @@ const isPathMatch = (
 
   const relativePath = normalizeRelativePath(filename, baseDirectory);
 
-  if (relativePath.startsWith("..") || path.isAbsolute(relativePath)) {
-    return false;
-  }
-
-  return patterns.some((pattern) =>
-    minimatch(relativePath, normalizePattern(pattern), { dot: true }),
+  return (
+    !relativePath.startsWith("..") &&
+    !path.isAbsolute(relativePath) &&
+    patterns.some((pattern) =>
+      minimatch(relativePath, normalizePattern(pattern), { dot: true }),
+    )
   );
 };
 

@@ -113,18 +113,15 @@ const hasImportedExport = (
   statement: AST.Program["body"][number],
   importedNames: Set<string>,
 ): boolean => {
-  if (
-    statement.type !== "ExportNamedDeclaration" ||
-    (statement.source !== null && statement.source !== void 0) ||
-    (statement.declaration !== null && statement.declaration !== void 0)
-  ) {
-    return false;
-  }
-
-  return statement.specifiers.some(
-    (specifier) =>
-      specifier.local.type === "Identifier" &&
-      importedNames.has(specifier.local.name),
+  return (
+    statement.type === "ExportNamedDeclaration" &&
+    (statement.source === null || statement.source === void 0) &&
+    (statement.declaration === null || statement.declaration === void 0) &&
+    statement.specifiers.some(
+      (specifier) =>
+        specifier.local.type === "Identifier" &&
+        importedNames.has(specifier.local.name),
+    )
   );
 };
 

@@ -93,22 +93,14 @@ describe("no-unused-exports public API usages", () => {
               return [featureSymbol];
             }
 
-            if (moduleSymbol === moduleSymbolApi) {
-              return [exposedSymbol];
-            }
-
-            return [];
+            return moduleSymbol === moduleSymbolApi ? [exposedSymbol] : [];
           },
           getSymbolAtLocation: (node: unknown) => {
             if (node === featureSourceFile) {
               return moduleSymbolFeature;
             }
 
-            if (node === apiSourceFile) {
-              return moduleSymbolApi;
-            }
-
-            return void 0;
+            return node === apiSourceFile ? moduleSymbolApi : void 0;
           },
         } as never;
 
@@ -169,22 +161,14 @@ describe("no-unused-exports public API usages", () => {
               return [featureSymbol];
             }
 
-            if (moduleSymbol === moduleSymbolApi) {
-              return [otherSymbol];
-            }
-
-            return [];
+            return moduleSymbol === moduleSymbolApi ? [otherSymbol] : [];
           },
           getSymbolAtLocation: (node: unknown) => {
             if (node === featureSourceFile) {
               return moduleSymbolFeature;
             }
 
-            if (node === apiSourceFile) {
-              return moduleSymbolApi;
-            }
-
-            return void 0;
+            return node === apiSourceFile ? moduleSymbolApi : void 0;
           },
         } as never;
 

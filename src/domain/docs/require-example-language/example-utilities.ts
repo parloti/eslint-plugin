@@ -36,11 +36,7 @@ function getFenceLanguage(line: string): string | undefined {
     line,
   );
 
-  if (fenceMatch === null) {
-    return void 0;
-  }
-
-  return fenceMatch.groups?.["lang"] ?? "";
+  return fenceMatch === null ? void 0 : (fenceMatch.groups?.["lang"] ?? "");
 }
 
 /**
@@ -89,11 +85,7 @@ function getLineMeta(context: LineMetaContext): LineMeta {
 function getPrefix(header: string): string {
   const prefixMatch = header.indexOf("@example");
 
-  if (prefixMatch === -1) {
-    return "";
-  }
-
-  return header.slice(0, prefixMatch);
+  return prefixMatch === -1 ? "" : header.slice(0, prefixMatch);
 }
 
 /**

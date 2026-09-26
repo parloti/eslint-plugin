@@ -130,11 +130,9 @@ const updateFenceStateForLine = (
     return { ...state, currentFenceHasContent: true };
   }
 
-  if (!state.inFence && hasLineContent(line)) {
-    return { ...state, hasOutsideFenceContent: true };
-  }
-
-  return state;
+  return !state.inFence && hasLineContent(line)
+    ? { ...state, hasOutsideFenceContent: true }
+    : state;
 };
 
 /**
@@ -190,11 +188,7 @@ function buildExampleContent(context: ExampleContentContext): string {
   const { body, header } = context;
   const inlineContent = getInlineContent(header);
 
-  if (inlineContent.length > 0) {
-    return `${inlineContent}\n${body}`;
-  }
-
-  return body;
+  return inlineContent.length > 0 ? `${inlineContent}\n${body}` : body;
 }
 
 /**
@@ -251,11 +245,7 @@ function checkExampleContent(content: string): Problem | undefined {
     return "emptyExample";
   }
 
-  if (!sawFence) {
-    return "missingFence";
-  }
-
-  return void 0;
+  return sawFence ? void 0 : "missingFence";
 }
 
 export { buildExampleFromParts, checkExampleContent };

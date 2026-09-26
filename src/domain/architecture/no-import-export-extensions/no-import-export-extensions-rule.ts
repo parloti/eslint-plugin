@@ -53,11 +53,7 @@ const getTrailingExtension = (source: string): string | undefined => {
   const basename = cleanedSource.slice(lastSlashIndex + 1);
   const dotIndex = basename.lastIndexOf(".");
 
-  if (dotIndex <= 0) {
-    return void 0;
-  }
-
-  return basename.slice(dotIndex).toLowerCase();
+  return dotIndex <= 0 ? void 0 : basename.slice(dotIndex).toLowerCase();
 };
 
 /**
@@ -139,11 +135,11 @@ const reportWhenSourceHasExtension = (
 ): void => {
   const sourceLiteral = statement.source;
 
-  if (sourceLiteral === null || sourceLiteral === void 0) {
-    return;
-  }
-
-  if (!hasDisallowedExtension(sourceLiteral)) {
+  if (
+    sourceLiteral === null ||
+    sourceLiteral === void 0 ||
+    !hasDisallowedExtension(sourceLiteral)
+  ) {
     return;
   }
 
@@ -187,11 +183,7 @@ const asSourceDeclaration = (
     return statement;
   }
 
-  if (statement.type === "ImportDeclaration") {
-    return statement;
-  }
-
-  return void 0;
+  return statement.type === "ImportDeclaration" ? statement : void 0;
 };
 
 /** ESLint rule that forbids import/export module specifiers with explicit file extensions. */

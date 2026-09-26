@@ -79,11 +79,9 @@ const createContext = (
   const reports: ReportEntry[] = [];
   const sourceCode = {
     getText: (node?: MockNode): string => {
-      if (node?.range === void 0) {
-        return sourceText;
-      }
-
-      return sourceText.slice(node.range[0], node.range[1]);
+      return node?.range === void 0
+        ? sourceText
+        : sourceText.slice(node.range[0], node.range[1]);
     },
     ...(options?.omitText !== true && { text: sourceText }),
   };
@@ -208,11 +206,9 @@ const createReplacementReader = (
 
     const fixResult = reportFix(fixer);
 
-    if (!fixResult || Array.isArray(fixResult) || !("text" in fixResult)) {
-      return void 0;
-    }
-
-    return fixResult.text;
+    return !fixResult || Array.isArray(fixResult) || !("text" in fixResult)
+      ? void 0
+      : fixResult.text;
   };
 };
 

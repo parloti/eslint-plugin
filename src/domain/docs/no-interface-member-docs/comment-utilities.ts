@@ -50,10 +50,16 @@ const findClosestComment = (
     const commentEnd = getCommentEnd(comment);
     const shouldConsider = isJsdocComment(comment) && commentEnd !== void 0;
 
-    if (shouldConsider && commentEnd <= nodeStart && commentEnd > closestEnd) {
-      closest = comment;
-      closestEnd = commentEnd;
+    if (!(
+      shouldConsider &&
+      commentEnd <= nodeStart &&
+      commentEnd > closestEnd
+    )) {
+      continue;
     }
+
+    closest = comment;
+    closestEnd = commentEnd;
   }
 
   return closest;
@@ -114,11 +120,9 @@ const getCommentText = (
   const start = comment.range?.[0];
   const end = comment.range?.[1];
 
-  if (typeof start !== "number" || typeof end !== "number") {
-    return "";
-  }
-
-  return sourceCode.text.slice(start, end);
+  return typeof start !== "number" || typeof end !== "number"
+    ? ""
+    : sourceCode.text.slice(start, end);
 };
 
 export { getCommentText, getJsdocComment };

@@ -81,10 +81,7 @@ const getTokenAfterRange = (
   const tokenAfter = sourceCode.getTokenAfter(comment, {
     includeComments: false,
   });
-  if (tokenAfter?.range === void 0) {
-    return void 0;
-  }
-  return { range: tokenAfter.range };
+  return tokenAfter?.range === void 0 ? void 0 : { range: tokenAfter.range };
 };
 
 /**
@@ -208,21 +205,16 @@ const isExportedFunctionLike = (node: Node): boolean => {
  * isFunctionLikeNode({ type: "FunctionDeclaration" } as Node);
  * ```
  */
-const isFunctionLikeNode = (node: MaybeNode): boolean => {
-  if (node === null || node === void 0) {
-    return false;
-  }
-
-  return (
-    isFunctionDeclaration(node) ||
+const isFunctionLikeNode = (node: MaybeNode): boolean =>
+  node !== null &&
+  node !== void 0 &&
+  (isFunctionDeclaration(node) ||
     isFunctionExpression(node) ||
     isMethodLike(node) ||
     functionLikeTypes.has(node.type) ||
     isPropertyWithFunctionValue(node as Node) ||
     isVariableWithFunctionInit(node as Node) ||
-    isExportedFunctionLike(node as Node)
-  );
-};
+    isExportedFunctionLike(node as Node));
 
 /**
  * Determines whether a JSDoc comment should be skipped for function targets.

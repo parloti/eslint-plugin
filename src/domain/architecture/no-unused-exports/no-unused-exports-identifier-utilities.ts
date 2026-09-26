@@ -72,22 +72,16 @@ const isTypePositionIdentifier = (identifier: ts.Identifier): boolean => {
       return true;
     }
 
-    if (
+    const isValuePosition =
       ts.isExpressionStatement(current) ||
       ts.isCallExpression(current) ||
       ts.isPropertyAccessExpression(current) ||
       ts.isElementAccessExpression(current) ||
       ts.isVariableDeclaration(current) ||
-      ts.isReturnStatement(current)
-    ) {
-      return false;
-    }
+      ts.isReturnStatement(current) ||
+      ts.isSourceFile(current);
 
-    if (ts.isSourceFile(current)) {
-      return false;
-    }
-
-    return visitNode(current.parent);
+    return !isValuePosition && visitNode(current.parent);
   };
 
   return visitNode(identifier);
