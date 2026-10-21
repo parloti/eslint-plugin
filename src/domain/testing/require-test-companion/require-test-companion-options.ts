@@ -10,7 +10,7 @@ const DEFAULT_TEST_SUFFIXES = ["spec", "test"] as const;
 const DEFAULT_IGNORE_PATTERNS = ["/*.d.ts", "/index.ts"] as const;
 
 /** Default folders where test companions are enforced. */
-const DEFAULT_ENFORCE_IN = ["src/**"] as const;
+const DEFAULT_ENFORCE_IN = ["**/src/**"] as const;
 
 /** File extension used to detect TypeScript source files. */
 const TYPESCRIPT_EXTENSION = ".ts";
@@ -58,7 +58,7 @@ const isTypeScriptFile = (filename: string): boolean =>
  * @returns Normalized list of strings.
  * @example
  * ```typescript
- * const list = normalizeList("src/**", ["src/**"]);
+ * const list = normalizeList("**\/src/**", ["**\/src/**"]);
  * ```
  */
 const normalizeList = (

@@ -17,7 +17,7 @@ const requireTestCompanionRule: Rule.RuleModule = {
   meta: {
     defaultOptions: [
       {
-        enforceIn: ["src/**"],
+        enforceIn: ["**/src/**"],
         ignorePatterns: ["/*.d.ts", "/index.ts"],
         testSuffixes: ["spec", "test"],
       },
