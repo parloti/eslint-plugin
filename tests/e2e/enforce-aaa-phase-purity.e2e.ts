@@ -16,11 +16,8 @@ import { runRuleCase } from "../support";
  * void result;
  * ```
  */
-function compareMessageIds(
-  left: string | undefined,
-  right: string | undefined,
-): number {
-  return (left ?? "").localeCompare(right ?? "");
+function compareMessageIds(left = "", right = ""): number {
+  return left.localeCompare(right);
 }
 
 /**

@@ -42,18 +42,10 @@ function toBinding(
   if (
     propertyNode.type !== "Property" ||
     propertyNode.computed ||
-    propertyNode.key.type !== "Identifier"
-  ) {
-    return void 0;
-  }
-  if (
+    propertyNode.key.type !== "Identifier" ||
     !hasRange(propertyNode) ||
     !hasRange(propertyNode.key) ||
-    propertyNode.value.type !== "Identifier"
-  ) {
-    return void 0;
-  }
-  if (
+    propertyNode.value.type !== "Identifier" ||
     !hasRange(propertyNode.value) ||
     !declarations.has(propertyNode.value.name)
   ) {

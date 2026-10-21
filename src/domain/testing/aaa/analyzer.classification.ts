@@ -4,4 +4,4 @@ import type { TestBlockAnalysis } from "./types";
 const analyzerClassificationModuleCompanion: TestBlockAnalysis | undefined =
   void 0;
 
-JSON.stringify(analyzerClassificationModuleCompanion);
+String(analyzerClassificationModuleCompanion);

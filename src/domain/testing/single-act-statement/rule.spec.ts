@@ -158,7 +158,7 @@ const loadRule = async (
 const runRule = async (
   analysis: unknown,
   actStatementCount: number,
-  callExpression: Rule.Node = { type: "CallExpression" } as Rule.Node,
+  callExpression?: Rule.Node,
   actStatements: readonly MockActStatement[] = [],
 ): Promise<Rule.ReportDescriptor[]> => {
   const { singleActStatementRule } = await loadRule(
@@ -168,8 +168,10 @@ const runRule = async (
   );
   const { context, reports } = createContext();
   const listener = singleActStatementRule.create(context).CallExpression;
+  const targetCallExpression =
+    callExpression ?? ({ type: "CallExpression" } as Rule.Node);
 
-  listener?.(callExpression as never);
+  listener?.(targetCallExpression as never);
 
   return reports;
 };

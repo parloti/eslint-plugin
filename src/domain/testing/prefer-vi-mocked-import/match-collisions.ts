@@ -38,11 +38,10 @@ function collectPatternNames(
 
     case "ObjectPattern": {
       for (const property of pattern.properties) {
-        if (property.type === "RestElement") {
-          collectPatternNames(property.argument, names);
-        } else {
-          collectPatternNames(property.value, names);
-        }
+        collectPatternNames(
+          property.type === "RestElement" ? property.argument : property.value,
+          names,
+        );
       }
       return;
     }

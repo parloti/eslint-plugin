@@ -126,10 +126,9 @@ function getImportDeclarations(
  * ```
  */
 function getNamedImports(statement: ESTree.ImportDeclaration): string[] {
-  return statement.specifiers.flatMap((specifier) => {
-    const importedName = toImportedName(specifier);
-    return importedName === void 0 ? [] : [importedName];
-  });
+  return statement.specifiers
+    .map((specifier) => toImportedName(specifier))
+    .filter((importedName): importedName is string => importedName !== void 0);
 }
 
 /**

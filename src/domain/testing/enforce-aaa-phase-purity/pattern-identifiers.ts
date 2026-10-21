@@ -79,11 +79,10 @@ function collectObjectPatternIdentifiers(
   identifiers: Set<string>,
 ): void {
   for (const property of (pattern as ESTree.ObjectPattern).properties) {
-    if (property.type === "Property") {
-      collectPatternIdentifiers(property.value, identifiers);
-    } else {
-      collectPatternIdentifiers(property.argument, identifiers);
-    }
+    collectPatternIdentifiers(
+      property.type === "Property" ? property.value : property.argument,
+      identifiers,
+    );
   }
 }
 

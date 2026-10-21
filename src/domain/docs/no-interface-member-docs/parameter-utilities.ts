@@ -116,9 +116,9 @@ const getParameterIdentifier = (
   const identifier = resolved as IdentifierNode;
   const { name } = identifier;
 
-  return typeof name !== "string" || identifier.type !== "Identifier"
-    ? void 0
-    : { ...identifier, name };
+  return typeof name === "string" && identifier.type === "Identifier"
+    ? { ...identifier, name }
+    : void 0;
 };
 
 /**

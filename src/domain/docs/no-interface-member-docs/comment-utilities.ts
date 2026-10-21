@@ -120,9 +120,9 @@ const getCommentText = (
   const start = comment.range?.[0];
   const end = comment.range?.[1];
 
-  return typeof start !== "number" || typeof end !== "number"
-    ? ""
-    : sourceCode.text.slice(start, end);
+  return typeof start === "number" && typeof end === "number"
+    ? sourceCode.text.slice(start, end)
+    : "";
 };
 
 export { getCommentText, getJsdocComment };

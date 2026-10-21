@@ -27,17 +27,16 @@ interface ParameterNode {
 
 /**
  * Creates createParameter.
- * @param type Input type value.
  * @returns Return value output.
  * @example
  * ```typescript
  * createParameter();
  * ```
  */
-const createParameter = (type: string): ParameterNode => ({
+const createParameter = (): ParameterNode => ({
   name: "value",
   type: "Identifier",
-  typeAnnotation: { typeAnnotation: { type } },
+  typeAnnotation: { typeAnnotation: { type: "TSTypeReference" } },
 });
 
 /**
@@ -68,7 +67,7 @@ const createFunctionNode = (parameters: unknown[]): Rule.Node =>
 describe("parameter utilities", () => {
   it("collects parameter type annotations", () => {
     // Arrange
-    const node = createFunctionNode([createParameter("TSTypeReference")]);
+    const node = createFunctionNode([createParameter()]);
 
     // Act
     const lookup = getParameterTypeLookup(node);
@@ -79,8 +78,8 @@ describe("parameter utilities", () => {
 
   it("handles rest and parameter properties", () => {
     // Arrange
-    const rest = { argument: createParameter("TSTypeReference") };
-    const property = { parameter: createParameter("TSTypeReference") };
+    const rest = { argument: createParameter() };
+    const property = { parameter: createParameter() };
 
     // Act
     const lookup = getParameterTypeLookup(createFunctionNode([rest, property]));
@@ -91,10 +90,7 @@ describe("parameter utilities", () => {
 
   it("handles assignment patterns", () => {
     // Arrange
-    const assignment = {
-      left: createParameter("TSTypeReference"),
-      type: "AssignmentPattern",
-    };
+    const assignment = { left: createParameter(), type: "AssignmentPattern" };
     const node = createFunctionNode([assignment]);
 
     // Act

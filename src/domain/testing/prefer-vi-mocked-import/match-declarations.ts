@@ -160,10 +160,12 @@ function toDeclaration(
   statement: ESTree.Program["body"][number],
   sourceCode?: Rule.RuleContext["sourceCode"],
 ): Declaration | undefined {
-  if (statement.type !== "VariableDeclaration" || statement.kind !== "const") {
-    return void 0;
-  }
-  if (!hasRange(statement) || statement.declarations.length !== 1) {
+  if (
+    statement.type !== "VariableDeclaration" ||
+    statement.kind !== "const" ||
+    !hasRange(statement) ||
+    statement.declarations.length !== 1
+  ) {
     return void 0;
   }
 
