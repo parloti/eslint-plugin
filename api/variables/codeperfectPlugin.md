@@ -8,7 +8,7 @@
 
 > `const` **codeperfectPlugin**: `object`
 
-Defined in: [infrastructure/codeperfect-plugin.ts:47](https://github.com/parloti/eslint-plugin/blob/864c61b010520fb126ceeb1d80d89645a03f01aa/src/infrastructure/codeperfect-plugin.ts#L47)
+Defined in: [infrastructure/codeperfect-plugin.ts:49](https://github.com/parloti/eslint-plugin/blob/d1301258accd21bbf33cad5508441c070521e48d/src/infrastructure/codeperfect-plugin.ts#L49)
 
 ESLint plugin object exported by the package.
 
@@ -65,6 +65,10 @@ ESLint plugin object exported by the package.
 #### rules.no-unused-exports
 
 > `readonly` **no-unused-exports**: `RuleModule` = `noUnusedExportsRule`
+
+#### rules.no-unused-public-members
+
+> `readonly` **no-unused-public-members**: `RuleModule` = `noUnusedPublicMembersRule`
 
 #### rules.no-useless-delegation
 

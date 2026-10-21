@@ -8,6 +8,6 @@
 
 > **CodeperfectPreset** = `Pick`\<`Linter.Config`, `"plugins"` \| `"rules"`\>
 
-Defined in: [infrastructure/presets.ts:6](https://github.com/parloti/eslint-plugin/blob/864c61b010520fb126ceeb1d80d89645a03f01aa/src/infrastructure/presets.ts#L6)
+Defined in: [infrastructure/presets.ts:6](https://github.com/parloti/eslint-plugin/blob/d1301258accd21bbf33cad5508441c070521e48d/src/infrastructure/presets.ts#L6)
 
 Represents a ready-to-use preset exported by the package.

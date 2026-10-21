@@ -8,6 +8,6 @@
 
 > `const` **aaa**: [`CodeperfectPreset`](../type-aliases/CodeperfectPreset.md)
 
-Defined in: [infrastructure/presets.ts:131](https://github.com/parloti/eslint-plugin/blob/864c61b010520fb126ceeb1d80d89645a03f01aa/src/infrastructure/presets.ts#L131)
+Defined in: [infrastructure/presets.ts:133](https://github.com/parloti/eslint-plugin/blob/d1301258accd21bbf33cad5508441c070521e48d/src/infrastructure/presets.ts#L133)
 
 Preset that enables AAA-specific testing rules.

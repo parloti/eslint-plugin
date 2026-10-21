@@ -31,6 +31,7 @@
 - [noMultipleDeclaratorsRule](variables/noMultipleDeclaratorsRule.md)
 - [noReexportsOutsideBarrelsRule](variables/noReexportsOutsideBarrelsRule.md)
 - [noUnusedExportsRule](variables/noUnusedExportsRule.md)
+- [noUnusedPublicMembersRule](variables/noUnusedPublicMembersRule.md)
 - [noUselessDelegationRule](variables/noUselessDelegationRule.md)
 - [preferInterfaceTypesRule](variables/preferInterfaceTypesRule.md)
 - [preferViMockedImportRule](variables/preferViMockedImportRule.md)
