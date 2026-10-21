@@ -4,9 +4,6 @@ import type { CommentLine, ParameterMemberTag } from "./types";
 interface ParameterMemberName {
   /** Basename field value. */
   basename: string;
-
-  /** MemberPath field value. */
-  memberPath: string;
 }
 
 /** Extracts the parameter name from an `@param` tag line. */
@@ -94,7 +91,7 @@ const getMemberName = (normalized: string): ParameterMemberName | undefined => {
   const basename = normalized.slice(0, dotIndex);
   const memberPath = normalized.slice(dotIndex + 1).trim();
 
-  return memberPath.length > 0 ? { basename, memberPath } : void 0;
+  return memberPath.length > 0 ? { basename } : void 0;
 };
 
 /**

@@ -1,6 +1,6 @@
 import type { Rule } from "eslint";
 
-import type { Comment, ParameterMemberTag, TypeAnnotationNode } from "./types";
+import type { ParameterMemberTag, TypeAnnotationNode } from "./types";
 
 import { buildRemovalRange, getCommentLines } from "./comment-removal-ranges";
 import { getCommentText, getJsdocComment } from "./comment-utilities";
@@ -12,9 +12,6 @@ import {
 
 /** JSDoc data extracted from a function-like node. */
 interface JsdocData {
-  /** Comment field value. */
-  comment: Comment;
-
   /** CommentStart field value. */
   commentStart: number;
 
@@ -24,9 +21,6 @@ interface JsdocData {
 
 /** Member-tag context resolved for reporting. */
 interface MemberTagContext {
-  /** Comment field value. */
-  comment: Comment;
-
   /** CommentStart field value. */
   commentStart: number;
 
@@ -39,9 +33,6 @@ interface MemberTagContext {
 
 /** Type definition for rule data. */
 interface ReportMemberDocumentationContext {
-  /** Comment field value. */
-  comment: Comment;
-
   /** CommentStart field value. */
   commentStart: number;
 
@@ -53,9 +44,6 @@ interface ReportMemberDocumentationContext {
 
   /** Node field value. */
   node: Rule.Node;
-
-  /** SourceCode field value. */
-  sourceCode: Rule.RuleContext["sourceCode"];
 }
 
 /**
@@ -175,7 +163,7 @@ const getJsdocData = (
 
   const text = getCommentText(sourceCode, comment);
 
-  return { comment, commentStart, text };
+  return { commentStart, text };
 };
 
 /**
@@ -203,7 +191,6 @@ const resolveMemberTagContext = (
 
   return memberTags.length > 0
     ? {
-        comment: jsdocData.comment,
         commentStart: jsdocData.commentStart,
         commentText: jsdocData.text,
         memberTags,
@@ -244,12 +231,10 @@ const handleFunctionLike = (
   }
 
   reportMemberDocumentation(context, {
-    comment: resolved.comment,
     commentStart: resolved.commentStart,
     commentText: resolved.commentText,
     memberTags: resolved.memberTags,
     node,
-    sourceCode: context.sourceCode,
   });
 };
 

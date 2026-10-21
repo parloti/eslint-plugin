@@ -35,18 +35,12 @@ interface StatementPhase {
   /** Statement node that belongs to the analyzed test body. */
   node: LocatedNode<ESTree.Statement>;
 
-  /** Last active phase before this statement, when any exists. */
-  phase: AaaPhase | undefined;
-
   /** All active phases inherited from the nearest section marker. */
   phases: AaaPhase[];
 }
 
 /** Derived metadata for a supported test callback. */
 interface TestBlockAnalysis {
-  /** Block body belonging to the test callback. */
-  body: LocatedNode<ESTree.BlockStatement>;
-
   /** Number of lines inside the callback body. */
   bodyLineCount: number;
 

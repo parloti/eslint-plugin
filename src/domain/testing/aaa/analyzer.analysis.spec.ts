@@ -137,7 +137,6 @@ describe("aAA analyzer block analysis", () => {
 
     // Assert
     expect(result.newline).toBe("\r\n");
-    expect(result.statements[0]?.phase).toBeUndefined();
     expect(result.statements[0]?.phases).toStrictEqual([]);
   });
 

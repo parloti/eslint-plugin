@@ -24,6 +24,7 @@ const architectureRuleNames = [
   "no-import-export-extensions",
   "no-unused-exports",
   "no-reexports-outside-barrels",
+  "no-unused-public-members",
 ] as const satisfies readonly CodeperfectRuleName[];
 
 /** Rule names grouped into the core preset. */
@@ -68,6 +69,7 @@ const allRuleNames = [
   "no-useless-delegation",
   "no-reexports-outside-barrels",
   "no-unused-exports",
+  "no-unused-public-members",
   "prefer-interface-types",
   "prefer-vi-mocked-import",
   "require-act-result-capture",

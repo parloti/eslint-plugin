@@ -38,7 +38,6 @@ describe("prefer-vi-mocked-import match-imports", () => {
     // Assert
     expect(actualPlan).toStrictEqual({
       insert: { afterRange: [0, 25] },
-      moduleSpecifier: "./mod",
       names: ["a"],
     });
   });
@@ -69,7 +68,6 @@ describe("prefer-vi-mocked-import match-imports", () => {
 
     // Assert
     expect(actualPlan).toStrictEqual({
-      moduleSpecifier: "./mod",
       names: ["a"],
       update: {
         defaultImportName: "mod",
@@ -105,7 +103,6 @@ describe("prefer-vi-mocked-import match-imports", () => {
     // Assert
     expect(actualPlan).toStrictEqual({
       insert: { afterRange: [0, 30] },
-      moduleSpecifier: "./mod",
       names: ["a"],
     });
   });

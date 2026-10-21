@@ -31,7 +31,6 @@ interface ApplyFixInput {
  */
 const createExample = (content: string, prefix: string): Example => ({
   content,
-  endIndex: 0,
   endOffset: 0,
   lineIndex: 0,
   prefix,
@@ -47,7 +46,6 @@ const createExample = (content: string, prefix: string): Example => ({
  * const text = applyFix({
  *   example: {
  *     content: "value",
- *     endIndex: 0,
  *     endOffset: 0,
  *     lineIndex: 0,
  *     prefix: " * ",

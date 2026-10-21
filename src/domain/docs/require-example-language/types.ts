@@ -10,9 +10,6 @@ interface Example {
   /** Content field value. */
   content: string;
 
-  /** EndIndex field value. */
-  endIndex: number;
-
   /** EndOffset field value. */
   endOffset: number;
 

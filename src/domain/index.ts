@@ -5,6 +5,7 @@ export {
   noImportExportExtensionsRule,
   noReexportsOutsideBarrelsRule,
   noUnusedExportsRule,
+  noUnusedPublicMembersRule,
 } from "./architecture";
 export {
   noMultipleDeclaratorsRule,

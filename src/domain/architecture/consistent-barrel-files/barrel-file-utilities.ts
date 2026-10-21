@@ -26,8 +26,6 @@ interface DirectoryBarrelState {
   hasNonBarrelModuleFile: boolean;
   /** The first allowed barrel file discovered in the directory. */
   primaryAllowedBarrelFile: string | undefined;
-  /** The first non-barrel module file discovered in the directory. */
-  primaryNonBarrelModuleFile: string | undefined;
 }
 
 /** Stores the module filename and derived stem for a directory entry. */
@@ -192,7 +190,6 @@ const getDirectoryBarrelState = (
     hasAllowedBarrelFile: primaryAllowedBarrelFile !== void 0,
     hasNonBarrelModuleFile: primaryNonBarrelModuleFile !== void 0,
     primaryAllowedBarrelFile,
-    primaryNonBarrelModuleFile,
   };
 };
 

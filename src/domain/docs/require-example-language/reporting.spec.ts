@@ -76,7 +76,6 @@ const runReportExample = (options: RunExampleOptions): RunExampleResult => {
     context: { report, sourceCode } as Rule.RuleContext,
     example: {
       content: options.content,
-      endIndex: 0,
       endOffset: 0,
       lineIndex: 0,
       prefix: "",

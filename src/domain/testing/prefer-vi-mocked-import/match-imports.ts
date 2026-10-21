@@ -20,47 +20,39 @@ interface RangedImportDeclaration extends ESTree.ImportDeclaration {
 
 /**
  * Builds an import plan for insertion mode.
- * @param moduleSpecifier Target module path.
  * @param names Names to import.
  * @param afterRange Range to insert after.
  * @returns Insert plan payload.
  * @example
  * ```typescript
- * const plan = createInsertPlan("./x", ["a"], [0, 1]);
+ * const plan = createInsertPlan(["a"], [0, 1]);
  * void plan;
  * ```
  */
 function createInsertPlan(
-  moduleSpecifier: string,
   names: string[],
   afterRange: Range | undefined,
 ): ImportPlan {
-  return {
-    insert: afterRange === void 0 ? {} : { afterRange },
-    moduleSpecifier,
-    names,
-  };
+  return { insert: afterRange === void 0 ? {} : { afterRange }, names };
 }
 
 /**
  * Builds an import plan for update mode.
  * @param statement Existing import declaration.
- * @param moduleSpecifier Target module path.
  * @param names Names to import.
  * @returns Update plan payload.
  * @example
  * ```typescript
- * const plan = createUpdatePlan({ specifiers: [], source: { type: "Literal", value: "./x" }, type: "ImportDeclaration", range: [0, 1] } as never, "./x", ["a"]);
+ * const plan = createUpdatePlan({ specifiers: [], source: { type: "Literal", value: "./x" }, type: "ImportDeclaration", range: [0, 1] } as never, ["a"]);
  * void plan;
  * ```
  */
 function createUpdatePlan(
   statement: RangedImportDeclaration,
-  moduleSpecifier: string,
   names: string[],
 ): ImportPlan {
   if (hasNamespaceImport(statement)) {
-    return createInsertPlan(moduleSpecifier, names, statement.range);
+    return createInsertPlan(names, statement.range);
   }
 
   const defaultImportName = getDefaultImportName(statement);
@@ -73,7 +65,7 @@ function createUpdatePlan(
       ? baseUpdate
       : { ...baseUpdate, defaultImportName };
 
-  return { moduleSpecifier, names, update };
+  return { names, update };
 }
 
 /**
@@ -189,8 +181,8 @@ function resolveImportPlan(
   );
 
   return existingImport === void 0
-    ? createInsertPlan(moduleSpecifier, names, imports.at(-1)?.range)
-    : createUpdatePlan(existingImport, moduleSpecifier, names);
+    ? createInsertPlan(names, imports.at(-1)?.range)
+    : createUpdatePlan(existingImport, names);
 }
 
 /**

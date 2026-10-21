@@ -1,0 +1,1 @@
+export { noUnusedPublicMembersRule } from "./rule";

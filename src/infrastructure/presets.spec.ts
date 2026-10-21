@@ -66,6 +66,7 @@ describe("ready-to-use presets", () => {
       "codeperfect/no-multiple-declarators",
       "codeperfect/no-reexports-outside-barrels",
       "codeperfect/no-unused-exports",
+      "codeperfect/no-unused-public-members",
       "codeperfect/no-useless-delegation",
       "codeperfect/prefer-interface-types",
       "codeperfect/prefer-vi-mocked-import",
@@ -92,6 +93,7 @@ describe("ready-to-use presets", () => {
       "codeperfect/no-import-export-extensions",
       "codeperfect/no-reexports-outside-barrels",
       "codeperfect/no-unused-exports",
+      "codeperfect/no-unused-public-members",
     ];
 
     // Act

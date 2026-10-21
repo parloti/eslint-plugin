@@ -42,7 +42,7 @@ function buildImportFixes(match: RuleMatch, fixer: Rule.RuleFixer): Rule.Fix[] {
  * @returns Import insertion fixes for one match.
  * @example
  * ```typescript
- * const fixes = buildImportInsertFixes({ importPlan: { moduleSpecifier: "./x", names: [] }, newline: "\n" } as never, [], {} as never);
+ * const fixes = buildImportInsertFixes({ importPlan: { names: [] }, moduleSpecifier: "./x", newline: "\n" } as never, [], {} as never);
  * void fixes;
  * ```
  */
@@ -52,7 +52,7 @@ function buildImportInsertFixes(
   fixer: Rule.RuleFixer,
 ): Rule.Fix[] {
   const statementText = buildImportStatement(
-    match.importPlan.moduleSpecifier,
+    match.moduleSpecifier,
     void 0,
     sortedNames,
   );
@@ -79,7 +79,7 @@ function buildImportInsertFixes(
  * @returns Replacement fix when an import can be updated.
  * @example
  * ```typescript
- * const fix = buildImportUpdateFix({ importPlan: { moduleSpecifier: "./x", names: [] } } as never, [], {} as never);
+ * const fix = buildImportUpdateFix({ importPlan: { names: [] }, moduleSpecifier: "./x" } as never, [], {} as never);
  * void fix;
  * ```
  */
@@ -88,7 +88,7 @@ function buildImportUpdateFix(
   sortedNames: string[],
   fixer: Rule.RuleFixer,
 ): Rule.Fix | undefined {
-  const { moduleSpecifier, update } = match.importPlan;
+  const { update } = match.importPlan;
 
   if (update === void 0) {
     return void 0;
@@ -99,7 +99,7 @@ function buildImportUpdateFix(
     ...new Set([...sortedNames, ...existingNamedImports]),
   ].toSorted((left, right) => (left === right ? 0 : left < right ? -1 : 1));
   const statementText = buildImportStatement(
-    moduleSpecifier,
+    match.moduleSpecifier,
     defaultImportName,
     mergedNames,
   );
@@ -126,10 +126,8 @@ describe("prefer-vi-mocked-import fix-import-statements", () => {
   it("inserts new imports at the top of the file when no anchor exists", () => {
     // Arrange
     const match = {
-      importPlan: {
-        moduleSpecifier: "./dependencies",
-        names: ["installDevelopmentDependencies"],
-      },
+      importPlan: { names: ["installDevelopmentDependencies"] },
+      moduleSpecifier: "./dependencies",
       newline: "\n",
     } as never;
     const fixer = {
@@ -158,9 +156,9 @@ describe("prefer-vi-mocked-import fix-import-statements", () => {
     const match = {
       importPlan: {
         insert: { afterRange: [10, 20] },
-        moduleSpecifier: "./dependencies",
         names: ["installDevelopmentDependencies"],
       },
+      moduleSpecifier: "./dependencies",
       newline: "\n",
     } as never;
     const fixer = {
@@ -188,7 +186,6 @@ describe("prefer-vi-mocked-import fix-import-statements", () => {
     // Arrange
     const match = {
       importPlan: {
-        moduleSpecifier: "./dependencies",
         names: ["installDevelopmentDependencies"],
         update: {
           defaultImportName: "dependencies",
@@ -196,6 +193,7 @@ describe("prefer-vi-mocked-import fix-import-statements", () => {
           range: [5, 25],
         },
       },
+      moduleSpecifier: "./dependencies",
     } as never;
     const fixer = {
       replaceTextRange: (range: [number, number], text: string) => ({

@@ -6,3 +6,4 @@ export {
 } from "./consistent-barrel-files";
 export { noImportExportExtensionsRule } from "./no-import-export-extensions";
 export { noUnusedExportsRule } from "./no-unused-exports";
+export { noUnusedPublicMembersRule } from "./no-unused-public-members";

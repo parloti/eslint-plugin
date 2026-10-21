@@ -67,7 +67,7 @@ function createMatch(): RuleMatch {
         },
       ],
     ]),
-    importPlan: { insert: {}, moduleSpecifier: "./mod", names: ["a"] },
+    importPlan: { insert: {}, names: ["a"] },
     memberRewrites: [{ exportedName: "a", localObjectRange: [10, 11] }],
     mockSpecifierIsImportExpression: false,
     mockSpecifierRange: [20, 27],
@@ -202,7 +202,7 @@ describe("prefer-vi-mocked-import fix", () => {
   it("skips import work when no names are planned", () => {
     // Arrange
     const match = createMatch();
-    match.importPlan = { moduleSpecifier: "./mod", names: [] };
+    match.importPlan = { names: [] };
 
     // Act
     const actualInsertFixes = buildFixes([match], createFixer())
@@ -218,7 +218,7 @@ describe("prefer-vi-mocked-import fix", () => {
   it("inserts import at the top when insert plan is omitted", () => {
     // Arrange
     const match = createMatch();
-    match.importPlan = { moduleSpecifier: "./mod", names: ["a"] };
+    match.importPlan = { names: ["a"] };
 
     // Act
     const actualBeforeFix = buildFixes([match], createFixer())
@@ -238,7 +238,6 @@ describe("prefer-vi-mocked-import fix", () => {
     // Arrange
     const match = createMatch();
     match.importPlan = {
-      moduleSpecifier: "./mod",
       names: ["a"],
       update: {
         defaultImportName: "mod",

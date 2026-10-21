@@ -46,27 +46,22 @@ describe("prefer-vi-mocked-import fix-imports", () => {
     // Arrange
     const matches = [
       {
-        importPlan: { moduleSpecifier: "./alpha", names: ["beta"] },
+        importPlan: { names: ["beta"] },
         moduleSpecifier: "./alpha",
         newline: "\n",
       },
       {
-        importPlan: {
-          insert: { afterRange: [10, 20] },
-          moduleSpecifier: "./alpha",
-          names: ["alpha"],
-        },
+        importPlan: { insert: { afterRange: [10, 20] }, names: ["alpha"] },
         moduleSpecifier: "./alpha",
         newline: "\n",
       },
       {
-        importPlan: { moduleSpecifier: "./delta", names: ["zeta"] },
+        importPlan: { names: ["zeta"] },
         moduleSpecifier: "./delta",
         newline: "\n",
       },
       {
         importPlan: {
-          moduleSpecifier: "./delta",
           names: ["eta"],
           update: { existingNamedImports: ["theta"], range: [30, 40] },
         },
@@ -114,20 +109,12 @@ describe("prefer-vi-mocked-import fix-imports", () => {
     // Arrange
     const matches = [
       {
-        importPlan: {
-          insert: { afterRange: [5, 10] },
-          moduleSpecifier: "./zeta",
-          names: ["zeta"],
-        },
+        importPlan: { insert: { afterRange: [5, 10] }, names: ["zeta"] },
         moduleSpecifier: "./zeta",
         newline: "\n",
       },
       {
-        importPlan: {
-          insert: { afterRange: [5, 10] },
-          moduleSpecifier: "./alpha",
-          names: ["alpha"],
-        },
+        importPlan: { insert: { afterRange: [5, 10] }, names: ["alpha"] },
         moduleSpecifier: "./alpha",
         newline: "\n",
       },
@@ -168,7 +155,6 @@ describe("prefer-vi-mocked-import fix-imports", () => {
     const matches = [
       {
         importPlan: {
-          moduleSpecifier: "./delta",
           names: ["eta"],
           update: { existingNamedImports: ["theta"], range: [30, 40] },
         },

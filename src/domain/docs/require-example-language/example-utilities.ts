@@ -1,11 +1,5 @@
 /** Type definition for rule data. */
 interface LineMeta {
-  /** EndIndex field value. */
-  endIndex: number;
-
-  /** EndOffset field value. */
-  endOffset: number;
-
   /** LineIndex field value. */
   lineIndex: number;
 }
@@ -14,9 +8,6 @@ interface LineMeta {
 interface LineMetaContext {
   /** CommentValue field value. */
   commentValue: string;
-
-  /** Full field value. */
-  full: string;
 
   /** StartOffset field value. */
   startOffset: number;
@@ -60,17 +51,15 @@ function getInlineContent(header: string): string {
  * @returns Line metadata for the example.
  * @example
  * ```typescript
- * const meta = getLineMeta({ commentValue: "* ok", full: "* ok", startOffset: 0 });
+ * const meta = getLineMeta({ commentValue: "* ok", startOffset: 0 });
  * ```
  */
 function getLineMeta(context: LineMetaContext): LineMeta {
-  const { commentValue, full, startOffset } = context;
+  const { commentValue, startOffset } = context;
   const lineIndex =
     commentValue.slice(0, startOffset).split(/\r?\n/u).length - 1;
-  const endOffset = startOffset + full.length;
-  const endIndex = lineIndex + full.split(/\r?\n/u).length - 1;
 
-  return { endIndex, endOffset, lineIndex };
+  return { lineIndex };
 }
 
 /**

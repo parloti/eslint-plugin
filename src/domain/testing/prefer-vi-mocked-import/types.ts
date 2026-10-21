@@ -46,9 +46,6 @@ interface ImportPlan {
   /** Insert plan when no compatible import exists. */
   insert?: ImportInsertPlan;
 
-  /** Module specifier to import from. */
-  moduleSpecifier: string;
-
   /** Names that must be imported from the module. */
   names: string[];
 

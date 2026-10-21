@@ -12,9 +12,6 @@ interface ConsistentBarrelFilesState {
   /** AllowedNames field value. */
   allowedNames: string[];
 
-  /** AllowedNamesKey field value. */
-  allowedNamesKey: string;
-
   /** AllowedNamesSet field value. */
   allowedNamesSet: Set<string>;
 
@@ -37,16 +34,8 @@ const getOptions = (
   const rawOptions = options[0] as ConsistentBarrelFilesOptions | undefined;
   const enforce = rawOptions?.enforce ?? true;
   const allowedNames = normalizeAllowedBarrelNames(rawOptions?.allowedNames);
-  const allowedNamesKey = allowedNames
-    .toSorted((a, b) => a.localeCompare(b))
-    .join("|");
 
-  return {
-    allowedNames,
-    allowedNamesKey,
-    allowedNamesSet: new Set(allowedNames),
-    enforce,
-  };
+  return { allowedNames, allowedNamesSet: new Set(allowedNames), enforce };
 };
 
 /**

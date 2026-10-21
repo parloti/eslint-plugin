@@ -68,7 +68,7 @@ const summarizeCustomRuleContract = (
 describe("custom rule registry", () => {
   it("covers every package-owned rule with metadata", () => {
     // Arrange
-    const expectedRuleCount = 18;
+    const expectedRuleCount = 19;
 
     // Act
     const actualRuleSummaries = customRules.map((ruleEntry) =>
@@ -147,6 +147,16 @@ describe("custom rule registry", () => {
         schemaIsArray: true,
         type: "problem",
         url: getCustomRuleDocumentationUrl("no-unused-exports"),
+      },
+      {
+        createType: "function",
+        description:
+          "Disallow public members that are unused by production code unless their host is part of the public API.",
+        hasMessages: true,
+        ruleName: "no-unused-public-members",
+        schemaIsArray: true,
+        type: "problem",
+        url: getCustomRuleDocumentationUrl("no-unused-public-members"),
       },
       {
         createType: "function",

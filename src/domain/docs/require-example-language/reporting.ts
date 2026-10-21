@@ -87,7 +87,6 @@ interface ReportLocation {
  *   comment: { type: "Block", value: "*" } as Comment,
  *   example: {
  *     content: "",
- *     endIndex: 0,
  *     endOffset: 0,
  *     lineIndex: 0,
  *     prefix: " * ",
@@ -148,7 +147,6 @@ function buildReportDescriptor(
  *   comment: { type: "Block", value: "*" } as Comment,
  *   example: {
  *     content: "",
- *     endIndex: 0,
  *     endOffset: 0,
  *     lineIndex: 0,
  *     prefix: " * ",
@@ -199,7 +197,6 @@ function getFixerForExample(
  * ```typescript
  * const loc = getReportLocation({} as Comment, {
  *    content: "",
- *    endIndex: 0,
  *    endOffset: 0,
  *    lineIndex: 0,
  *    prefix: "",

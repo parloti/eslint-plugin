@@ -64,7 +64,6 @@ describe("barrel file utilities", () => {
       hasAllowedBarrelFile: false,
       hasNonBarrelModuleFile: true,
       primaryAllowedBarrelFile: void 0,
-      primaryNonBarrelModuleFile: "feature.ts",
     });
   });
 
@@ -88,7 +87,6 @@ describe("barrel file utilities", () => {
       hasAllowedBarrelFile: false,
       hasNonBarrelModuleFile: false,
       primaryAllowedBarrelFile: void 0,
-      primaryNonBarrelModuleFile: void 0,
     });
   });
 

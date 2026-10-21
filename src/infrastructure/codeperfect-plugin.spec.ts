@@ -16,6 +16,7 @@ describe("codeperfect plugin", () => {
       "no-multiple-declarators",
       "no-reexports-outside-barrels",
       "no-unused-exports",
+      "no-unused-public-members",
       "no-useless-delegation",
       "prefer-interface-types",
       "prefer-vi-mocked-import",

@@ -16,8 +16,6 @@ interface ActiveMocks {
 interface ExampleRecord {
   /** Example content text. */
   content: string;
-  /** Ending line index in the comment. */
-  endIndex: number;
   /** Ending character offset. */
   endOffset: number;
   /** Line index within the comment. */
@@ -188,7 +186,6 @@ function createReportingScenario(): ReportingScenario {
       return [
         {
           content: "first()",
-          endIndex: 0,
           endOffset: 8,
           lineIndex: 0,
           prefix: " * ",
@@ -196,7 +193,6 @@ function createReportingScenario(): ReportingScenario {
         },
         {
           content: "second()",
-          endIndex: 1,
           endOffset: 17,
           lineIndex: 1,
           prefix: " * ",

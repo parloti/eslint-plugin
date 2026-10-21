@@ -62,7 +62,6 @@ function analyzeTestBlock(
       }));
 
   return {
-    body: callback.body,
     bodyLineCount:
       callback.body.loc.end.line - callback.body.loc.start.line - 1,
     callExpression,
@@ -71,11 +70,7 @@ function analyzeTestBlock(
     sourceText: sourceCode.text,
     statements: callback.body.body.map((statement) => {
       const phases = getStatementPhases(statement, sectionComments);
-      return {
-        node: statement as LocatedNode<ESTree.Statement>,
-        phase: phases.at(-1),
-        phases,
-      };
+      return { node: statement as LocatedNode<ESTree.Statement>, phases };
     }),
   };
 }
