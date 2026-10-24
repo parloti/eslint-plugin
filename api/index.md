@@ -19,6 +19,7 @@
 - [architecture](variables/architecture.md)
 - [assertActualExpectedNamesRule](variables/assertActualExpectedNamesRule.md)
 - [barrelFilesExportsOnlyRule](variables/barrelFilesExportsOnlyRule.md)
+- [codeperfectAngularPlugin](variables/codeperfectAngularPlugin.md)
 - [codeperfectPlugin](variables/codeperfectPlugin.md)
 - [consistentBarrelFilesRule](variables/consistentBarrelFilesRule.md)
 - [core](variables/core.md)

@@ -8,6 +8,6 @@
 
 > `const` **noUnusedPublicMembersRule**: `Rule.RuleModule`
 
-Defined in: [domain/architecture/no-unused-public-members/rule.ts:19](https://github.com/parloti/eslint-plugin/blob/d1301258accd21bbf33cad5508441c070521e48d/src/domain/architecture/no-unused-public-members/rule.ts#L19)
+Defined in: [domain/architecture/no-unused-public-members/rule.ts:81](https://github.com/parloti/eslint-plugin/blob/8d34aa9a3809f09376259feae7dbce7eab3698dd/src/domain/architecture/no-unused-public-members/rule.ts#L81)
 
 ESLint rule flagging public members unused by production code.
