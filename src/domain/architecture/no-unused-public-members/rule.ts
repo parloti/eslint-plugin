@@ -2,6 +2,8 @@ import type { Rule } from "eslint";
 
 import { ESLintUtils } from "@typescript-eslint/utils";
 
+import type { MemberUsageAdapter } from "./member-usage-utilities";
+
 import {
   DEFAULT_PUBLIC_API_FILES,
   DEFAULT_TEST_FILE_PATTERNS,
@@ -15,9 +17,20 @@ import {
   getProjectRoot,
 } from "./member-utilities";
 
-/** ESLint rule flagging public members unused by production code. */
-const noUnusedPublicMembersRule: Rule.RuleModule = {
-  create(context: Rule.RuleContext): Rule.RuleListener {
+/**
+ * Creates the rule listener with optional framework-specific member usage adapters.
+ * @param usageAdapters Adapters that recognize uses outside TypeScript source.
+ * @returns ESLint's create listener for the rule.
+ * @example
+ * ```typescript
+ * const create = createNoUnusedPublicMembersListener();
+ * ```
+ */
+const createNoUnusedPublicMembersListener =
+  (
+    usageAdapters: readonly MemberUsageAdapter[] = [],
+  ): ((context: Rule.RuleContext) => Rule.RuleListener) =>
+  (context): Rule.RuleListener => {
     if (!isLintableFilename(context.filename)) {
       return {};
     }
@@ -52,6 +65,7 @@ const noUnusedPublicMembersRule: Rule.RuleModule = {
           state,
           projectRoot,
           parserServices,
+          usageAdapters,
         )) {
           context.report({
             data: { hostName: member.hostName, memberName: member.memberName },
@@ -61,7 +75,11 @@ const noUnusedPublicMembersRule: Rule.RuleModule = {
         }
       },
     };
-  },
+  };
+
+/** ESLint rule flagging public members unused by production code. */
+const noUnusedPublicMembersRule: Rule.RuleModule = {
+  create: createNoUnusedPublicMembersListener(),
   meta: {
     defaultOptions: [
       {
@@ -104,4 +122,4 @@ const noUnusedPublicMembersRule: Rule.RuleModule = {
   },
 };
 
-export { noUnusedPublicMembersRule };
+export { createNoUnusedPublicMembersListener, noUnusedPublicMembersRule };

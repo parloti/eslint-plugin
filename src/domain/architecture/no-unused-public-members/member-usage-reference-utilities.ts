@@ -2,7 +2,10 @@ import * as ts from "typescript";
 
 import type { PublicMember } from "./member-declaration-utilities";
 
-import { isSameSymbol } from "../no-unused-exports/no-unused-exports-symbol-utilities";
+import {
+  isSameSymbol,
+  resolveCanonicalSymbol,
+} from "../no-unused-exports/no-unused-exports-symbol-utilities";
 import { hasCompatibleMemberShape } from "./member-usage-type-utilities";
 
 /** Source type and name for a property access or destructuring read. */
@@ -44,9 +47,7 @@ const getPropertyAccess = (
   ) {
     const owner = parent.parent.parent;
     const sourceType = ts.isVariableDeclaration(owner)
-      ? owner.initializer === void 0
-        ? void 0
-        : checker.getTypeAtLocation(owner.initializer)
+      ? checker.getTypeAtLocation(owner.initializer ?? owner.name)
       : ts.isParameter(owner)
         ? checker.getTypeAtLocation(owner)
         : void 0;
@@ -134,6 +135,24 @@ const isComputedMemberRead = (
 
   const objectType = checker.getTypeAtLocation(node.expression);
   const keyType = checker.getTypeAtLocation(node.argumentExpression);
+
+  if (
+    (keyType.flags & ts.TypeFlags.String) !== 0 &&
+    ts.isVariableDeclaration(member.hostDeclaration) &&
+    member.hostSymbol !== void 0
+  ) {
+    const accessedSymbol = checker.getSymbolAtLocation(node.expression);
+
+    if (
+      accessedSymbol !== void 0 &&
+      isSameSymbol(
+        resolveCanonicalSymbol(accessedSymbol, checker),
+        resolveCanonicalSymbol(member.hostSymbol, checker),
+      )
+    ) {
+      return true;
+    }
+  }
 
   return getStringLiteralKeys(keyType).some((name) => {
     if (name !== member.memberName) {

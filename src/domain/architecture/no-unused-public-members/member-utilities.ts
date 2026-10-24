@@ -3,6 +3,7 @@ import path from "node:path";
 import * as ts from "typescript";
 
 import type { NoUnusedExportsState } from "../no-unused-exports/types";
+import type { MemberUsageAdapter } from "./member-usage-utilities";
 
 import { collectPublicMembers } from "./member-declaration-utilities";
 import {
@@ -20,6 +21,7 @@ type ParserServices = ReturnType<typeof ESLintUtils.getParserServices>;
  * @param state Normalized public API and test patterns.
  * @param repoRoot Root directory used for glob matching.
  * @param parserServices TypeScript and ESTree node maps.
+ * @param usageAdapters Adapters that recognize usage outside TypeScript source.
  * @returns Members outside the public API with no production use.
  * @example
  * ```typescript
@@ -32,6 +34,7 @@ const collectUnusedPublicMembers = (
   state: NoUnusedExportsState,
   repoRoot: string,
   parserServices: ParserServices,
+  usageAdapters: readonly MemberUsageAdapter[] = [],
 ) => {
   const checker = program.getTypeChecker();
 
@@ -39,7 +42,7 @@ const collectUnusedPublicMembers = (
     (member) =>
       !isPublicApiHost(program, state, repoRoot, member.hostSymbol) &&
       !isPublicApiMember(program, state, repoRoot, member.memberSymbol) &&
-      !hasProductionUsage(program, state, repoRoot, member),
+      !hasProductionUsage(program, state, repoRoot, member, usageAdapters),
   );
 };
 

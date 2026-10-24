@@ -2,6 +2,8 @@ import * as ts from "typescript";
 
 import type { PublicMember } from "./member-declaration-utilities";
 
+import { carriesMember } from "./member-usage-value-utilities";
+
 /**
  * Gets the declared type of the host that owns a public member.
  * @param member Member whose host type is needed.
@@ -53,7 +55,6 @@ const hasCompatibleMemberShape = (
   return (
     hostProperty !== void 0 &&
     observedProperty !== void 0 &&
-    checker.isTypeAssignableTo(observedType, hostType) &&
     checker.isTypeAssignableTo(hostType, observedType)
   );
 };
@@ -87,68 +88,146 @@ const getContextualPropertyType = (
 };
 
 /**
+ * Gets the resolved parameter type for a call argument.
+ * @param call Call expression containing the argument.
+ * @param argument Argument expression to inspect.
+ * @param checker TypeScript type checker.
+ * @returns Parameter type when TypeScript resolves the call.
+ * @example
+ * ```typescript
+ * const parameterType = getCallArgumentType(call, argument, checker);
+ * ```
+ */
+const getCallArgumentType = (
+  call: ts.CallExpression,
+  argument: ts.Expression,
+  checker: ts.TypeChecker,
+): ts.Type | undefined => {
+  const contextualType = checker.getContextualType(argument);
+
+  if (contextualType !== void 0) {
+    return contextualType;
+  }
+
+  const argumentIndex = call.arguments.indexOf(argument);
+  const signature = checker.getResolvedSignature(call);
+  const parameter =
+    signature === void 0 ? void 0 : signature.parameters[argumentIndex];
+
+  return parameter === void 0
+    ? void 0
+    : checker.getTypeOfSymbolAtLocation(parameter, call);
+};
+
+/**
+ * Checks whether a method declaration contains only a contract.
+ * @param declaration Candidate method declaration.
+ * @returns True when the declaration has no implementation body.
+ * @example
+ * ```typescript
+ * const declarationOnly = isDeclarationOnlyMethod(declaration);
+ * ```
+ */
+const isDeclarationOnlyMethod = (declaration: ts.Node): boolean =>
+  ts.isCallSignatureDeclaration(declaration) ||
+  ts.isFunctionTypeNode(declaration) ||
+  ts.isMethodSignature(declaration) ||
+  (ts.isMethodDeclaration(declaration) && declaration.body === void 0);
+
+/**
+ * Resolves a named property or the string-index contract accepting it.
+ * @param type Object type whose member is being forwarded.
+ * @param member Member supplying the property name and type location.
+ * @param checker TypeScript type checker.
+ * @returns Explicit property type or string-index value type.
+ * @example
+ * ```typescript
+ * const valueType = getPropertyOrIndexType(type, member, checker);
+ * ```
+ */
+const getPropertyOrIndexType = (
+  type: ts.Type,
+  member: PublicMember,
+  checker: ts.TypeChecker,
+): ts.Type | undefined => {
+  const property = checker.getPropertyOfType(type, member.memberName);
+
+  return property === void 0
+    ? checker.getIndexTypeOfType(type, ts.IndexKind.String)
+    : checker.getTypeOfSymbolAtLocation(property, member.declaration);
+};
+
+/**
  * Checks whether a typed handoff carries a member into a compatible contract.
- * @param sourceType Type of the value being forwarded.
+ * @param sourceExpression Value being forwarded.
  * @param targetType Type expected at the receiving boundary.
  * @param member Member whose usage is being checked.
  * @param checker TypeScript type checker.
  * @returns True when the receiving contract accepts the corresponding member.
  * @example
  * ```typescript
- * const used = isMemberHandoff(sourceType, targetType, member, checker);
+ * const used = isMemberHandoff(expression, targetType, member, checker);
  * ```
  */
 const isMemberHandoff = (
-  sourceType: ts.Type | undefined,
+  sourceExpression: ts.Expression,
   targetType: ts.Type | undefined,
   member: PublicMember,
   checker: ts.TypeChecker,
 ): boolean => {
-  if (sourceType === void 0 || targetType === void 0) {
+  if (targetType === void 0) {
     return false;
   }
 
   const hostType = checker.getNonNullableType(
     getMemberHostType(member, checker),
   );
-  const forwardedType = checker.getNonNullableType(sourceType);
+  const forwardedType = checker.getNonNullableType(
+    checker.getTypeAtLocation(sourceExpression),
+  );
   const receivingType = checker.getNonNullableType(targetType);
-  const hostProperty = checker.getPropertyOfType(hostType, member.memberName);
-  const forwardedProperty = checker.getPropertyOfType(
-    forwardedType,
-    member.memberName,
-  );
-  const receivingProperty = checker.getPropertyOfType(
-    receivingType,
-    member.memberName,
-  );
+
+  if (receivingType.isUnion()) {
+    return receivingType.types.some((part) =>
+      isMemberHandoff(sourceExpression, part, member, checker),
+    );
+  }
 
   if (
-    hostProperty === void 0 ||
-    forwardedProperty === void 0 ||
-    receivingProperty === void 0 ||
-    !(
-      checker.isTypeAssignableTo(forwardedType, hostType) ||
-      checker.isTypeAssignableTo(hostType, forwardedType)
-    ) ||
-    !checker.isTypeAssignableTo(hostType, receivingType)
+    checker.getPropertyOfType(receivingType, member.memberName) === void 0 &&
+    !carriesMember(sourceExpression, checker, member)
   ) {
     return false;
   }
 
-  const hostPropertyType = checker.getTypeOfSymbolAtLocation(
-    hostProperty,
-    member.declaration,
+  const hostPropertyType = getPropertyOrIndexType(hostType, member, checker);
+  const forwardedPropertyType = getPropertyOrIndexType(
+    forwardedType,
+    member,
+    checker,
   );
-  const receivingPropertyType = checker.getTypeOfSymbolAtLocation(
-    receivingProperty,
-    member.declaration,
+  const receivingPropertyType = getPropertyOrIndexType(
+    receivingType,
+    member,
+    checker,
   );
 
   return (
-    checker.isTypeAssignableTo(hostPropertyType, receivingPropertyType) ||
-    checker.isTypeAssignableTo(receivingPropertyType, hostPropertyType)
+    hostPropertyType !== void 0 &&
+    forwardedPropertyType !== void 0 &&
+    receivingPropertyType !== void 0 &&
+    (checker.isTypeAssignableTo(forwardedType, hostType) ||
+      checker.isTypeAssignableTo(hostType, forwardedType)) &&
+    checker.isTypeAssignableTo(hostType, receivingType) &&
+    (checker.isTypeAssignableTo(hostPropertyType, receivingPropertyType) ||
+      checker.isTypeAssignableTo(receivingPropertyType, hostPropertyType))
   );
 };
 
-export { getContextualPropertyType, hasCompatibleMemberShape, isMemberHandoff };
+export {
+  getCallArgumentType,
+  getContextualPropertyType,
+  hasCompatibleMemberShape,
+  isDeclarationOnlyMethod,
+  isMemberHandoff,
+};

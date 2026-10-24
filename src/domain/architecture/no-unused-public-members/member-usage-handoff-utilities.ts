@@ -3,41 +3,12 @@ import * as ts from "typescript";
 import type { PublicMember } from "./member-declaration-utilities";
 
 import {
+  getCallArgumentType,
   getContextualPropertyType,
+  isDeclarationOnlyMethod,
   isMemberHandoff,
 } from "./member-usage-type-utilities";
-
-/**
- * Finds a call argument's resolved parameter type.
- * @param call Call expression containing the argument.
- * @param argument Argument expression to inspect.
- * @param checker TypeScript type checker.
- * @returns Parameter type when TypeScript resolves the call.
- * @example
- * ```typescript
- * const parameterType = getCallArgumentType(call, argument, checker);
- * ```
- */
-const getCallArgumentType = (
-  call: ts.CallExpression,
-  argument: ts.Expression,
-  checker: ts.TypeChecker,
-): ts.Type | undefined => {
-  const contextualType = checker.getContextualType(argument);
-
-  if (contextualType !== void 0) {
-    return contextualType;
-  }
-
-  const argumentIndex = call.arguments.indexOf(argument);
-  const signature = checker.getResolvedSignature(call);
-  const parameter =
-    signature === void 0 ? void 0 : signature.parameters[argumentIndex];
-
-  return parameter === void 0
-    ? void 0
-    : checker.getTypeOfSymbolAtLocation(parameter, call);
-};
+import { expressionCarriesMemberValue } from "./member-usage-value-utilities";
 
 /**
  * Checks whether a contextual property comes from an external declaration.
@@ -91,8 +62,70 @@ const hasCallImplementation = (
 };
 
 /**
- * Checks whether an object property is supplied to a typed call boundary.
- * @param node Candidate property assignment.
+ * Checks whether an opaque value property is passed to a method contract.
+ * @param objectLiteral Object literal passed to the method.
+ * @param propertyName Property carrying the value.
+ * @param valueExpression Value assigned to the property.
+ * @param objectType Contextual type of the object literal.
+ * @param checker TypeScript type checker.
+ * @param member Member whose value is being handed off.
+ * @returns True when a declaration-only method receives the member as opaque data.
+ * @example
+ * ```typescript
+ * const handedOff = isOpaqueMethodContractHandoff(
+ *   objectLiteral,
+ *   "payload",
+ *   value,
+ *   type,
+ *   checker,
+ *   member,
+ * );
+ * ```
+ */
+const isOpaqueMethodContractHandoff = (
+  objectLiteral: ts.ObjectLiteralExpression,
+  propertyName: string,
+  valueExpression: ts.Expression,
+  objectType: ts.Type | undefined,
+  checker: ts.TypeChecker,
+  member: PublicMember,
+): boolean => {
+  const call = objectLiteral.parent;
+  const declaration = ts.isCallExpression(call)
+    ? checker.getResolvedSignature(call)?.getDeclaration()
+    : void 0;
+
+  if (
+    !ts.isCallExpression(call) ||
+    !call.arguments.includes(objectLiteral) ||
+    declaration === void 0 ||
+    !isDeclarationOnlyMethod(declaration)
+  ) {
+    return false;
+  }
+
+  const targetType = getContextualPropertyType(
+    objectType,
+    propertyName,
+    objectLiteral,
+    checker,
+  );
+  const isHttpRequestBody =
+    propertyName === "body" &&
+    ts.isPropertyAccessExpression(call.expression) &&
+    call.expression.name.text === "request";
+
+  return (
+    targetType !== void 0 &&
+    ((targetType.flags & ts.TypeFlags.Unknown) !== 0 ||
+      (isHttpRequestBody && (targetType.flags & ts.TypeFlags.Any) !== 0)) &&
+    expressionCarriesMemberValue(valueExpression, checker, member)
+  );
+};
+
+/**
+ * Checks whether a value is supplied to a typed external call boundary.
+ * @param node Candidate call expression.
  * @param checker TypeScript type checker.
  * @param member Member whose usage is being checked.
  * @returns True when an external call contract accepts the member shape.
@@ -106,34 +139,30 @@ const isCallArgumentMember = (
   checker: ts.TypeChecker,
   member: PublicMember,
 ): boolean => {
-  if (
-    !ts.isPropertyAssignment(node) ||
-    (!ts.isIdentifier(node.name) && !ts.isStringLiteralLike(node.name)) ||
-    !ts.isObjectLiteralExpression(node.parent)
-  ) {
+  if (!ts.isCallExpression(node) || hasCallImplementation(node, checker)) {
     return false;
   }
 
-  const call = node.parent.parent;
-
-  if (
-    !ts.isCallExpression(call) ||
-    hasCallImplementation(call, checker) ||
-    !call.arguments.some((argument) => argument === node.parent)
-  ) {
-    return false;
-  }
-
-  const targetType = getCallArgumentType(call, node.parent, checker);
+  const declaration = checker.getResolvedSignature(node)?.getDeclaration();
 
   return (
-    node.name.text === member.memberName &&
-    isMemberHandoff(
-      checker.getTypeAtLocation(node.parent),
-      targetType,
-      member,
-      checker,
-    )
+    declaration !== void 0 &&
+    node.arguments.some((argument) => {
+      const argumentType = getCallArgumentType(node, argument, checker);
+      const isOpaqueJsonBody =
+        isDeclarationOnlyMethod(declaration) &&
+        ts.isPropertyAccessExpression(node.expression) &&
+        node.expression.name.text === "json" &&
+        node.arguments[0] === argument &&
+        argumentType !== void 0 &&
+        (argumentType.flags & (ts.TypeFlags.Any | ts.TypeFlags.Unknown)) !== 0;
+
+      return (
+        (isOpaqueJsonBody &&
+          expressionCarriesMemberValue(argument, checker, member)) ||
+        isMemberHandoff(argument, argumentType, member, checker)
+      );
+    })
   );
 };
 
@@ -165,11 +194,23 @@ const isObjectContractHandoff = (
 
     const objectType = checker.getContextualType(node.parent);
 
+    if (
+      isOpaqueMethodContractHandoff(
+        node.parent,
+        name.text,
+        node.initializer,
+        objectType,
+        checker,
+        member,
+      )
+    ) {
+      return true;
+    }
+
     if (!isExternalPropertyContract(objectType, name.text, checker)) {
       return false;
     }
 
-    const sourceType = checker.getTypeAtLocation(node.initializer);
     const targetType = getContextualPropertyType(
       objectType,
       name.text,
@@ -177,7 +218,7 @@ const isObjectContractHandoff = (
       checker,
     );
 
-    return isMemberHandoff(sourceType, targetType, member, checker);
+    return isMemberHandoff(node.initializer, targetType, member, checker);
   }
 
   if (
@@ -186,11 +227,23 @@ const isObjectContractHandoff = (
   ) {
     const objectType = checker.getContextualType(node.parent);
 
+    if (
+      isOpaqueMethodContractHandoff(
+        node.parent,
+        node.name.text,
+        node.name,
+        objectType,
+        checker,
+        member,
+      )
+    ) {
+      return true;
+    }
+
     if (!isExternalPropertyContract(objectType, node.name.text, checker)) {
       return false;
     }
 
-    const sourceType = checker.getTypeAtLocation(node.name);
     const targetType = getContextualPropertyType(
       objectType,
       node.name.text,
@@ -198,7 +251,7 @@ const isObjectContractHandoff = (
       checker,
     );
 
-    return isMemberHandoff(sourceType, targetType, member, checker);
+    return isMemberHandoff(node.name, targetType, member, checker);
   }
 
   return false;

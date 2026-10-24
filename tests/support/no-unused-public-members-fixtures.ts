@@ -1,4 +1,4 @@
-import type { Linter } from "eslint";
+import type { Linter, Rule } from "eslint";
 
 import { ESLint } from "eslint";
 import { parser } from "typescript-eslint";
@@ -13,6 +13,9 @@ export interface NoUnusedPublicMembersFixtureRun {
   /** Files written to the temporary project. */
   files: Record<string, string>;
 
+  /** Optional rule implementation override for adapter-specific fixtures. */
+  ruleModule?: Rule.RuleModule;
+
   /** Optional rule options. */
   ruleOptions?: unknown[];
 
@@ -25,6 +28,7 @@ export interface NoUnusedPublicMembersFixtureRun {
  * @param directory Fixture project root.
  * @param tsconfigPath Absolute project tsconfig path.
  * @param ruleOptions Optional rule options.
+ * @param ruleModule Rule implementation to register.
  * @returns Configured ESLint instance.
  * @example
  * ```typescript
@@ -35,6 +39,7 @@ const createTypedRuleEslint = (
   directory: string,
   tsconfigPath: string,
   ruleOptions: unknown[] = [],
+  ruleModule: Rule.RuleModule = noUnusedPublicMembersRule,
 ): ESLint => {
   const ruleEntry: Linter.RuleEntry = ["error", ...ruleOptions];
 
@@ -55,9 +60,7 @@ const createTypedRuleEslint = (
           },
         },
         plugins: {
-          codeperfect: {
-            rules: { "no-unused-public-members": noUnusedPublicMembersRule },
-          },
+          codeperfect: { rules: { "no-unused-public-members": ruleModule } },
         },
         rules: { "codeperfect/no-unused-public-members": ruleEntry },
       },
@@ -86,11 +89,11 @@ const createFixtureLintRunner =
       fixtureSet.directory,
       fixtureSet.getFilePath("tsconfig.json"),
       run.ruleOptions,
+      run.ruleModule,
     );
     const [result] = await eslint.lintFiles([
       fixtureSet.getFilePath(run.targetRelativePath),
     ]);
-
     return (result?.messages ?? []).map((message) => message.messageId ?? "");
   };
 

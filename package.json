@@ -13,6 +13,11 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "default": "./dist/index.js"
+    },
+    "./angular": {
+      "types": "./dist/adapters/angular/plugin.d.ts",
+      "import": "./dist/adapters/angular/plugin.js",
+      "default": "./dist/adapters/angular/plugin.js"
     }
   },
   "sideEffects": false,
@@ -78,6 +83,7 @@
     "minimatch": "^10.2.6"
   },
   "devDependencies": {
+    "@angular/compiler": "^22.2.3",
     "@codeperfect/commitlint-config-emoji": "^1.1.0",
     "@codeperfect/eslint-config": "^2.1.0",
     "@commitlint/cz-commitlint": "^21.2.4",
@@ -125,6 +131,12 @@
     "vitest": "^4.1.12"
   },
   "peerDependencies": {
+    "@angular/compiler": ">=22.2.0",
     "eslint": ">=10.13.0"
+  },
+  "peerDependenciesMeta": {
+    "@angular/compiler": {
+      "optional": true
+    }
   }
 }

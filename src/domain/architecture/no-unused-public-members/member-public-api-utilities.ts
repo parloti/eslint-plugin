@@ -41,6 +41,19 @@ const typeContainsSymbol = (
 
   visitedTypes.add(type);
 
+  if (type.isUnionOrIntersection()) {
+    return type.types.some((constituent) =>
+      typeContainsSymbol(
+        constituent,
+        targetSymbol,
+        checker,
+        location,
+        visitedTypes,
+        depth,
+      ),
+    );
+  }
+
   for (const property of checker.getPropertiesOfType(type)) {
     if (
       isSameSymbol(resolveCanonicalSymbol(property, checker), targetSymbol) ||
@@ -114,7 +127,16 @@ const isPublicApiMember = (
           sourceFile,
           new Set(),
           3,
-        )
+        ) ||
+        ((canonicalExport.flags & ts.SymbolFlags.Type) !== 0 &&
+          typeContainsSymbol(
+            checker.getDeclaredTypeOfSymbol(canonicalExport),
+            targetSymbol,
+            checker,
+            sourceFile,
+            new Set(),
+            3,
+          ))
       ) {
         return true;
       }

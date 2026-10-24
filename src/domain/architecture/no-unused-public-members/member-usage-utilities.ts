@@ -14,10 +14,22 @@ import {
   isCallArgumentMember,
   isObjectContractHandoff,
 } from "./member-usage-handoff-utilities";
+import { isLocalCallArgumentTransmitted } from "./member-usage-local-flow-utilities";
 import {
   isComputedMemberRead,
   isStructuralPropertyRead,
 } from "./member-usage-reference-utilities";
+import {
+  isLocalCallArgumentSerialized,
+  isWholeObjectRead,
+} from "./member-usage-serialization-utilities";
+
+/** Framework-specific member usage detector supplied by an opt-in adapter. */
+type MemberUsageAdapter = (
+  sourceFile: ts.SourceFile,
+  checker: ts.TypeChecker,
+  member: PublicMember,
+) => boolean;
 
 /**
  * Resolves destructured member names or direct reference symbols.
@@ -97,6 +109,7 @@ const isDeclarationName = (node: ts.Node): boolean => {
  * @param state Normalized public API and test patterns.
  * @param repoRoot Root directory used for glob matching.
  * @param member Member whose production usage is being checked.
+ * @param usageAdapters Optional framework-specific usage detectors.
  * @returns True when production code references the member.
  * @example
  * ```typescript
@@ -108,6 +121,7 @@ const hasProductionUsage = (
   state: NoUnusedExportsState,
   repoRoot: string,
   member: PublicMember,
+  usageAdapters: readonly MemberUsageAdapter[] = [],
 ): boolean => {
   const checker = program.getTypeChecker();
   const relatedSymbols = [
@@ -147,6 +161,10 @@ const hasProductionUsage = (
       continue;
     }
 
+    if (usageAdapters.some((adapter) => adapter(sourceFile, checker, member))) {
+      return true;
+    }
+
     const findUsageSymbol = (node: ts.Node): ts.Symbol | undefined => {
       if (
         (ts.isIdentifier(node) || ts.isStringLiteralLike(node)) &&
@@ -167,6 +185,9 @@ const hasProductionUsage = (
       }
 
       return isComputedMemberRead(node, checker, member, relatedSymbols) ||
+        isWholeObjectRead(node, checker, member, program) ||
+        isLocalCallArgumentSerialized(node, checker, member, program) ||
+        isLocalCallArgumentTransmitted(node, checker, member) ||
         isCallArgumentMember(node, checker, member) ||
         isObjectContractHandoff(node, checker, member)
         ? member.memberSymbol
@@ -182,3 +203,4 @@ const hasProductionUsage = (
 };
 
 export { hasProductionUsage };
+export type { MemberUsageAdapter };

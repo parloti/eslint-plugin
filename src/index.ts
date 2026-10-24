@@ -1,3 +1,4 @@
+export { codeperfectAngularPlugin } from "./adapters";
 export {
   assertActualExpectedNamesRule,
   barrelFilesExportsOnlyRule,
