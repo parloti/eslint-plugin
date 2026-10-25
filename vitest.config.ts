@@ -1,6 +1,6 @@
 import { defineConfig } from "vitest/config";
 
-export default defineConfig({
+const config = defineConfig({
   test: {
     clearMocks: true,
     coverage: {
@@ -10,6 +10,7 @@ export default defineConfig({
       thresholds: { branches: 95, functions: 95, lines: 95, statements: 95 },
     },
     include: ["src/**/*.spec.ts", "tests/support/**/*.spec.ts"],
+    maxWorkers: "50%",
     mockReset: true,
     name: "eslint-plugin-unit",
     pool: "threads",
@@ -20,3 +21,5 @@ export default defineConfig({
     unstubGlobals: true,
   },
 });
+
+export default config;

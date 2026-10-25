@@ -1,6 +1,6 @@
 import { defineConfig } from "vitest/config";
 
-export default defineConfig({
+const config = defineConfig({
   test: {
     clearMocks: true,
     coverage: {
@@ -11,6 +11,7 @@ export default defineConfig({
       thresholds: { branches: 15, functions: 15, lines: 15, statements: 15 },
     },
     include: ["tests/e2e/**/*.e2e.ts"],
+    maxWorkers: "50%",
     mockReset: true,
     name: "eslint-plugin-e2e",
     pool: "threads",
@@ -21,3 +22,5 @@ export default defineConfig({
     unstubGlobals: true,
   },
 });
+
+export default config;

@@ -64,12 +64,13 @@ coverage/
 # ---------------------------------------------------------
 # IDE / Editor files
 # ---------------------------------------------------------
-.idea/
-*.swp
-*.swo
 .DS_Store
-Thumbs.db
+.freebuff/
 .github/context-mode
+.idea/
+*.swo
+*.swp
+Thumbs.db
 
 # ---------------------------------------------------------
 # Angular
