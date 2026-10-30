@@ -54,6 +54,21 @@ const isDeclarationOnlyIdentifier = (identifier: ts.Identifier): boolean => {
 };
 
 /**
+ * Checks whether one node is the base expression of a class `extends` clause.
+ * @param node Candidate node.
+ * @returns True when the node is evaluated at runtime as a class base.
+ * @example
+ * ```typescript
+ * const classBase = isClassExtendsExpression(node);
+ * ```
+ */
+const isClassExtendsExpression = (node: ts.Node): boolean =>
+  ts.isExpressionWithTypeArguments(node) &&
+  ts.isHeritageClause(node.parent) &&
+  node.parent.token === ts.SyntaxKind.ExtendsKeyword &&
+  ts.isClassLike(node.parent.parent);
+
+/**
  * Checks whether one identifier node appears under a type node.
  * @param identifier Candidate identifier.
  * @returns True when the identifier is inside type-only syntax.
@@ -64,7 +79,7 @@ const isDeclarationOnlyIdentifier = (identifier: ts.Identifier): boolean => {
  */
 const isTypePositionIdentifier = (identifier: ts.Identifier): boolean => {
   const visitNode = (current: ts.Node): boolean => {
-    if (ts.isTypeQueryNode(current)) {
+    if (ts.isTypeQueryNode(current) || isClassExtendsExpression(current)) {
       return false;
     }
 
@@ -87,10 +102,33 @@ const isTypePositionIdentifier = (identifier: ts.Identifier): boolean => {
   return visitNode(identifier);
 };
 
+/** Syntax position that can satisfy one export usage. */
+type UsagePosition = "any" | ExportKind;
+
 /**
- * Checks whether one identifier is one concrete usage candidate for the export kind.
+ * Resolves which syntax positions consume one exported symbol.
+ * @param exportKind Export kind declared by the export site.
+ * @param symbol Canonical exported symbol.
+ * @returns `any` for value exports that also declare a type, such as classes and enums.
+ * @example
+ * ```typescript
+ * const position = resolveUsagePosition("value", classSymbol);
+ * ```
+ */
+const resolveUsagePosition = (
+  exportKind: ExportKind,
+  symbol: ts.Symbol,
+): UsagePosition => {
+  const declaresTypeAndValue =
+    (symbol.flags & (ts.SymbolFlags.Class | ts.SymbolFlags.Enum)) !== 0;
+
+  return exportKind === "value" && declaresTypeAndValue ? "any" : exportKind;
+};
+
+/**
+ * Checks whether one identifier is one concrete usage candidate for the usage position.
  * @param identifier Identifier node.
- * @param exportKind Whether type-only or value usage is required.
+ * @param usagePosition Whether type, value, or either usage is required.
  * @returns True when the identifier can satisfy usage.
  * @example
  * ```typescript
@@ -99,15 +137,23 @@ const isTypePositionIdentifier = (identifier: ts.Identifier): boolean => {
  */
 const isConcreteUsageIdentifier = (
   identifier: ts.Identifier,
-  exportKind: ExportKind,
+  usagePosition: UsagePosition,
 ): boolean => {
   if (isDeclarationOnlyIdentifier(identifier)) {
     return false;
   }
 
+  if (usagePosition === "any") {
+    return true;
+  }
+
   const isInTypePosition = isTypePositionIdentifier(identifier);
 
-  return exportKind === "type" ? isInTypePosition : !isInTypePosition;
+  return usagePosition === "type" ? isInTypePosition : !isInTypePosition;
 };
 
-export { getTypeScriptProgram, isConcreteUsageIdentifier };
+export {
+  getTypeScriptProgram,
+  isConcreteUsageIdentifier,
+  resolveUsagePosition,
+};

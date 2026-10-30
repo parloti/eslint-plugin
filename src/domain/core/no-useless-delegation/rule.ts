@@ -161,6 +161,19 @@ const forwardsParameter = (
 const isNamedReceiver = (node?: Node): boolean => node?.type === "Identifier";
 
 /**
+ * Determines whether a function declares a type predicate return type.
+ * @param functionNode Function node to inspect.
+ * @returns Whether the function narrows its argument (`value is T` or `asserts value`).
+ * @example
+ * ```typescript
+ * const narrows = declaresTypePredicate(functionNode);
+ * ```
+ */
+const declaresTypePredicate = (functionNode: Node): boolean =>
+  asNode(asNode(functionNode["returnType"])?.["typeAnnotation"])?.type ===
+  "TSTypePredicate";
+
+/**
  * Determines whether a function does nothing except directly call another function.
  * @param functionNode Function node to inspect.
  * @param functionName Declared wrapper function name.
@@ -184,10 +197,7 @@ const isUselessDelegation = (
     parameters === void 0 ||
     arguments_ === void 0 ||
     callee === void 0 ||
-    // A method call is only a replaceable delegation when its receiver is a
-    // plain named reference (e.g. `service.run`). Expression receivers such
-    // as type assertions, calls, or literals cannot be inlined at the call
-    // site, so the wrapper is not useless.
+    declaresTypePredicate(functionNode) ||
     (callee.type === "MemberExpression" &&
       !isNamedReceiver(asNode(callee["object"]))) ||
     getIdentifierName(callee) === functionName ||

@@ -30,6 +30,7 @@
   "scripts": {
     "\n# ---------------- GENERAL  ---------------- #": "",
     "prepare": "patch-package && husky",
+    "nuke": "npx --yes tsx scripts/nuke.ts",
     "\n# ------------------ SCM  ------------------ #": "",
     "commit": "npx --yes git-cz",
     "\n# ---------------- BUILDING ---------------- #": "",

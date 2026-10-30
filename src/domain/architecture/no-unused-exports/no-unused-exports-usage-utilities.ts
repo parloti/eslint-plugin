@@ -7,7 +7,10 @@ import type {
   NoUnusedExportsState,
 } from "./types";
 
-import { isConcreteUsageIdentifier } from "./no-unused-exports-identifier-utilities";
+import {
+  isConcreteUsageIdentifier,
+  resolveUsagePosition,
+} from "./no-unused-exports-identifier-utilities";
 import { isTestFile } from "./no-unused-exports-options";
 import { collectPublicApiExposureUsages } from "./no-unused-exports-public-api-usage-utilities";
 import {
@@ -38,13 +41,18 @@ const collectConcreteUsagesFromSourceFile = (
   consumerIsTestFile: boolean,
   usages: ExportUsage[],
 ): void => {
+  const usagePosition = resolveUsagePosition(
+    exportedElement.exportKind,
+    targetSymbol,
+  );
+
   const visitNode = (node: ts.Node): void => {
     if (!ts.isIdentifier(node)) {
       ts.forEachChild(node, visitNode);
       return;
     }
 
-    if (!isConcreteUsageIdentifier(node, exportedElement.exportKind)) {
+    if (!isConcreteUsageIdentifier(node, usagePosition)) {
       ts.forEachChild(node, visitNode);
       return;
     }

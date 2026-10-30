@@ -104,4 +104,26 @@ describe("no-useless-delegation rule", () => {
     // Assert
     expect(actual).toStrictEqual([]);
   });
+
+  it.each([
+    "function isKnown(value: string): value is Known { return KNOWN.includes(value); }",
+    "const isKnown = (value: string): value is Known => KNOWN.includes(value);",
+    "function assertKnown(value: string): asserts value is Known { return check(value); }",
+  ])("does not report type predicate wrappers: %s", (code) => {
+    // Act
+    const actual = lint(code);
+
+    // Assert
+    expect(actual).toStrictEqual([]);
+  });
+
+  it("reports pass-through functions with a plain return type", () => {
+    // Act
+    const actual = lint(
+      "function isKnown(value: string): boolean { return KNOWN.includes(value); }",
+    );
+
+    // Assert
+    expect(actual).toStrictEqual(["uselessDelegation"]);
+  });
 });

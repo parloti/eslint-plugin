@@ -63,6 +63,26 @@ const TYPEOF_FIXTURE_FILES = {
   "src/feature.ts": "export const feature = { id: 1 } as const;\n",
 };
 
+/**
+ * Builds the fixture project files for one consumer of an exported base value.
+ * @param consumerSource Source of `src/consumer.ts`, which imports `Base`.
+ * @param baseSource Source of `src/base.ts`.
+ * @returns Relative file contents composing the class consumer fixture project.
+ * @example
+ * ```typescript
+ * const files = createClassConsumerFixtureFiles("export class Child extends Base {}");
+ * ```
+ */
+const createClassConsumerFixtureFiles = (
+  consumerSource: string,
+  baseSource = "export abstract class Base { id = 1; }\n",
+) => ({
+  "src/base.ts": baseSource,
+  "src/consumer.ts": ["import { Base } from './base';", consumerSource].join(
+    "\n",
+  ),
+});
+
 /** Relative file contents composing the mixed consumer fixture project. */
 const MIXED_CONSUMER_FIXTURE_FILES = {
   "src/consumer.ts": [
@@ -199,7 +219,39 @@ const collectShorthandPropertyFixtureUsages = () =>
       ),
   );
 
+/**
+ * Builds one temporary project whose single consumer references one exported class.
+ * @param consumerSource Source of the consumer module after its `Base` import.
+ * @param baseSource Source of `src/base.ts`.
+ * @returns Collected usages for the `Base` value export.
+ * @example
+ * ```typescript
+ * const usages = collectClassConsumerFixtureUsages("export class Child extends Base {}");
+ * ```
+ */
+const collectClassConsumerFixtureUsages = (
+  consumerSource: string,
+  baseSource?: string,
+) =>
+  withTemporaryProject(
+    "no-unused-class-",
+    createClassConsumerFixtureFiles(consumerSource, baseSource),
+    (temporaryRoot, program, resolvePath) =>
+      collectCrossFileUsages(
+        program,
+        resolvePath("src/base.ts"),
+        getOptions([]),
+        temporaryRoot,
+        {
+          exportedName: "Base",
+          exportKind: "value",
+          node: { type: "ExportNamedDeclaration" } as never,
+        },
+      ),
+  );
+
 export {
+  collectClassConsumerFixtureUsages,
   collectShorthandPropertyFixtureUsages,
   collectTypeFixtureUsages,
   collectTypeofValueFixtureUsages,

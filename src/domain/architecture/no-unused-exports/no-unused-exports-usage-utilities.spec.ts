@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  collectClassConsumerFixtureUsages,
   collectShorthandPropertyFixtureUsages,
   collectTypeFixtureUsages,
   collectTypeofValueFixtureUsages,
@@ -59,6 +60,29 @@ describe("no-unused-exports cross-file usages", () => {
   it("treats `typeof` references as concrete value usage", () => {
     // Act
     const actualUsages = collectTypeofValueFixtureUsages();
+
+    // Assert
+    expect(actualUsages).toStrictEqual([{ isTestFile: false }]);
+  });
+
+  it.each([
+    ["extends", "export class Child extends Base {}"],
+    ["implements", "export class Implementer implements Base { id = 2; }"],
+    ["type annotation", "export const describeBase = (base: Base) => base.id;"],
+  ])("treats class reference via %s as usage", (_position, consumerSource) => {
+    // Act
+    const actualUsages = collectClassConsumerFixtureUsages(consumerSource);
+
+    // Assert
+    expect(actualUsages).toStrictEqual([{ isTestFile: false }]);
+  });
+
+  it("treats a class expression export used in an extends clause as usage", () => {
+    // Act
+    const actualUsages = collectClassConsumerFixtureUsages(
+      "export class Child extends Base {}",
+      "export const Base = class { id = 1; };\n",
+    );
 
     // Assert
     expect(actualUsages).toStrictEqual([{ isTestFile: false }]);
