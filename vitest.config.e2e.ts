@@ -1,6 +1,7 @@
 import { defineConfig } from "vitest/config";
 
 const config = defineConfig({
+  cacheDir: "node_modules/.vitest-cache/e2e",
   test: {
     clearMocks: true,
     coverage: {
@@ -11,6 +12,7 @@ const config = defineConfig({
       thresholds: { branches: 15, functions: 15, lines: 15, statements: 15 },
     },
     include: ["tests/e2e/**/*.e2e.ts"],
+    isolate: false,
     maxWorkers: "50%",
     mockReset: true,
     name: "eslint-plugin-e2e",

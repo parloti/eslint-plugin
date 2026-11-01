@@ -1,6 +1,7 @@
 import { defineConfig } from "vitest/config";
 
 const config = defineConfig({
+  cacheDir: "node_modules/.vitest-cache/unit",
   test: {
     clearMocks: true,
     coverage: {
@@ -10,6 +11,7 @@ const config = defineConfig({
       thresholds: { branches: 95, functions: 95, lines: 95, statements: 95 },
     },
     include: ["src/**/*.spec.ts", "tests/support/**/*.spec.ts"],
+    isolate: false,
     maxWorkers: "50%",
     mockReset: true,
     name: "eslint-plugin-unit",

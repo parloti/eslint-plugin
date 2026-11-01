@@ -22,21 +22,38 @@ $current = [int]$env:NUKE_PROCESS_ID
 while ($current -gt 0 -and $parents.ContainsKey($current) -and $protected.Add($current)) { $current = $parents[$current] }
 $root = $env:NUKE_REPO_PATH.Replace('/', '\')
 $pattern = [regex]::Escape($root) + '(?:[\\/]|$|"|\s|[=:,;)])'
-$targets = @($processes | Where-Object {
-  $_.Name -ieq 'node.exe' -and
-  -not $protected.Contains([int]$_.ProcessId) -and
-  $_.CommandLine -and
-  [regex]::IsMatch($_.CommandLine.Replace('/', '\'), $pattern, [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
-})
-$ids = @($targets | ForEach-Object { [int]$_.ProcessId })
-foreach ($id in $ids) { Stop-Process -Id $id -Force }
+$prefix = $root.TrimEnd('\') + '\'
+$ids = [System.Collections.Generic.HashSet[int]]::new()
+foreach ($item in $processes) {
+  if (
+    $item.Name -ieq 'node.exe' -and
+    -not $protected.Contains([int]$item.ProcessId) -and
+    $item.CommandLine -and
+    [regex]::IsMatch($item.CommandLine.Replace('/', '\'), $pattern, [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
+  ) { [void]$ids.Add([int]$item.ProcessId) }
+}
+# Windows cannot delete executables or native modules while a process has them loaded.
+foreach ($candidate in Get-Process) {
+  if ($protected.Contains($candidate.Id) -or $ids.Contains($candidate.Id)) { continue }
+  try { $modules = @($candidate.Modules) } catch { continue }
+  foreach ($module in $modules) {
+    if ($module.FileName -and $module.FileName.StartsWith($prefix, [StringComparison]::OrdinalIgnoreCase)) {
+      [void]$ids.Add($candidate.Id)
+      break
+    }
+  }
+}
+foreach ($id in $ids) {
+  try { Stop-Process -Id $id -Force }
+  catch { if (Get-Process -Id $id -ErrorAction SilentlyContinue) { throw } }
+}
 $deadline = [DateTime]::UtcNow.AddSeconds(5)
 $remaining = @()
 do {
   $remaining = @($ids | Where-Object { Get-Process -Id $_ -ErrorAction SilentlyContinue })
   if ($remaining.Count -gt 0) { Start-Sleep -Milliseconds 50 }
 } while ($remaining.Count -gt 0 -and [DateTime]::UtcNow -lt $deadline)
-if ($remaining.Count -gt 0) { throw 'Timed out waiting for Node.js processes to exit.' }
+if ($remaining.Count -gt 0) { throw 'Timed out waiting for processes to exit.' }
 foreach ($id in $ids) { Write-Output $id }
 `;
 
@@ -86,7 +103,7 @@ const hasRepositoryPath = (
   return false;
 };
 
-const stopWindowsNodeProcesses = (repositoryPath: string): number => {
+const stopWindowsRepositoryProcesses = (repositoryPath: string): number => {
   const output = run(
     "powershell.exe",
     [
@@ -172,19 +189,25 @@ const main = async (): Promise<void> => {
   const repositoryPath = process.cwd();
   const stopped =
     process.platform === "win32"
-      ? stopWindowsNodeProcesses(repositoryPath)
+      ? stopWindowsRepositoryProcesses(repositoryPath)
       : await stopUnixNodeProcesses(repositoryPath);
   if (stopped > 0) {
     console.log(
-      `Stopped ${String(stopped)} Node.js process${stopped === 1 ? "" : "es"}.`,
+      `Stopped ${String(stopped)} process${stopped === 1 ? "" : "es"} using the repository.`,
     );
   }
 
+  // Git for Windows asks whether to retry locked files when stdin is a terminal.
   const result = spawnSync("git", ["clean", "-xfd"], {
     cwd: repositoryPath,
-    stdio: "inherit",
+    stdio: ["ignore", "inherit", "inherit"],
   });
   if (result.error) throw result.error;
+  if (result.status !== 0) {
+    console.error(
+      "Some files could not be removed. Stop the programs using them and run nuke again.",
+    );
+  }
   process.exitCode = result.status ?? 1;
 };
 
