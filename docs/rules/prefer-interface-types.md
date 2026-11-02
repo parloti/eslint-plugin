@@ -70,7 +70,7 @@ Generated names use PascalCase without adding an `I` prefix or a `Type` suffix:
 
 The rule keeps reporting without an autofix when moving a type to module scope could change its meaning. This includes types that depend on function, class, or namespace scope, contextual `this` types, and declarations inside namespaces or ambient modules. Names declared in inner scopes are also reserved so a local declaration cannot capture a generated type reference.
 
-For union, intersection, and parenthesized wrappers, one inline literal is reported per lint pass. ESLint's normal iterative autofix processing fixes later literals on subsequent passes.
+For union, intersection, and parenthesized wrappers, one inline literal is reported per lint pass. When reported literals are nested, each autofix pass extracts only the outermost literals to avoid overlapping edits. ESLint's normal iterative autofix processing fixes remaining literals, including nested callback parameters and returns in the generated interfaces, on subsequent passes.
 
 ## Invalid
 
