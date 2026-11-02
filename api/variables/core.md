@@ -8,6 +8,6 @@
 
 > `const` **core**: [`CodeperfectPreset`](../type-aliases/CodeperfectPreset.md)
 
-Defined in: [infrastructure/presets.ts:124](https://github.com/parloti/eslint-plugin/blob/03ca0804592a9adb0a9c6b2741f03809b5d9f3d7/src/infrastructure/presets.ts#L124)
+Defined in: [infrastructure/presets.ts:124](https://github.com/parloti/eslint-plugin/blob/f72451e6101adde86ed7234e86d48bfe3e84357d/src/infrastructure/presets.ts#L124)
 
 Preset that enables core rules.

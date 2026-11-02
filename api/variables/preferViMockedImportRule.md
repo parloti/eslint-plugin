@@ -8,6 +8,6 @@
 
 > `const` **preferViMockedImportRule**: `Rule.RuleModule`
 
-Defined in: [domain/testing/prefer-vi-mocked-import/rule.ts:7](https://github.com/parloti/eslint-plugin/blob/03ca0804592a9adb0a9c6b2741f03809b5d9f3d7/src/domain/testing/prefer-vi-mocked-import/rule.ts#L7)
+Defined in: [domain/testing/prefer-vi-mocked-import/rule.ts:7](https://github.com/parloti/eslint-plugin/blob/f72451e6101adde86ed7234e86d48bfe3e84357d/src/domain/testing/prefer-vi-mocked-import/rule.ts#L7)
 
 Enforce inline `vi.fn()` mocks inside `vi.mock`/`vi.doMock` factories.
