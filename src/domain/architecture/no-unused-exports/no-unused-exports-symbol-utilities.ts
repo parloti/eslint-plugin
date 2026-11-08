@@ -1,6 +1,8 @@
 import path from "node:path";
 import * as ts from "typescript";
 
+const declarationKeyCache = new WeakMap<ts.Symbol, Set<string>>();
+
 const programExportCaches = new WeakMap<
   ts.Program,
   {
@@ -34,14 +36,21 @@ const toComparableAbsolutePath = (inputPath: string): string => {
  * ```
  */
 const getDeclarationKeys = (symbol: ts.Symbol): Set<string> => {
+  const cached = declarationKeyCache.get(symbol);
+  if (cached !== void 0) {
+    return cached;
+  }
+
   const declarations = symbol.declarations ?? [];
 
-  return new Set(
+  const keys = new Set(
     declarations.map((declaration) => {
       const sourceFilename = declaration.getSourceFile().fileName;
       return `${sourceFilename}:${String(declaration.pos)}:${String(declaration.end)}`;
     }),
   );
+  declarationKeyCache.set(symbol, keys);
+  return keys;
 };
 
 /**
@@ -155,44 +164,10 @@ const getExportedSymbol = (
   return exports.get(exportedName);
 };
 
-/**
- * Checks whether one source file exports the target symbol.
- * @param sourceFile Source file that may expose the symbol.
- * @param checker TypeScript checker.
- * @param targetSymbol Symbol being classified.
- * @returns True when one module export resolves to the target symbol.
- * @example
- * ```typescript
- * const exposed = sourceFileExportsSymbol(sourceFile, checker, targetSymbol);
- * ```
- */
-const sourceFileExportsSymbol = (
-  sourceFile: ts.SourceFile,
-  checker: ts.TypeChecker,
-  targetSymbol: ts.Symbol,
-): boolean => {
-  const moduleSymbol = checker.getSymbolAtLocation(sourceFile);
-
-  if (moduleSymbol === void 0) {
-    return false;
-  }
-
-  for (const exportedSymbol of checker.getExportsOfModule(moduleSymbol)) {
-    const resolvedSymbol = resolveCanonicalSymbol(exportedSymbol, checker);
-
-    if (isSameSymbol(resolvedSymbol, targetSymbol)) {
-      return true;
-    }
-  }
-
-  return false;
-};
-
 export {
   getDeclarationKeys,
   getExportedSymbol,
   isSameSymbol,
   resolveCanonicalSymbol,
-  sourceFileExportsSymbol,
   toComparableAbsolutePath,
 };

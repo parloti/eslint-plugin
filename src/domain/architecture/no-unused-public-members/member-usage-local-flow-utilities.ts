@@ -41,16 +41,16 @@ const isLocalCallArgumentTransmitted = (
         ? void 0
         : checker.getSymbolAtLocation(parameter.name);
 
-    const carries = expressionCarriesMemberValue(argument, checker, member);
-    const reachesBody =
+    return (
       parameterSymbol !== void 0 &&
+      expressionCarriesMemberValue(argument, checker, member) &&
       localParameterReachesRequestBody(
         declaration,
         parameterSymbol,
         checker,
         new Map(),
-      );
-    return parameterSymbol !== void 0 && carries && reachesBody;
+      )
+    );
   });
 };
 

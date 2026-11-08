@@ -8,6 +8,41 @@ import {
 } from "../no-unused-exports/no-unused-exports-symbol-utilities";
 import { isSupportedMember } from "./member-host-utilities";
 
+type HeritageDeclaration =
+  ts.ClassDeclaration | ts.ClassExpression | ts.InterfaceDeclaration;
+
+const heritageDeclarationCache = new WeakMap<
+  ts.Program,
+  HeritageDeclaration[]
+>();
+
+const getHeritageDeclarations = (
+  program: ts.Program,
+): HeritageDeclaration[] => {
+  const cached = heritageDeclarationCache.get(program);
+  if (cached !== void 0) {
+    return cached;
+  }
+  const declarations: HeritageDeclaration[] = [];
+  const visit = (node: ts.Node): void => {
+    if (
+      ts.isClassDeclaration(node) ||
+      ts.isInterfaceDeclaration(node) ||
+      ts.isClassExpression(node)
+    ) {
+      declarations.push(node);
+    }
+    ts.forEachChild(node, visit);
+  };
+  for (const sourceFile of program.getSourceFiles()) {
+    if (!sourceFile.isDeclarationFile) {
+      visit(sourceFile);
+    }
+  }
+  heritageDeclarationCache.set(program, declarations);
+  return declarations;
+};
+
 /**
  * Extracts the static key from a supported member declaration.
  * @param declaration TypeScript member node to inspect.
@@ -87,66 +122,52 @@ const collectHeritageMemberSymbols = (
     }
   };
 
-  const visit = (node: ts.Node): void => {
-    if (
-      ts.isClassDeclaration(node) ||
-      ts.isInterfaceDeclaration(node) ||
-      ts.isClassExpression(node)
-    ) {
-      const ownMembers = node.members.filter(
-        (member) => getDeclaredMemberName(member) === targetMember.memberName,
-      );
-      const matchingHeritageSymbols: ts.Symbol[] = [];
+  for (const node of getHeritageDeclarations(program)) {
+    const ownMembers = node.members.filter(
+      (member) => getDeclaredMemberName(member) === targetMember.memberName,
+    );
+    const matchingHeritageSymbols: ts.Symbol[] = [];
 
-      const heritageClauses = node.heritageClauses ?? [];
+    const heritageClauses = node.heritageClauses ?? [];
 
-      for (const clause of heritageClauses) {
-        for (const heritageType of clause.types) {
-          const inheritedMember = checker.getPropertyOfType(
-            checker.getTypeAtLocation(heritageType),
-            targetMember.memberName,
-          );
+    for (const clause of heritageClauses) {
+      for (const heritageType of clause.types) {
+        const inheritedMember = checker.getPropertyOfType(
+          checker.getTypeAtLocation(heritageType),
+          targetMember.memberName,
+        );
 
-          if (
-            inheritedMember !== void 0 &&
-            (isSameSymbol(
-              resolveCanonicalSymbol(inheritedMember, checker),
-              targetSymbol,
-            ) ||
-              node === targetMember.declaration.parent)
-          ) {
-            matchingHeritageSymbols.push(inheritedMember);
-          }
+        if (
+          inheritedMember !== void 0 &&
+          (isSameSymbol(
+            resolveCanonicalSymbol(inheritedMember, checker),
+            targetSymbol,
+          ) ||
+            node === targetMember.declaration.parent)
+        ) {
+          matchingHeritageSymbols.push(inheritedMember);
         }
-      }
-
-      if (node === targetMember.declaration.parent) {
-        for (const member of ownMembers) {
-          addSymbol(
-            getDeclaredMemberSymbol(checker, member, targetMember.memberName),
-          );
-        }
-      }
-
-      if (matchingHeritageSymbols.length > 0) {
-        for (const member of ownMembers) {
-          addSymbol(
-            getDeclaredMemberSymbol(checker, member, targetMember.memberName),
-          );
-        }
-      }
-
-      for (const symbol of matchingHeritageSymbols) {
-        addSymbol(symbol);
       }
     }
 
-    ts.forEachChild(node, visit);
-  };
+    if (node === targetMember.declaration.parent) {
+      for (const member of ownMembers) {
+        addSymbol(
+          getDeclaredMemberSymbol(checker, member, targetMember.memberName),
+        );
+      }
+    }
 
-  for (const sourceFile of program.getSourceFiles()) {
-    if (!sourceFile.isDeclarationFile) {
-      visit(sourceFile);
+    if (matchingHeritageSymbols.length > 0) {
+      for (const member of ownMembers) {
+        addSymbol(
+          getDeclaredMemberSymbol(checker, member, targetMember.memberName),
+        );
+      }
+    }
+
+    for (const symbol of matchingHeritageSymbols) {
+      addSymbol(symbol);
     }
   }
 

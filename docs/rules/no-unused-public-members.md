@@ -60,6 +60,32 @@ The rule resolves uses through explicitly implemented or inherited class and int
 
 Class members without an explicit visibility modifier are treated as public. Private, protected, and `#private` members are ignored.
 
+## Performance
+
+The rule indexes production reference symbols and candidate operations once per
+TypeScript program and test-pattern configuration. Direct references use symbol
+and declaration-site lookups; only unresolved members require structural,
+whole-object, or local-flow checks. Heritage declarations are also indexed.
+
+Direct public API exports are checked without expanding their types. Nested API
+types are searched only for members without production use, stopping when the
+member is found rather than expanding every export. Discovered symbols and
+positive/negative exposure results are cached. Before expanding an export, a
+cached source-dependency graph checks whether its API file and declaring file
+can reach the member's declaration. Imports, re-exports, import types,
+triple-slash references, and global/module augmentations are included
+conservatively. Unrelated generic schema and builder types are not expanded
+to prove an absent member is unused.
+
+Caches are weakly keyed by the TypeScript program so replacing a program permits
+its analysis data to be garbage-collected. Public API patterns, test patterns,
+and project roots remain isolated between configurations. Framework adapter
+results are not shared with the framework-neutral rule.
+
+Large projects with many unused members and complex whole-object handoffs can
+still require more analysis than projects dominated by direct references.
+Increasing Node's heap limit does not remove this analysis cost.
+
 ## Angular template adapter
 
 Angular template analysis is opt-in and is not loaded by the default rule. The `@codeperfect/eslint-config` Angular profile enables the adapter automatically for its scoped files when `angular-eslint` is selected. The adapter recognizes only a `Component` decorator imported from `@angular/core`, parses static inline and external templates with the Angular compiler, respects template-local variables and `$event`, and resolves member reads through the component's TypeScript types.

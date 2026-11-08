@@ -41,8 +41,8 @@ const collectUnusedPublicMembers = (
   return collectPublicMembers(sourceFile, checker, parserServices).filter(
     (member) =>
       !isPublicApiHost(program, state, repoRoot, member.hostSymbol) &&
-      !isPublicApiMember(program, state, repoRoot, member.memberSymbol) &&
-      !hasProductionUsage(program, state, repoRoot, member, usageAdapters),
+      !hasProductionUsage(program, state, repoRoot, member, usageAdapters) &&
+      !isPublicApiMember(program, state, repoRoot, member.memberSymbol),
   );
 };
 

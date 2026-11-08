@@ -161,4 +161,25 @@ describe("no-unused-public-members structural references", () => {
     // Assert
     expect(actualMessages).toStrictEqual(["unusedPublicMember"]);
   });
+
+  it("does not mistake nested destructuring bindings for unrelated direct member references", async () => {
+    // Arrange
+    const run = {
+      files: {
+        "src/feature.ts": [
+          "export const unrelated = { selected: 1 };",
+          "const source = { nested: { selected: 2 } };",
+          "const { nested: { selected } } = source;",
+          "void selected;",
+        ].join("\n"),
+      },
+      targetRelativePath: "src/feature.ts",
+    };
+
+    // Act
+    const actualMessages = await runFixtureLint(run);
+
+    // Assert
+    expect(actualMessages).toStrictEqual(["unusedPublicMember"]);
+  });
 });

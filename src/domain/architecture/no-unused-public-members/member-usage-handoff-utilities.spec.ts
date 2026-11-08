@@ -11,6 +11,31 @@ describe("no-unused-public-members value handoffs", () => {
     fixtureManager.cleanupTemporaryDirectories();
   });
 
+  it("terminates recursive forwarding and recognizes a shorthand request body", async () => {
+    // Arrange
+    const run = {
+      files: {
+        "src/feature.ts": [
+          "interface Client { request(options: { body: unknown }): void }",
+          "declare const client: Client;",
+          "export const sent = { field: 1 };",
+          "export const unsent = { field: 2 };",
+          "function transmit(body: unknown): void { client.request({ body }); }",
+          "function cycle(value: unknown): void { cycle(value); }",
+          "transmit(sent);",
+          "cycle(unsent);",
+        ].join("\n"),
+      },
+      targetRelativePath: "src/feature.ts",
+    };
+
+    // Act
+    const actualMessages = await runFixtureLint(run);
+
+    // Assert
+    expect(actualMessages).toStrictEqual(["unusedPublicMember"]);
+  });
+
   it("recognizes nested values sent through opaque contracts and local serializers", async () => {
     // Arrange
     const run = {

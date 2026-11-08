@@ -102,4 +102,27 @@ describe("no-unused-public-members exported type shapes", () => {
     // Assert
     expect(actualMessages).toStrictEqual(["unusedPublicMember"]);
   });
+
+  it("recognizes members exposed by a later overloaded API signature", async () => {
+    // Arrange
+    const run = {
+      files: {
+        "src/feature.ts": [
+          "interface Detail { downstream: string }",
+          "export interface Api {",
+          "  (value: string): string;",
+          "  (value: number): Detail;",
+          "}",
+        ].join("\n"),
+        "src/index.ts": "export type { Api } from './feature';",
+      },
+      targetRelativePath: "src/feature.ts",
+    };
+
+    // Act
+    const actualMessages = await runFixtureLint(run);
+
+    // Assert
+    expect(actualMessages).toStrictEqual([]);
+  });
 });
