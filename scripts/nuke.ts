@@ -197,11 +197,13 @@ const main = async (): Promise<void> => {
     );
   }
 
-  // Git for Windows asks whether to retry locked files when stdin is a terminal.
-  const result = spawnSync("git", ["clean", "-xfd"], {
-    cwd: repositoryPath,
-    stdio: ["ignore", "inherit", "inherit"],
-  });
+  // Git for Windows asks whether to retry locked files when stdin is a terminal
+  // and cannot remove paths beyond MAX_PATH unless core.longPaths is enabled.
+  const result = spawnSync(
+    "git",
+    ["-c", "core.longPaths=true", "clean", "-xfd"],
+    { cwd: repositoryPath, stdio: ["ignore", "inherit", "inherit"] },
+  );
   if (result.error) throw result.error;
   if (result.status !== 0) {
     console.error(

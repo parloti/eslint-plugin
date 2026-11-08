@@ -55,6 +55,31 @@ describe("no-unused-public-members exported type shapes", () => {
     expect(actualMessages).toStrictEqual(["unusedPublicMember"]);
   });
 
+  it("recognizes type members exposed through exported API method signatures", async () => {
+    // Arrange
+    const run = {
+      files: {
+        "src/feature.ts": [
+          "interface View { createdAt: string; updatedAt: string }",
+          "interface Input { accepted: boolean; unused: number }",
+          "export class Api {",
+          "  list(): readonly View[] { return []; }",
+          "  submit(input: Input): void { void input.accepted; }",
+          "}",
+          "export const unrelated = { unused: true };",
+        ].join("\n"),
+        "src/index.ts": "export { Api } from './feature';",
+      },
+      targetRelativePath: "src/feature.ts",
+    };
+
+    // Act
+    const actualMessages = await runFixtureLint(run);
+
+    // Assert
+    expect(actualMessages).toStrictEqual(["unusedPublicMember"]);
+  });
+
   it("preserves exported class static values and terminates recursive type searches", async () => {
     // Arrange
     const run = {

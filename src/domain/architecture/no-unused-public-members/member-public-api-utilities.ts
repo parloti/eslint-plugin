@@ -70,7 +70,51 @@ const typeContainsSymbol = (
     }
   }
 
-  return false;
+  const indexTypes = [
+    checker.getIndexTypeOfType(type, ts.IndexKind.Number),
+    checker.getIndexTypeOfType(type, ts.IndexKind.String),
+  ];
+  if (
+    indexTypes.some(
+      (indexType) =>
+        indexType !== void 0 &&
+        typeContainsSymbol(
+          indexType,
+          targetSymbol,
+          checker,
+          location,
+          visitedTypes,
+          depth - 1,
+        ),
+    )
+  ) {
+    return true;
+  }
+
+  const signatures = [
+    ...checker.getSignaturesOfType(type, ts.SignatureKind.Call),
+    ...checker.getSignaturesOfType(type, ts.SignatureKind.Construct),
+  ];
+  return signatures.some((signature) => {
+    const signatureTypes = [
+      checker.getReturnTypeOfSignature(signature),
+      ...signature
+        .getParameters()
+        .map((parameter) =>
+          checker.getTypeOfSymbolAtLocation(parameter, location),
+        ),
+    ];
+    return signatureTypes.some((signatureType) =>
+      typeContainsSymbol(
+        signatureType,
+        targetSymbol,
+        checker,
+        location,
+        visitedTypes,
+        depth - 1,
+      ),
+    );
+  });
 };
 
 /**
@@ -126,7 +170,7 @@ const isPublicApiMember = (
           checker,
           sourceFile,
           new Set(),
-          3,
+          6,
         ) ||
         ((canonicalExport.flags & ts.SymbolFlags.Type) !== 0 &&
           typeContainsSymbol(
@@ -135,7 +179,7 @@ const isPublicApiMember = (
             checker,
             sourceFile,
             new Set(),
-            3,
+            6,
           ))
       ) {
         return true;

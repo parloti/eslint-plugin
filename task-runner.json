@@ -30,13 +30,13 @@
         "dependsOn": ["test"],
         "run": { "kind": "npm", "script": "mutation" }
       },
-      "build": { "dependsOn": ["resolve-paths"] },
+      "build": { "dependsOn": ["clean", "compile", "resolve-paths"] },
       "lint": { "dependsOn": ["prettier", "eslint"] },
       "eslint:fix-command": {
         "dependsOn": ["check:rules"],
         "run": { "kind": "npm", "script": "eslint", "args": ["--fix"] }
       },
-      "eslint:fix": { "dependsOn": ["eslint:fix-command"] },
+      "eslint:fix": { "dependsOn": ["check:rules", "eslint:fix-command"] },
       "lint:fix": { "dependsOn": ["fmt", "eslint:fix"] },
       "test:all": { "dependsOn": ["test", "e2e", "mutation"] },
       "docs": {

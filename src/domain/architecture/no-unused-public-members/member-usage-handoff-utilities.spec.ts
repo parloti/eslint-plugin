@@ -99,6 +99,41 @@ describe("no-unused-public-members value handoffs", () => {
     expect(actualMessages).toStrictEqual(["unusedPublicMember"]);
   });
 
+  it("recognizes values serialized after multiple local forwarding calls", async () => {
+    // Arrange
+    const run = {
+      files: {
+        "src/consumer.ts": [
+          'import { ignored, payload } from "./feature";',
+          "function serialize(message: { payload: unknown }): void {",
+          "  const envelope = { ...message };",
+          "  void JSON.stringify(envelope);",
+          "}",
+          "function sendPending(input: { payload: unknown }): void {",
+          "  serialize(input);",
+          "}",
+          "function sendCommand(input: { payload: unknown }): void {",
+          "  sendPending(input);",
+          "}",
+          "sendCommand({ payload });",
+          "function discard(input: { payload: unknown }): void { void input; }",
+          "discard({ payload: ignored });",
+        ].join("\n"),
+        "src/feature.ts": [
+          "export const payload = { InstrumentID: 1, PositionID: 2 };",
+          "export const ignored = { unused: true };",
+        ].join("\n"),
+      },
+      targetRelativePath: "src/feature.ts",
+    };
+
+    // Act
+    const actualMessages = await runFixtureLint(run);
+
+    // Assert
+    expect(actualMessages).toStrictEqual(["unusedPublicMember"]);
+  });
+
   it("recognizes local request bodies passed to class method declarations", async () => {
     // Arrange
     const run = {

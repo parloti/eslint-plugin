@@ -34,14 +34,11 @@ const isLocalCallArgumentSerialized = (
   const declaration = checker.getResolvedSignature(node)?.getDeclaration();
   if (
     declaration === void 0 ||
-    !("body" in declaration) ||
-    declaration.body === void 0 ||
-    !ts.isBlock(declaration.body) ||
+    !hasBlockBody(declaration) ||
     declaration.parameters.length === 0
   ) {
     return false;
   }
-  const body = declaration.body;
 
   return node.arguments.some((argument, argumentIndex) => {
     const parameter =
@@ -53,34 +50,126 @@ const isLocalCallArgumentSerialized = (
         ? void 0
         : checker.getSymbolAtLocation(parameter.name);
 
-    if (
-      parameterSymbol === void 0 ||
-      !expressionCarriesMemberValue(argument, checker, member)
-    ) {
-      return false;
-    }
-
-    const isSerializedParameter = (candidate: ts.Node): true | undefined => {
-      if (candidate !== declaration && ts.isFunctionLike(candidate)) {
-        return void 0;
-      }
-
-      return ts.isCallExpression(candidate) &&
-        isStandardJsonStringifyCall(candidate, checker, program) &&
-        candidate.arguments.length === 1 &&
-        candidate.arguments[0] !== void 0 &&
-        expressionReferencesSymbol(
-          candidate.arguments[0],
-          parameterSymbol,
-          checker,
-        )
-        ? true
-        : ts.forEachChild(candidate, isSerializedParameter);
-    };
-
-    return isSerializedParameter(body) === true;
+    return (
+      parameterSymbol !== void 0 &&
+      expressionCarriesMemberValue(argument, checker, member) &&
+      localParameterReachesJsonStringify(
+        declaration,
+        parameterSymbol,
+        checker,
+        program,
+        new Map(),
+      )
+    );
   });
 };
+
+/**
+ * Traces a local parameter through calls until standard JSON serialization.
+ * @param declaration Function containing the parameter.
+ * @param parameterSymbol Parameter currently being traced.
+ * @param checker TypeScript type checker.
+ * @param program TypeScript project used to identify standard declarations.
+ * @param visitedParameters Parameter references already inspected.
+ * @returns True when the parameter reaches standard JSON serialization.
+ * @example
+ * ```typescript
+ * const serialized = localParameterReachesJsonStringify(
+ *   declaration,
+ *   parameterSymbol,
+ *   checker,
+ *   program,
+ *   new Map(),
+ * );
+ * ```
+ */
+const localParameterReachesJsonStringify = (
+  declaration: ts.SignatureDeclaration,
+  parameterSymbol: ts.Symbol,
+  checker: ts.TypeChecker,
+  program: ts.Program,
+  visitedParameters: Map<ts.SignatureDeclaration, Set<ts.Symbol>>,
+): boolean => {
+  if (!hasBlockBody(declaration)) {
+    return false;
+  }
+
+  const visited = visitedParameters.get(declaration) ?? new Set<ts.Symbol>();
+  if (visited.has(parameterSymbol)) {
+    return false;
+  }
+  visited.add(parameterSymbol);
+  visitedParameters.set(declaration, visited);
+
+  const inspect = (node: ts.Node): true | undefined => {
+    if (node !== declaration && ts.isFunctionLike(node)) {
+      return void 0;
+    }
+
+    if (ts.isCallExpression(node)) {
+      if (
+        isStandardJsonStringifyCall(node, checker, program) &&
+        node.arguments.length === 1 &&
+        node.arguments[0] !== void 0 &&
+        expressionReferencesSymbol(node.arguments[0], parameterSymbol, checker)
+      ) {
+        return true;
+      }
+
+      const nestedDeclaration = checker
+        .getResolvedSignature(node)
+        ?.getDeclaration();
+      if (nestedDeclaration !== void 0 && hasBlockBody(nestedDeclaration)) {
+        for (const [argumentIndex, argument] of node.arguments.entries()) {
+          if (!expressionReferencesSymbol(argument, parameterSymbol, checker)) {
+            continue;
+          }
+
+          const nestedParameter =
+            nestedDeclaration.parameters[
+              Math.min(argumentIndex, nestedDeclaration.parameters.length - 1)
+            ];
+          const nestedParameterSymbol =
+            nestedParameter === void 0 || !ts.isIdentifier(nestedParameter.name)
+              ? void 0
+              : checker.getSymbolAtLocation(nestedParameter.name);
+          if (
+            nestedParameterSymbol !== void 0 &&
+            localParameterReachesJsonStringify(
+              nestedDeclaration,
+              nestedParameterSymbol,
+              checker,
+              program,
+              visitedParameters,
+            )
+          ) {
+            return true;
+          }
+        }
+      }
+    }
+
+    return ts.forEachChild(node, inspect);
+  };
+
+  return inspect(declaration.body) === true;
+};
+
+/**
+ * Narrows a signature to a function body represented by a block.
+ * @param declaration Candidate function declaration.
+ * @returns Whether the declaration has a block body.
+ * @example
+ * ```typescript
+ * if (hasBlockBody(declaration)) inspect(declaration.body);
+ * ```
+ */
+const hasBlockBody = (
+  declaration: ts.SignatureDeclaration,
+): declaration is ts.SignatureDeclaration & { body: ts.Block } =>
+  "body" in declaration &&
+  declaration.body !== void 0 &&
+  ts.isBlock(declaration.body);
 
 /**
  * Checks whether a call resolves to standard-library JSON.stringify.
