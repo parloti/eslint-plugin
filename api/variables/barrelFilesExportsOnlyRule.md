@@ -8,7 +8,7 @@
 
 > `const` **barrelFilesExportsOnlyRule**: `Rule.RuleModule`
 
-Defined in: [domain/architecture/consistent-barrel-files/exports-only-rule.ts:193](https://github.com/parloti/eslint-plugin/blob/f72451e6101adde86ed7234e86d48bfe3e84357d/src/domain/architecture/consistent-barrel-files/exports-only-rule.ts#L193)
+Defined in: [domain/architecture/consistent-barrel-files/exports-only-rule.ts:193](https://github.com/parloti/eslint-plugin/blob/a8dcfa9c59136b1df0552fd929ded49c21cf9890/src/domain/architecture/consistent-barrel-files/exports-only-rule.ts#L193)
 
 ESLint rule enforcing re-export-only barrel files.
 

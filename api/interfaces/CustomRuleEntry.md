@@ -6,7 +6,7 @@
 
 # Interface: CustomRuleEntry
 
-Defined in: [application/custom-rules.ts:26](https://github.com/parloti/eslint-plugin/blob/f72451e6101adde86ed7234e86d48bfe3e84357d/src/application/custom-rules.ts#L26)
+Defined in: [application/custom-rules.ts:26](https://github.com/parloti/eslint-plugin/blob/a8dcfa9c59136b1df0552fd929ded49c21cf9890/src/application/custom-rules.ts#L26)
 
 Internal registry entry for a package-owned custom rule.
 
@@ -16,7 +16,7 @@ Internal registry entry for a package-owned custom rule.
 
 > **rule**: `RuleModule`
 
-Defined in: [application/custom-rules.ts:28](https://github.com/parloti/eslint-plugin/blob/f72451e6101adde86ed7234e86d48bfe3e84357d/src/application/custom-rules.ts#L28)
+Defined in: [application/custom-rules.ts:28](https://github.com/parloti/eslint-plugin/blob/a8dcfa9c59136b1df0552fd929ded49c21cf9890/src/application/custom-rules.ts#L28)
 
 ESLint rule implementation.
 
@@ -26,6 +26,6 @@ ESLint rule implementation.
 
 > **ruleName**: `string`
 
-Defined in: [application/custom-rules.ts:31](https://github.com/parloti/eslint-plugin/blob/f72451e6101adde86ed7234e86d48bfe3e84357d/src/application/custom-rules.ts#L31)
+Defined in: [application/custom-rules.ts:31](https://github.com/parloti/eslint-plugin/blob/a8dcfa9c59136b1df0552fd929ded49c21cf9890/src/application/custom-rules.ts#L31)
 
 ESLint rule name without the plugin prefix.
