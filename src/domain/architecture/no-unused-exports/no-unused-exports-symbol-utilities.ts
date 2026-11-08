@@ -1,6 +1,14 @@
 import path from "node:path";
 import * as ts from "typescript";
 
+const programExportCaches = new WeakMap<
+  ts.Program,
+  {
+    exports: Map<string, Map<string, ts.Symbol>>;
+    files: Map<string, ts.SourceFile>;
+  }
+>();
+
 /**
  * Normalizes an absolute file path for safe equality checks.
  * @param inputPath Candidate path.
@@ -105,31 +113,46 @@ const getExportedSymbol = (
   exportedName: string,
 ): ts.Symbol | undefined => {
   const checker = program.getTypeChecker();
-  const sourceFile = program
-    .getSourceFiles()
-    .find(
-      (file) =>
-        toComparableAbsolutePath(file.fileName) ===
-        toComparableAbsolutePath(sourceFilename),
-    );
+  let cache = programExportCaches.get(program);
+
+  if (cache === void 0) {
+    cache = {
+      exports: new Map(),
+      files: new Map(
+        program
+          .getSourceFiles()
+          .map((file) => [toComparableAbsolutePath(file.fileName), file]),
+      ),
+    };
+    programExportCaches.set(program, cache);
+  }
+
+  const filename = toComparableAbsolutePath(sourceFilename);
+  const cachedExports = cache.exports.get(filename);
+
+  if (cachedExports !== void 0) {
+    return cachedExports.get(exportedName);
+  }
+
+  const sourceFile = cache.files.get(filename);
 
   if (sourceFile === void 0) {
     return void 0;
   }
 
   const moduleSymbol = checker.getSymbolAtLocation(sourceFile);
+  const exports = new Map(
+    (moduleSymbol === void 0
+      ? []
+      : checker.getExportsOfModule(moduleSymbol)
+    ).map((symbol) => [
+      symbol.getName(),
+      resolveCanonicalSymbol(symbol, checker),
+    ]),
+  );
+  cache.exports.set(filename, exports);
 
-  if (moduleSymbol === void 0) {
-    return void 0;
-  }
-
-  const exportedSymbol = checker
-    .getExportsOfModule(moduleSymbol)
-    .find((symbol) => symbol.getName() === exportedName);
-
-  return exportedSymbol === void 0
-    ? void 0
-    : resolveCanonicalSymbol(exportedSymbol, checker);
+  return exports.get(exportedName);
 };
 
 /**
@@ -166,6 +189,7 @@ const sourceFileExportsSymbol = (
 };
 
 export {
+  getDeclarationKeys,
   getExportedSymbol,
   isSameSymbol,
   resolveCanonicalSymbol,

@@ -17,6 +17,37 @@ const SCRIPT_ONLY_FIXTURE_FILES = {
 };
 
 describe("no-unused-exports symbol resolution", () => {
+  it.each([
+    { consumer: "const local = 1; void local;", expectedUsages: [] },
+    {
+      consumer: "import { feature } from './feature'; void feature;",
+      expectedUsages: [{ isTestFile: false }],
+    },
+  ])(
+    "collects declaration-file usages for $consumer",
+    ({ consumer, expectedUsages }) => {
+      // Arrange & Act
+      const actualUsages = withTemporaryProject(
+        "no-unused-declaration-export-",
+        {
+          "src/consumer.ts": consumer,
+          "src/feature.d.ts": "export declare const feature: number;",
+        },
+        (root, program, resolvePath) =>
+          collectCrossFileUsages(
+            program,
+            resolvePath("src/feature.d.ts"),
+            getOptions([]),
+            root,
+            EXPORTED_FEATURE_VALUE_ELEMENT,
+          ),
+      );
+
+      // Assert
+      expect(actualUsages).toStrictEqual(expectedUsages);
+    },
+  );
+
   it("returns no usages when the export symbol cannot be resolved", () => {
     // Arrange
     const options = getOptions([]);

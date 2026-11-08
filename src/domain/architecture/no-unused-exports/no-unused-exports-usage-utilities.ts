@@ -1,5 +1,6 @@
+import type * as ts from "typescript";
+
 import path from "node:path";
-import * as ts from "typescript";
 
 import type {
   ExportedElement,
@@ -7,91 +8,24 @@ import type {
   NoUnusedExportsState,
 } from "./types";
 
-import {
-  isConcreteUsageIdentifier,
-  resolveUsagePosition,
-} from "./no-unused-exports-identifier-utilities";
-import { isTestFile } from "./no-unused-exports-options";
-import { collectPublicApiExposureUsages } from "./no-unused-exports-public-api-usage-utilities";
+import { resolveUsagePosition } from "./no-unused-exports-identifier-utilities";
 import {
   getExportedSymbol,
-  isSameSymbol,
-  resolveCanonicalSymbol,
   toComparableAbsolutePath,
 } from "./no-unused-exports-symbol-utilities";
+import {
+  getIndexedSymbolUsages,
+  getUsageFileClassifications,
+} from "./no-unused-exports-usage-index";
 
 /**
- * Appends concrete usages from one source file into the accumulator.
- * @param sourceFile Source file to scan.
- * @param checker TypeScript checker.
- * @param targetSymbol Export symbol being classified.
- * @param exportedElement Export metadata.
- * @param consumerIsTestFile Whether source file is a test file.
- * @param usages Mutable usage accumulator.
- * @example
- * ```typescript
- * collectConcreteUsagesFromSourceFile(sourceFile, checker, targetSymbolKey, exportedElement, false, usages);
- * ```
- */
-const collectConcreteUsagesFromSourceFile = (
-  sourceFile: ts.SourceFile,
-  checker: ts.TypeChecker,
-  targetSymbol: ts.Symbol,
-  exportedElement: ExportedElement,
-  consumerIsTestFile: boolean,
-  usages: ExportUsage[],
-): void => {
-  const usagePosition = resolveUsagePosition(
-    exportedElement.exportKind,
-    targetSymbol,
-  );
-
-  const visitNode = (node: ts.Node): void => {
-    if (!ts.isIdentifier(node)) {
-      ts.forEachChild(node, visitNode);
-      return;
-    }
-
-    if (!isConcreteUsageIdentifier(node, usagePosition)) {
-      ts.forEachChild(node, visitNode);
-      return;
-    }
-
-    const isShorthandName =
-      ts.isShorthandPropertyAssignment(node.parent) &&
-      node.parent.name === node;
-
-    const candidateSymbol = isShorthandName
-      ? checker.getShorthandAssignmentValueSymbol(node.parent)
-      : checker.getSymbolAtLocation(node);
-
-    if (candidateSymbol === void 0) {
-      ts.forEachChild(node, visitNode);
-      return;
-    }
-
-    const resolvedSymbol = resolveCanonicalSymbol(candidateSymbol, checker);
-
-    if (!isSameSymbol(resolvedSymbol, targetSymbol)) {
-      ts.forEachChild(node, visitNode);
-      return;
-    }
-
-    usages.push({ isTestFile: consumerIsTestFile });
-    ts.forEachChild(node, visitNode);
-  };
-
-  visitNode(sourceFile);
-};
-
-/**
- * Collects concrete usages of one exported element across the program.
+ * Collects cross-file usages from the shared Program index.
  * @param program TypeScript program.
  * @param sourceFilename Source filename where export is defined.
  * @param state Normalized rule options.
- * @param repoRoot Absolute repository root used for test-file classification.
+ * @param repoRoot Absolute repository root used for file classification.
  * @param exportedElement Exported element to classify.
- * @returns Concrete usages for the exported element.
+ * @returns Concrete and public API usages for the exported element.
  * @example
  * ```typescript
  * const usages = collectCrossFileUsages(program, "/repo/src/feature.ts", state, "/repo", exportedElement);
@@ -104,7 +38,6 @@ const collectCrossFileUsages = (
   repoRoot: string,
   exportedElement: ExportedElement,
 ): ExportUsage[] => {
-  const checker = program.getTypeChecker();
   const targetSymbol = getExportedSymbol(
     program,
     sourceFilename,
@@ -115,46 +48,40 @@ const collectCrossFileUsages = (
     return [];
   }
 
-  const normalizedSourceFilename = toComparableAbsolutePath(sourceFilename);
-  const normalizedRepoRoot = path.resolve(repoRoot);
-  const usages: ExportUsage[] = collectPublicApiExposureUsages(
-    program,
-    sourceFilename,
-    state,
-    repoRoot,
+  const source = toComparableAbsolutePath(sourceFilename);
+  const position = resolveUsagePosition(
+    exportedElement.exportKind,
     targetSymbol,
   );
+  const files = getUsageFileClassifications(
+    program,
+    state,
+    path.resolve(repoRoot),
+  );
+  const publicApiUsages: ExportUsage[] = [];
+  const concreteUsages: ExportUsage[] = [];
 
-  for (const sourceFile of program.getSourceFiles()) {
-    if (sourceFile.isDeclarationFile) {
+  for (const usage of getIndexedSymbolUsages(program, targetSymbol)) {
+    if (usage.filename === source) {
       continue;
     }
 
-    const consumerFilename = path.resolve(sourceFile.fileName);
-    const normalizedConsumerFilename =
-      toComparableAbsolutePath(consumerFilename);
+    const classification = files.get(usage.filename);
 
-    if (normalizedConsumerFilename === normalizedSourceFilename) {
-      continue;
+    if (classification === void 0) {
+      throw new Error(`Missing indexed source file: ${usage.filename}`);
     }
 
-    const isConsumerTestFile = isTestFile(
-      consumerFilename,
-      state,
-      normalizedRepoRoot,
-    );
-
-    collectConcreteUsagesFromSourceFile(
-      sourceFile,
-      checker,
-      targetSymbol,
-      exportedElement,
-      isConsumerTestFile,
-      usages,
-    );
+    if (usage.position === "public-api") {
+      if (classification.isPublicApiFile) {
+        publicApiUsages.push({ isTestFile: classification.isTestFile });
+      }
+    } else if (position === "any" || position === usage.position) {
+      concreteUsages.push({ isTestFile: classification.isTestFile });
+    }
   }
 
-  return usages;
+  return [...publicApiUsages, ...concreteUsages];
 };
 
 /**
@@ -163,7 +90,7 @@ const collectCrossFileUsages = (
  * @returns Classification label.
  * @example
  * ```typescript
- * const classification = classifyExportUsage("feature", usages);
+ * const classification = classifyExportUsage(usages);
  * ```
  */
 const classifyExportUsage = (
