@@ -81,6 +81,17 @@ One additional non-reported path exists:
 
 - **publicApiExposure**: the export is reachable from a file matching `publicApiFiles`
 
+### Performance
+
+The rule scans each TypeScript Program once and shares a symbol usage index
+across exports and linted files. Public API exposure is indexed alongside
+concrete references. File classifications are cached separately for each
+repository root and option set.
+
+Caches are scoped to the parser's Program object through weak references. A new
+Program receives a fresh index, so editor updates do not reuse an old Program's
+analysis. Separate TypeScript projects each require their own scan.
+
 ## Invalid
 
 ### Fully unused export
