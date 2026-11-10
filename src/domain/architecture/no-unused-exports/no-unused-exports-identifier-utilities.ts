@@ -126,34 +126,21 @@ const resolveUsagePosition = (
 };
 
 /**
- * Checks whether one identifier is one concrete usage candidate for the usage position.
+ * Gets the concrete type/value position for a usage identifier.
  * @param identifier Identifier node.
- * @param usagePosition Whether type, value, or either usage is required.
- * @returns True when the identifier can satisfy usage.
+ * @returns The usage position or undefined for declaration-only syntax.
  * @example
  * ```typescript
- * const concrete = isConcreteUsageIdentifier(identifier, "value");
+ * const position = getConcreteUsagePosition(identifier);
  * ```
  */
-const isConcreteUsageIdentifier = (
+const getConcreteUsagePosition = (
   identifier: ts.Identifier,
-  usagePosition: UsagePosition,
-): boolean => {
-  if (isDeclarationOnlyIdentifier(identifier)) {
-    return false;
-  }
+): ExportKind | undefined =>
+  isDeclarationOnlyIdentifier(identifier)
+    ? void 0
+    : isTypePositionIdentifier(identifier)
+      ? "type"
+      : "value";
 
-  if (usagePosition === "any") {
-    return true;
-  }
-
-  const isInTypePosition = isTypePositionIdentifier(identifier);
-
-  return usagePosition === "type" ? isInTypePosition : !isInTypePosition;
-};
-
-export {
-  getTypeScriptProgram,
-  isConcreteUsageIdentifier,
-  resolveUsagePosition,
-};
+export { getConcreteUsagePosition, getTypeScriptProgram, resolveUsagePosition };

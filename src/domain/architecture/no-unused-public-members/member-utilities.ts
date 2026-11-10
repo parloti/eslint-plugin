@@ -14,6 +14,40 @@ import { hasProductionUsage } from "./member-usage-utilities";
 
 type ParserServices = ReturnType<typeof ESLintUtils.getParserServices>;
 
+const programSourceFiles = new WeakMap<
+  ts.Program,
+  Map<string, ts.SourceFile>
+>();
+
+/**
+ * Gets source files by normalized absolute path for one Program.
+ * @param program TypeScript program snapshot.
+ * @returns Cached source-file index.
+ * @example
+ * ```typescript
+ * const files = getProgramSourceFileIndex(program);
+ * ```
+ */
+const getProgramSourceFileIndex = (
+  program: ts.Program,
+): Map<string, ts.SourceFile> => {
+  let sourceFiles = programSourceFiles.get(program);
+
+  if (sourceFiles === void 0) {
+    sourceFiles = new Map(
+      program
+        .getSourceFiles()
+        .map((sourceFile) => [
+          path.resolve(sourceFile.fileName).toLowerCase(),
+          sourceFile,
+        ]),
+    );
+    programSourceFiles.set(program, sourceFiles);
+  }
+
+  return sourceFiles;
+};
+
 /**
  * Collects unused direct public members from a linted source file.
  * @param sourceFile Source file being linted.
@@ -60,13 +94,7 @@ const getProgramSourceFile = (
   program: ts.Program,
   filename: string,
 ): ts.SourceFile | undefined =>
-  program
-    .getSourceFiles()
-    .find(
-      (sourceFile) =>
-        path.resolve(sourceFile.fileName).toLowerCase() ===
-        path.resolve(filename).toLowerCase(),
-    );
+  getProgramSourceFileIndex(program).get(path.resolve(filename).toLowerCase());
 
 /**
  * Returns the absolute project root from the TypeScript program.

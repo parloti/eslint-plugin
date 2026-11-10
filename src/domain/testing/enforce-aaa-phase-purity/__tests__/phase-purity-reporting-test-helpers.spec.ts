@@ -5,6 +5,7 @@ import type { NodeFlags } from "./phase-purity-reporting-test-helpers";
 import {
   collectMessageIds,
   createAnalysis,
+  createMessageIdRecorder,
   hasFlag,
 } from "./phase-purity-reporting-test-helpers";
 
@@ -98,5 +99,23 @@ describe("enforce-aaa-phase-purity phase-purity-reporting-test-helpers", () => {
 
     // Assert
     expect(actualMessages).toStrictEqual([]);
+  });
+
+  it("marks reports without message identifiers as missing", () => {
+    // Arrange
+    const recorder = createMessageIdRecorder();
+
+    // Act
+    const actual = (() => {
+      recorder.context.report({
+        message: "A report without an identifier",
+        node: { name: "value", type: "Identifier" } as never,
+      });
+
+      return recorder.getMessageIds();
+    })();
+
+    // Assert
+    expect(actual).toStrictEqual(["<missing>"]);
   });
 });

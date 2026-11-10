@@ -17,6 +17,11 @@ import {
   getIndexedSymbolUsages,
   getUsageFileClassifications,
 } from "./no-unused-exports-usage-index";
+import {
+  PUBLIC_API_USAGE,
+  TYPE_USAGE,
+  VALUE_USAGE,
+} from "./no-unused-exports-usage-index-builder";
 
 /**
  * Collects cross-file usages from the shared Program index.
@@ -72,11 +77,22 @@ const collectCrossFileUsages = (
       throw new Error(`Missing indexed source file: ${usage.filename}`);
     }
 
-    if (usage.position === "public-api") {
-      if (classification.isPublicApiFile) {
-        publicApiUsages.push({ isTestFile: classification.isTestFile });
-      }
-    } else if (position === "any" || position === usage.position) {
+    if (
+      (usage.positions & PUBLIC_API_USAGE) !== 0 &&
+      classification.isPublicApiFile
+    ) {
+      publicApiUsages.push({ isTestFile: classification.isTestFile });
+    }
+
+    const usageMask =
+      position === "any"
+        ? TYPE_USAGE | VALUE_USAGE
+        : position === "type"
+          ? TYPE_USAGE
+          : VALUE_USAGE;
+    const hasConcreteUsage = (usage.positions & usageMask) !== 0;
+
+    if (hasConcreteUsage) {
       concreteUsages.push({ isTestFile: classification.isTestFile });
     }
   }

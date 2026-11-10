@@ -169,4 +169,4 @@ const isComputedMemberRead = (
   });
 };
 
-export { isComputedMemberRead, isStructuralPropertyRead };
+export { getStringLiteralKeys, isComputedMemberRead, isStructuralPropertyRead };

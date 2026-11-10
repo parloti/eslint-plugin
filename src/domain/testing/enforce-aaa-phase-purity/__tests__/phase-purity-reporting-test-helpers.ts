@@ -60,15 +60,14 @@ interface StatementFixture {
 }
 
 /**
- * Runs reporting and returns emitted message identifiers.
- * @param analysis Analysis fixture passed to the reporter.
- * @returns Ordered message identifiers collected from context.report.
+ * Creates a report recorder for fixture tests.
+ * @returns Recording context and collected message identifiers.
  * @example
  * ```typescript
- * const messageIds = collectMessageIds(createAnalysis([]));
+ * const recorder = createMessageIdRecorder();
  * ```
  */
-const collectMessageIds = (analysis: unknown): string[] => {
+const createMessageIdRecorder = () => {
   const calls: MessageCall[] = [];
   const context = {
     report: (descriptor: Rule.ReportDescriptor): void => {
@@ -78,8 +77,27 @@ const collectMessageIds = (analysis: unknown): string[] => {
     },
   } as Rule.RuleContext;
 
-  reportPhasePurityViolations(context, analysis as never);
-  return calls.map((call) => call.messageId ?? "<missing>");
+  return {
+    context,
+    getMessageIds: (): string[] =>
+      calls.map((call) => call.messageId ?? "<missing>"),
+  };
+};
+
+/**
+ * Runs reporting and returns emitted message identifiers.
+ * @param analysis Analysis fixture passed to the reporter.
+ * @returns Ordered message identifiers collected from context.report.
+ * @example
+ * ```typescript
+ * const messageIds = collectMessageIds(createAnalysis([]));
+ * ```
+ */
+const collectMessageIds = (analysis: unknown): string[] => {
+  const recorder = createMessageIdRecorder();
+
+  reportPhasePurityViolations(recorder.context, analysis as never);
+  return recorder.getMessageIds();
 };
 
 /**
@@ -118,4 +136,4 @@ const hasFlag = (node: NodeFlags, key: keyof NodeFlags): boolean =>
   node[key] === true;
 
 export type { NodeFlags };
-export { collectMessageIds, createAnalysis, hasFlag };
+export { collectMessageIds, createAnalysis, createMessageIdRecorder, hasFlag };

@@ -11,37 +11,15 @@ import { isSupportedMember } from "./member-host-utilities";
 type HeritageDeclaration =
   ts.ClassDeclaration | ts.ClassExpression | ts.InterfaceDeclaration;
 
-const heritageDeclarationCache = new WeakMap<
-  ts.Program,
-  HeritageDeclaration[]
->();
+interface HeritageMemberDeclarations {
+  declaration: HeritageDeclaration;
+  members: ts.Node[];
+}
 
-const getHeritageDeclarations = (
-  program: ts.Program,
-): HeritageDeclaration[] => {
-  const cached = heritageDeclarationCache.get(program);
-  if (cached !== void 0) {
-    return cached;
-  }
-  const declarations: HeritageDeclaration[] = [];
-  const visit = (node: ts.Node): void => {
-    if (
-      ts.isClassDeclaration(node) ||
-      ts.isInterfaceDeclaration(node) ||
-      ts.isClassExpression(node)
-    ) {
-      declarations.push(node);
-    }
-    ts.forEachChild(node, visit);
-  };
-  for (const sourceFile of program.getSourceFiles()) {
-    if (!sourceFile.isDeclarationFile) {
-      visit(sourceFile);
-    }
-  }
-  heritageDeclarationCache.set(program, declarations);
-  return declarations;
-};
+const heritageDeclarationsByMember = new WeakMap<
+  ts.Program,
+  Map<string, HeritageMemberDeclarations[]>
+>();
 
 /**
  * Extracts the static key from a supported member declaration.
@@ -63,6 +41,67 @@ const getDeclaredMemberName = (declaration: ts.Node): string | undefined => {
     (ts.isIdentifier(name) || ts.isStringLiteralLike(name))
     ? name.text
     : void 0;
+};
+
+/**
+ * Gets declarations that directly define a member with the requested name.
+ * @param program TypeScript project program.
+ * @param memberName Static name of the member being resolved.
+ * @returns Matching declarations and their member nodes.
+ * @example
+ * ```typescript
+ * const declarations = getHeritageMemberDeclarations(program, "run");
+ * ```
+ */
+const getHeritageMemberDeclarations = (
+  program: ts.Program,
+  memberName: string,
+): HeritageMemberDeclarations[] => {
+  let declarationsByMember = heritageDeclarationsByMember.get(program);
+
+  if (declarationsByMember === void 0) {
+    const index = new Map<string, HeritageMemberDeclarations[]>();
+    const visit = (node: ts.Node): void => {
+      if (
+        ts.isClassDeclaration(node) ||
+        ts.isInterfaceDeclaration(node) ||
+        ts.isClassExpression(node)
+      ) {
+        const membersByName = new Map<string, ts.Node[]>();
+
+        for (const member of node.members) {
+          const name = getDeclaredMemberName(member);
+
+          if (name === void 0) {
+            continue;
+          }
+
+          const members = membersByName.get(name) ?? [];
+          members.push(member);
+          membersByName.set(name, members);
+        }
+
+        for (const [name, members] of membersByName) {
+          const declarations = index.get(name) ?? [];
+          declarations.push({ declaration: node, members });
+          index.set(name, declarations);
+        }
+      }
+
+      ts.forEachChild(node, visit);
+    };
+
+    for (const sourceFile of program.getSourceFiles()) {
+      if (!sourceFile.isDeclarationFile) {
+        visit(sourceFile);
+      }
+    }
+
+    declarationsByMember = index;
+    heritageDeclarationsByMember.set(program, index);
+  }
+
+  return declarationsByMember.get(memberName) ?? [];
 };
 
 /**
@@ -122,10 +161,10 @@ const collectHeritageMemberSymbols = (
     }
   };
 
-  for (const node of getHeritageDeclarations(program)) {
-    const ownMembers = node.members.filter(
-      (member) => getDeclaredMemberName(member) === targetMember.memberName,
-    );
+  for (const {
+    declaration: node,
+    members: ownMembers,
+  } of getHeritageMemberDeclarations(program, targetMember.memberName)) {
     const matchingHeritageSymbols: ts.Symbol[] = [];
 
     const heritageClauses = node.heritageClauses ?? [];

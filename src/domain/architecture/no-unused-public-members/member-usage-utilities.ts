@@ -91,14 +91,32 @@ const hasProductionUsage = (
       index.sourceFiles.some((sourceFile) =>
         usageAdapters.some((adapter) => adapter(sourceFile, checker, member)),
       )) ||
-    index.operations.some(
+    (index.computedMemberReads.get(member.memberName) ?? []).some((node) =>
+      isComputedMemberRead(node, checker, member, relatedSymbols),
+    ) ||
+    index.dynamicStringMemberReads.some((node) =>
+      isComputedMemberRead(node, checker, member, relatedSymbols),
+    ) ||
+    index.spreads.some((node) =>
+      isWholeObjectRead(node, checker, member, program),
+    ) ||
+    index.jsonStringifyCalls.some(
       (node) =>
-        isComputedMemberRead(node, checker, member, relatedSymbols) ||
         isWholeObjectRead(node, checker, member, program) ||
+        isCallArgumentMember(node, checker, member),
+    ) ||
+    index.localCalls.some(
+      (node) =>
         isLocalCallArgumentSerialized(node, checker, member, program) ||
-        isLocalCallArgumentTransmitted(node, checker, member) ||
-        isCallArgumentMember(node, checker, member) ||
-        isObjectContractHandoff(node, checker, member),
+        isLocalCallArgumentTransmitted(node, checker, member),
+    ) ||
+    index.boundaryCalls.some(
+      (node) =>
+        isWholeObjectRead(node, checker, member, program) ||
+        isCallArgumentMember(node, checker, member),
+    ) ||
+    index.objectProperties.some((node) =>
+      isObjectContractHandoff(node, checker, member),
     )
   );
 };
