@@ -5,7 +5,16 @@ import type { NoUnusedExportsState } from "../no-unused-exports/types";
 import type { SymbolIndex } from "./member-symbol-index-utilities";
 
 import { isTestFile } from "../no-unused-exports/no-unused-exports-options";
+import {
+  getStaticMemberName,
+  isSupportedMember,
+} from "./member-host-utilities";
+import {
+  getMemberProgramCache,
+  setMemberProgramCache,
+} from "./member-program-cache-utilities";
 import { addIndexedSymbol } from "./member-symbol-index-utilities";
+import { getResolvedCallDeclaration } from "./member-usage-call-utilities";
 import { getStringLiteralKeys } from "./member-usage-reference-utilities";
 
 interface ProductionUsageIndex {
@@ -26,11 +35,6 @@ const MEMBER_SYMBOL_FLAGS =
   ts.SymbolFlags.Method |
   ts.SymbolFlags.GetAccessor |
   ts.SymbolFlags.SetAccessor;
-
-const productionUsageIndexes = new WeakMap<
-  ts.Program,
-  Map<string, ProductionUsageIndex>
->();
 
 const getUsageSymbol = (
   node: ts.Node,
@@ -95,6 +99,14 @@ const isStructuralPropertyName = (node: ts.Node): boolean => {
   );
 };
 
+const isPrimitiveLiteralArgument = (node: ts.Expression): boolean =>
+  ts.isStringLiteralLike(node) ||
+  ts.isNumericLiteral(node) ||
+  ts.isBigIntLiteral(node) ||
+  node.kind === ts.SyntaxKind.TrueKeyword ||
+  node.kind === ts.SyntaxKind.FalseKeyword ||
+  node.kind === ts.SyntaxKind.NullKeyword;
+
 const getProductionUsageIndex = (
   program: ts.Program,
   state: NoUnusedExportsState,
@@ -102,8 +114,11 @@ const getProductionUsageIndex = (
 ): ProductionUsageIndex => {
   const normalizedRoot = path.resolve(repoRoot);
   const cacheKey = JSON.stringify([normalizedRoot, state.testFilePatterns]);
-  let indexes = productionUsageIndexes.get(program);
-  const cached = indexes?.get(cacheKey);
+  const cached = getMemberProgramCache(
+    program,
+    "production-usage-index",
+    cacheKey,
+  ) as ProductionUsageIndex | undefined;
   if (cached !== void 0) {
     return cached;
   }
@@ -140,9 +155,28 @@ const getProductionUsageIndex = (
 
     return contextualObjectTypes.get(node);
   };
+  const memberNames = new Set<string>();
+  const collectMemberNames = (node: ts.Node): void => {
+    if (isSupportedMember(node)) {
+      const memberName = getStaticMemberName(
+        (node as ts.NamedDeclaration).name,
+      );
+
+      if (memberName !== void 0) {
+        memberNames.add(memberName);
+      }
+    }
+
+    ts.forEachChild(node, collectMemberNames);
+  };
+  for (const sourceFile of index.sourceFiles) {
+    collectMemberNames(sourceFile);
+  }
+
   const visit = (node: ts.Node): void => {
     if (
       (ts.isIdentifier(node) || ts.isStringLiteralLike(node)) &&
+      memberNames.has(node.text) &&
       !isDeclarationName(node)
     ) {
       const symbol = getUsageSymbol(node, checker);
@@ -158,8 +192,19 @@ const getProductionUsageIndex = (
     }
 
     if (ts.isElementAccessExpression(node)) {
-      const keyType = checker.getTypeAtLocation(node.argumentExpression);
-      const keys = getStringLiteralKeys(keyType);
+      const staticKey = ts.isStringLiteralLike(node.argumentExpression)
+        ? node.argumentExpression.text
+        : void 0;
+      const keyType =
+        staticKey === void 0
+          ? checker.getTypeAtLocation(node.argumentExpression)
+          : void 0;
+      const keys =
+        staticKey === void 0
+          ? keyType === void 0
+            ? []
+            : getStringLiteralKeys(keyType)
+          : [staticKey];
 
       const uniqueKeys = new Set(keys);
 
@@ -169,13 +214,20 @@ const getProductionUsageIndex = (
         index.computedMemberReads.set(key, reads);
       }
 
-      if (keys.length === 0 && (keyType.flags & ts.TypeFlags.String) !== 0) {
+      if (
+        keys.length === 0 &&
+        keyType !== void 0 &&
+        (keyType.flags & ts.TypeFlags.String) !== 0
+      ) {
         index.dynamicStringMemberReads.push(node);
       }
     } else if (ts.isSpreadAssignment(node)) {
       index.spreads.push(node);
     } else if (ts.isCallExpression(node)) {
-      if (node.arguments.length > 0) {
+      if (
+        node.arguments.length > 0 &&
+        node.arguments.some((argument) => !isPrimitiveLiteralArgument(argument))
+      ) {
         const isJsonStringifyCandidate =
           ts.isPropertyAccessExpression(node.expression) &&
           node.expression.name.text === "stringify";
@@ -184,9 +236,7 @@ const getProductionUsageIndex = (
           index.jsonStringifyCalls.push(node);
         }
 
-        const declaration = checker
-          .getResolvedSignature(node)
-          ?.getDeclaration();
+        const declaration = getResolvedCallDeclaration(node, checker);
         const hasImplementation =
           declaration !== void 0 &&
           "body" in declaration &&
@@ -212,11 +262,7 @@ const getProductionUsageIndex = (
     visit(sourceFile);
   }
 
-  if (indexes === void 0) {
-    indexes = new Map();
-    productionUsageIndexes.set(program, indexes);
-  }
-  indexes.set(cacheKey, index);
+  setMemberProgramCache(program, "production-usage-index", cacheKey, index);
   return index;
 };
 

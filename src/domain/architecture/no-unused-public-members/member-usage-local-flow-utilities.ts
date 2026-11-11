@@ -2,9 +2,15 @@ import * as ts from "typescript";
 
 import type { PublicMember } from "./member-declaration-utilities";
 
+import { getResolvedCallDeclaration } from "./member-usage-call-utilities";
 import { expressionReferencesSymbol } from "./member-usage-expression-reference-utilities";
 import { isDeclarationOnlyMethod } from "./member-usage-type-utilities";
 import { expressionCarriesMemberValue } from "./member-usage-value-utilities";
+
+const requestBodyParameters = new WeakMap<
+  ts.TypeChecker,
+  WeakMap<ts.SignatureDeclaration, WeakSet<ts.Symbol>>
+>();
 
 /**
  * Checks whether a local call forwards a member-bearing value to an HTTP body.
@@ -26,7 +32,7 @@ const isLocalCallArgumentTransmitted = (
     return false;
   }
 
-  const declaration = checker.getResolvedSignature(node)?.getDeclaration();
+  const declaration = getResolvedCallDeclaration(node, checker);
   if (!hasFunctionBody(declaration)) {
     return false;
   }
@@ -81,6 +87,12 @@ const localParameterReachesRequestBody = (
     return false;
   }
 
+  if (
+    requestBodyParameters.get(checker)?.get(declaration)?.has(parameterSymbol)
+  ) {
+    return true;
+  }
+
   const visitedParameters =
     visitedDeclarations.get(declaration) ?? new Set<ts.Symbol>();
   if (visitedParameters.has(parameterSymbol)) {
@@ -96,9 +108,7 @@ const localParameterReachesRequestBody = (
         return true;
       }
 
-      const nestedDeclaration = checker
-        .getResolvedSignature(node)
-        ?.getDeclaration();
+      const nestedDeclaration = getResolvedCallDeclaration(node, checker);
       if (hasFunctionBody(nestedDeclaration)) {
         for (const [argumentIndex, argument] of node.arguments.entries()) {
           const references = expressionReferencesSymbol(
@@ -137,7 +147,27 @@ const localParameterReachesRequestBody = (
     return ts.forEachChild(node, inspect);
   };
 
-  return inspect(declaration.body) === true;
+  const reachesRequestBody = inspect(declaration.body) === true;
+
+  if (reachesRequestBody) {
+    let declarations = requestBodyParameters.get(checker);
+
+    if (declarations === void 0) {
+      declarations = new WeakMap();
+      requestBodyParameters.set(checker, declarations);
+    }
+
+    let parameters = declarations.get(declaration);
+
+    if (parameters === void 0) {
+      parameters = new WeakSet();
+      declarations.set(declaration, parameters);
+    }
+
+    parameters.add(parameterSymbol);
+  }
+
+  return reachesRequestBody;
 };
 
 /**
@@ -156,7 +186,7 @@ const isOpaqueRequestBodyHandoff = (
   parameterSymbol: ts.Symbol,
   checker: ts.TypeChecker,
 ): boolean => {
-  const declaration = checker.getResolvedSignature(call)?.getDeclaration();
+  const declaration = getResolvedCallDeclaration(call, checker);
 
   if (
     declaration === void 0 ||

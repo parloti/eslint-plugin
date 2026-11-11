@@ -2,6 +2,7 @@ import * as ts from "typescript";
 
 import type { PublicMember } from "./member-declaration-utilities";
 
+import { getResolvedCallSignature } from "./member-usage-call-utilities";
 import { carriesMember } from "./member-usage-value-utilities";
 
 /**
@@ -110,7 +111,7 @@ const getCallArgumentType = (
   }
 
   const argumentIndex = call.arguments.indexOf(argument);
-  const signature = checker.getResolvedSignature(call);
+  const signature = getResolvedCallSignature(call, checker);
   const parameter =
     signature === void 0 ? void 0 : signature.parameters[argumentIndex];
 

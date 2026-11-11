@@ -2,12 +2,18 @@ import * as ts from "typescript";
 
 import type { PublicMember } from "./member-declaration-utilities";
 
+import { getResolvedCallDeclaration } from "./member-usage-call-utilities";
 import { expressionReferencesSymbol } from "./member-usage-expression-reference-utilities";
 import {
   carriesMember,
   containsSerializedMember,
   expressionCarriesMemberValue,
 } from "./member-usage-value-utilities";
+
+const jsonStringifyParameters = new WeakMap<
+  ts.TypeChecker,
+  WeakMap<ts.SignatureDeclaration, WeakSet<ts.Symbol>>
+>();
 
 /**
  * Checks whether a local call serializes the value supplied to a parameter.
@@ -31,7 +37,7 @@ const isLocalCallArgumentSerialized = (
     return false;
   }
 
-  const declaration = checker.getResolvedSignature(node)?.getDeclaration();
+  const declaration = getResolvedCallDeclaration(node, checker);
   if (
     declaration === void 0 ||
     !hasBlockBody(declaration) ||
@@ -94,6 +100,12 @@ const localParameterReachesJsonStringify = (
     return false;
   }
 
+  if (
+    jsonStringifyParameters.get(checker)?.get(declaration)?.has(parameterSymbol)
+  ) {
+    return true;
+  }
+
   const visited = visitedParameters.get(declaration) ?? new Set<ts.Symbol>();
   if (visited.has(parameterSymbol)) {
     return false;
@@ -116,9 +128,7 @@ const localParameterReachesJsonStringify = (
         return true;
       }
 
-      const nestedDeclaration = checker
-        .getResolvedSignature(node)
-        ?.getDeclaration();
+      const nestedDeclaration = getResolvedCallDeclaration(node, checker);
       if (nestedDeclaration !== void 0 && hasBlockBody(nestedDeclaration)) {
         for (const [argumentIndex, argument] of node.arguments.entries()) {
           if (!expressionReferencesSymbol(argument, parameterSymbol, checker)) {
@@ -152,7 +162,27 @@ const localParameterReachesJsonStringify = (
     return ts.forEachChild(node, inspect);
   };
 
-  return inspect(declaration.body) === true;
+  const reachesJsonStringify = inspect(declaration.body) === true;
+
+  if (reachesJsonStringify) {
+    let declarations = jsonStringifyParameters.get(checker);
+
+    if (declarations === void 0) {
+      declarations = new WeakMap();
+      jsonStringifyParameters.set(checker, declarations);
+    }
+
+    let parameters = declarations.get(declaration);
+
+    if (parameters === void 0) {
+      parameters = new WeakSet();
+      declarations.set(declaration, parameters);
+    }
+
+    parameters.add(parameterSymbol);
+  }
+
+  return reachesJsonStringify;
 };
 
 /**
@@ -191,7 +221,7 @@ const isStandardJsonStringifyCall = (
     return false;
   }
 
-  const declaration = checker.getResolvedSignature(node)?.getDeclaration();
+  const declaration = getResolvedCallDeclaration(node, checker);
 
   return (
     declaration !== void 0 &&

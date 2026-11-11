@@ -2,6 +2,7 @@ import * as ts from "typescript";
 
 import type { PublicMember } from "./member-declaration-utilities";
 
+import { getResolvedCallDeclaration } from "./member-usage-call-utilities";
 import {
   getCallArgumentType,
   getContextualPropertyType,
@@ -52,7 +53,7 @@ const hasCallImplementation = (
   call: ts.CallExpression,
   checker: ts.TypeChecker,
 ): boolean => {
-  const declaration = checker.getResolvedSignature(call)?.getDeclaration();
+  const declaration = getResolvedCallDeclaration(call, checker);
 
   return (
     declaration !== void 0 &&
@@ -92,7 +93,7 @@ const isOpaqueMethodContractHandoff = (
 ): boolean => {
   const call = objectLiteral.parent;
   const declaration = ts.isCallExpression(call)
-    ? checker.getResolvedSignature(call)?.getDeclaration()
+    ? getResolvedCallDeclaration(call, checker)
     : void 0;
 
   if (
@@ -143,7 +144,7 @@ const isCallArgumentMember = (
     return false;
   }
 
-  const declaration = checker.getResolvedSignature(node)?.getDeclaration();
+  const declaration = getResolvedCallDeclaration(node, checker);
 
   return (
     declaration !== void 0 &&

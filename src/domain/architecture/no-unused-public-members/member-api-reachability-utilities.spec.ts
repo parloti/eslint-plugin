@@ -7,6 +7,73 @@ import { canSourceReachMember } from "./member-api-reachability-utilities";
 import { isPublicApiMember } from "./member-public-api-utilities";
 
 describe("public API source reachability", () => {
+  it("finds module dependencies when the source file has no cached imports", () => {
+    // Arrange & Act
+    const actual = withTemporaryProject(
+      "api-reachability-ast-",
+      {
+        "src/api.ts": [
+          "import { Detail } from './detail';",
+          "export { Detail as PublicDetail } from './barrel';",
+          "import Required = require('./required');",
+          "const dynamic = import('./dynamic');",
+          "const common = require('./common');",
+          "type Query = import('./query').Detail;",
+          "const unrelated = './not-a-module';",
+        ].join("\n"),
+        "src/barrel.ts": "export type { Detail } from './detail';",
+        "src/detail.ts": "export interface Detail { value: number }",
+        "src/dynamic.ts": "export const dynamic = true;",
+        "src/query.ts": "export interface Detail { value: number }",
+        "src/required.ts": "export const required = true;",
+      },
+      (_, program, resolvePath) => {
+        const checker = program.getTypeChecker();
+        const detail = program.getSourceFile(resolvePath("src/detail.ts"));
+        const api = program.getSourceFile(resolvePath("src/api.ts"));
+        const declaration = detail?.statements.find((node) =>
+          ts.isInterfaceDeclaration(node),
+        );
+        if (api === void 0 || declaration === void 0) {
+          throw new Error("Missing AST reachability fixture");
+        }
+        const member = checker.getPropertyOfType(
+          checker.getTypeAtLocation(declaration),
+          "value",
+        );
+        if (member === void 0) {
+          throw new Error("Missing AST reachability member");
+        }
+
+        Object.defineProperty(api, "imports", {
+          configurable: true,
+          value: void 0,
+        });
+        const getSymbolAtLocation = vi.spyOn(checker, "getSymbolAtLocation");
+        const reachable = canSourceReachMember(api, member, program);
+        const moduleSpecifiers = getSymbolAtLocation.mock.calls.map(([node]) =>
+          ts.isStringLiteralLike(node) ? node.text : "",
+        );
+
+        return { moduleSpecifiers, reachable };
+      },
+    );
+
+    // Assert
+    expect(actual).toStrictEqual({
+      moduleSpecifiers: [
+        "./detail",
+        "./barrel",
+        "./required",
+        "./dynamic",
+        "./common",
+        "./query",
+        "./detail",
+      ],
+      reachable: true,
+    });
+  });
+
   it("follows imports, barrels, import types, and cycles without admitting unrelated packages", () => {
     // Arrange & Act
     const actual = withTemporaryProject(

@@ -12,18 +12,26 @@ import { resolveCanonicalSymbol } from "../no-unused-exports/no-unused-exports-s
 import { canSourceReachMember } from "./member-api-reachability-utilities";
 import { collectTypeSymbols } from "./member-api-type-utilities";
 import {
+  getMemberProgramCache,
+  setMemberProgramCache,
+} from "./member-program-cache-utilities";
+import {
   addIndexedSymbol,
   hasIndexedSymbol,
 } from "./member-symbol-index-utilities";
 
+interface PublicApiExport {
+  sourceFile: ts.SourceFile;
+  symbol: ts.Symbol;
+}
+
 interface PublicApiIndex {
-  exports: { sourceFile: ts.SourceFile; symbol: ts.Symbol }[];
+  expandedExports: WeakSet<PublicApiExport>;
+  exports: PublicApiExport[];
   hosts: SymbolIndex;
   members: SymbolIndex;
   nonApiMembers: SymbolIndex;
 }
-
-const publicApiIndexes = new WeakMap<ts.Program, Map<string, PublicApiIndex>>();
 
 const getPublicApiIndex = (
   program: ts.Program,
@@ -35,8 +43,11 @@ const getPublicApiIndex = (
     state.publicApiFiles,
     state.testFilePatterns,
   ]);
-  let indexes = publicApiIndexes.get(program);
-  const cached = indexes?.get(cacheKey);
+  const cached = getMemberProgramCache(
+    program,
+    "public-api-index",
+    cacheKey,
+  ) as PublicApiIndex | undefined;
   if (cached !== void 0) {
     return cached;
   }
@@ -44,6 +55,7 @@ const getPublicApiIndex = (
   const checker = program.getTypeChecker();
   const normalizedRoot = path.resolve(repoRoot);
   const index: PublicApiIndex = {
+    expandedExports: new WeakSet(),
     exports: [],
     hosts: new Set(),
     members: new Set(),
@@ -79,11 +91,7 @@ const getPublicApiIndex = (
     }
   }
 
-  if (indexes === void 0) {
-    indexes = new Map();
-    publicApiIndexes.set(program, indexes);
-  }
-  indexes.set(cacheKey, index);
+  setMemberProgramCache(program, "public-api-index", cacheKey, index);
   return index;
 };
 
@@ -99,7 +107,13 @@ const isIndexedPublicApiMember = (
     return false;
   }
   const checker = program.getTypeChecker();
-  for (const { sourceFile, symbol } of index.exports) {
+  for (const publicApiExport of index.exports) {
+    const { sourceFile, symbol } = publicApiExport;
+
+    if (index.expandedExports.has(publicApiExport)) {
+      continue;
+    }
+
     const declarations = symbol.declarations ?? [];
     if (
       !canSourceReachMember(sourceFile, targetSymbol, program) ||
@@ -115,27 +129,30 @@ const isIndexedPublicApiMember = (
     ) {
       continue;
     }
-    if (
+
+    collectTypeSymbols(
+      checker.getTypeOfSymbolAtLocation(symbol, sourceFile),
+      index.members,
+      checker,
+      sourceFile,
+      new Set(),
+      6,
+    );
+
+    if ((symbol.flags & ts.SymbolFlags.Type) !== 0) {
       collectTypeSymbols(
-        checker.getTypeOfSymbolAtLocation(symbol, sourceFile),
+        checker.getDeclaredTypeOfSymbol(symbol),
         index.members,
-        targetSymbol,
         checker,
         sourceFile,
         new Set(),
         6,
-      ) ||
-      ((symbol.flags & ts.SymbolFlags.Type) !== 0 &&
-        collectTypeSymbols(
-          checker.getDeclaredTypeOfSymbol(symbol),
-          index.members,
-          targetSymbol,
-          checker,
-          sourceFile,
-          new Set(),
-          6,
-        ))
-    ) {
+      );
+    }
+
+    index.expandedExports.add(publicApiExport);
+
+    if (hasIndexedSymbol(index.members, targetSymbol)) {
       return true;
     }
   }

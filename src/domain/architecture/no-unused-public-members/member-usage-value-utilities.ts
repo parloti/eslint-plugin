@@ -6,6 +6,7 @@ import {
   isSameSymbol,
   resolveCanonicalSymbol,
 } from "../no-unused-exports/no-unused-exports-symbol-utilities";
+import { getResolvedCallDeclaration } from "./member-usage-call-utilities";
 
 /**
  * Checks whether an expression carries the member's declaration.
@@ -66,9 +67,7 @@ const carriesMember = (
     return false;
   }
 
-  const declaration = checker
-    .getResolvedSignature(expression)
-    ?.getDeclaration();
+  const declaration = getResolvedCallDeclaration(expression, checker);
   const body =
     declaration !== void 0 && "body" in declaration ? declaration.body : void 0;
   if (body === void 0) {

@@ -7,17 +7,16 @@ import type { MemberUsageAdapter } from "./member-usage-utilities";
 
 import { collectPublicMembers } from "./member-declaration-utilities";
 import {
+  getMemberProgramCache,
+  setMemberProgramCache,
+} from "./member-program-cache-utilities";
+import {
   isPublicApiHost,
   isPublicApiMember,
 } from "./member-public-api-utilities";
 import { hasProductionUsage } from "./member-usage-utilities";
 
 type ParserServices = ReturnType<typeof ESLintUtils.getParserServices>;
-
-const programSourceFiles = new WeakMap<
-  ts.Program,
-  Map<string, ts.SourceFile>
->();
 
 /**
  * Gets source files by normalized absolute path for one Program.
@@ -31,19 +30,22 @@ const programSourceFiles = new WeakMap<
 const getProgramSourceFileIndex = (
   program: ts.Program,
 ): Map<string, ts.SourceFile> => {
-  let sourceFiles = programSourceFiles.get(program);
+  const cached = getMemberProgramCache(program, "source-file-index", "") as
+    Map<string, ts.SourceFile> | undefined;
 
-  if (sourceFiles === void 0) {
-    sourceFiles = new Map(
-      program
-        .getSourceFiles()
-        .map((sourceFile) => [
-          path.resolve(sourceFile.fileName).toLowerCase(),
-          sourceFile,
-        ]),
-    );
-    programSourceFiles.set(program, sourceFiles);
+  if (cached !== void 0) {
+    return cached;
   }
+
+  const sourceFiles = new Map(
+    program
+      .getSourceFiles()
+      .map((sourceFile) => [
+        path.resolve(sourceFile.fileName).toLowerCase(),
+        sourceFile,
+      ]),
+  );
+  setMemberProgramCache(program, "source-file-index", "", sourceFiles);
 
   return sourceFiles;
 };
