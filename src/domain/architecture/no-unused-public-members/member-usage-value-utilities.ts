@@ -1,94 +1,14 @@
 import * as ts from "typescript";
 
 import type { PublicMember } from "./member-declaration-utilities";
+import type { MemberAnalysisScope } from "./member-scope-utilities";
 
+import { isSameSymbol } from "../no-unused-exports/no-unused-exports-symbol-utilities";
+import { carriesMember } from "./member-factory-utilities";
 import {
-  isSameSymbol,
-  resolveCanonicalSymbol,
-} from "../no-unused-exports/no-unused-exports-symbol-utilities";
-import { getResolvedCallDeclaration } from "./member-usage-call-utilities";
-
-/**
- * Checks whether an expression carries the member's declaration.
- * @param expression Value being copied or serialized.
- * @param checker TypeScript type checker.
- * @param member Member whose declaration must be present.
- * @param visitedExpressions Expressions already inspected across local return paths.
- * @returns True when the expression carries this member rather than an unrelated matching shape.
- * @example
- * ```typescript
- * const matches = carriesMember(expression, checker, member);
- * ```
- */
-const carriesMember = (
-  expression: ts.Expression,
-  checker: ts.TypeChecker,
-  member: PublicMember,
-  visitedExpressions: Set<ts.Expression> = new Set(),
-): boolean => {
-  if (visitedExpressions.has(expression)) {
-    return false;
-  }
-  visitedExpressions.add(expression);
-
-  const expressionSymbol = ts.isShorthandPropertyAssignment(expression.parent)
-    ? checker.getShorthandAssignmentValueSymbol(expression.parent)
-    : checker.getSymbolAtLocation(expression);
-  if (
-    ts.isVariableDeclaration(member.hostDeclaration) &&
-    member.hostSymbol !== void 0 &&
-    expressionSymbol !== void 0 &&
-    isSameSymbol(
-      resolveCanonicalSymbol(expressionSymbol, checker),
-      resolveCanonicalSymbol(member.hostSymbol, checker),
-    )
-  ) {
-    return true;
-  }
-
-  const property = checker.getPropertyOfType(
-    checker.getNonNullableType(checker.getTypeAtLocation(expression)),
-    member.memberName,
-  );
-  const declaredProperty = checker.getPropertyOfType(
-    checker.getTypeAtLocation(member.hostDeclaration),
-    member.memberName,
-  );
-
-  if (
-    property !== void 0 &&
-    (isSameSymbol(property, member.memberSymbol) ||
-      (declaredProperty !== void 0 && isSameSymbol(property, declaredProperty)))
-  ) {
-    return true;
-  }
-
-  if (!ts.isCallExpression(expression)) {
-    return false;
-  }
-
-  const declaration = getResolvedCallDeclaration(expression, checker);
-  const body =
-    declaration !== void 0 && "body" in declaration ? declaration.body : void 0;
-  if (body === void 0) {
-    return false;
-  }
-  if (!ts.isBlock(body)) {
-    return carriesMember(body, checker, member, visitedExpressions);
-  }
-
-  const findReturnedMember = (node: ts.Node): boolean => {
-    if (ts.isFunctionLike(node)) {
-      return false;
-    }
-    return ts.isReturnStatement(node)
-      ? node.expression !== void 0 &&
-          carriesMember(node.expression, checker, member, visitedExpressions)
-      : ts.forEachChild(node, findReturnedMember) === true;
-  };
-
-  return findReturnedMember(body);
-};
+  getUsageProperties,
+  getUsageType,
+} from "./member-operation-type-utilities";
 
 /**
  * Checks serialized property types without following method signatures.
@@ -132,22 +52,20 @@ const containsSerializedMember = (
 
   const elementType = checker.getIndexTypeOfType(type, ts.IndexKind.Number);
   return elementType === void 0
-    ? checker
-        .getPropertiesOfType(type)
-        .some(
-          (nestedProperty) =>
-            (nestedProperty.flags & ts.SymbolFlags.Method) === 0 &&
-            containsSerializedMember(
-              checker.getTypeOfSymbolAtLocation(
-                nestedProperty,
-                member.declaration,
-              ),
-              checker,
-              member,
-              visitedTypes,
-              depth - 1,
+    ? getUsageProperties(type, checker).some(
+        (nestedProperty) =>
+          (nestedProperty.flags & ts.SymbolFlags.Method) === 0 &&
+          containsSerializedMember(
+            checker.getTypeOfSymbolAtLocation(
+              nestedProperty,
+              member.declaration,
             ),
-        )
+            checker,
+            member,
+            visitedTypes,
+            depth - 1,
+          ),
+      )
     : containsSerializedMember(
         elementType,
         checker,
@@ -162,21 +80,23 @@ const containsSerializedMember = (
  * @param expression Value expression to inspect.
  * @param checker TypeScript type checker.
  * @param member Member whose value is being searched for.
+ * @param scope Eligible local implementations.
  * @returns True when the expression contains the member or its host value.
  * @example
  * ```typescript
- * const carries = expressionCarriesMemberValue(value, checker, member);
+ * const carries = expressionCarriesMemberValue(value, checker, member, scope);
  * ```
  */
 const expressionCarriesMemberValue = (
   expression: ts.Expression,
   checker: ts.TypeChecker,
   member: PublicMember,
+  scope: MemberAnalysisScope,
 ): boolean => {
   if (
-    carriesMember(expression, checker, member) ||
+    carriesMember(expression, checker, member, scope) ||
     containsSerializedMember(
-      checker.getTypeAtLocation(expression),
+      getUsageType(expression, checker),
       checker,
       member,
       new Set(),
@@ -189,28 +109,35 @@ const expressionCarriesMemberValue = (
   if (ts.isObjectLiteralExpression(expression)) {
     return expression.properties.some((property) => {
       return ts.isSpreadAssignment(property)
-        ? expressionCarriesMemberValue(property.expression, checker, member)
+        ? expressionCarriesMemberValue(
+            property.expression,
+            checker,
+            member,
+            scope,
+          )
         : (ts.isPropertyAssignment(property) &&
             expressionCarriesMemberValue(
               property.initializer,
               checker,
               member,
+              scope,
             )) ||
             (ts.isShorthandPropertyAssignment(property) &&
-              expressionCarriesMemberValue(property.name, checker, member));
+              expressionCarriesMemberValue(
+                property.name,
+                checker,
+                member,
+                scope,
+              ));
     });
   }
 
   return (
     ts.isArrayLiteralExpression(expression) &&
     expression.elements.some((element) =>
-      expressionCarriesMemberValue(element, checker, member),
+      expressionCarriesMemberValue(element, checker, member, scope),
     )
   );
 };
 
-export {
-  carriesMember,
-  containsSerializedMember,
-  expressionCarriesMemberValue,
-};
+export { containsSerializedMember, expressionCarriesMemberValue };

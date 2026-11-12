@@ -1,5 +1,7 @@
 import * as ts from "typescript";
 
+import type { MemberAnalysisScope } from "./member-scope-utilities";
+
 import {
   isSameSymbol,
   resolveCanonicalSymbol,
@@ -11,6 +13,7 @@ import {
  * @param targetSymbol Symbol whose value flow is followed.
  * @param checker TypeScript type checker.
  * @param visitedExpressions Expressions already inspected.
+ * @param scope Eligible local expression files when called by member analysis.
  * @returns True when the expression derives from the target symbol.
  * @example
  * ```typescript
@@ -22,8 +25,12 @@ const expressionReferencesSymbol = (
   targetSymbol: ts.Symbol,
   checker: ts.TypeChecker,
   visitedExpressions: Set<ts.Node> = new Set(),
+  scope?: MemberAnalysisScope,
 ): boolean => {
-  if (visitedExpressions.has(expression)) {
+  if (
+    visitedExpressions.has(expression) ||
+    (scope !== void 0 && !scope.sourceFiles.has(expression.getSourceFile()))
+  ) {
     return false;
   }
   visitedExpressions.add(expression);
@@ -52,6 +59,7 @@ const expressionReferencesSymbol = (
           targetSymbol,
           checker,
           visitedExpressions,
+          scope,
         )
       );
     }
@@ -70,6 +78,7 @@ const expressionReferencesSymbol = (
           targetSymbol,
           checker,
           visitedExpressions,
+          scope,
         )
       );
     }
@@ -89,6 +98,7 @@ const expressionReferencesSymbol = (
       targetSymbol,
       checker,
       visitedExpressions,
+      scope,
     );
   }
 
@@ -98,6 +108,7 @@ const expressionReferencesSymbol = (
       targetSymbol,
       checker,
       visitedExpressions,
+      scope,
     );
   }
 
@@ -107,6 +118,7 @@ const expressionReferencesSymbol = (
       targetSymbol,
       checker,
       visitedExpressions,
+      scope,
     );
   }
 
@@ -117,6 +129,7 @@ const expressionReferencesSymbol = (
         targetSymbol,
         checker,
         visitedExpressions,
+        scope,
       ),
     );
   }
@@ -128,12 +141,14 @@ const expressionReferencesSymbol = (
         targetSymbol,
         checker,
         visitedExpressions,
+        scope,
       ) ||
       expressionReferencesSymbol(
         expression.whenFalse,
         targetSymbol,
         checker,
         visitedExpressions,
+        scope,
       )
     );
   }
@@ -146,6 +161,7 @@ const expressionReferencesSymbol = (
             targetSymbol,
             checker,
             visitedExpressions,
+            scope,
           )
         : (ts.isPropertyAssignment(property) &&
             expressionReferencesSymbol(
@@ -153,6 +169,7 @@ const expressionReferencesSymbol = (
               targetSymbol,
               checker,
               visitedExpressions,
+              scope,
             )) ||
             (ts.isShorthandPropertyAssignment(property) &&
               expressionReferencesSymbol(
@@ -160,6 +177,7 @@ const expressionReferencesSymbol = (
                 targetSymbol,
                 checker,
                 visitedExpressions,
+                scope,
               ));
     });
   }
@@ -172,6 +190,7 @@ const expressionReferencesSymbol = (
         targetSymbol,
         checker,
         visitedExpressions,
+        scope,
       ),
     )
   );

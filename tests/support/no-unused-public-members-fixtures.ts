@@ -82,7 +82,11 @@ const createFixtureLintRunner =
   (fixtureManager: TemporaryFixtureManager) =>
   async (run: NoUnusedPublicMembersFixtureRun): Promise<string[]> => {
     const fixtureSet = fixtureManager.createFixtureSet(
-      { ...run.files, "tsconfig.json": temporaryProjectTsconfig },
+      {
+        "src/index.ts": "export {};",
+        ...run.files,
+        "tsconfig.json": temporaryProjectTsconfig,
+      },
       "tmp",
     );
     const eslint = createTypedRuleEslint(

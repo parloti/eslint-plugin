@@ -1,7 +1,9 @@
 import * as ts from "typescript";
 
 import type { PublicMember } from "./member-declaration-utilities";
+import type { MemberAnalysisScope } from "./member-scope-utilities";
 
+import { getUsageContextualType } from "./member-operation-type-utilities";
 import { getResolvedCallDeclaration } from "./member-usage-call-utilities";
 import {
   getCallArgumentType,
@@ -70,6 +72,7 @@ const hasCallImplementation = (
  * @param objectType Contextual type of the object literal.
  * @param checker TypeScript type checker.
  * @param member Member whose value is being handed off.
+ * @param scope Eligible local implementations.
  * @returns True when a declaration-only method receives the member as opaque data.
  * @example
  * ```typescript
@@ -80,6 +83,7 @@ const hasCallImplementation = (
  *   type,
  *   checker,
  *   member,
+ *   scope,
  * );
  * ```
  */
@@ -90,6 +94,7 @@ const isOpaqueMethodContractHandoff = (
   objectType: ts.Type | undefined,
   checker: ts.TypeChecker,
   member: PublicMember,
+  scope: MemberAnalysisScope,
 ): boolean => {
   const call = objectLiteral.parent;
   const declaration = ts.isCallExpression(call)
@@ -120,7 +125,7 @@ const isOpaqueMethodContractHandoff = (
     targetType !== void 0 &&
     ((targetType.flags & ts.TypeFlags.Unknown) !== 0 ||
       (isHttpRequestBody && (targetType.flags & ts.TypeFlags.Any) !== 0)) &&
-    expressionCarriesMemberValue(valueExpression, checker, member)
+    expressionCarriesMemberValue(valueExpression, checker, member, scope)
   );
 };
 
@@ -129,16 +134,18 @@ const isOpaqueMethodContractHandoff = (
  * @param node Candidate call expression.
  * @param checker TypeScript type checker.
  * @param member Member whose usage is being checked.
+ * @param scope Eligible local implementations.
  * @returns True when an external call contract accepts the member shape.
  * @example
  * ```typescript
- * const used = isCallArgumentMember(node, checker, member);
+ * const used = isCallArgumentMember(node, checker, member, scope);
  * ```
  */
 const isCallArgumentMember = (
   node: ts.Node,
   checker: ts.TypeChecker,
   member: PublicMember,
+  scope: MemberAnalysisScope,
 ): boolean => {
   if (!ts.isCallExpression(node) || hasCallImplementation(node, checker)) {
     return false;
@@ -160,8 +167,8 @@ const isCallArgumentMember = (
 
       return (
         (isOpaqueJsonBody &&
-          expressionCarriesMemberValue(argument, checker, member)) ||
-        isMemberHandoff(argument, argumentType, member, checker)
+          expressionCarriesMemberValue(argument, checker, member, scope)) ||
+        isMemberHandoff(argument, argumentType, member, checker, scope)
       );
     })
   );
@@ -172,16 +179,18 @@ const isCallArgumentMember = (
  * @param node Candidate outer object property.
  * @param checker TypeScript type checker.
  * @param member Member whose host value is being forwarded.
+ * @param scope Eligible local implementations.
  * @returns True when the receiving property accepts the host shape.
  * @example
  * ```typescript
- * const used = isObjectContractHandoff(node, checker, member);
+ * const used = isObjectContractHandoff(node, checker, member, scope);
  * ```
  */
 const isObjectContractHandoff = (
   node: ts.Node,
   checker: ts.TypeChecker,
   member: PublicMember,
+  scope: MemberAnalysisScope,
 ): boolean => {
   if (
     ts.isPropertyAssignment(node) &&
@@ -193,7 +202,7 @@ const isObjectContractHandoff = (
       return false;
     }
 
-    const objectType = checker.getContextualType(node.parent);
+    const objectType = getUsageContextualType(node.parent, checker);
 
     if (
       isOpaqueMethodContractHandoff(
@@ -203,6 +212,7 @@ const isObjectContractHandoff = (
         objectType,
         checker,
         member,
+        scope,
       )
     ) {
       return true;
@@ -219,14 +229,20 @@ const isObjectContractHandoff = (
       checker,
     );
 
-    return isMemberHandoff(node.initializer, targetType, member, checker);
+    return isMemberHandoff(
+      node.initializer,
+      targetType,
+      member,
+      checker,
+      scope,
+    );
   }
 
   if (
     ts.isShorthandPropertyAssignment(node) &&
     ts.isObjectLiteralExpression(node.parent)
   ) {
-    const objectType = checker.getContextualType(node.parent);
+    const objectType = getUsageContextualType(node.parent, checker);
 
     if (
       isOpaqueMethodContractHandoff(
@@ -236,6 +252,7 @@ const isObjectContractHandoff = (
         objectType,
         checker,
         member,
+        scope,
       )
     ) {
       return true;
@@ -252,7 +269,7 @@ const isObjectContractHandoff = (
       checker,
     );
 
-    return isMemberHandoff(node.name, targetType, member, checker);
+    return isMemberHandoff(node.name, targetType, member, checker, scope);
   }
 
   return false;

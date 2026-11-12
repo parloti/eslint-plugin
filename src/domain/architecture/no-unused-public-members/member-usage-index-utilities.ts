@@ -2,69 +2,34 @@ import path from "node:path";
 import * as ts from "typescript";
 
 import type { NoUnusedExportsState } from "../no-unused-exports/types";
+import type { MemberAnalysisScope } from "./member-scope-utilities";
 import type { SymbolIndex } from "./member-symbol-index-utilities";
 
-import { isTestFile } from "../no-unused-exports/no-unused-exports-options";
 import {
-  getStaticMemberName,
-  isSupportedMember,
-} from "./member-host-utilities";
+  isProjectSourceFile,
+  isTestFile,
+} from "../no-unused-exports/no-unused-exports-options";
+import { getSourceFileFacts } from "../program-analysis";
+import { buildMemberConsumerIndex } from "./member-consumer-utilities";
 import {
   getMemberProgramCache,
   setMemberProgramCache,
 } from "./member-program-cache-utilities";
 import { addIndexedSymbol } from "./member-symbol-index-utilities";
-import { getResolvedCallDeclaration } from "./member-usage-call-utilities";
-import { getStringLiteralKeys } from "./member-usage-reference-utilities";
+import { getReferencedMemberSymbol } from "./member-usage-reference-utilities";
 
-interface ProductionUsageIndex {
-  boundaryCalls: ts.CallExpression[];
-  computedMemberReads: Map<string, ts.ElementAccessExpression[]>;
-  dynamicStringMemberReads: ts.ElementAccessExpression[];
-  jsonStringifyCalls: ts.CallExpression[];
-  localCalls: ts.CallExpression[];
-  objectProperties: (ts.PropertyAssignment | ts.ShorthandPropertyAssignment)[];
-  references: Map<string, ts.Node[]>;
-  sourceFiles: ts.SourceFile[];
-  spreads: ts.SpreadAssignment[];
-  symbols: SymbolIndex;
+interface ProductionUsageCache {
+  scopes: WeakMap<MemberAnalysisScope, ProductionUsageIndex>;
+  unscoped?: ProductionUsageIndex;
 }
 
-const MEMBER_SYMBOL_FLAGS =
-  ts.SymbolFlags.Property |
-  ts.SymbolFlags.Method |
-  ts.SymbolFlags.GetAccessor |
-  ts.SymbolFlags.SetAccessor;
-
-const getUsageSymbol = (
-  node: ts.Node,
-  checker: ts.TypeChecker,
-): ts.Symbol | undefined => {
-  const parent = node.parent;
-
-  if (
-    ts.isIdentifier(node) &&
-    ts.isBindingElement(parent) &&
-    parent.name === node &&
-    parent.propertyName === void 0 &&
-    ts.isObjectBindingPattern(parent.parent)
-  ) {
-    const owner = parent.parent.parent;
-    const sourceType = ts.isVariableDeclaration(owner)
-      ? owner.initializer === void 0
-        ? void 0
-        : checker.getTypeAtLocation(owner.initializer)
-      : ts.isParameter(owner)
-        ? checker.getTypeAtLocation(owner)
-        : void 0;
-
-    return sourceType === void 0
-      ? checker.getSymbolAtLocation(node)
-      : checker.getPropertyOfType(sourceType, node.text);
-  }
-
-  return checker.getSymbolAtLocation(node);
-};
+interface ProductionUsageIndex {
+  deferredReferences: Map<string, ts.Node[]>;
+  operations: readonly ts.Node[];
+  references: Map<string, ts.Node[]>;
+  sourceFiles: ts.SourceFile[];
+  symbols: SymbolIndex;
+}
 
 const isDeclarationName = (node: ts.Node): boolean => {
   const parent = node.parent;
@@ -99,170 +64,100 @@ const isStructuralPropertyName = (node: ts.Node): boolean => {
   );
 };
 
-const isPrimitiveLiteralArgument = (node: ts.Expression): boolean =>
-  ts.isStringLiteralLike(node) ||
-  ts.isNumericLiteral(node) ||
-  ts.isBigIntLiteral(node) ||
-  node.kind === ts.SyntaxKind.TrueKeyword ||
-  node.kind === ts.SyntaxKind.FalseKeyword ||
-  node.kind === ts.SyntaxKind.NullKeyword;
-
 const getProductionUsageIndex = (
   program: ts.Program,
   state: NoUnusedExportsState,
   repoRoot: string,
+  scope?: MemberAnalysisScope,
 ): ProductionUsageIndex => {
   const normalizedRoot = path.resolve(repoRoot);
+  const cacheName = "production-usage-index";
   const cacheKey = JSON.stringify([normalizedRoot, state.testFilePatterns]);
-  const cached = getMemberProgramCache(
+  const cache: ProductionUsageCache = (getMemberProgramCache(
     program,
-    "production-usage-index",
+    cacheName,
     cacheKey,
-  ) as ProductionUsageIndex | undefined;
+  ) as ProductionUsageCache | undefined) ?? { scopes: new WeakMap() };
+  const cached = scope === void 0 ? cache.unscoped : cache.scopes.get(scope);
   if (cached !== void 0) {
     return cached;
   }
 
   const checker = program.getTypeChecker();
   const index: ProductionUsageIndex = {
-    boundaryCalls: [],
-    computedMemberReads: new Map(),
-    dynamicStringMemberReads: [],
-    jsonStringifyCalls: [],
-    localCalls: [],
-    objectProperties: [],
+    deferredReferences: new Map(),
+    operations: [],
     references: new Map(),
-    sourceFiles: program
-      .getSourceFiles()
-      .filter(
-        (file) =>
-          !file.isDeclarationFile &&
-          !isTestFile(path.resolve(file.fileName), state, normalizedRoot),
-      ),
-    spreads: [],
+    sourceFiles:
+      scope === void 0
+        ? program
+            .getSourceFiles()
+            .filter(
+              (file) =>
+                !file.isDeclarationFile &&
+                isProjectSourceFile(file.fileName, normalizedRoot) &&
+                !isTestFile(path.resolve(file.fileName), state, normalizedRoot),
+            )
+        : [...scope.sourceFiles],
     symbols: new Set(),
   };
-  const contextualObjectTypes = new WeakMap<
-    ts.ObjectLiteralExpression,
-    ts.Type | undefined
+  const consumers = buildMemberConsumerIndex(program, index.sourceFiles);
+  const pendingReferences = new Map<
+    string,
+    (ts.Identifier | ts.StringLiteralLike)[]
   >();
-  const getContextualObjectType = (
-    node: ts.ObjectLiteralExpression,
-  ): ts.Type | undefined => {
-    if (!contextualObjectTypes.has(node)) {
-      contextualObjectTypes.set(node, checker.getContextualType(node));
-    }
-
-    return contextualObjectTypes.get(node);
-  };
-  const memberNames = new Set<string>();
-  const collectMemberNames = (node: ts.Node): void => {
-    if (isSupportedMember(node)) {
-      const memberName = getStaticMemberName(
-        (node as ts.NamedDeclaration).name,
-      );
-
-      if (memberName !== void 0) {
-        memberNames.add(memberName);
+  const sourceFacts = index.sourceFiles.map((file) => getSourceFileFacts(file));
+  for (const facts of sourceFacts) {
+    for (const node of facts.references) {
+      if (
+        !(ts.isIdentifier(node) || ts.isStringLiteralLike(node)) ||
+        !consumers.memberNames.has(node.text) ||
+        isDeclarationName(node)
+      ) {
+        continue;
       }
+      const references = pendingReferences.get(node.text) ?? [];
+      references.push(node);
+      pendingReferences.set(node.text, references);
     }
-
-    ts.forEachChild(node, collectMemberNames);
-  };
-  for (const sourceFile of index.sourceFiles) {
-    collectMemberNames(sourceFile);
   }
 
-  const visit = (node: ts.Node): void => {
-    if (
-      (ts.isIdentifier(node) || ts.isStringLiteralLike(node)) &&
-      memberNames.has(node.text) &&
-      !isDeclarationName(node)
-    ) {
-      const symbol = getUsageSymbol(node, checker);
-      if (symbol !== void 0 && (symbol.flags & MEMBER_SYMBOL_FLAGS) !== 0) {
+  const indexReference = (
+    node: ts.Identifier | ts.StringLiteralLike,
+    sourceFiles: ReadonlySet<ts.SourceFile>,
+  ): void => {
+    if (sourceFiles.has(node.getSourceFile())) {
+      const symbol = getReferencedMemberSymbol(node, checker, program);
+      if (symbol !== void 0) {
         addIndexedSymbol(index.symbols, symbol);
       }
-
-      if (isStructuralPropertyName(node)) {
-        const references = index.references.get(node.text) ?? [];
-        references.push(node);
-        index.references.set(node.text, references);
-      }
+    } else {
+      const deferred = index.deferredReferences.get(node.text) ?? [];
+      deferred.push(node);
+      index.deferredReferences.set(node.text, deferred);
     }
 
-    if (ts.isElementAccessExpression(node)) {
-      const staticKey = ts.isStringLiteralLike(node.argumentExpression)
-        ? node.argumentExpression.text
-        : void 0;
-      const keyType =
-        staticKey === void 0
-          ? checker.getTypeAtLocation(node.argumentExpression)
-          : void 0;
-      const keys =
-        staticKey === void 0
-          ? keyType === void 0
-            ? []
-            : getStringLiteralKeys(keyType)
-          : [staticKey];
-
-      const uniqueKeys = new Set(keys);
-
-      for (const key of uniqueKeys) {
-        const reads = index.computedMemberReads.get(key) ?? [];
-        reads.push(node);
-        index.computedMemberReads.set(key, reads);
-      }
-
-      if (
-        keys.length === 0 &&
-        keyType !== void 0 &&
-        (keyType.flags & ts.TypeFlags.String) !== 0
-      ) {
-        index.dynamicStringMemberReads.push(node);
-      }
-    } else if (ts.isSpreadAssignment(node)) {
-      index.spreads.push(node);
-    } else if (ts.isCallExpression(node)) {
-      if (
-        node.arguments.length > 0 &&
-        node.arguments.some((argument) => !isPrimitiveLiteralArgument(argument))
-      ) {
-        const isJsonStringifyCandidate =
-          ts.isPropertyAccessExpression(node.expression) &&
-          node.expression.name.text === "stringify";
-
-        if (isJsonStringifyCandidate) {
-          index.jsonStringifyCalls.push(node);
-        }
-
-        const declaration = getResolvedCallDeclaration(node, checker);
-        const hasImplementation =
-          declaration !== void 0 &&
-          "body" in declaration &&
-          declaration.body !== void 0;
-
-        if (hasImplementation) {
-          index.localCalls.push(node);
-        } else if (!isJsonStringifyCandidate && declaration !== void 0) {
-          index.boundaryCalls.push(node);
-        }
-      }
-    } else if (
-      (ts.isPropertyAssignment(node) ||
-        ts.isShorthandPropertyAssignment(node)) &&
-      ts.isObjectLiteralExpression(node.parent) &&
-      getContextualObjectType(node.parent) !== void 0
-    ) {
-      index.objectProperties.push(node);
+    if (!isStructuralPropertyName(node)) {
+      return;
     }
-    ts.forEachChild(node, visit);
+    const references = index.references.get(node.text) ?? [];
+    references.push(node);
+    index.references.set(node.text, references);
   };
-  for (const sourceFile of index.sourceFiles) {
-    visit(sourceFile);
+  for (const [name, references] of pendingReferences) {
+    const sourceFiles = consumers.getConsumers(name);
+    for (const reference of references) {
+      indexReference(reference, sourceFiles);
+    }
   }
+  index.operations = sourceFacts.flatMap((facts) => facts.operations);
 
-  setMemberProgramCache(program, "production-usage-index", cacheKey, index);
+  if (scope === void 0) {
+    cache.unscoped = index;
+  } else {
+    cache.scopes.set(scope, index);
+  }
+  setMemberProgramCache(program, cacheName, cacheKey, cache);
   return index;
 };
 

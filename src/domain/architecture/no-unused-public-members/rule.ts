@@ -53,7 +53,11 @@ const createNoUnusedPublicMembersListener =
 
     return {
       Program(): void {
-        const sourceFile = getProgramSourceFile(program, context.filename);
+        const sourceFile = getProgramSourceFile(
+          program,
+          context.filename,
+          projectRoot,
+        );
 
         if (sourceFile === void 0) {
           return;

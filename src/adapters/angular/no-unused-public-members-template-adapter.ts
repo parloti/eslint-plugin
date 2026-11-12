@@ -18,11 +18,11 @@ interface ComponentTemplate {
 }
 
 const componentTemplateCache = new WeakMap<
-  ts.ClassDeclaration,
-  ComponentTemplate | undefined
+  ts.TypeChecker,
+  WeakMap<ts.ClassDeclaration, ComponentTemplate | undefined>
 >();
 const parsedTemplateCache = new WeakMap<
-  ts.ClassDeclaration,
+  ComponentTemplate,
   AngularTemplateNode[] | undefined
 >();
 
@@ -65,8 +65,13 @@ const getComponentTemplate = (
   sourceFile: ts.SourceFile,
   checker: ts.TypeChecker,
 ): ComponentTemplate | undefined => {
-  if (componentTemplateCache.has(declaration)) {
-    return componentTemplateCache.get(declaration);
+  let templates = componentTemplateCache.get(checker);
+  if (templates === undefined) {
+    templates = new WeakMap();
+    componentTemplateCache.set(checker, templates);
+  }
+  if (templates.has(declaration)) {
+    return templates.get(declaration);
   }
 
   const decorators = ts.canHaveDecorators(declaration)
@@ -104,7 +109,7 @@ const getComponentTemplate = (
           content: property.initializer.text,
           filePath: sourceFile.fileName,
         };
-        componentTemplateCache.set(declaration, template);
+        templates.set(declaration, template);
         return template;
       }
 
@@ -117,13 +122,13 @@ const getComponentTemplate = (
           property.initializer.text,
         );
         const template = readTemplateFile(filePath);
-        componentTemplateCache.set(declaration, template);
+        templates.set(declaration, template);
         return template;
       }
     }
   }
 
-  componentTemplateCache.set(declaration, undefined);
+  templates.set(declaration, undefined);
   return undefined;
 };
 
@@ -169,7 +174,7 @@ const templateUsesMember = (
   checker: ts.TypeChecker,
   member: PublicMember,
 ): boolean => {
-  const nodes = getParsedTemplateNodes(template, component);
+  const nodes = getParsedTemplateNodes(template);
   if (nodes === undefined) {
     return false;
   }
@@ -185,10 +190,9 @@ const templateUsesMember = (
 
 const getParsedTemplateNodes = (
   template: ComponentTemplate,
-  component: ts.ClassDeclaration,
 ): AngularTemplateNode[] | undefined => {
-  if (parsedTemplateCache.has(component)) {
-    return parsedTemplateCache.get(component);
+  if (parsedTemplateCache.has(template)) {
+    return parsedTemplateCache.get(template);
   }
 
   const parsed = angular.parseTemplate(template.content, template.filePath, {
@@ -196,7 +200,7 @@ const getParsedTemplateNodes = (
     enableLetSyntax: true,
   });
   const nodes = parsed.errors === null ? parsed.nodes : undefined;
-  parsedTemplateCache.set(component, nodes);
+  parsedTemplateCache.set(template, nodes);
   return nodes;
 };
 

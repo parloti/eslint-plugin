@@ -1,9 +1,14 @@
 import * as ts from "typescript";
 
 import type { PublicMember } from "./member-declaration-utilities";
+import type { MemberAnalysisScope } from "./member-scope-utilities";
 
+import { carriesMember } from "./member-factory-utilities";
+import {
+  getUsageContextualType,
+  getUsageType,
+} from "./member-operation-type-utilities";
 import { getResolvedCallSignature } from "./member-usage-call-utilities";
-import { carriesMember } from "./member-usage-value-utilities";
 
 /**
  * Gets the declared type of the host that owns a public member.
@@ -24,7 +29,7 @@ const getMemberHostType = (
     ? declaration.name
     : declaration;
 
-  return checker.getTypeAtLocation(location);
+  return getUsageType(location, checker);
 };
 
 /**
@@ -104,7 +109,7 @@ const getCallArgumentType = (
   argument: ts.Expression,
   checker: ts.TypeChecker,
 ): ts.Type | undefined => {
-  const contextualType = checker.getContextualType(argument);
+  const contextualType = getUsageContextualType(argument, checker);
 
   if (contextualType !== void 0) {
     return contextualType;
@@ -164,10 +169,11 @@ const getPropertyOrIndexType = (
  * @param targetType Type expected at the receiving boundary.
  * @param member Member whose usage is being checked.
  * @param checker TypeScript type checker.
+ * @param scope Eligible local implementations.
  * @returns True when the receiving contract accepts the corresponding member.
  * @example
  * ```typescript
- * const used = isMemberHandoff(expression, targetType, member, checker);
+ * const used = isMemberHandoff(expression, targetType, member, checker, scope);
  * ```
  */
 const isMemberHandoff = (
@@ -175,6 +181,7 @@ const isMemberHandoff = (
   targetType: ts.Type | undefined,
   member: PublicMember,
   checker: ts.TypeChecker,
+  scope: MemberAnalysisScope,
 ): boolean => {
   if (targetType === void 0) {
     return false;
@@ -184,19 +191,19 @@ const isMemberHandoff = (
     getMemberHostType(member, checker),
   );
   const forwardedType = checker.getNonNullableType(
-    checker.getTypeAtLocation(sourceExpression),
+    getUsageType(sourceExpression, checker),
   );
   const receivingType = checker.getNonNullableType(targetType);
 
   if (receivingType.isUnion()) {
     return receivingType.types.some((part) =>
-      isMemberHandoff(sourceExpression, part, member, checker),
+      isMemberHandoff(sourceExpression, part, member, checker, scope),
     );
   }
 
   if (
     checker.getPropertyOfType(receivingType, member.memberName) === void 0 &&
-    !carriesMember(sourceExpression, checker, member)
+    !carriesMember(sourceExpression, checker, member, scope)
   ) {
     return false;
   }

@@ -2,27 +2,20 @@ import * as ts from "typescript";
 
 import type { NoUnusedExportsState } from "../no-unused-exports/types";
 import type { PublicMember } from "./member-declaration-utilities";
+import type { MemberAnalysisScope } from "./member-scope-utilities";
 
 import {
   isSameSymbol,
   resolveCanonicalSymbol,
 } from "../no-unused-exports/no-unused-exports-symbol-utilities";
 import { collectHeritageMemberSymbols } from "./member-contract-utilities";
+import { getUsageType } from "./member-operation-type-utilities";
 import { hasIndexedSymbol } from "./member-symbol-index-utilities";
-import {
-  isCallArgumentMember,
-  isObjectContractHandoff,
-} from "./member-usage-handoff-utilities";
 import { getProductionUsageIndex } from "./member-usage-index-utilities";
-import { isLocalCallArgumentTransmitted } from "./member-usage-local-flow-utilities";
 import {
-  isComputedMemberRead,
+  getReferencedMemberSymbol,
   isStructuralPropertyRead,
 } from "./member-usage-reference-utilities";
-import {
-  isLocalCallArgumentSerialized,
-  isWholeObjectRead,
-} from "./member-usage-serialization-utilities";
 
 /** Framework-specific member usage detector supplied by an opt-in adapter. */
 type MemberUsageAdapter = (
@@ -32,34 +25,73 @@ type MemberUsageAdapter = (
 ) => boolean;
 
 /**
- * Checks whether a member has a concrete reference in production TypeScript.
+ * Checks direct, structural, and adapter references before operation analysis.
  * @param program TypeScript project program.
  * @param state Normalized public API and test patterns.
  * @param repoRoot Root directory used for glob matching.
  * @param member Member whose production usage is being checked.
+ * @param scope Owning folder and its eligible production files.
  * @param usageAdapters Optional framework-specific usage detectors.
  * @returns True when production code references the member.
  * @example
  * ```typescript
- * const used = hasProductionUsage(program, state, repoRoot, member);
+ * const used = hasProductionReference(program, state, repoRoot, member, scope);
  * ```
  */
-const hasProductionUsage = (
+const hasProductionReference = (
   program: ts.Program,
   state: NoUnusedExportsState,
   repoRoot: string,
   member: PublicMember,
+  scope: MemberAnalysisScope,
   usageAdapters: readonly MemberUsageAdapter[] = [],
 ): boolean => {
   const checker = program.getTypeChecker();
-  const index = getProductionUsageIndex(program, state, repoRoot);
+  const index = getProductionUsageIndex(program, state, repoRoot, scope);
   const canonicalMember = resolveCanonicalSymbol(member.memberSymbol, checker);
   if (hasIndexedSymbol(index.symbols, canonicalMember)) {
     return true;
   }
+  const relatedSymbols = getRelatedMemberSymbols(member, scope, checker);
+
+  return (
+    relatedSymbols.some((symbol) => hasIndexedSymbol(index.symbols, symbol)) ||
+    (index.references.get(member.memberName) ?? []).some((node) =>
+      isStructuralPropertyRead(node, checker, member),
+    ) ||
+    (index.deferredReferences.get(member.memberName) ?? []).some((node) => {
+      const symbol = getReferencedMemberSymbol(node, checker, program);
+      return (
+        symbol !== void 0 &&
+        relatedSymbols.some((related) => isSameSymbol(related, symbol))
+      );
+    }) ||
+    (usageAdapters.length > 0 &&
+      index.sourceFiles.some((sourceFile) =>
+        usageAdapters.some((adapter) => adapter(sourceFile, checker, member)),
+      ))
+  );
+};
+
+/**
+ * Collects declaration identities accepted by direct and computed reads.
+ * @param member Candidate whose contracts are requested.
+ * @param scope Eligible owner-local declarations.
+ * @param checker Active semantic checker.
+ * @returns Canonical member, heritage, and contextual declaration symbols.
+ * @example
+ * ```typescript
+ * const symbols = getRelatedMemberSymbols(member, scope, checker);
+ * ```
+ */
+const getRelatedMemberSymbols = (
+  member: PublicMember,
+  scope: MemberAnalysisScope,
+  checker: ts.TypeChecker,
+): ts.Symbol[] => {
   const relatedSymbols = [
-    canonicalMember,
-    ...collectHeritageMemberSymbols(program, checker, member).map((symbol) =>
+    resolveCanonicalSymbol(member.memberSymbol, checker),
+    ...collectHeritageMemberSymbols(scope, checker, member).map((symbol) =>
       resolveCanonicalSymbol(symbol, checker),
     ),
   ];
@@ -68,7 +100,7 @@ const hasProductionUsage = (
     : void 0;
 
   if (variableDeclaration !== void 0) {
-    const declaredType = checker.getTypeAtLocation(variableDeclaration.name);
+    const declaredType = getUsageType(variableDeclaration.name, checker);
     const declaredMember = checker.getPropertyOfType(
       declaredType,
       member.memberName,
@@ -82,44 +114,8 @@ const hasProductionUsage = (
     }
   }
 
-  return (
-    relatedSymbols.some((symbol) => hasIndexedSymbol(index.symbols, symbol)) ||
-    (index.references.get(member.memberName) ?? []).some((node) =>
-      isStructuralPropertyRead(node, checker, member),
-    ) ||
-    (usageAdapters.length > 0 &&
-      index.sourceFiles.some((sourceFile) =>
-        usageAdapters.some((adapter) => adapter(sourceFile, checker, member)),
-      )) ||
-    (index.computedMemberReads.get(member.memberName) ?? []).some((node) =>
-      isComputedMemberRead(node, checker, member, relatedSymbols),
-    ) ||
-    index.dynamicStringMemberReads.some((node) =>
-      isComputedMemberRead(node, checker, member, relatedSymbols),
-    ) ||
-    index.spreads.some((node) =>
-      isWholeObjectRead(node, checker, member, program),
-    ) ||
-    index.jsonStringifyCalls.some(
-      (node) =>
-        isWholeObjectRead(node, checker, member, program) ||
-        isCallArgumentMember(node, checker, member),
-    ) ||
-    index.localCalls.some(
-      (node) =>
-        isLocalCallArgumentSerialized(node, checker, member, program) ||
-        isLocalCallArgumentTransmitted(node, checker, member),
-    ) ||
-    index.boundaryCalls.some(
-      (node) =>
-        isWholeObjectRead(node, checker, member, program) ||
-        isCallArgumentMember(node, checker, member),
-    ) ||
-    index.objectProperties.some((node) =>
-      isObjectContractHandoff(node, checker, member),
-    )
-  );
+  return relatedSymbols;
 };
 
-export { hasProductionUsage };
+export { getRelatedMemberSymbols, hasProductionReference };
 export type { MemberUsageAdapter };

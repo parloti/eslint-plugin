@@ -1,6 +1,10 @@
 import path from "node:path";
 import * as ts from "typescript";
 
+import {
+  getSourceFileFacts,
+  getSourceReferenceSymbol,
+} from "../program-analysis";
 import { getConcreteUsagePosition } from "./no-unused-exports-identifier-utilities";
 import { isLintableFilename } from "./no-unused-exports-options";
 import {
@@ -174,7 +178,7 @@ const buildProgramUsageIndex = (program: ts.Program): ProgramUsageIndex => {
       }
     }
 
-    const moduleSymbol = checker.getSymbolAtLocation(sourceFile);
+    const moduleSymbol = getSourceReferenceSymbol(program, sourceFile);
 
     if (moduleSymbol !== void 0) {
       for (const symbol of checker.getExportsOfModule(moduleSymbol)) {
@@ -202,31 +206,29 @@ const buildProgramUsageIndex = (program: ts.Program): ProgramUsageIndex => {
 
     const filename = toComparableAbsolutePath(sourceFile.fileName);
 
-    const visitNode = (node: ts.Node): void => {
-      if (ts.isIdentifier(node) && possibleUsageNames.has(node.text)) {
-        const position = getConcreteUsagePosition(node);
-
-        if (position !== void 0) {
-          const symbol =
-            ts.isShorthandPropertyAssignment(node.parent) &&
-            node.parent.name === node
-              ? checker.getShorthandAssignmentValueSymbol(node.parent)
-              : checker.getSymbolAtLocation(node);
-
-          if (symbol !== void 0) {
-            const canonicalSymbol = canonicalize(symbol);
-
-            if (isExportedSymbol(canonicalSymbol)) {
-              indexSymbolUsage(index, canonicalSymbol, filename, position);
-            }
-          }
-        }
+    for (const node of getSourceFileFacts(sourceFile).references) {
+      if (!(ts.isIdentifier(node) && possibleUsageNames.has(node.text))) {
+        continue;
       }
 
-      ts.forEachChild(node, visitNode);
-    };
+      const position = getConcreteUsagePosition(node);
 
-    visitNode(sourceFile);
+      if (position === void 0) {
+        continue;
+      }
+      const symbol =
+        ts.isShorthandPropertyAssignment(node.parent) &&
+        node.parent.name === node
+          ? checker.getShorthandAssignmentValueSymbol(node.parent)
+          : getSourceReferenceSymbol(program, node);
+      if (symbol === void 0) {
+        continue;
+      }
+      const canonicalSymbol = canonicalize(symbol);
+      if (isExportedSymbol(canonicalSymbol)) {
+        indexSymbolUsage(index, canonicalSymbol, filename, position);
+      }
+    }
   }
 
   return index;

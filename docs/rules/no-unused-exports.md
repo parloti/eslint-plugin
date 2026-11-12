@@ -88,9 +88,20 @@ across exports and linted files. Public API exposure is indexed alongside
 concrete references. File classifications are cached separately for each
 repository root and option set.
 
+Source syntax catalogs and native reference-symbol lookups are shared with
+`no-unused-public-members` when both rules run. These facts contain no API,
+test-file, or ownership classifications; each rule applies its own policy.
+Import/dependency edges do not turn bare imports or dynamic loading into
+concrete export usage.
+
 Caches are scoped to the parser's Program object through weak references. A new
 Program receives a fresh index, so editor updates do not reuse an old Program's
 analysis. Separate TypeScript projects each require their own scan.
+
+The member rule's analysis folders do not restrict this rule's consumers.
+Both rules work independently and in either execution order. See the
+[measured export controls](../design/architecture.md#measured-performance)
+for diagnostic equivalence and timing limits of the reference workloads.
 
 ## Invalid
 

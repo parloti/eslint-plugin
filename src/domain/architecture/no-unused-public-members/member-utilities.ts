@@ -5,7 +5,9 @@ import * as ts from "typescript";
 import type { NoUnusedExportsState } from "../no-unused-exports/types";
 import type { MemberUsageAdapter } from "./member-usage-utilities";
 
+import { isProjectSourceFile } from "../no-unused-exports/no-unused-exports-options";
 import { collectPublicMembers } from "./member-declaration-utilities";
+import { collectOperationMembers } from "./member-operation-utilities";
 import {
   getMemberProgramCache,
   setMemberProgramCache,
@@ -14,24 +16,33 @@ import {
   isPublicApiHost,
   isPublicApiMember,
 } from "./member-public-api-utilities";
-import { hasProductionUsage } from "./member-usage-utilities";
+import { getMemberAnalysisScope } from "./member-scope-utilities";
+import { getProductionUsageIndex } from "./member-usage-index-utilities";
+import { hasProductionReference } from "./member-usage-utilities";
 
 type ParserServices = ReturnType<typeof ESLintUtils.getParserServices>;
 
 /**
  * Gets source files by normalized absolute path for one Program.
  * @param program TypeScript program snapshot.
+ * @param projectRoot Project root used to limit the index to source files.
  * @returns Cached source-file index.
  * @example
  * ```typescript
- * const files = getProgramSourceFileIndex(program);
+ * const files = getProgramSourceFileIndex(program, projectRoot);
  * ```
  */
 const getProgramSourceFileIndex = (
   program: ts.Program,
+  projectRoot: string,
 ): Map<string, ts.SourceFile> => {
-  const cached = getMemberProgramCache(program, "source-file-index", "") as
-    Map<string, ts.SourceFile> | undefined;
+  const normalizedRoot = path.resolve(projectRoot);
+  const cacheKey = normalizedRoot.toLowerCase();
+  const cached = getMemberProgramCache(
+    program,
+    "source-file-index",
+    cacheKey,
+  ) as Map<string, ts.SourceFile> | undefined;
 
   if (cached !== void 0) {
     return cached;
@@ -40,12 +51,15 @@ const getProgramSourceFileIndex = (
   const sourceFiles = new Map(
     program
       .getSourceFiles()
+      .filter((sourceFile) =>
+        isProjectSourceFile(sourceFile.fileName, normalizedRoot),
+      )
       .map((sourceFile) => [
         path.resolve(sourceFile.fileName).toLowerCase(),
         sourceFile,
       ]),
   );
-  setMemberProgramCache(program, "source-file-index", "", sourceFiles);
+  setMemberProgramCache(program, "source-file-index", cacheKey, sourceFiles);
 
   return sourceFiles;
 };
@@ -73,11 +87,41 @@ const collectUnusedPublicMembers = (
   usageAdapters: readonly MemberUsageAdapter[] = [],
 ) => {
   const checker = program.getTypeChecker();
+  const members = collectPublicMembers(sourceFile, checker, parserServices);
+  if (members.length === 0) {
+    return members;
+  }
+  const scope = getMemberAnalysisScope(
+    program,
+    state,
+    repoRoot,
+    sourceFile.fileName,
+  );
 
-  return collectPublicMembers(sourceFile, checker, parserServices).filter(
+  const pending = members.filter(
     (member) =>
       !isPublicApiHost(program, state, repoRoot, member.hostSymbol) &&
-      !hasProductionUsage(program, state, repoRoot, member, usageAdapters) &&
+      !hasProductionReference(
+        program,
+        state,
+        repoRoot,
+        member,
+        scope,
+        usageAdapters,
+      ),
+  );
+  if (pending.length === 0) {
+    return pending;
+  }
+  const used = collectOperationMembers(
+    getProductionUsageIndex(program, state, repoRoot, scope).operations,
+    pending,
+    program,
+    scope,
+  );
+  return pending.filter(
+    (member) =>
+      !used.has(member) &&
       !isPublicApiMember(program, state, repoRoot, member.memberSymbol),
   );
 };
@@ -86,17 +130,25 @@ const collectUnusedPublicMembers = (
  * Finds the program source file matching an absolute lint filename.
  * @param program TypeScript project program.
  * @param filename Absolute filename to find.
+ * @param projectRoot Project root used to limit the search to source files.
  * @returns Matching source file when it belongs to the program.
  * @example
  * ```typescript
- * const sourceFile = getProgramSourceFile(program, context.filename);
+ * const sourceFile = getProgramSourceFile(
+ *   program,
+ *   context.filename,
+ *   projectRoot,
+ * );
  * ```
  */
 const getProgramSourceFile = (
   program: ts.Program,
   filename: string,
+  projectRoot: string,
 ): ts.SourceFile | undefined =>
-  getProgramSourceFileIndex(program).get(path.resolve(filename).toLowerCase());
+  getProgramSourceFileIndex(program, projectRoot).get(
+    path.resolve(filename).toLowerCase(),
+  );
 
 /**
  * Returns the absolute project root from the TypeScript program.

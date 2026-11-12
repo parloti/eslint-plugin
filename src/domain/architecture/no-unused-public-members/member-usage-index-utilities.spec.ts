@@ -29,6 +29,7 @@ describe("no-unused-public-members analysis performance", () => {
         ...MEMBER_NAMES.map((name) => `void feature.${name};`),
       ].join("\n"),
       "src/feature.ts": feature,
+      "src/index.ts": "export {};",
     };
 
     // Act

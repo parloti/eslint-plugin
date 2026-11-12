@@ -1,6 +1,7 @@
 import * as ts from "typescript";
 
 import type { PublicMember } from "./member-declaration-utilities";
+import type { MemberAnalysisScope } from "./member-scope-utilities";
 
 import {
   isSameSymbol,
@@ -17,7 +18,7 @@ interface HeritageMemberDeclarations {
 }
 
 const heritageDeclarationsByMember = new WeakMap<
-  ts.Program,
+  MemberAnalysisScope,
   Map<string, HeritageMemberDeclarations[]>
 >();
 
@@ -45,19 +46,19 @@ const getDeclaredMemberName = (declaration: ts.Node): string | undefined => {
 
 /**
  * Gets declarations that directly define a member with the requested name.
- * @param program TypeScript project program.
+ * @param scope Eligible production files in the host's analysis folder.
  * @param memberName Static name of the member being resolved.
  * @returns Matching declarations and their member nodes.
  * @example
  * ```typescript
- * const declarations = getHeritageMemberDeclarations(program, "run");
+ * const declarations = getHeritageMemberDeclarations(scope, "run");
  * ```
  */
 const getHeritageMemberDeclarations = (
-  program: ts.Program,
+  scope: MemberAnalysisScope,
   memberName: string,
 ): HeritageMemberDeclarations[] => {
-  let declarationsByMember = heritageDeclarationsByMember.get(program);
+  let declarationsByMember = heritageDeclarationsByMember.get(scope);
 
   if (declarationsByMember === void 0) {
     const index = new Map<string, HeritageMemberDeclarations[]>();
@@ -91,14 +92,12 @@ const getHeritageMemberDeclarations = (
       ts.forEachChild(node, visit);
     };
 
-    for (const sourceFile of program.getSourceFiles()) {
-      if (!sourceFile.isDeclarationFile) {
-        visit(sourceFile);
-      }
+    for (const sourceFile of scope.sourceFiles) {
+      visit(sourceFile);
     }
 
     declarationsByMember = index;
-    heritageDeclarationsByMember.set(program, index);
+    heritageDeclarationsByMember.set(scope, index);
   }
 
   return declarationsByMember.get(memberName) ?? [];
@@ -133,17 +132,17 @@ const getDeclaredMemberSymbol = (
 
 /**
  * Collects member symbols linked by implemented or inherited types.
- * @param program TypeScript project program.
+ * @param scope Eligible production files in the host's analysis folder.
  * @param checker TypeScript type checker.
  * @param targetMember Member whose related contracts are being found.
  * @returns Related member symbols from contract declarations.
  * @example
  * ```typescript
- * const symbols = collectHeritageMemberSymbols(program, checker, member);
+ * const symbols = collectHeritageMemberSymbols(scope, checker, member);
  * ```
  */
 const collectHeritageMemberSymbols = (
-  program: ts.Program,
+  scope: MemberAnalysisScope,
   checker: ts.TypeChecker,
   targetMember: PublicMember,
 ): ts.Symbol[] => {
@@ -164,7 +163,7 @@ const collectHeritageMemberSymbols = (
   for (const {
     declaration: node,
     members: ownMembers,
-  } of getHeritageMemberDeclarations(program, targetMember.memberName)) {
+  } of getHeritageMemberDeclarations(scope, targetMember.memberName)) {
     const matchingHeritageSymbols: ts.Symbol[] = [];
 
     const heritageClauses = node.heritageClauses ?? [];

@@ -52,6 +52,33 @@ export const isLintableFilename = (filename: string): boolean => {
 };
 
 /**
+ * Checks whether a filename is inside a project's lintable source tree.
+ * @param filename Candidate filename.
+ * @param projectRoot Absolute or relative project root.
+ * @returns True for a TypeScript file under `src` and within the project root.
+ * @example
+ * ```typescript
+ * const sourceFile = isProjectSourceFile("/repo/src/feature.ts", "/repo");
+ * ```
+ */
+export const isProjectSourceFile = (
+  filename: string,
+  projectRoot: string,
+): boolean => {
+  const normalizedRoot = path.resolve(projectRoot);
+  const normalizedFilename = path.resolve(filename);
+  const relativePath = path.relative(normalizedRoot, normalizedFilename);
+
+  return (
+    isLintableFilename(normalizedFilename) &&
+    relativePath !== "" &&
+    relativePath !== ".." &&
+    !relativePath.startsWith(`..${path.sep}`) &&
+    !path.isAbsolute(relativePath)
+  );
+};
+
+/**
  * Normalizes one rule option value into a string list.
  * @param value Raw option value.
  * @param defaults Default values.

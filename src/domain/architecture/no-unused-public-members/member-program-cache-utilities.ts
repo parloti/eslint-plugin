@@ -5,21 +5,12 @@ interface ProgramCacheEntry {
   value: unknown;
 }
 
-const MAX_CACHED_PROGRAMS = 1;
-const programCaches = new Map<ts.Program, Map<string, ProgramCacheEntry>>();
+interface ProgramCaches {
+  latest?: WeakRef<ts.Program>;
+  values: WeakMap<ts.Program, Map<string, ProgramCacheEntry>>;
+}
 
-const getProgramCaches = (
-  program: ts.Program,
-): Map<string, ProgramCacheEntry> | undefined => {
-  const caches = programCaches.get(program);
-
-  if (caches !== void 0) {
-    programCaches.delete(program);
-    programCaches.set(program, caches);
-  }
-
-  return caches;
-};
+const programCaches: ProgramCaches = { values: new WeakMap() };
 
 /**
  * Gets one cached analysis value for the most recently used TypeScript program.
@@ -39,13 +30,13 @@ const getMemberProgramCache = (
   cacheName: string,
   cacheKey: string,
 ): unknown => {
-  const entry = getProgramCaches(program)?.get(cacheName);
+  const entry = programCaches.values.get(program)?.get(cacheName);
 
   return entry?.cacheKey === cacheKey ? entry.value : void 0;
 };
 
 /**
- * Stores one analysis value and evicts the previous program's plugin caches.
+ * Weakly owns analysis values while evicting the previous Program's caches.
  * @param program TypeScript program owning the analysis.
  * @param cacheName Name of the analysis cache.
  * @param cacheKey Options that determine the cached value.
@@ -61,24 +52,21 @@ const setMemberProgramCache = (
   cacheKey: string,
   value: unknown,
 ): void => {
-  let caches = getProgramCaches(program);
+  const previous = programCaches.latest?.deref();
+  if (previous !== program) {
+    if (previous !== void 0) {
+      programCaches.values.delete(previous);
+    }
+    programCaches.latest = new WeakRef(program);
+  }
+  let caches = programCaches.values.get(program);
 
   if (caches === void 0) {
     caches = new Map();
-    programCaches.set(program, caches);
+    programCaches.values.set(program, caches);
   }
 
   caches.set(cacheName, { cacheKey, value });
-
-  while (programCaches.size > MAX_CACHED_PROGRAMS) {
-    const oldestProgram = programCaches.keys().next().value;
-
-    if (oldestProgram === void 0) {
-      break;
-    }
-
-    programCaches.delete(oldestProgram);
-  }
 };
 
 export { getMemberProgramCache, setMemberProgramCache };

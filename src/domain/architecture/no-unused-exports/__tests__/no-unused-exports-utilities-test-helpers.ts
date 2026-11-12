@@ -103,11 +103,14 @@ const withTemporaryProject = <Result>(
       resolveWrittenPath(relativePath),
     );
 
-    const program = ts.createProgram(programRoots, {
+    const options: ts.CompilerOptions = {
       module: ts.ModuleKind.ESNext,
       moduleResolution: ts.ModuleResolutionKind.Bundler,
       target: ts.ScriptTarget.ESNext,
-    });
+    };
+    const host = ts.createCompilerHost(options);
+    host.getCurrentDirectory = () => temporaryRoot;
+    const program = ts.createProgram(programRoots, options, host);
 
     return callback(temporaryRoot, program, resolveWrittenPath);
   });

@@ -6,7 +6,65 @@ import {
   isSameSymbol,
   resolveCanonicalSymbol,
 } from "../no-unused-exports/no-unused-exports-symbol-utilities";
+import { getSourceReferenceSymbol } from "../program-analysis";
+import { getUsageType } from "./member-operation-type-utilities";
 import { hasCompatibleMemberShape } from "./member-usage-type-utilities";
+
+const MEMBER_SYMBOL_FLAGS =
+  ts.SymbolFlags.Property |
+  ts.SymbolFlags.Method |
+  ts.SymbolFlags.GetAccessor |
+  ts.SymbolFlags.SetAccessor;
+
+const getUsageSymbol = (
+  node: ts.Node,
+  checker: ts.TypeChecker,
+  program: ts.Program,
+): ts.Symbol | undefined => {
+  const parent = node.parent;
+  if (
+    ts.isIdentifier(node) &&
+    ts.isBindingElement(parent) &&
+    parent.name === node &&
+    parent.propertyName === void 0 &&
+    ts.isObjectBindingPattern(parent.parent)
+  ) {
+    const owner = parent.parent.parent;
+    const sourceType = ts.isVariableDeclaration(owner)
+      ? owner.initializer === void 0
+        ? void 0
+        : getUsageType(owner.initializer, checker)
+      : ts.isParameter(owner)
+        ? getUsageType(owner, checker)
+        : void 0;
+    return sourceType === void 0
+      ? getSourceReferenceSymbol(program, node)
+      : checker.getPropertyOfType(sourceType, node.text);
+  }
+  return getSourceReferenceSymbol(program, node);
+};
+
+/**
+ * Resolves member identity while preserving destructuring-specific semantics.
+ * @param node Candidate reference.
+ * @param checker Semantic checker for the program.
+ * @param program Active TypeScript snapshot.
+ * @returns Property or method symbol, excluding unrelated local variables.
+ * @example
+ * ```typescript
+ * const symbol = getReferencedMemberSymbol(reference, checker, program);
+ * ```
+ */
+const getReferencedMemberSymbol = (
+  node: ts.Node,
+  checker: ts.TypeChecker,
+  program: ts.Program,
+): ts.Symbol | undefined => {
+  const symbol = getUsageSymbol(node, checker, program);
+  return symbol === void 0 || (symbol.flags & MEMBER_SYMBOL_FLAGS) === 0
+    ? void 0
+    : symbol;
+};
 
 /** Source type and name for a property access or destructuring read. */
 interface PropertyAccessDetails {
@@ -36,7 +94,7 @@ const getPropertyAccess = (
   if (ts.isPropertyAccessExpression(parent) && parent.name === node) {
     return {
       name: parent.name.text,
-      sourceType: checker.getTypeAtLocation(parent.expression),
+      sourceType: getUsageType(parent.expression, checker),
     };
   }
 
@@ -47,9 +105,9 @@ const getPropertyAccess = (
   ) {
     const owner = parent.parent.parent;
     const sourceType = ts.isVariableDeclaration(owner)
-      ? checker.getTypeAtLocation(owner.initializer ?? owner.name)
+      ? getUsageType(owner.initializer ?? owner.name, checker)
       : ts.isParameter(owner)
-        ? checker.getTypeAtLocation(owner)
+        ? getUsageType(owner, checker)
         : void 0;
     const nameNode = parent.propertyName ?? parent.name;
 
@@ -133,8 +191,8 @@ const isComputedMemberRead = (
     return false;
   }
 
-  const objectType = checker.getTypeAtLocation(node.expression);
-  const keyType = checker.getTypeAtLocation(node.argumentExpression);
+  const objectType = getUsageType(node.expression, checker);
+  const keyType = getUsageType(node.argumentExpression, checker);
 
   if (
     (keyType.flags & ts.TypeFlags.String) !== 0 &&
@@ -169,4 +227,9 @@ const isComputedMemberRead = (
   });
 };
 
-export { getStringLiteralKeys, isComputedMemberRead, isStructuralPropertyRead };
+export {
+  getReferencedMemberSymbol,
+  getStringLiteralKeys,
+  isComputedMemberRead,
+  isStructuralPropertyRead,
+};
