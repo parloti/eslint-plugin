@@ -81,7 +81,20 @@ const createNoUnusedPublicMembersListener =
     };
   };
 
-/** ESLint rule flagging public members unused by production code. */
+/**
+ * ESLint rule flagging public members unused by production code unless their host is part of the public API.
+ *
+ * ### The Problem with Public Visibility for Testing Only
+ * - **Breaks Encapsulation**: Exposing internal methods, properties, or state pollutes the class or type contract.
+ * - **Ties Tests to Implementation**: If you test private functions or methods directly, refactoring or renaming those internal members will break your unit tests, even if the public behavior of the host remains unchanged.
+ * - **Smell of Design Issues**: Needing to expose a private member often means the class or module is doing too much and should be split into smaller, independent services or collaborator classes.
+ *
+ * ### Better Alternatives
+ * - **Test Through Public Methods**: Write your tests against the public methods of the class. If the public methods work correctly, internal helper methods are verified by extension.
+ * - **Extract a Separate Service or Helper**: If a private method is complex enough that it needs its own dedicated unit tests, extract it into its own separate service, collaborator class, or utility module and export it properly from there.
+ * - **Make Members Private or Protected**: Declare internal members as `private` (or `#private`) so the rule ignores them.
+ * @see {@link https://github.com/parloti/eslint-plugin/blob/main/docs/rules/no-unused-public-members.md}
+ */
 const noUnusedPublicMembersRule: Rule.RuleModule = {
   create: createNoUnusedPublicMembersListener(),
   meta: {
@@ -99,7 +112,7 @@ const noUnusedPublicMembersRule: Rule.RuleModule = {
     },
     messages: {
       unusedPublicMember:
-        "Member '{{memberName}}' of '{{hostName}}' is never used by production code; remove it or make it private.",
+        "Member '{{memberName}}' of '{{hostName}}' is never used by production code. Test through public methods, extract to a separate service/helper, or make it private.",
     },
     schema: [
       {

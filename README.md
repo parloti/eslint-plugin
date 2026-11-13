@@ -97,7 +97,8 @@ void preferInterfaceTypesRule;
 - `codeperfect/no-interface-member-docs`
 - `codeperfect/no-multiple-declarators`
 - `codeperfect/no-reexports-outside-barrels`
-- `codeperfect/no-unused-exports`
+- [`codeperfect/no-unused-exports`](docs/rules/no-unused-exports.md) — Disallow exports unused or consumed only by tests. Avoid exporting internal helpers for testing; test through the public API or extract to a dedicated module.
+- [`codeperfect/no-unused-public-members`](docs/rules/no-unused-public-members.md) — Disallow public members unused by production code. Test through public methods, extract to a separate service/helper, or make members private.
 - `codeperfect/no-useless-delegation`
 - `codeperfect/prefer-interface-types`
 - `codeperfect/prefer-vi-mocked-import`

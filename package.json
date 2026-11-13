@@ -69,7 +69,8 @@
     "docs:clean": "npx --yes rimraf docs/api"
   },
   "files": [
-    "dist"
+    "dist",
+    "docs"
   ],
   "keywords": [
     "eslint",

@@ -32,6 +32,20 @@ Classification rules:
 - value exports must be referenced in value positions
 - `typeof X` counts as a concrete value reference to `X` even when it appears inside a type
 
+## The Problem with Exporting for Testing Only
+
+Exporting an internal helper, type, or function solely so a test file can import it is a common anti-pattern:
+
+- **Breaks Encapsulation**: Exposing internal details pollutes your public API and makes it unclear what parts of the module are meant to be used by the rest of the application. Consumers of the module cannot distinguish between intentional public interfaces and accidental implementation details.
+- **Ties Tests to Implementation**: If you test private functions directly, refactoring, restructuring, or renaming those internal functions will break your unit tests, even if the public behavior of the module remains completely unchanged. Tests should verify observable behavior and contracts rather than private mechanics.
+- **Smell of Design Issues**: Needing to export a private function often means the module is doing too much (violating the Single Responsibility Principle) and should be split into smaller, independent services or utility classes.
+
+### Better Alternatives
+
+- **Test Through Public Methods**: Write your tests against the public API (the functions or classes that are already exported and meant to be consumed). If the public methods work correctly, the internal helper functions are verified by extension.
+- **Extract a Separate Helper Module**: If a private function is complex enough that it needs its own dedicated unit tests, extract it into its own separate module or utility file and export it properly from there (where the original module imports and consumes it in production).
+- **Move to Test Utilities**: If the symbol is genuinely only needed for testing (such as mock data factories, fixtures, or test assertion helpers), move it to a test file or a dedicated test utilities folder outside production source code.
+
 ## Options
 
 ```typescript
@@ -109,6 +123,8 @@ for diagnostic equivalence and timing limits of the reference workloads.
 
 ```typescript
 // src/feature.ts
+// Reported: Export 'orphan' is never consumed by any file in the project;
+// remove the export or delete the symbol if it is no longer needed.
 export const orphan = 1;
 ```
 
@@ -123,6 +139,31 @@ export const feature = 1;
 // src/feature.spec.ts
 import { feature } from "./feature";
 void feature;
+```
+
+### Internal helper exported solely for tests
+
+```typescript
+// src/order.ts
+// BAD: calculateTax is internal logic exported solely for test files
+export function calculateTax(amount: number): number {
+  return amount * 0.2;
+}
+
+export function createOrder(amount: number): { total: number } {
+  return { total: amount + calculateTax(amount) };
+}
+```
+
+```typescript
+// src/order.spec.ts
+import { calculateTax } from "./order";
+
+// Reported: Export 'calculateTax' is consumed only by test files.
+// Avoid exporting for tests: test through the public API, extract to a separate helper module, or move to test utilities.
+test("calculates tax", () => {
+  expect(calculateTax(100)).toBe(20);
+});
 ```
 
 ### Forwarded only by a non-public barrel
@@ -150,6 +191,58 @@ export const feature = 1;
 // src/consumer.ts
 import { feature } from "./feature";
 console.log(feature);
+```
+
+### Alternative 1: Test through public API (keep helper unexported)
+
+```typescript
+// src/order.ts
+// GOOD: helper remains unexported and private to the module
+function calculateTax(amount: number): number {
+  return amount * 0.2;
+}
+
+export function createOrder(amount: number): { total: number } {
+  return { total: amount + calculateTax(amount) };
+}
+```
+
+```typescript
+// src/order.spec.ts
+import { createOrder } from "./order";
+
+// GOOD: Unit test verifies the observable public API
+test("creates order with tax included", () => {
+  expect(createOrder(100)).toEqual({ total: 120 });
+});
+```
+
+### Alternative 2: Extract a separate helper module
+
+```typescript
+// src/tax-calculator.ts
+// GOOD: Complex logic extracted to its own module and exported for production use
+export function calculateTax(amount: number): number {
+  return amount * 0.2;
+}
+```
+
+```typescript
+// src/order.ts
+import { calculateTax } from "./tax-calculator";
+
+export function createOrder(amount: number): { total: number } {
+  return { total: amount + calculateTax(amount) };
+}
+```
+
+```typescript
+// src/tax-calculator.spec.ts
+import { calculateTax } from "./tax-calculator";
+
+test("calculates tax", () => {
+  expect(calculateTax(100)).toBe(20);
+});
 ```
 
 ### Export exposed by a public API file
