@@ -36,6 +36,8 @@ export interface PublicMember {
 
 type ParserServices = ReturnType<typeof ESLintUtils.getParserServices>;
 
+const HOST_KEYWORDS = /\b(?:class|interface|type|const)\b/;
+
 /**
  * Collects direct public members from one source file.
  * @param sourceFile Source file being analyzed.
@@ -52,11 +54,17 @@ const collectPublicMembers = (
   checker: ts.TypeChecker,
   parserServices: ParserServices,
 ): PublicMember[] => {
+  if (!HOST_KEYWORDS.test(sourceFile.text)) {
+    return [];
+  }
+
   const members: PublicMember[] = [];
 
   for (const host of collectMemberHosts(sourceFile, checker)) {
-    const hostType = checker.getTypeAtLocation(host.node);
     const isClassHost = ts.isClassDeclaration(host.node);
+    let resolvedHostType: ts.Type | undefined;
+    const getHostType = (): ts.Type =>
+      (resolvedHostType ??= checker.getTypeAtLocation(host.node));
 
     for (const declaration of host.members) {
       if (
@@ -82,7 +90,7 @@ const collectPublicMembers = (
         checker,
         declaration,
         memberName,
-        hostType,
+        getHostType,
       );
 
       if (

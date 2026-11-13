@@ -69,7 +69,7 @@ const getHostName = (node: ts.Node): string => {
  * @param checker TypeScript type checker.
  * @param member Member declaration.
  * @param memberName Static member name.
- * @param hostType Type of the containing host.
+ * @param hostType Type of the containing host or resolver function.
  * @returns Member symbol when TypeScript can resolve it.
  * @example
  * ```typescript
@@ -80,7 +80,7 @@ const getMemberSymbol = (
   checker: ts.TypeChecker,
   member: ts.Node,
   memberName: string,
-  hostType: ts.Type,
+  hostType: (() => ts.Type) | ts.Type,
 ): ts.Symbol | undefined => {
   const nameNode = (member as ts.NamedDeclaration).name;
   const isObjectMember =
@@ -104,7 +104,14 @@ const getMemberSymbol = (
   const directSymbol =
     nameNode === void 0 ? void 0 : checker.getSymbolAtLocation(nameNode);
 
-  return directSymbol ?? checker.getPropertyOfType(hostType, memberName);
+  if (directSymbol !== void 0) {
+    return directSymbol;
+  }
+
+  const resolvedHostType =
+    typeof hostType === "function" ? hostType() : hostType;
+
+  return checker.getPropertyOfType(resolvedHostType, memberName);
 };
 
 /**
@@ -203,32 +210,49 @@ const collectMemberHosts = (
   const hosts: MemberHost[] = [];
   const visit = (node: ts.Node): void => {
     if (ts.isClassDeclaration(node)) {
-      hosts.push({
-        members: node.members,
-        name: getHostName(node),
-        node,
-        symbol:
-          node.name === void 0
-            ? void 0
-            : checker.getSymbolAtLocation(node.name),
-      });
+      if (
+        node.members.length > 0 &&
+        node.members.some(
+          (member) => isSupportedMember(member) && isPublicClassMember(member),
+        )
+      ) {
+        hosts.push({
+          members: node.members,
+          name: getHostName(node),
+          node,
+          symbol:
+            node.name === void 0
+              ? void 0
+              : checker.getSymbolAtLocation(node.name),
+        });
+      }
     } else if (ts.isInterfaceDeclaration(node)) {
-      hosts.push({
-        members: node.members,
-        name: getHostName(node),
-        node,
-        symbol: checker.getSymbolAtLocation(node.name),
-      });
+      if (
+        node.members.length > 0 &&
+        node.members.some((member) => isSupportedMember(member))
+      ) {
+        hosts.push({
+          members: node.members,
+          name: getHostName(node),
+          node,
+          symbol: checker.getSymbolAtLocation(node.name),
+        });
+      }
     } else if (
       ts.isTypeAliasDeclaration(node) &&
       ts.isTypeLiteralNode(node.type)
     ) {
-      hosts.push({
-        members: node.type.members,
-        name: getHostName(node),
-        node,
-        symbol: checker.getSymbolAtLocation(node.name),
-      });
+      if (
+        node.type.members.length > 0 &&
+        node.type.members.some((member) => isSupportedMember(member))
+      ) {
+        hosts.push({
+          members: node.type.members,
+          name: getHostName(node),
+          node,
+          symbol: checker.getSymbolAtLocation(node.name),
+        });
+      }
     } else if (
       ts.isVariableDeclaration(node) &&
       ts.isIdentifier(node.name) &&
@@ -237,7 +261,11 @@ const collectMemberHosts = (
     ) {
       const objectLiteral = getObjectLiteral(node.initializer);
 
-      if (objectLiteral !== void 0) {
+      if (
+        objectLiteral !== void 0 &&
+        objectLiteral.properties.length > 0 &&
+        objectLiteral.properties.some((property) => isSupportedMember(property))
+      ) {
         hosts.push({
           members: objectLiteral.properties,
           name: getHostName(node),

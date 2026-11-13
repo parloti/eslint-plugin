@@ -1,4 +1,4 @@
-import { minimatch } from "minimatch";
+import { Minimatch } from "minimatch";
 import path from "node:path";
 import * as ts from "typescript";
 
@@ -13,11 +13,39 @@ import {
   setMemberProgramCache,
 } from "./member-program-cache-utilities";
 
+interface AnalysisScopeIndex {
+  fileToScope: Map<string, MemberAnalysisScope>;
+  scopes: MemberAnalysisScope[];
+}
+
 interface MemberAnalysisScope {
   apiFiles: ts.SourceFile[];
   root: string;
   sourceFiles: Set<ts.SourceFile>;
 }
+
+const compiledMinimatchCache = new Map<
+  string,
+  InstanceType<typeof Minimatch>
+>();
+
+const getCompiledMinimatch = (
+  pattern: string,
+): InstanceType<typeof Minimatch> => {
+  const normalizedPattern = pattern.replaceAll("\\", "/");
+  const cacheKey = `${normalizedPattern}::${ts.sys.useCaseSensitiveFileNames ? "case" : "nocase"}`;
+  let matcher = compiledMinimatchCache.get(cacheKey);
+
+  if (matcher === void 0) {
+    matcher = new Minimatch(normalizedPattern, {
+      dot: true,
+      nocase: !ts.sys.useCaseSensitiveFileNames,
+    });
+    compiledMinimatchCache.set(cacheKey, matcher);
+  }
+
+  return matcher;
+};
 
 const normalizePath = (filename: string): string => {
   const absolute = path.resolve(filename);
@@ -46,10 +74,7 @@ const matchesApiFile = (
     .split(path.sep)
     .join("/");
   return state.publicApiFiles.some((pattern) =>
-    minimatch(relative, pattern.replaceAll("\\", "/"), {
-      dot: true,
-      nocase: !ts.sys.useCaseSensitiveFileNames,
-    }),
+    getCompiledMinimatch(pattern).match(relative),
   );
 };
 
@@ -90,11 +115,11 @@ const collectApiScopes = (
   return result;
 };
 
-const getMemberAnalysisScopes = (
+const getMemberAnalysisScopeIndex = (
   program: ts.Program,
   state: NoUnusedExportsState,
   repoRoot: string,
-): MemberAnalysisScope[] => {
+): AnalysisScopeIndex => {
   const projectRoot = normalizePath(repoRoot);
   const cacheKey = JSON.stringify([
     projectRoot,
@@ -105,11 +130,13 @@ const getMemberAnalysisScopes = (
     program,
     "member-analysis-scopes",
     cacheKey,
-  ) as MemberAnalysisScope[] | undefined;
+  ) as AnalysisScopeIndex | undefined;
   if (cached !== void 0) {
     return cached;
   }
   const scopes = collectApiScopes(program, state, projectRoot);
+  const fileToScope = new Map<string, MemberAnalysisScope>();
+
   for (const sourceFile of program.getSourceFiles()) {
     if (
       sourceFile.isDeclarationFile ||
@@ -118,12 +145,19 @@ const getMemberAnalysisScopes = (
     ) {
       continue;
     }
-    scopes
-      .find((scope) => containsFile(scope.root, sourceFile.fileName))
-      ?.sourceFiles.add(sourceFile);
+    const matchingScope = scopes.find((scope) =>
+      containsFile(scope.root, sourceFile.fileName),
+    );
+    if (matchingScope === void 0) {
+      continue;
+    }
+    matchingScope.sourceFiles.add(sourceFile);
+    fileToScope.set(normalizePath(sourceFile.fileName), matchingScope);
   }
-  setMemberProgramCache(program, "member-analysis-scopes", cacheKey, scopes);
-  return scopes;
+
+  const index: AnalysisScopeIndex = { fileToScope, scopes };
+  setMemberProgramCache(program, "member-analysis-scopes", cacheKey, index);
+  return index;
 };
 
 /**
@@ -144,9 +178,19 @@ const getMemberAnalysisScope = (
   repoRoot: string,
   filename: string,
 ): MemberAnalysisScope => {
-  const scope = getMemberAnalysisScopes(program, state, repoRoot).find(
-    (candidate) => containsFile(candidate.root, filename),
-  );
+  const index = getMemberAnalysisScopeIndex(program, state, repoRoot);
+  const normalizedFilename = normalizePath(filename);
+  let scope = index.fileToScope.get(normalizedFilename);
+
+  if (scope === void 0) {
+    scope = index.scopes.find((candidate) =>
+      containsFile(candidate.root, filename),
+    );
+    if (scope !== void 0) {
+      index.fileToScope.set(normalizedFilename, scope);
+    }
+  }
+
   if (scope === void 0) {
     throw new Error(
       `Invalid publicApiFiles: no analysis folder covers '${filename}'. Configure a non-test, non-declaration API entry whose parent contains this host. Patterns: ${state.publicApiFiles.join(", ")}.`,
@@ -171,7 +215,7 @@ const getMemberApiSourceFiles = (
   state: NoUnusedExportsState,
   repoRoot: string,
 ): ts.SourceFile[] =>
-  getMemberAnalysisScopes(program, state, repoRoot).flatMap(
+  getMemberAnalysisScopeIndex(program, state, repoRoot).scopes.flatMap(
     (scope) => scope.apiFiles,
   );
 

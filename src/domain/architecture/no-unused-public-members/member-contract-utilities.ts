@@ -130,6 +130,11 @@ const getDeclaredMemberSymbol = (
         ));
 };
 
+const heritageSymbolsByMemberDeclaration = new WeakMap<
+  MemberAnalysisScope,
+  WeakMap<ts.Node, ts.Symbol[]>
+>();
+
 /**
  * Collects member symbols linked by implemented or inherited types.
  * @param scope Eligible production files in the host's analysis folder.
@@ -146,6 +151,16 @@ const collectHeritageMemberSymbols = (
   checker: ts.TypeChecker,
   targetMember: PublicMember,
 ): ts.Symbol[] => {
+  let cache = heritageSymbolsByMemberDeclaration.get(scope);
+  if (cache === void 0) {
+    cache = new WeakMap();
+    heritageSymbolsByMemberDeclaration.set(scope, cache);
+  }
+  const cached = cache.get(targetMember.declaration);
+  if (cached !== void 0) {
+    return cached;
+  }
+
   const relatedSymbols: ts.Symbol[] = [];
   const targetSymbol = resolveCanonicalSymbol(
     targetMember.memberSymbol,
@@ -209,6 +224,7 @@ const collectHeritageMemberSymbols = (
     }
   }
 
+  cache.set(targetMember.declaration, relatedSymbols);
   return relatedSymbols;
 };
 

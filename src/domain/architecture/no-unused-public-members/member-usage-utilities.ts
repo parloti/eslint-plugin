@@ -73,6 +73,11 @@ const hasProductionReference = (
   );
 };
 
+const relatedSymbolsByMemberDeclaration = new WeakMap<
+  MemberAnalysisScope,
+  WeakMap<ts.Node, ts.Symbol[]>
+>();
+
 /**
  * Collects declaration identities accepted by direct and computed reads.
  * @param member Candidate whose contracts are requested.
@@ -89,6 +94,16 @@ const getRelatedMemberSymbols = (
   scope: MemberAnalysisScope,
   checker: ts.TypeChecker,
 ): ts.Symbol[] => {
+  let cache = relatedSymbolsByMemberDeclaration.get(scope);
+  if (cache === void 0) {
+    cache = new WeakMap();
+    relatedSymbolsByMemberDeclaration.set(scope, cache);
+  }
+  const cached = cache.get(member.declaration);
+  if (cached !== void 0) {
+    return cached;
+  }
+
   const relatedSymbols = [
     resolveCanonicalSymbol(member.memberSymbol, checker),
     ...collectHeritageMemberSymbols(scope, checker, member).map((symbol) =>
@@ -114,6 +129,7 @@ const getRelatedMemberSymbols = (
     }
   }
 
+  cache.set(member.declaration, relatedSymbols);
   return relatedSymbols;
 };
 
