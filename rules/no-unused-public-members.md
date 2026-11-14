@@ -24,6 +24,20 @@ Exported classes and types can stay in use while individual methods or propertie
 
 Hosts exposed by configured public API files are exempt because those members may be consumed by downstream package users.
 
+## The Problem with Public Visibility for Testing Only
+
+Making class methods, properties, or interface fields `public` solely so a unit test can reach them is an anti-pattern:
+
+- **Breaks Encapsulation**: Exposing internal details pollutes the class or type contract and makes it unclear what parts are intended to be consumed by other parts of the application.
+- **Ties Tests to Implementation**: If you test private methods directly by making them public, refactoring, restructuring, or renaming those internal methods will break your unit tests, even if the public behavior of the class remains unchanged.
+- **Smell of Design Issues**: Needing to expose a private method often means the class is doing too much (violating the Single Responsibility Principle) and should be split into smaller, independent services, collaborator classes, or utility modules.
+
+### Better Alternatives
+
+- **Test Through Public Methods**: Write your tests against the legitimate public API of the class. If the public methods work correctly, internal helper methods and state transitions are verified by extension.
+- **Extract a Separate Service or Helper**: If a private method contains complex logic that warrants dedicated unit testing, extract it into its own separate service, collaborator class, or helper module with its own contract and inject or call it in production code.
+- **Keep Internal Members Private or Protected**: If a member is only used internally by the declaring class, declare it as `private` (or `#private`). The rule ignores private and protected class members.
+
 ## Options
 
 ```typescript
@@ -246,7 +260,14 @@ export type Options = { enabled: boolean; legacy: boolean };
 ```typescript
 // src/service.ts
 export class Service {
-  tested(): void {}
+  // BAD: calculateDiscount is internal logic made public solely for tests
+  calculateDiscount(price: number): number {
+    return price * 0.1;
+  }
+
+  checkout(price: number): number {
+    return price - this.calculateDiscount(price);
+  }
 }
 ```
 
@@ -254,7 +275,11 @@ export class Service {
 // src/service.spec.ts
 import { Service } from "./service";
 
-new Service().tested();
+// Reported: Member 'calculateDiscount' of 'Service' is never used by production code.
+// Test through public methods, extract to a separate service/helper, or make it private.
+test("calculates discount", () => {
+  expect(new Service().calculateDiscount(100)).toBe(10);
+});
 ```
 
 ## Valid
@@ -273,6 +298,65 @@ export class Service {
 import { Service } from "./service";
 
 new Service().run();
+```
+
+### Alternative 1: Test through public methods (keep member private)
+
+```typescript
+// src/service.ts
+export class Service {
+  // GOOD: internal helper remains private
+  private calculateDiscount(price: number): number {
+    return price * 0.1;
+  }
+
+  checkout(price: number): number {
+    return price - this.calculateDiscount(price);
+  }
+}
+```
+
+```typescript
+// src/service.spec.ts
+import { Service } from "./service";
+
+// GOOD: Tests verify the observable public method
+test("checks out with discount applied", () => {
+  expect(new Service().checkout(100)).toBe(90);
+});
+```
+
+### Alternative 2: Extract a separate collaborator service
+
+```typescript
+// src/discount-calculator.ts
+export class DiscountCalculator {
+  calculateDiscount(price: number): number {
+    return price * 0.1;
+  }
+}
+```
+
+```typescript
+// src/service.ts
+import { DiscountCalculator } from "./discount-calculator";
+
+export class Service {
+  constructor(private readonly discounts = new DiscountCalculator()) {}
+
+  checkout(price: number): number {
+    return price - this.discounts.calculateDiscount(price);
+  }
+}
+```
+
+```typescript
+// src/discount-calculator.spec.ts
+import { DiscountCalculator } from "./discount-calculator";
+
+test("calculates discount", () => {
+  expect(new DiscountCalculator().calculateDiscount(100)).toBe(10);
+});
 ```
 
 ### Public API host

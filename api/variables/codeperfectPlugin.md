@@ -8,7 +8,7 @@
 
 > `const` **codeperfectPlugin**: `object`
 
-Defined in: [infrastructure/codeperfect-plugin.ts:49](https://github.com/parloti/eslint-plugin/blob/deaa60563996a60001bf1d1fc6f358b54ebaa918/src/infrastructure/codeperfect-plugin.ts#L49)
+Defined in: [codeperfect-plugin.ts:51](https://github.com/parloti/eslint-plugin/blob/1ab9298112a10d4f56b4fd2718ece2c9ebd3a0bf/src/infrastructure/codeperfect-plugin.ts#L51)
 
 ESLint plugin object exported by the package.
 
@@ -77,6 +77,10 @@ ESLint plugin object exported by the package.
 #### rules.prefer-interface-types
 
 > `readonly` **prefer-interface-types**: `RuleModule` = `preferInterfaceTypesRule`
+
+#### rules.prefer-package-subpath-imports
+
+> `readonly` **prefer-package-subpath-imports**: `RuleModule` = `preferPackageSubpathImportsRule`
 
 #### rules.prefer-vi-mocked-import
 
