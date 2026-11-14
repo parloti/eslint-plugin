@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { assertActualExpectedNamesRule } from "../../src";
+import { codeperfectPlugin } from "../../src";
 import { runRuleCase } from "../support";
+
+const assertActualExpectedNamesRule =
+  codeperfectPlugin.rules["assert-actual-expected-names"];
 
 describe("assert-actual-expected-names e2e", () => {
   it("rejects names without actual and expected prefixes", () => {

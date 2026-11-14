@@ -2,8 +2,11 @@ import { Linter } from "eslint";
 import { parser } from "typescript-eslint";
 import { describe, expect, it } from "vitest";
 
-import { enforceAaaStructureRule } from "../../src";
+import { codeperfectPlugin } from "../../src";
 import { runRuleCase } from "../support";
+
+const enforceAaaStructureRule =
+  codeperfectPlugin.rules["enforce-aaa-structure"];
 
 /**
  * Provides deterministic ordering for optional message identifiers.

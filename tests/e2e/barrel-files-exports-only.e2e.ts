@@ -1,7 +1,10 @@
 import { afterAll, describe, expect, it } from "vitest";
 
-import { barrelFilesExportsOnlyRule } from "../../src";
+import { codeperfectPlugin } from "../../src";
 import { createTemporaryFixtureManager, runRuleCase } from "../support";
+
+const barrelFilesExportsOnlyRule =
+  codeperfectPlugin.rules["barrel-files-exports-only"];
 
 describe("barrel-files-exports-only e2e", () => {
   const { cleanupTemporaryDirectories, createFixtureSet } =

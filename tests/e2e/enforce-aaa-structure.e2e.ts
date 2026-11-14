@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { enforceAaaStructureRule } from "../../src";
+import { codeperfectPlugin } from "../../src";
 import { runRuleCase } from "../support";
+
+const enforceAaaStructureRule =
+  codeperfectPlugin.rules["enforce-aaa-structure"];
 
 describe("enforce-aaa-structure e2e", () => {
   it.each([

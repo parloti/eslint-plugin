@@ -2,10 +2,12 @@ import { Linter } from "eslint";
 import { parser } from "typescript-eslint";
 import { describe, expect, it } from "vitest";
 
-import {
-  enforceAaaStructureRule,
-  requireActResultCaptureRule,
-} from "../../src";
+import { codeperfectPlugin } from "../../src";
+
+const enforceAaaStructureRule =
+  codeperfectPlugin.rules["enforce-aaa-structure"];
+const requireActResultCaptureRule =
+  codeperfectPlugin.rules["require-act-result-capture"];
 
 /** Aggregated AAA lint result for one end-to-end regression case. */
 interface AaaLintResult {

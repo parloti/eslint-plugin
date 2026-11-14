@@ -7,6 +7,11 @@ import {
   isLintableModuleFile,
   normalizeAllowedBarrelNames,
 } from "./barrel-file-utilities";
+import {
+  getCompilerOptions,
+  getTypeScriptParserServices,
+  hasLocalExportTarget,
+} from "./exports-only-rule-utilities";
 
 /** Stores normalized rule options for the exports-only rule. */
 interface BarrelFilesExportsOnlyState {
@@ -170,10 +175,28 @@ const buildListenerForFile = (
      * ```
      */
     Program(node: AST.Program): void {
+      const parserServices = getTypeScriptParserServices(context);
+      const compilerOptions = getCompilerOptions(filename, parserServices);
+
       for (const statement of node.body) {
         if (!isAllowedBarrelStatement(statement)) {
           context.report({
             messageId: "invalidBarrelContent",
+            node: statement,
+          });
+          break;
+        }
+
+        if (
+          !hasLocalExportTarget(
+            statement,
+            filename,
+            parserServices,
+            compilerOptions,
+          )
+        ) {
+          context.report({
+            messageId: "barrelExportOutsideFolder",
             node: statement,
           });
           break;
@@ -215,6 +238,8 @@ const barrelFilesExportsOnlyRule: Rule.RuleModule = {
       url: "https://github.com/parloti/eslint-plugin/blob/main/docs/rules/barrel-files-exports-only.md",
     },
     messages: {
+      barrelExportOutsideFolder:
+        "Barrel files may only re-export from their own folder or a descendant folder.",
       invalidBarrelContent:
         "Barrel files must only contain re-export statements or type-only declarations.",
     },

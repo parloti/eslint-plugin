@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { noImportExportExtensionsRule } from "../../src";
+import { codeperfectPlugin } from "../../src";
 import { runRuleCase } from "../support";
+
+const noImportExportExtensionsRule =
+  codeperfectPlugin.rules["no-import-export-extensions"];
 
 describe("no-import-export-extensions e2e", () => {
   it.each([

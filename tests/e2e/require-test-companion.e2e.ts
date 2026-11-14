@@ -1,7 +1,10 @@
 import { afterAll, describe, expect, it } from "vitest";
 
-import { requireTestCompanionRule } from "../../src";
+import { codeperfectPlugin } from "../../src";
 import { createTemporaryFixtureManager, runRuleCase } from "../support";
+
+const requireTestCompanionRule =
+  codeperfectPlugin.rules["require-test-companion"];
 
 describe("require-test-companion e2e", () => {
   const { cleanupTemporaryDirectories, createFixtureSet } =

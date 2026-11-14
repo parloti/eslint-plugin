@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { singleActStatementRule } from "../../src";
+import { codeperfectPlugin } from "../../src";
 import { runRuleCase } from "../support";
+
+const singleActStatementRule = codeperfectPlugin.rules["single-act-statement"];
 
 describe("single-act-statement e2e", () => {
   it("rejects multiple Act statements", () => {

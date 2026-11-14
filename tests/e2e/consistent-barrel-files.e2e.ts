@@ -1,7 +1,10 @@
 import { afterAll, describe, expect, it } from "vitest";
 
-import { consistentBarrelFilesRule } from "../../src";
+import { codeperfectPlugin } from "../../src";
 import { createTemporaryFixtureManager, runRuleCase } from "../support";
+
+const consistentBarrelFilesRule =
+  codeperfectPlugin.rules["consistent-barrel-files"];
 
 describe("consistent-barrel-files e2e", () => {
   const { cleanupTemporaryDirectories, createFixtureSet } =

@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { noMultipleDeclaratorsRule } from "../../src";
+import { codeperfectPlugin } from "../../src";
 import { runRuleCase } from "../support";
+
+const noMultipleDeclaratorsRule =
+  codeperfectPlugin.rules["no-multiple-declarators"];
 
 describe("no-multiple-declarators e2e", () => {
   it("fixes multiple declarators in one statement", () => {

@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { noInterfaceMemberDocumentationRule } from "../../src";
+import { codeperfectPlugin } from "../../src";
 import { runRuleCase } from "../support";
+
+const noInterfaceMemberDocumentationRule =
+  codeperfectPlugin.rules["no-interface-member-docs"];
 
 describe("no-interface-member-docs e2e", () => {
   it("removes interface-member parameter documentation", () => {

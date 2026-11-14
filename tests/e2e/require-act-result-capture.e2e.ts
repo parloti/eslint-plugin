@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { requireActResultCaptureRule } from "../../src";
+import { codeperfectPlugin } from "../../src";
 import { runRuleCase } from "../support";
+
+const requireActResultCaptureRule =
+  codeperfectPlugin.rules["require-act-result-capture"];
 
 describe("require-act-result-capture e2e", () => {
   it("rejects uncaptured Act results", () => {

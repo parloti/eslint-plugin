@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { noImportExportAliasesRule } from "../../src";
+import { codeperfectPlugin } from "../../src";
 import { runRuleCase } from "../support";
+
+const noImportExportAliasesRule =
+  codeperfectPlugin.rules["no-import-export-aliases"];
 
 describe("no-import-export-aliases e2e", () => {
   it.each([

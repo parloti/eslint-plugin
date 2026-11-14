@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { requireExampleLanguageRule } from "../../src";
+import { codeperfectPlugin } from "../../src";
 import { runRuleCase } from "../support";
+
+const requireExampleLanguageRule =
+  codeperfectPlugin.rules["require-example-language"];
 
 describe("require-example-language e2e", () => {
   it.each([

@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { preferInterfaceTypesRule } from "../../src";
+import { codeperfectPlugin } from "../../src";
 import { runRuleCase } from "../support";
+
+const preferInterfaceTypesRule =
+  codeperfectPlugin.rules["prefer-interface-types"];
 
 describe("prefer-interface-types e2e", () => {
   it("rejects inline object types in parameters and returns", () => {

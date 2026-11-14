@@ -6,6 +6,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import {
   createTemporaryRunner,
   runRule,
+  runTypedBarrel,
 } from "./__tests__/exports-only-rule-test-utilities";
 import {
   createBody,
@@ -121,6 +122,20 @@ describe("barrel files exports-only rule (enforced)", () => {
 
     // Assert
     expect(actualReports).toStrictEqual([]);
+  });
+
+  it("uses ESM conditions and rejects external or unresolved targets", () => {
+    // Arrange
+    const sourceNames = ["#conditional", "outside-package", "#missing"];
+    const rejected = ["barrelExportOutsideFolder"];
+
+    // Act
+    const actualReports = sourceNames.map((name) =>
+      runTypedBarrel(`export * from "${name}";`),
+    );
+
+    // Assert
+    expect(actualReports).toStrictEqual([[], rejected, rejected]);
   });
 
   it("allows type-only export-all statements", () => {

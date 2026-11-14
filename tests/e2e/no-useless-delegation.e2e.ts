@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { noUselessDelegationRule } from "../../src";
+import { codeperfectPlugin } from "../../src";
 import { runRuleCase } from "../support";
+
+const noUselessDelegationRule =
+  codeperfectPlugin.rules["no-useless-delegation"];
 
 describe("no-useless-delegation e2e", () => {
   it.each([

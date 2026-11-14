@@ -139,7 +139,8 @@
   },
   "peerDependencies": {
     "@angular/compiler": ">=22.2.5",
-    "eslint": ">=10.14.0"
+    "eslint": ">=10.14.0",
+    "typescript": ">=6.0.3"
   },
   "peerDependenciesMeta": {
     "@angular/compiler": {

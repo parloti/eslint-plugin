@@ -1,33 +1,9 @@
 export {
-  assertActualExpectedNamesRule,
-  barrelFilesExportsOnlyRule,
-  consistentBarrelFilesRule,
-  enforceAaaStructureRule,
-  noImportExportAliasesRule,
-  noImportExportExtensionsRule,
-  noInterfaceMemberDocumentationRule,
-  noMultipleDeclaratorsRule,
-  noReexportsOutsideBarrelsRule,
-  noUnusedExportsRule,
-  noUnusedPublicMembersRule,
-  noUselessDelegationRule,
-  preferInterfaceTypesRule,
-  preferPackageSubpathImportsRule,
-  preferViMockedImportRule,
-  requireActResultCaptureRule,
-  requireExampleLanguageRule,
-  requireTestCompanionRule,
-  singleActStatementRule,
-  singleLineJsdocRule,
-} from "./application";
-export type { CustomRuleEntry } from "./application";
-export {
   aaa,
   all,
   architecture,
   codeperfectPlugin,
   core,
-  customRules,
   documentation,
   testing,
 } from "./infrastructure";

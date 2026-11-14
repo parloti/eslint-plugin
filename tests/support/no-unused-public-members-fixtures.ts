@@ -5,7 +5,7 @@ import { parser } from "typescript-eslint";
 
 import type { TemporaryFixtureManager } from "./temporary-fixtures";
 
-import { noUnusedPublicMembersRule } from "../../src";
+import { codeperfectPlugin } from "../../src";
 import { temporaryProjectTsconfig } from "./no-unused-exports-fixtures";
 
 /** One fixture-backed lint run input. */
@@ -39,7 +39,9 @@ const createTypedRuleEslint = (
   directory: string,
   tsconfigPath: string,
   ruleOptions: unknown[] = [],
-  ruleModule: Rule.RuleModule = noUnusedPublicMembersRule,
+  ruleModule: Rule.RuleModule = codeperfectPlugin.rules[
+    "no-unused-public-members"
+  ],
 ): ESLint => {
   const ruleEntry: Linter.RuleEntry = ["error", ...ruleOptions];
 

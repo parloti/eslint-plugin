@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { preferViMockedImportRule } from "../../src";
+import { codeperfectPlugin } from "../../src";
 import { runRuleCase } from "../support";
+
+const preferViMockedImportRule =
+  codeperfectPlugin.rules["prefer-vi-mocked-import"];
 
 describe("prefer-vi-mocked-import e2e", () => {
   it.each([

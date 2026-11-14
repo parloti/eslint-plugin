@@ -4,10 +4,9 @@
 
 `@codeperfect/eslint-plugin` publishes a narrow public surface:
 
-- the default plugin export and named `codeperfectPlugin`
+- named `codeperfectPlugin`
 - first-party presets implemented in `src/infrastructure/presets.ts`
-- the `customRules` registry implemented in `src/application/custom-rules.ts`
-- direct named exports for each package-owned rule module via `src/application/index.ts`
+- package-owned rules through the public plugin object's `rules` map, assembled in `src/infrastructure/codeperfect-plugin.ts`
 
 The package does not own a shared-config composition layer. Local repository lint configuration stays in `eslint.config.ts`.
 
@@ -15,8 +14,7 @@ The package does not own a shared-config composition layer. Local repository lin
 
 - `src/index.ts` is the public entrypoint used for package exports and API documentation generation.
 - `src/domain/` contains the concrete rule implementations and domain-only support code.
-- `src/application/` contains package-level orchestration such as rule catalogs and registries.
-- `src/infrastructure/` contains ESLint-facing adapters such as the plugin object and ready-to-use presets.
+- `src/infrastructure/` contains ESLint-facing adapters such as the plugin rule map and ready-to-use presets.
 - `eslint.config.ts` owns the repository-specific architecture overlay, including the `boundaries` layer rules.
 - `docs/rules/` contains curated rule reference pages.
 
@@ -217,4 +215,4 @@ and mutation testing. The local log is `logs/validate-cache-ownership-final.log`
 
 - Keep the README focused on install, usage, exports, and links into this docs tree.
 - When the exported surface changes, regenerate `docs/api/` and review the design docs for drift.
-- When a rule is added or renamed, update `docs/rules/`, the custom rule registry, and any published references together.
+- When a rule is added or renamed, update `docs/rules/`, the plugin rule map, preset selections, and any published references together.

@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { singleLineJsdocRule } from "../../src";
+import { codeperfectPlugin } from "../../src";
 import { runRuleCase } from "../support";
+
+const singleLineJsdocRule = codeperfectPlugin.rules["single-line-jsdoc"];
 
 describe("single-line-jsdoc e2e", () => {
   it("collapses simple JSDoc blocks onto one line", () => {

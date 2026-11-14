@@ -1,9 +1,12 @@
 import type { Rule } from "eslint";
 import type * as ESTree from "estree";
 
-import { SourceCode } from "eslint";
+import { Linter, SourceCode } from "eslint";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { cwd } from "node:process";
+import * as ts from "typescript";
+import { parser } from "typescript-eslint";
 
 import { barrelFilesExportsOnlyRule } from "../exports-only-rule";
 import { createProgram, createRepoDirectory } from "./test-helpers";
@@ -126,6 +129,83 @@ const runRule = (
 };
 
 /**
+ * Executes source in a temporary ESM package with conditional imports.
+ * @param sourceText Text to lint as the barrel module contents.
+ * @returns Message identifiers reported by the rule.
+ * @example
+ * ```typescript
+ * const messages = runTypedBarrel('export * from "#conditional";');
+ * ```
+ */
+const runTypedBarrel = (sourceText: string): string[] => {
+  const temporaryRoot = path.join(cwd(), "tmp");
+  mkdirSync(temporaryRoot, { recursive: true });
+  const projectRoot = mkdtempSync(
+    path.join(temporaryRoot, "barrel-resolution-"),
+  );
+
+  try {
+    const files = {
+      "node_modules/outside-package/index.d.ts":
+        "export declare const outside: number;",
+      "node_modules/outside-package/package.json": JSON.stringify({
+        name: "outside-package",
+        types: "index.d.ts",
+      }),
+      "package.json": JSON.stringify({
+        imports: {
+          "#conditional": {
+            import: "./src/local.js",
+            require: "outside-package",
+          },
+        },
+        type: "module",
+      }),
+      "src/index.ts": sourceText,
+      "src/local.ts": "export const local = 1;",
+    };
+
+    for (const [relativePath, contents] of Object.entries(files)) {
+      const filename = path.join(projectRoot, relativePath);
+      mkdirSync(path.dirname(filename), { recursive: true });
+      writeFileSync(filename, contents);
+    }
+
+    const filename = path.join(projectRoot, "src", "index.ts");
+    const program = ts.createProgram(
+      [filename, path.join(projectRoot, "src", "local.ts")],
+      {
+        module: ts.ModuleKind.NodeNext,
+        moduleResolution: ts.ModuleResolutionKind.NodeNext,
+        target: ts.ScriptTarget.ESNext,
+      },
+    );
+    const linter = new Linter({ configType: "flat", cwd: projectRoot });
+    const config = [
+      {
+        files: ["**/*.ts"],
+        languageOptions: {
+          parser,
+          parserOptions: { programs: [program], tsconfigRootDir: projectRoot },
+        },
+        plugins: {
+          codeperfect: {
+            rules: { "barrel-files-exports-only": barrelFilesExportsOnlyRule },
+          },
+        },
+        rules: { "codeperfect/barrel-files-exports-only": "error" },
+      },
+    ] as Parameters<typeof linter.verify>[1];
+
+    return linter
+      .verify(sourceText, config, filename)
+      .map((message) => message.messageId ?? "");
+  } finally {
+    rmSync(projectRoot, { force: true, recursive: true });
+  }
+};
+
+/**
  * Creates temporary file runners for the rule.
  * @param temporaryDirectories Directories created during the run.
  * @returns Helpers for running the rule in temp folders.
@@ -169,4 +249,4 @@ const createTemporaryRunner = (
   };
 };
 
-export { createTemporaryRunner, runRule };
+export { createTemporaryRunner, runRule, runTypedBarrel };

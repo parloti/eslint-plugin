@@ -21,7 +21,7 @@ import {
   requireTestCompanionRule,
   singleActStatementRule,
   singleLineJsdocRule,
-} from "../application";
+} from "../domain";
 
 /** Rule registry exposed by the package plugin. */
 const codeperfectRules = {

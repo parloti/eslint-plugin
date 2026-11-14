@@ -1,4 +1,3 @@
-export { customRules } from "../application";
 export { codeperfectPlugin, codeperfectRules } from "./codeperfect-plugin";
 export {
   aaa,

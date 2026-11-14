@@ -1,7 +1,10 @@
 import { afterAll, describe, expect, it } from "vitest";
 
-import { preferPackageSubpathImportsRule } from "../../src";
+import { codeperfectPlugin } from "../../src";
 import { createTemporaryFixtureManager, runRuleCase } from "../support";
+
+const preferPackageSubpathImportsRule =
+  codeperfectPlugin.rules["prefer-package-subpath-imports"];
 
 describe("prefer-package-subpath-imports e2e", () => {
   const { cleanupTemporaryDirectories, createFixtureSet } =

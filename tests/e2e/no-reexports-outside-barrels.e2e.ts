@@ -1,7 +1,10 @@
 import { afterAll, describe, expect, it } from "vitest";
 
-import { noReexportsOutsideBarrelsRule } from "../../src";
+import { codeperfectPlugin } from "../../src";
 import { createTemporaryFixtureManager, runRuleCase } from "../support";
+
+const noReexportsOutsideBarrelsRule =
+  codeperfectPlugin.rules["no-reexports-outside-barrels"];
 
 describe("no-reexports-outside-barrels e2e", () => {
   const { cleanupTemporaryDirectories, createFixtureSet } =

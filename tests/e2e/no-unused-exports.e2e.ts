@@ -4,7 +4,7 @@ import { ESLint } from "eslint";
 import { parser } from "typescript-eslint";
 import { afterAll, describe, expect, it } from "vitest";
 
-import { noUnusedExportsRule } from "../../src";
+import { codeperfectPlugin } from "../../src";
 import { createTemporaryFixtureManager } from "../support";
 import {
   customPublicApiFilesOptions,
@@ -13,6 +13,8 @@ import {
   testOnlyFeatureUsageSource,
   testOnlyReexportUsageSource,
 } from "../support/no-unused-exports-fixtures";
+
+const noUnusedExportsRule = codeperfectPlugin.rules["no-unused-exports"];
 
 /** One fixture-backed lint run input. */
 interface LintFixtureRun {
