@@ -19,6 +19,7 @@ describe("codeperfect plugin", () => {
       "no-unused-public-members",
       "no-useless-delegation",
       "prefer-interface-types",
+      "prefer-package-subpath-imports",
       "prefer-vi-mocked-import",
       "require-act-result-capture",
       "require-example-language",

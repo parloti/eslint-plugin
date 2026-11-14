@@ -68,7 +68,7 @@ const summarizeCustomRuleContract = (
 describe("custom rule registry", () => {
   it("covers every package-owned rule with metadata", () => {
     // Arrange
-    const expectedRuleCount = 19;
+    const expectedRuleCount = 20;
 
     // Act
     const actualRuleSummaries = customRules.map((ruleEntry) =>
@@ -137,6 +137,16 @@ describe("custom rule registry", () => {
         schemaIsArray: true,
         type: "problem",
         url: getCustomRuleDocumentationUrl("no-import-export-extensions"),
+      },
+      {
+        createType: "function",
+        description:
+          "Prefer package.json subpath imports over matching relative module specifiers.",
+        hasMessages: true,
+        ruleName: "prefer-package-subpath-imports",
+        schemaIsArray: true,
+        type: "suggestion",
+        url: getCustomRuleDocumentationUrl("prefer-package-subpath-imports"),
       },
       {
         createType: "function",

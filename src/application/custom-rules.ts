@@ -14,6 +14,7 @@ import {
   noUnusedPublicMembersRule,
   noUselessDelegationRule,
   preferInterfaceTypesRule,
+  preferPackageSubpathImportsRule,
   preferViMockedImportRule,
   requireActResultCaptureRule,
   requireExampleLanguageRule,
@@ -44,6 +45,10 @@ const customRules = [
   {
     rule: noImportExportExtensionsRule,
     ruleName: "no-import-export-extensions",
+  },
+  {
+    rule: preferPackageSubpathImportsRule,
+    ruleName: "prefer-package-subpath-imports",
   },
   { rule: noUnusedExportsRule, ruleName: "no-unused-exports" },
   { rule: noUnusedPublicMembersRule, ruleName: "no-unused-public-members" },

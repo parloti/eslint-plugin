@@ -7,3 +7,4 @@ export {
 export { noImportExportExtensionsRule } from "./no-import-export-extensions";
 export { noUnusedExportsRule } from "./no-unused-exports";
 export { noUnusedPublicMembersRule } from "./no-unused-public-members";
+export { preferPackageSubpathImportsRule } from "./package-subpath-imports";

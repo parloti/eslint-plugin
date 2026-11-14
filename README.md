@@ -94,6 +94,7 @@ void preferInterfaceTypesRule;
 - `codeperfect/enforce-aaa-structure`
 - `codeperfect/no-import-export-aliases`
 - `codeperfect/no-import-export-extensions`
+- [`codeperfect/prefer-package-subpath-imports`](docs/rules/prefer-package-subpath-imports.md) — Prefer package.json `imports` aliases over matching relative module specifiers.
 - `codeperfect/no-interface-member-docs`
 - `codeperfect/no-multiple-declarators`
 - `codeperfect/no-reexports-outside-barrels`

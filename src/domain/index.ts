@@ -6,6 +6,7 @@ export {
   noReexportsOutsideBarrelsRule,
   noUnusedExportsRule,
   noUnusedPublicMembersRule,
+  preferPackageSubpathImportsRule,
 } from "./architecture";
 export {
   noMultipleDeclaratorsRule,

@@ -12,6 +12,7 @@ export {
   noUnusedPublicMembersRule,
   noUselessDelegationRule,
   preferInterfaceTypesRule,
+  preferPackageSubpathImportsRule,
   preferViMockedImportRule,
   requireActResultCaptureRule,
   requireExampleLanguageRule,
