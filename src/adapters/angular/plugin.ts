@@ -4,12 +4,16 @@ import {
   createNoUnusedPublicMembersListener,
   noUnusedPublicMembersRule,
 } from "../../domain/architecture/no-unused-public-members/rule";
+import { angularLifecycleUsageAdapter } from "./angular-lifecycle-usage-adapter";
 import { angularTemplateUsageAdapter } from "./no-unused-public-members-template-adapter";
 
-/** Rule variant that includes the opt-in Angular template usage adapter. */
+/** Rule variant that includes opt-in Angular usage adapters. */
 const angularNoUnusedPublicMembersRule: Rule.RuleModule = {
   ...noUnusedPublicMembersRule,
-  create: createNoUnusedPublicMembersListener([angularTemplateUsageAdapter]),
+  create: createNoUnusedPublicMembersListener([
+    angularLifecycleUsageAdapter,
+    angularTemplateUsageAdapter,
+  ]),
 };
 
 /** Plugin namespace used by Angular-specific ESLint configuration. */

@@ -203,9 +203,9 @@ for the reference workloads, default/constrained-heap results, export-only
 controls, and diagnostic comparisons. Those observations are not a runtime or
 memory guarantee for every project.
 
-## Angular template adapter
+## Angular adapter
 
-Angular template analysis is opt-in and is not loaded by the default rule. The `@codeperfect/eslint-config` Angular profile enables the adapter automatically for its scoped files when `angular-eslint` is selected. The adapter recognizes only a `Component` decorator imported from `@angular/core`, parses static inline and external templates with the Angular compiler, respects template-local variables and `$event`, and resolves member reads through the component's TypeScript types.
+Angular analysis is opt-in and is not loaded by the default rule. The `@codeperfect/eslint-config` Angular profile enables the adapter automatically for its scoped files when `angular-eslint` is selected. The adapter recognizes known lifecycle hook methods on Angular-managed classes, including concrete methods inherited from base classes, when their decorators are imported from `@angular/core`; implementing the corresponding lifecycle interface is optional. For component templates, it recognizes a `Component` decorator imported from `@angular/core`, parses static inline and external templates with the Angular compiler, respects template-local variables and `$event`, and resolves member reads through the component's TypeScript types.
 
 When configuring the plugin directly, register the Angular entry point under a separate namespace and replace the framework-neutral rule for the Angular files:
 
