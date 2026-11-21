@@ -8,7 +8,7 @@
 
 > `const` **codeperfectPlugin**: `object`
 
-Defined in: [codeperfect-plugin.ts:51](https://github.com/parloti/eslint-plugin/blob/1ab9298112a10d4f56b4fd2718ece2c9ebd3a0bf/src/infrastructure/codeperfect-plugin.ts#L51)
+Defined in: [codeperfect-plugin.ts:53](https://github.com/parloti/eslint-plugin/blob/15889975eae0d864ddd3e9b5ac8c4ae1a7268c74/src/infrastructure/codeperfect-plugin.ts#L53)
 
 ESLint plugin object exported by the package.
 
@@ -41,6 +41,10 @@ ESLint plugin object exported by the package.
 #### rules.enforce-aaa-structure
 
 > `readonly` **enforce-aaa-structure**: `RuleModule` = `enforceAaaStructureRule`
+
+#### rules.no-directory-only-imports
+
+> `readonly` **no-directory-only-imports**: `RuleModule` = `noDirectoryOnlyImportsRule`
 
 #### rules.no-import-export-aliases
 
