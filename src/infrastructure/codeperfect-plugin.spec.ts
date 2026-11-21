@@ -10,6 +10,7 @@ describe("codeperfect plugin", () => {
       "barrel-files-exports-only",
       "consistent-barrel-files",
       "enforce-aaa-structure",
+      "no-directory-only-imports",
       "no-import-export-aliases",
       "no-import-export-extensions",
       "no-interface-member-docs",
@@ -62,6 +63,11 @@ const expectedRuleContracts = [
     "enforce-aaa-structure",
     "problem",
     "Require explicit AAA markers, enforce section order and uniqueness, and keep setup, action, and assertions in their intended phases.",
+  ],
+  [
+    "no-directory-only-imports",
+    "problem",
+    "Forbid relative module specifiers made only from `.` and `..` path segments.",
   ],
   [
     "no-import-export-aliases",

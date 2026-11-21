@@ -1,6 +1,7 @@
 export {
   barrelFilesExportsOnlyRule,
   consistentBarrelFilesRule,
+  noDirectoryOnlyImportsRule,
   noImportExportAliasesRule,
   noImportExportExtensionsRule,
   noReexportsOutsideBarrelsRule,

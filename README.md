@@ -82,6 +82,7 @@ void codeperfectPlugin.rules["prefer-interface-types"];
 - `codeperfect/barrel-files-exports-only`
 - `codeperfect/consistent-barrel-files`
 - `codeperfect/enforce-aaa-structure`
+- [`codeperfect/no-directory-only-imports`](docs/rules/no-directory-only-imports.md) — Disallow relative module specifiers made only from `.` and `..` path segments.
 - `codeperfect/no-import-export-aliases`
 - `codeperfect/no-import-export-extensions`
 - [`codeperfect/prefer-package-subpath-imports`](docs/rules/prefer-package-subpath-imports.md) — Prefer package.json `imports` aliases over matching relative module specifiers.

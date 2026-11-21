@@ -60,6 +60,7 @@ describe("ready-to-use presets", () => {
       "codeperfect/barrel-files-exports-only",
       "codeperfect/consistent-barrel-files",
       "codeperfect/enforce-aaa-structure",
+      "codeperfect/no-directory-only-imports",
       "codeperfect/no-import-export-aliases",
       "codeperfect/no-import-export-extensions",
       "codeperfect/no-interface-member-docs",
@@ -90,6 +91,7 @@ describe("ready-to-use presets", () => {
     const expectedRuleKeys = [
       "codeperfect/barrel-files-exports-only",
       "codeperfect/consistent-barrel-files",
+      "codeperfect/no-directory-only-imports",
       "codeperfect/no-import-export-aliases",
       "codeperfect/no-import-export-extensions",
       "codeperfect/no-reexports-outside-barrels",
