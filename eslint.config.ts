@@ -2,7 +2,7 @@ import { config } from "@codeperfect/eslint-config";
 import plugin from "eslint-plugin-eslint-plugin";
 import { defineConfig } from "eslint/config";
 
-import { all } from "./src";
+import { all } from "#root";
 
 /** CodePerfect ESLint configuration. */
 const codePerfect = await config({
@@ -16,6 +16,10 @@ const codePerfect = await config({
 
 const customConfigs = defineConfig(
   { ...all, files: ["**/*.ts"] },
+  {
+    files: ["src/adapters/**/*.ts"],
+    rules: { "boundaries/no-unknown-files": "off" },
+  },
   {
     files: ["src/adapters/angular/plugin.ts"],
     name: "Angular package public API",

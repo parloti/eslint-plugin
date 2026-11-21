@@ -1,4 +1,4 @@
-import * as ts from "typescript";
+import ts from "typescript";
 
 import type { NoUnusedExportsState } from "../no-unused-exports/types";
 import type { PublicMember } from "./member-declaration-utilities";

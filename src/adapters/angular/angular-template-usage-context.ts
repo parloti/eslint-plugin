@@ -1,5 +1,5 @@
 import * as angular from "@angular/compiler";
-import * as ts from "typescript";
+import ts from "typescript";
 
 import type { PublicMember } from "../../domain/architecture/no-unused-public-members/member-declaration-utilities";
 

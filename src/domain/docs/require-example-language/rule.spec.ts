@@ -206,7 +206,7 @@ function createReportingScenario(): ReportingScenario {
         { type: "Line", value: " @example ignored()" },
         blockComment,
       ],
-    } as SourceCode,
+    } as unknown as SourceCode,
   };
 }
 
@@ -237,7 +237,7 @@ describe("require example language rule", () => {
         { type: "Line", value: " @example" },
         { type: "Block", value: " Not jsdoc" },
       ],
-    } as SourceCode;
+    } as unknown as SourceCode;
     const context = {
       report(): void {
         reportCalls += 1;

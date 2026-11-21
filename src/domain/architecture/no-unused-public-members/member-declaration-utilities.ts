@@ -1,5 +1,5 @@
 import { ESLintUtils } from "@typescript-eslint/utils";
-import * as ts from "typescript";
+import ts from "typescript";
 
 import { isSameSymbol } from "../no-unused-exports/no-unused-exports-symbol-utilities";
 import {

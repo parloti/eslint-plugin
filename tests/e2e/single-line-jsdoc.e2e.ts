@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { codeperfectPlugin } from "../../src";
+import { codeperfectPlugin } from "#root";
+
 import { runRuleCase } from "../support";
 
 const singleLineJsdocRule = codeperfectPlugin.rules["single-line-jsdoc"];

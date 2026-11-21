@@ -4,7 +4,8 @@ import { ESLint } from "eslint";
 import { parser } from "typescript-eslint";
 import { afterAll, describe, expect, it } from "vitest";
 
-import { codeperfectPlugin } from "../../src";
+import { codeperfectPlugin } from "#root";
+
 import { createTemporaryFixtureManager } from "../support";
 import {
   customPublicApiFilesOptions,

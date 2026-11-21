@@ -3,7 +3,7 @@ import type { AST } from "eslint";
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import * as ts from "typescript";
+import ts from "typescript";
 import { parser } from "typescript-eslint";
 
 /**

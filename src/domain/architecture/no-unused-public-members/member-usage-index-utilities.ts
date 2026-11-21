@@ -1,5 +1,5 @@
 import path from "node:path";
-import * as ts from "typescript";
+import ts from "typescript";
 
 import type { NoUnusedExportsState } from "../no-unused-exports/types";
 import type { MemberAnalysisScope } from "./member-scope-utilities";

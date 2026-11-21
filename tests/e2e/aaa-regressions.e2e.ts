@@ -2,7 +2,7 @@ import { Linter } from "eslint";
 import { parser } from "typescript-eslint";
 import { describe, expect, it } from "vitest";
 
-import { codeperfectPlugin } from "../../src";
+import { codeperfectPlugin } from "#root";
 
 const enforceAaaStructureRule =
   codeperfectPlugin.rules["enforce-aaa-structure"];

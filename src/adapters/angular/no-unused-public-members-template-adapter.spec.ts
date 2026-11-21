@@ -1,5 +1,5 @@
 import { writeFileSync } from "node:fs";
-import * as ts from "typescript";
+import ts from "typescript";
 import { afterAll, describe, expect, it } from "vitest";
 
 import { createTemporaryFixtureManager } from "../../../tests/support";

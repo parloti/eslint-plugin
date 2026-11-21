@@ -67,7 +67,7 @@ interface VariableDeclarationEntry {
  * @returns Token range metadata when available.
  * @example
  * ```typescript
- * getTokenAfterRange({} as SourceCodeAccess, {} as Comment);
+ * getTokenAfterRange({} as unknown as SourceCodeAccess, {} as Comment);
  * ```
  */
 const getTokenAfterRange = (
@@ -230,7 +230,7 @@ const shouldSkipForFunction = (
   context: Rule.RuleContext,
   comment: Comment,
 ): boolean => {
-  const sourceCode = context.sourceCode as SourceCodeAccess;
+  const sourceCode = context.sourceCode as unknown as SourceCodeAccess;
   if (typeof sourceCode.getNodeByRangeIndex !== "function") {
     return false;
   }

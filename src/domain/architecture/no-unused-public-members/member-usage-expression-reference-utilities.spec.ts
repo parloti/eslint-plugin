@@ -1,4 +1,4 @@
-import * as ts from "typescript";
+import ts from "typescript";
 import { describe, expect, it } from "vitest";
 
 import { expressionReferencesSymbol } from "./member-usage-expression-reference-utilities";

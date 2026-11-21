@@ -1,7 +1,7 @@
 import type { Rule } from "eslint";
 
 import { ESLintUtils } from "@typescript-eslint/utils";
-import * as ts from "typescript";
+import ts from "typescript";
 
 import type { ExportKind } from "./types";
 

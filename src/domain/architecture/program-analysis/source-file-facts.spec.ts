@@ -1,5 +1,5 @@
 import path from "node:path";
-import * as ts from "typescript";
+import ts from "typescript";
 import { describe, expect, it, vi } from "vitest";
 
 import { EXPORTED_FEATURE_VALUE_ELEMENT } from "../no-unused-exports/__tests__/no-unused-exports-usage-fixture-helpers";

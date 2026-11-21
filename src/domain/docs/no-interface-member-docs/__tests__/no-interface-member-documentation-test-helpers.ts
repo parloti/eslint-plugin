@@ -1,4 +1,4 @@
-import type { Rule } from "eslint";
+import type { Rule, SourceCode } from "eslint";
 
 import { noInterfaceMemberDocumentationRule } from "../rule";
 
@@ -59,14 +59,11 @@ interface RuleContextState {
  * const sourceCode = createSourceCode("", []);
  * ```
  */
-const createSourceCode = (
-  text: string,
-  comments: Comment[],
-): Rule.RuleContext["sourceCode"] =>
+const createSourceCode = (text: string, comments: Comment[]): SourceCode =>
   ({
     getAllComments: (): Comment[] => comments,
     text,
-  }) as Rule.RuleContext["sourceCode"];
+  }) as unknown as SourceCode;
 
 /**
  * Builds a rule context for collecting reports.

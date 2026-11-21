@@ -1,4 +1,4 @@
-import type { Rule } from "eslint";
+import type { Rule, SourceCode } from "eslint";
 
 import { describe, expect, it } from "vitest";
 
@@ -127,7 +127,7 @@ const createContext = (
         ...(messageId !== void 0 && { messageId }),
       });
     },
-    sourceCode,
+    sourceCode: sourceCode as unknown as SourceCode,
   } as Rule.RuleContext;
 
   return { context, reports };

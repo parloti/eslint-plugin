@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import * as ts from "typescript";
+import ts from "typescript";
 import { describe, expect, it } from "vitest";
 
 import {

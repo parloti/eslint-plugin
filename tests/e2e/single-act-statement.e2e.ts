@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { codeperfectPlugin } from "../../src";
+import { codeperfectPlugin } from "#root";
+
 import { runRuleCase } from "../support";
 
 const singleActStatementRule = codeperfectPlugin.rules["single-act-statement"];

@@ -1,5 +1,5 @@
 import path from "node:path";
-import * as ts from "typescript";
+import ts from "typescript";
 import { describe, expect, it, vi } from "vitest";
 
 import { withTemporaryProject } from "../no-unused-exports/__tests__/no-unused-exports-utilities-test-helpers";

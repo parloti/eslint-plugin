@@ -1,6 +1,7 @@
 import { afterAll, describe, expect, it } from "vitest";
 
-import { codeperfectPlugin } from "../../src";
+import { codeperfectPlugin } from "#root";
+
 import { createTemporaryFixtureManager, runRuleCase } from "../support";
 
 const preferPackageSubpathImportsRule =

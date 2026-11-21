@@ -1,7 +1,7 @@
 import * as angular from "@angular/compiler";
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
-import * as ts from "typescript";
+import ts from "typescript";
 
 import type { PublicMember } from "../../domain/architecture/no-unused-public-members/member-declaration-utilities";
 import type { MemberUsageAdapter } from "../../domain/architecture/no-unused-public-members/member-usage-utilities";

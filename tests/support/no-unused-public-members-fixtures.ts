@@ -3,9 +3,10 @@ import type { Linter, Rule } from "eslint";
 import { ESLint } from "eslint";
 import { parser } from "typescript-eslint";
 
+import { codeperfectPlugin } from "#root";
+
 import type { TemporaryFixtureManager } from "./temporary-fixtures";
 
-import { codeperfectPlugin } from "../../src";
 import { temporaryProjectTsconfig } from "./no-unused-exports-fixtures";
 
 /** One fixture-backed lint run input. */

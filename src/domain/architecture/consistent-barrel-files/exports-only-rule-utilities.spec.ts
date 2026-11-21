@@ -3,7 +3,7 @@ import type { AST } from "eslint";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { cwd } from "node:process";
-import * as ts from "typescript";
+import ts from "typescript";
 import { describe, expect, it, vi } from "vitest";
 
 import { runTypedBarrel } from "./__tests__/exports-only-rule-test-utilities";

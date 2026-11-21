@@ -1,4 +1,4 @@
-import * as ts from "typescript";
+import ts from "typescript";
 
 import type { LocalFunction } from "./member-function-utilities";
 import type { MemberAnalysisScope } from "./member-scope-utilities";

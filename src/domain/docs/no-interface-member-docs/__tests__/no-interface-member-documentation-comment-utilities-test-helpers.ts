@@ -1,4 +1,4 @@
-import type { Rule } from "eslint";
+import type { Rule, SourceCode } from "eslint";
 
 /** Type definition for rule data. */
 type Comment = ReturnType<
@@ -64,14 +64,11 @@ const createComment = (value: string, range?: [number, number]): Comment => ({
  * const sourceCode = createSourceCode("function demo() {}", []);
  * ```
  */
-const createSourceCode = (
-  text: string,
-  comments: Comment[],
-): Rule.RuleContext["sourceCode"] =>
+const createSourceCode = (text: string, comments: Comment[]): SourceCode =>
   ({
     getAllComments: (): Comment[] => comments,
     text,
-  }) as Rule.RuleContext["sourceCode"];
+  }) as unknown as SourceCode;
 
 /**
  * Creates a function node for the test source text.

@@ -6,7 +6,7 @@ import type { AST, Rule } from "eslint";
 
 import { ESLintUtils } from "@typescript-eslint/utils";
 import path from "node:path";
-import * as ts from "typescript";
+import ts from "typescript";
 
 /** Describes an export source literal. */
 interface ExportSourceCandidate {

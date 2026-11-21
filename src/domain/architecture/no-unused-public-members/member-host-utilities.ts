@@ -1,4 +1,4 @@
-import * as ts from "typescript";
+import ts from "typescript";
 
 /** One supported host and its direct member declarations. */
 interface MemberHost {

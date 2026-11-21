@@ -5,7 +5,7 @@ import { Linter, SourceCode } from "eslint";
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { cwd } from "node:process";
-import * as ts from "typescript";
+import ts from "typescript";
 import { parser } from "typescript-eslint";
 
 import { barrelFilesExportsOnlyRule } from "../exports-only-rule";

@@ -1,4 +1,4 @@
-import * as ts from "typescript";
+import ts from "typescript";
 
 import { resolveCanonicalSymbol } from "../no-unused-exports/no-unused-exports-symbol-utilities";
 import { getGlobalSourceFiles } from "../program-analysis";

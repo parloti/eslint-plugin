@@ -1,4 +1,4 @@
-import type { Rule } from "eslint";
+import type { Rule, SourceCode } from "eslint";
 
 import { describe, expect, it } from "vitest";
 
@@ -204,7 +204,7 @@ describe("aAA analyzer block analysis", () => {
             return program.comments ?? [];
           },
           text: sourceText,
-        },
+        } as unknown as SourceCode,
       } as Rule.RuleContext;
       const [firstCallExpression, secondCallExpression] =
         getFirstTwoCallExpressions(program);

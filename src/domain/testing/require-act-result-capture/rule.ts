@@ -2,7 +2,7 @@ import type { Rule } from "eslint";
 import type * as ESTree from "estree";
 
 import { ESLintUtils } from "@typescript-eslint/utils";
-import * as ts from "typescript";
+import ts from "typescript";
 
 import { analyzeTestBlock } from "../aaa/analyzer.analysis";
 import { hasCapturableActResult } from "../aaa/analyzer.classification.helpers";
