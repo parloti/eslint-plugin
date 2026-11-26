@@ -55,7 +55,7 @@ const getUsageSymbol = (
  * const symbol = getReferencedMemberSymbol(reference, checker, program);
  * ```
  */
-const getReferencedMemberSymbol = (
+export const getReferencedMemberSymbol = (
   node: ts.Node,
   checker: ts.TypeChecker,
   program: ts.Program,
@@ -132,7 +132,7 @@ const getPropertyAccess = (
  * const used = isStructuralPropertyRead(node, checker, member);
  * ```
  */
-const isStructuralPropertyRead = (
+export const isStructuralPropertyRead = (
   node: ts.Node,
   checker: ts.TypeChecker,
   member: PublicMember,
@@ -155,7 +155,7 @@ const isStructuralPropertyRead = (
  * const keys = getStringLiteralKeys(keyType);
  * ```
  */
-const getStringLiteralKeys = (type: ts.Type): string[] => {
+export const getStringLiteralKeys = (type: ts.Type): string[] => {
   if (type.isUnionOrIntersection()) {
     return type.types.flatMap((part) => getStringLiteralKeys(part));
   }
@@ -181,7 +181,7 @@ const getStringLiteralKeys = (type: ts.Type): string[] => {
  * const used = isComputedMemberRead(node, checker, member, relatedSymbols);
  * ```
  */
-const isComputedMemberRead = (
+export const isComputedMemberRead = (
   node: ts.Node,
   checker: ts.TypeChecker,
   member: PublicMember,
@@ -227,9 +227,71 @@ const isComputedMemberRead = (
   });
 };
 
-export {
-  getReferencedMemberSymbol,
-  getStringLiteralKeys,
-  isComputedMemberRead,
-  isStructuralPropertyRead,
+const getIndexedAccessKeys = (
+  type: ts.Type,
+  checker: ts.TypeChecker,
+  visitedTypes: Set<ts.Type> = new Set(),
+): string[] => {
+  if (visitedTypes.has(type)) {
+    return [];
+  }
+  visitedTypes.add(type);
+
+  if (type.isUnionOrIntersection()) {
+    return type.types.flatMap((part) =>
+      getIndexedAccessKeys(part, checker, visitedTypes),
+    );
+  }
+
+  const literalKeys = getStringLiteralKeys(type);
+  if (literalKeys.length > 0) {
+    return literalKeys;
+  }
+
+  if (type.isIndexType()) {
+    return checker
+      .getPropertiesOfType(type.type)
+      .map((property) => property.getName());
+  }
+
+  const constraint = checker.getBaseConstraintOfType(type);
+  return constraint === type || constraint === void 0
+    ? []
+    : getIndexedAccessKeys(constraint, checker, visitedTypes);
+};
+
+/**
+ * Checks whether an indexed access type can select a member through its key constraint.
+ * @param node Indexed access type node to inspect.
+ * @param checker TypeScript type checker.
+ * @param member Member whose usage is being checked.
+ * @param relatedSymbols Member and contract symbols accepted as usage.
+ * @returns True when the index type can resolve to the member.
+ * @example
+ * ```typescript
+ * const used = isIndexedAccessTypeMemberRead(node, checker, member, relatedSymbols);
+ * ```
+ */
+export const isIndexedAccessTypeMemberRead = (
+  node: ts.IndexedAccessTypeNode,
+  checker: ts.TypeChecker,
+  member: PublicMember,
+  relatedSymbols: ts.Symbol[],
+): boolean => {
+  const objectType = getUsageType(node.objectType, checker);
+  const indexType = getUsageType(node.indexType, checker);
+
+  return getIndexedAccessKeys(indexType, checker).some((name) => {
+    if (name !== member.memberName) {
+      return false;
+    }
+
+    const property = checker.getPropertyOfType(objectType, name);
+
+    return (
+      property !== void 0 &&
+      (relatedSymbols.some((symbol) => isSameSymbol(symbol, property)) ||
+        hasCompatibleMemberShape(objectType, member, checker))
+    );
+  });
 };

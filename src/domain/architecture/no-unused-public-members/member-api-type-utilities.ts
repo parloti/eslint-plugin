@@ -83,6 +83,14 @@ function* getNestedTypes(
   if (depth === 0) {
     return;
   }
+  if ((type.flags & ts.TypeFlags.Conditional) !== 0) {
+    const constraint = checker.getBaseConstraintOfType(type);
+
+    if (constraint !== type && constraint !== void 0) {
+      yield { depth: depth - 1, type: constraint };
+    }
+    return;
+  }
   for (const kind of [ts.IndexKind.Number, ts.IndexKind.String]) {
     const indexType = checker.getIndexTypeOfType(type, kind);
     if (indexType !== void 0) {

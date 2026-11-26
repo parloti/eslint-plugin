@@ -16,6 +16,7 @@ import { isLocalCallArgumentTransmitted } from "./member-usage-local-flow-utilit
 import {
   getStringLiteralKeys,
   isComputedMemberRead,
+  isIndexedAccessTypeMemberRead,
 } from "./member-usage-reference-utilities";
 import { isLocalCallArgumentSerialized } from "./member-usage-serialization-utilities";
 import { getRelatedMemberSymbols } from "./member-usage-utilities";
@@ -45,6 +46,15 @@ const createOperationConsumer = (
   program: ts.Program,
   scope: MemberAnalysisScope,
 ): OperationSummary => {
+  if (ts.isIndexedAccessTypeNode(node)) {
+    return (member) =>
+      isIndexedAccessTypeMemberRead(
+        node,
+        checker,
+        member,
+        getRelatedMemberSymbols(member, scope, checker),
+      );
+  }
   if (ts.isElementAccessExpression(node)) {
     let keys = new Set<string>();
     let dynamic = false;

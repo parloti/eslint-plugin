@@ -182,4 +182,36 @@ describe("no-unused-public-members structural references", () => {
     // Assert
     expect(actualMessages).toStrictEqual(["unusedPublicMember"]);
   });
+
+  it("recognizes generic indexed access types over protocol maps", async () => {
+    // Arrange
+    const run = {
+      files: {
+        "src/consumer.ts": [
+          'import type { ResponseMap } from "./feature";',
+          "interface RequestMap {",
+          "  registerEvent: void;",
+          "  release: void;",
+          "  unregisterEvent: void;",
+          "}",
+          "export type Read<K extends keyof RequestMap> = ResponseMap[K];",
+        ].join("\n"),
+        "src/feature.ts": [
+          "export interface ResponseMap {",
+          "  registerEvent: void;",
+          "  release: void;",
+          "  unregisterEvent: void;",
+          "}",
+          "export interface Other { unused: number }",
+        ].join("\n"),
+      },
+      targetRelativePath: "src/feature.ts",
+    };
+
+    // Act
+    const actualMessages = await runFixtureLint(run);
+
+    // Assert
+    expect(actualMessages).toStrictEqual(["unusedPublicMember"]);
+  });
 });

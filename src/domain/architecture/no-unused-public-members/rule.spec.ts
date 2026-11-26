@@ -188,6 +188,35 @@ describe("no-unused-public-members rule", () => {
     expect(actualMessages).toStrictEqual(["unusedPublicMember"]);
   });
 
+  it("exempts members reachable through conditional public API types", async () => {
+    // Arrange
+    const run = {
+      files: {
+        "src/handle.ts": [
+          "interface EventEmitter<R> { event: R }",
+          "interface ObjectHandle<T> { release(): void }",
+          "export interface EventEmitterHandle<R>",
+          "  extends ObjectHandle<EventEmitter<R>> {",
+          "  addListener(event: R): void;",
+          "  removeListener(event: R): void;",
+          "  unused(event: R): void;",
+          "}",
+          "export type Handle<T> = T extends EventEmitter<infer R>",
+          "  ? EventEmitterHandle<R>",
+          "  : ObjectHandle<T>;",
+        ].join("\n"),
+        "src/index.ts": 'export type { Handle } from "./handle";',
+      },
+      targetRelativePath: "src/handle.ts",
+    };
+
+    // Act
+    const actualMessages = await runFixtureLint(run);
+
+    // Assert
+    expect(actualMessages).toStrictEqual(["unusedPublicMember"]);
+  });
+
   it("links const object methods to their declared contract and counts same-file use", async () => {
     // Arrange
     const run = {

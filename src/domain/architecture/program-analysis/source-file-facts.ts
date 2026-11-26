@@ -62,6 +62,7 @@ const getSourceFileFacts = (sourceFile: ts.SourceFile): SourceFileFacts => {
       }
     } else if (
       ts.isElementAccessExpression(node) ||
+      ts.isIndexedAccessTypeNode(node) ||
       ts.isSpreadAssignment(node) ||
       ts.isCallExpression(node) ||
       ts.isPropertyAssignment(node) ||
